@@ -97,6 +97,69 @@
     };
   }
 
+  /* AfA-Satz für Wohngebäude nach § 7 Abs. 4 Satz 1 Nr. 2 EStG (Wortlaut geprüft 08.10.2026):
+     fertiggestellt nach dem 31.12.2022: 3 %, 1925 bis 2022: 2 %, vor 1925: 2,5 %.
+     Sonderregeln (degressive AfA § 7 Abs. 5a, § 7b, Denkmal) sind nicht berücksichtigt. */
+  function afaSatz(baujahr) {
+    var b = zahl(baujahr);
+    if (!b) return 2;
+    if (b >= 2023) return 3;
+    if (b < 1925) return 2.5;
+    return 2;
+  }
+
+  /* Langfristige Entwicklung Jahr für Jahr, vor und nach Steuern (eigene Näherung).
+     o: kaufpreis, nebenkosten, ek, darlehen, zinsProzent, plan (Jahre aus kredit()), kaltmieteMonat,
+        ausfallProzent, kostenMonat (nicht umlagefähig), ruecklageMonat, mietsteigerung, kostensteigerung,
+        wertsteigerung (je % pro Jahr), jahre, gebaeudeanteil (%), afaSatz (%), steuersatz (%).
+     Steuer: Einkünfte = Miete − Ausfall − nicht umlagefähige Kosten − Zinsen − AfA; die Rücklage ist erst
+     absetzbar, wenn das Geld für Reparaturen ausgegeben wird, darum hier nicht. Steuer = Einkünfte × Satz
+     (negativ = Ersparnis durch Verrechnung mit anderem Einkommen). AfA-Basis = (Kaufpreis + Nebenkosten) ×
+     Gebäudeanteil; Renovierung und Möbel bleiben außen vor. */
+  function langfrist(o) {
+    var n = Math.max(1, Math.min(50, Math.round(zahl(o.jahre) || 30)));
+    var ms = zahl(o.mietsteigerung) / 100, ks = zahl(o.kostensteigerung) / 100, ws = zahl(o.wertsteigerung) / 100;
+    var afaBasis = (zahl(o.kaufpreis) + zahl(o.nebenkosten)) * zahl(o.gebaeudeanteil) / 100;
+    var afaJahr = afaBasis * zahl(o.afaSatz) / 100, afaRest = afaBasis;
+    var plan = o.plan || [], darlehen = zahl(o.darlehen);
+    var ohneTilgung = !plan.length && darlehen > 0; /* Rate deckt nur Zinsen: Schuld bleibt stehen */
+    var jahre = [], kumNach = 0, schuldenfrei = null;
+    for (var j = 1; j <= n; j++) {
+      var miete = zahl(o.kaltmieteMonat) * 12 * Math.pow(1 + ms, j - 1);
+      var ausfall = miete * zahl(o.ausfallProzent) / 100;
+      var kosten = zahl(o.kostenMonat) * 12 * Math.pow(1 + ks, j - 1);
+      var ruecklage = zahl(o.ruecklageMonat) * 12 * Math.pow(1 + ks, j - 1);
+      var p = plan[j - 1];
+      var zinsen = p ? p.zinsen : (ohneTilgung ? darlehen * zahl(o.zinsProzent) / 100 : 0);
+      var tilgung = p ? p.tilgung : 0;
+      var rest = p ? p.rest : (ohneTilgung ? darlehen : 0);
+      if (schuldenfrei === null && darlehen > 0 && rest <= 0.5) schuldenfrei = j;
+      var afa = Math.min(afaJahr, afaRest); afaRest -= afa;
+      var vorSteuer = miete - ausfall - kosten - ruecklage - zinsen - tilgung;
+      var einkuenfte = miete - ausfall - kosten - zinsen - afa;
+      var steuer = einkuenfte * zahl(o.steuersatz) / 100;
+      var nachSteuer = vorSteuer - steuer;
+      kumNach += nachSteuer;
+      var wert = zahl(o.kaufpreis) * Math.pow(1 + ws, j);
+      jahre.push({ jahr: j, miete: miete - ausfall, kosten: kosten, ruecklage: ruecklage, zinsen: zinsen, tilgung: tilgung,
+        afa: afa, einkuenfte: einkuenfte, steuer: steuer, vorSteuer: vorSteuer, nachSteuer: nachSteuer,
+        kumNachSteuer: kumNach, rest: rest, wert: wert, vermoegen: wert - rest });
+    }
+    var j1 = jahre[0];
+    var ek = zahl(o.ek);
+    return {
+      jahre: jahre,
+      afaBasis: afaBasis,
+      afaJahr: afaJahr,
+      schuldenfreiJahr: darlehen > 0 ? schuldenfrei : 0,
+      /* Eigenkapitalrendite Jahr 1: was nach Zinsen und Kosten bleibt, inkl. Tilgung (die ist Vermögen) */
+      ekRendite: ek > 0 ? (j1.vorSteuer + j1.tilgung) / ek * 100 : null,
+      ekRenditeNachSteuer: ek > 0 ? (j1.nachSteuer + j1.tilgung) / ek * 100 : null,
+      /* Schuldendienstdeckung: Reinertrag ÷ (Zinsen + Tilgung); über 1 deckt die Miete die Rate */
+      dscr: (j1.zinsen + j1.tilgung) > 0 ? (j1.miete - j1.kosten - j1.ruecklage) / (j1.zinsen + j1.tilgung) : null
+    };
+  }
+
   /* Monteurzimmer: Umsatz = Betten × Preis × Belegung × Tage.
      „operativ“ ohne Kreditrate (wie Folie 7), „nachKredit“ mit Kreditrate. */
   function monteur(o) {
@@ -350,6 +413,8 @@
 
   var api = {
     anzeigeLesen: anzeigeLesen,
+    afaSatz: afaSatz,
+    langfrist: langfrist,
     polygonFlaeche: polygonFlaeche,
     punktImPolygon: punktImPolygon,
     wohnflaecheRaum: wohnflaecheRaum,

@@ -292,7 +292,7 @@
   .band .kacheln { margin: 12px 0 0; grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .band .kz { padding: 10px 14px; }
   .band .kz dd { font-size: clamp(20px, 2vw, 26px); }
-  .schritte { list-style: none; padding: 0; margin: 12px 0 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .schritte { list-style: none; padding: 0; margin: 12px 0 18px; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px; }
   .schritte button { width: 100%; height: 100%; display: flex; gap: 10px; align-items: center; text-align: left; border: 2px solid transparent; border-radius: 14px; padding: 10px 12px; background: var(--karte); color: var(--leise); font: 600 16px var(--sans); cursor: pointer; }
   .schritte button b { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--linie); color: var(--text); font: 800 15px var(--display); }
   .schritte button[aria-current="step"] { border-color: var(--akzent); color: var(--text); background: var(--akzent-flaeche); }
@@ -301,7 +301,7 @@
   .schritt-fuss .knopf:only-child { margin-left: auto; }
   @media (max-width: 900px) {
     .band .kacheln { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .schritte { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .schritte { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   /* Merkliste als Karten */
@@ -707,7 +707,7 @@
     <div>
       <p class="etikett">Rechner</p>
       <h2>Kann ich mir das leisten?</h2>
-      <p class="lead">In vier Schritten: Kaufpreis, Kredit, Miete und der Fall, dass es schlechter läuft. Alles ändert sich sofort. Startwerte sind Beispiele, keine Angebote. Zahlen mit Punkt oder Komma (300.000 oder 5,5).</p>
+      <p class="lead">In fünf Schritten: Kaufpreis, Kredit, Miete, der Fall, dass es schlechter läuft, und der Blick auf viele Jahre mit Steuer. Alles ändert sich sofort. Startwerte sind Beispiele, keine Angebote. Zahlen mit Punkt oder Komma (300.000 oder 5,5).</p>
     </div>
   </header>
 
@@ -730,6 +730,7 @@
     <li><button type="button" data-schritt="2"><b>2</b>Kredit</button></li>
     <li><button type="button" data-schritt="3"><b>3</b>Miete</button></li>
     <li><button type="button" data-schritt="4"><b>4</b>Was, wenn es schlechter läuft?</button></li>
+    <li><button type="button" data-schritt="5"><b>5</b>Langfristig und Steuer</button></li>
   </ol>
 
   <form id="r-form" novalidate>
@@ -847,7 +848,46 @@
       </div>
       <dl class="ergebnisse" id="r-stress-ergebnis"></dl>
       <p class="formel">Anschlussrate = Restschuld nach Zinsbindung (Angebot A) × (Sollzins A + Aufschlag + Tilgung A) ÷ 12. Cashflow im Stress = Reinertrag mit gesenkter Miete und höherem Ausfall − Anschlussrate.</p>
-      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="3">← Zurück</button></div>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="3">← Zurück</button><button type="button" class="knopf" data-geh="5">Weiter zu Schritt 5: Langfristig und Steuer →</button></div>
+    </div>
+
+    <div class="karte schritt" data-schritt="5" hidden>
+      <h3>Schritt 5: Langfristig und Steuer</h3>
+      <p class="klein">Was bringt das Haus über die Jahre, wann ist es abbezahlt, und was bleibt nach Steuern? Gerechnet mit Angebot A und den Zahlen aus den Schritten 1 bis 3. Die Steigerungen sind Annahmen, keine Vorhersage. Ändere sie, um zu sehen, wie stark das Ergebnis davon abhängt.</p>
+      <dl class="ergebnisse" id="r-kennzahlen"></dl>
+      <p class="klein">So liest du das: <b>Kaufpreisfaktor</b> = wie viele Jahresmieten das Haus kostet. <b>Eigenkapitalrendite</b> = was dein eigenes Geld im ersten Jahr bringt (was nach Kosten und Zinsen übrig bleibt, plus die Tilgung, denn die gehört dir). <b>Schuldendienstdeckung</b> = Miete nach Kosten geteilt durch Zinsen und Tilgung; über 1 heißt, die Miete trägt die Rate. <b>Vermögen im Haus</b> = was das Haus dann wert ist, minus was du der Bank noch schuldest.</p>
+
+      <h4 style="margin:22px 0 8px">Annahmen für die Zukunft</h4>
+      <div class="raster">
+        <div><label for="r-ms">Mietsteigerung pro Jahr in % (Annahme)</label><input type="text" id="r-ms" inputmode="decimal" value="1,5" aria-describedby="r-ms-f"><div class="fehler" id="r-ms-f"></div></div>
+        <div><label for="r-ks">Kostensteigerung pro Jahr in % (Annahme)</label><input type="text" id="r-ks" inputmode="decimal" value="2" aria-describedby="r-ks-f"><div class="fehler" id="r-ks-f"></div></div>
+        <div><label for="r-ws">Wertsteigerung des Hauses pro Jahr in % (Annahme)</label><input type="text" id="r-ws" inputmode="decimal" value="1,5" aria-describedby="r-ws-f"><div class="fehler" id="r-ws-f"></div></div>
+        <div><label for="r-jahre">Wie viele Jahre betrachten?</label><input type="text" id="r-jahre" inputmode="decimal" value="30" aria-describedby="r-jahre-f"><div class="fehler" id="r-jahre-f"></div></div>
+      </div>
+      <figure class="diagramm" id="ch-vermoegen" style="margin-top:18px"></figure>
+      <div class="legende" id="ch-vermoegen-legende"></div>
+      <p class="klein" id="ch-vermoegen-text"></p>
+
+      <h4 style="margin:22px 0 8px">Steuer: Abschreibung und Ergebnis nach Steuern</h4>
+      <div class="raster">
+        <div><label for="r-baujahr">Baujahr (Fertigstellung)</label><input type="text" id="r-baujahr" inputmode="decimal" placeholder="z. B. 1965" aria-describedby="r-baujahr-f"><div class="fehler" id="r-baujahr-f"></div></div>
+        <div><label for="r-gebanteil">Gebäudeanteil am Kaufpreis in % (Annahme)</label><input type="text" id="r-gebanteil" inputmode="decimal" value="75" aria-describedby="r-gebanteil-f"><div class="fehler" id="r-gebanteil-f"></div></div>
+        <div><label for="r-steuersatz">Dein persönlicher Steuersatz in % (Annahme)</label><input type="text" id="r-steuersatz" inputmode="decimal" value="30" aria-describedby="r-steuersatz-f"><div class="fehler" id="r-steuersatz-f"></div></div>
+      </div>
+      <dl class="ergebnisse" id="r-steuer-ergebnis"></dl>
+      <p class="formel" id="r-steuer-formel"></p>
+      <p class="hinweis klein">Nur eine Rechnung zum Verstehen, keine Steuerberatung. Abschreibung nach § 7 Abs. 4 EStG (Wortlaut geprüft 08.10.2026 auf <a href="https://www.gesetze-im-internet.de/estg/__7.html" target="_blank" rel="noopener">gesetze-im-internet.de</a>): Baujahr ab 2023 3 %, 1925 bis 2022 2 %, vor 1925 2,5 % pro Jahr. Abgeschrieben wird nur das Gebäude, nicht der Boden. Wie das Finanzamt Boden und Gebäude aufteilt, kann von deiner Annahme abweichen. Nicht berücksichtigt: Sonderabschreibungen (Neubau, Denkmal), Renovierungskosten in den ersten drei Jahren, Möbel, Solidaritätszuschlag und Kirchensteuer. Vor dem Kauf und für die Steuererklärung (Anlage V) mit einem Steuerberater rechnen.</p>
+
+      <details class="rechenweg">
+        <summary>Jahr für Jahr als Tabelle</summary>
+        <div class="tabelle-kasten karten-kasten" style="margin-top:10px">
+          <table class="karten" id="r-langfrist-tabelle">
+            <thead><tr><th scope="col">Jahr</th><th scope="col" class="z">Miete</th><th scope="col" class="z">Bleibt vor Steuern</th><th scope="col" class="z">Steuer</th><th scope="col" class="z">Bleibt nach Steuern</th><th scope="col" class="z">Restschuld</th><th scope="col" class="z">Hauswert</th><th scope="col" class="z">Vermögen im Haus</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="4">← Zurück</button></div>
     </div>
   </form>
 </section>
@@ -1768,7 +1808,11 @@ window.DATEN.begriffe = [
   { w: ['Belegung'], t: 'Belegung', e: 'Wie viel Prozent der Betten im Durchschnitt pro Nacht bezahlt belegt sind.' },
   { w: ['Wohnfläche'], nurAnfang: true, t: 'Wohnfläche', e: 'Die Fläche, die als Wohnraum zählt. Stellen unter einer Dachschräge, die niedriger als 2 m sind, zählen nur halb, unter 1 m gar nicht. Balkone zählen meist zu einem Viertel. Keller und Garage zählen nicht. So steht es in der Wohnflächenverordnung.' },
   { w: ['Nutzfläche'], nurAnfang: true, t: 'Nutzfläche', e: 'Flächen, die keine Wohnfläche sind, aber genutzt werden können: Keller, Garage, Heizraum, Abstellraum. Manche davon kann man extra vermieten.' },
-  { w: ['Echte Länge'], t: 'Maßstab', e: 'Ein Bild weiß nicht, wie groß das Haus wirklich ist. Du zeigst der Seite eine Strecke, deren Länge du kennst, und sagst, wie lang sie in echt ist. Danach stimmen alle Flächen.' }
+  { w: ['Echte Länge'], t: 'Maßstab', e: 'Ein Bild weiß nicht, wie groß das Haus wirklich ist. Du zeigst der Seite eine Strecke, deren Länge du kennst, und sagst, wie lang sie in echt ist. Danach stimmen alle Flächen.' },
+  { w: ['Gebäudeanteil'], t: 'Gebäudeanteil', e: 'Beim Kauf bezahlst du Haus und Boden zusammen. Abschreiben darfst du nur das Haus, denn der Boden nutzt sich nicht ab. Der Gebäudeanteil sagt, wie viel vom Preis auf das Haus fällt. Das Finanzamt rechnet ihn mit einer eigenen Hilfe aus.' },
+  { w: ['persönlicher Steuersatz'], t: 'Persönlicher Steuersatz', e: 'Wie viel Prozent Steuer du auf einen zusätzlich verdienten Euro zahlst. Er hängt von deinem ganzen Einkommen ab. Wenn du ihn nicht kennst: Steuerberater fragen oder einen amtlichen Steuerrechner nutzen.' },
+  { w: ['Wertsteigerung des Hauses'], t: 'Wertsteigerung', e: 'Um wie viel Prozent das Haus jedes Jahr mehr wert wird. Das weiß niemand vorher. Probier auch 0 % oder einen Minuswert aus, um zu sehen, was dann passiert.' },
+  { w: ['Mietsteigerung'], t: 'Mietsteigerung', e: 'Um wie viel Prozent die Miete im Schnitt jedes Jahr steigt. Wie stark du die Miete erhöhen darfst, regelt das Mietrecht (zum Beispiel Mietspiegel und Kappungsgrenze).' }
 ];
 
 </script>
@@ -1994,6 +2038,69 @@ window.DATEN.beispielhaus = {
       nettorendite: gesamt > 0 ? reinertragMonat * 12 / gesamt * 100 : 0,
       reinertragMonat: reinertragMonat,
       cashflowMonat: reinertragMonat - zahl(o.kreditrateMonat)
+    };
+  }
+
+  /* AfA-Satz für Wohngebäude nach § 7 Abs. 4 Satz 1 Nr. 2 EStG (Wortlaut geprüft 08.10.2026):
+     fertiggestellt nach dem 31.12.2022: 3 %, 1925 bis 2022: 2 %, vor 1925: 2,5 %.
+     Sonderregeln (degressive AfA § 7 Abs. 5a, § 7b, Denkmal) sind nicht berücksichtigt. */
+  function afaSatz(baujahr) {
+    var b = zahl(baujahr);
+    if (!b) return 2;
+    if (b >= 2023) return 3;
+    if (b < 1925) return 2.5;
+    return 2;
+  }
+
+  /* Langfristige Entwicklung Jahr für Jahr, vor und nach Steuern (eigene Näherung).
+     o: kaufpreis, nebenkosten, ek, darlehen, zinsProzent, plan (Jahre aus kredit()), kaltmieteMonat,
+        ausfallProzent, kostenMonat (nicht umlagefähig), ruecklageMonat, mietsteigerung, kostensteigerung,
+        wertsteigerung (je % pro Jahr), jahre, gebaeudeanteil (%), afaSatz (%), steuersatz (%).
+     Steuer: Einkünfte = Miete − Ausfall − nicht umlagefähige Kosten − Zinsen − AfA; die Rücklage ist erst
+     absetzbar, wenn das Geld für Reparaturen ausgegeben wird, darum hier nicht. Steuer = Einkünfte × Satz
+     (negativ = Ersparnis durch Verrechnung mit anderem Einkommen). AfA-Basis = (Kaufpreis + Nebenkosten) ×
+     Gebäudeanteil; Renovierung und Möbel bleiben außen vor. */
+  function langfrist(o) {
+    var n = Math.max(1, Math.min(50, Math.round(zahl(o.jahre) || 30)));
+    var ms = zahl(o.mietsteigerung) / 100, ks = zahl(o.kostensteigerung) / 100, ws = zahl(o.wertsteigerung) / 100;
+    var afaBasis = (zahl(o.kaufpreis) + zahl(o.nebenkosten)) * zahl(o.gebaeudeanteil) / 100;
+    var afaJahr = afaBasis * zahl(o.afaSatz) / 100, afaRest = afaBasis;
+    var plan = o.plan || [], darlehen = zahl(o.darlehen);
+    var ohneTilgung = !plan.length && darlehen > 0; /* Rate deckt nur Zinsen: Schuld bleibt stehen */
+    var jahre = [], kumNach = 0, schuldenfrei = null;
+    for (var j = 1; j <= n; j++) {
+      var miete = zahl(o.kaltmieteMonat) * 12 * Math.pow(1 + ms, j - 1);
+      var ausfall = miete * zahl(o.ausfallProzent) / 100;
+      var kosten = zahl(o.kostenMonat) * 12 * Math.pow(1 + ks, j - 1);
+      var ruecklage = zahl(o.ruecklageMonat) * 12 * Math.pow(1 + ks, j - 1);
+      var p = plan[j - 1];
+      var zinsen = p ? p.zinsen : (ohneTilgung ? darlehen * zahl(o.zinsProzent) / 100 : 0);
+      var tilgung = p ? p.tilgung : 0;
+      var rest = p ? p.rest : (ohneTilgung ? darlehen : 0);
+      if (schuldenfrei === null && darlehen > 0 && rest <= 0.5) schuldenfrei = j;
+      var afa = Math.min(afaJahr, afaRest); afaRest -= afa;
+      var vorSteuer = miete - ausfall - kosten - ruecklage - zinsen - tilgung;
+      var einkuenfte = miete - ausfall - kosten - zinsen - afa;
+      var steuer = einkuenfte * zahl(o.steuersatz) / 100;
+      var nachSteuer = vorSteuer - steuer;
+      kumNach += nachSteuer;
+      var wert = zahl(o.kaufpreis) * Math.pow(1 + ws, j);
+      jahre.push({ jahr: j, miete: miete - ausfall, kosten: kosten, ruecklage: ruecklage, zinsen: zinsen, tilgung: tilgung,
+        afa: afa, einkuenfte: einkuenfte, steuer: steuer, vorSteuer: vorSteuer, nachSteuer: nachSteuer,
+        kumNachSteuer: kumNach, rest: rest, wert: wert, vermoegen: wert - rest });
+    }
+    var j1 = jahre[0];
+    var ek = zahl(o.ek);
+    return {
+      jahre: jahre,
+      afaBasis: afaBasis,
+      afaJahr: afaJahr,
+      schuldenfreiJahr: darlehen > 0 ? schuldenfrei : 0,
+      /* Eigenkapitalrendite Jahr 1: was nach Zinsen und Kosten bleibt, inkl. Tilgung (die ist Vermögen) */
+      ekRendite: ek > 0 ? (j1.vorSteuer + j1.tilgung) / ek * 100 : null,
+      ekRenditeNachSteuer: ek > 0 ? (j1.nachSteuer + j1.tilgung) / ek * 100 : null,
+      /* Schuldendienstdeckung: Reinertrag ÷ (Zinsen + Tilgung); über 1 deckt die Miete die Rate */
+      dscr: (j1.zinsen + j1.tilgung) > 0 ? (j1.miete - j1.kosten - j1.ruecklage) / (j1.zinsen + j1.tilgung) : null
     };
   }
 
@@ -2250,6 +2357,8 @@ window.DATEN.beispielhaus = {
 
   var api = {
     anzeigeLesen: anzeigeLesen,
+    afaSatz: afaSatz,
+    langfrist: langfrist,
     polygonFlaeche: polygonFlaeche,
     punktImPolygon: punktImPolygon,
     wohnflaecheRaum: wohnflaecheRaum,
@@ -2415,6 +2524,51 @@ window.DATEN.beispielhaus = {
     }).join('');
   }
 
+  /* ---------- 2b. Vermögen über die Jahre: Hauswert, Restschuld, Vermögen im Haus ---------- */
+  function vermoegen(el, legEl, jahre) {
+    var w = breite(el), h = 260, l = 64, r = 16, o = 12, u = 30;
+    if (!jahre || !jahre.length) { el.innerHTML = '<p class="klein">Schritte 1 bis 3 und Angebot A vollständig ausfüllen.</p>'; legEl.innerHTML = ''; return; }
+    var punkte = [{ jahr: 0, wert: jahre[0].wert / (jahre[1] ? jahre[1].wert / jahre[0].wert : 1), rest: jahre[0].rest + jahre[0].tilgung }].concat(jahre);
+    punkte[0].vermoegen = punkte[0].wert - punkte[0].rest;
+    var maxJ = jahre.length;
+    var maxY = Math.max.apply(null, punkte.map(function (p) { return Math.max(p.wert, p.rest, p.vermoegen); })) || 1;
+    var minY = Math.min(0, Math.min.apply(null, punkte.map(function (p) { return p.vermoegen; })));
+    var sx = function (j) { return l + j / maxJ * (w - l - r); };
+    var sy = function (y) { return o + (1 - (y - minY) / (maxY - minY)) * (h - o - u); };
+    var c1 = v('--c1'), c2 = v('--c2'), leise = v('--leise');
+    var s = '';
+    schritte(maxY - minY, 4).forEach(function (y0) {
+      var y = y0 + minY;
+      s += '<line class="gitter" x1="' + l + '" x2="' + (w - r) + '" y1="' + sy(y) + '" y2="' + sy(y) + '"/><text x="' + (l - 8) + '" y="' + (sy(y) + 4) + '" text-anchor="end">' + kurz(y) + '</text>';
+    });
+    schritte(maxJ, 6).forEach(function (j) { s += '<text x="' + sx(j) + '" y="' + (h - 8) + '" text-anchor="middle">' + j + '</text>'; });
+    s += '<line class="achse" x1="' + l + '" x2="' + (w - r) + '" y1="' + sy(0) + '" y2="' + sy(0) + '"/>';
+    function pfad(feld) { return punkte.map(function (p, i) { return (i ? 'L' : 'M') + sx(p.jahr).toFixed(1) + ' ' + sy(p[feld]).toFixed(1); }).join(' '); }
+    s += '<path d="' + pfad('vermoegen') + ' L' + sx(maxJ).toFixed(1) + ' ' + sy(0).toFixed(1) + ' L' + sx(0).toFixed(1) + ' ' + sy(0).toFixed(1) + 'Z" fill="' + c1 + '" fill-opacity=".18" stroke="none"/>';
+    s += '<path d="' + pfad('wert') + '" fill="none" stroke="' + c2 + '" stroke-width="2"/>';
+    s += '<path d="' + pfad('rest') + '" fill="none" stroke="' + leise + '" stroke-width="2" stroke-dasharray="6 4"/>';
+    s += '<path d="' + pfad('vermoegen') + '" fill="none" stroke="' + c1 + '" stroke-width="2.5"/>';
+    var e = punkte[punkte.length - 1];
+    s += '<circle cx="' + sx(e.jahr) + '" cy="' + sy(e.vermoegen) + '" r="4.5" fill="' + c1 + '" stroke="' + v('--karte') + '" stroke-width="2"/>';
+    s += '<text class="wertlabel" x="' + (sx(e.jahr) - 8) + '" y="' + (sy(e.vermoegen) - 9) + '" text-anchor="end">' + kurz(e.vermoegen) + '</text>';
+    s += '<line id="verm-kreuz" x1="0" x2="0" y1="' + o + '" y2="' + (h - u) + '" stroke="' + leise + '" stroke-width="1" visibility="hidden"/>';
+    s += '<rect class="fang" x="' + l + '" y="' + o + '" width="' + (w - l - r) + '" height="' + (h - o - u) + '" fill="transparent"/>';
+    el.innerHTML = svg(w, h, s, 'Hauswert, Restschuld und Vermögen im Haus über die Jahre');
+    var fang = el.querySelector('.fang'), kreuz = el.querySelector('#verm-kreuz');
+    fang.addEventListener('mousemove', function (ev) {
+      var box = el.querySelector('svg').getBoundingClientRect();
+      var x = (ev.clientX - box.left) * (w / box.width);
+      var j = Math.max(1, Math.min(maxJ, Math.round((x - l) / (w - l - r) * maxJ)));
+      var p = jahre[j - 1];
+      kreuz.setAttribute('x1', sx(j)); kreuz.setAttribute('x2', sx(j)); kreuz.setAttribute('visibility', 'visible');
+      zeigeTip(ev, '<b>Jahr ' + j + '</b><br><span style="color:' + c2 + '">■</span> Hauswert: ' + euro(p.wert) +
+        '<br><span style="color:' + leise + '">■</span> Restschuld: ' + euro(p.rest) + '<br><span style="color:' + c1 + '">■</span> Vermögen im Haus: ' + euro(p.vermoegen) +
+        '<br>Bleibt im Jahr nach Steuern: ' + euro(p.nachSteuer));
+    });
+    fang.addEventListener('mouseleave', function () { kreuz.setAttribute('visibility', 'hidden'); versteckeTip(); });
+    legEl.innerHTML = '<span><i class="linie" style="background:' + c2 + '"></i>Hauswert</span><span><i class="linie" style="background:' + leise + '"></i>Restschuld (gestrichelt)</span><span><i class="linie" style="background:' + c1 + '"></i>Vermögen im Haus = Hauswert − Restschuld</span>';
+  }
+
   /* ---------- 3. Zinsen und Tilgung je Jahr ---------- */
   function tilgung(el, legEl, plan, bindung) {
     var w = breite(el), h = 252, l = 58, r = 16, o = 26, u = 30;
@@ -2577,7 +2731,7 @@ window.DATEN.beispielhaus = {
       (d.kaufpreis > 0 ? '<span><i class="linie" style="background:' + v('--text') + '"></i>Kaufpreis ' + euro(d.kaufpreis) + '</span>' : '');
   }
 
-  window.GRAFIK = { werte: werte, mittel: mittel, restschuld: restschuld, tilgung: tilgung, wasserfall: wasserfall, belegung: belegung, versteckeTip: versteckeTip };
+  window.GRAFIK = { werte: werte, mittel: mittel, restschuld: restschuld, vermoegen: vermoegen, tilgung: tilgung, wasserfall: wasserfall, belegung: belegung, versteckeTip: versteckeTip };
 })();
 
 </script>
@@ -4188,6 +4342,8 @@ window.DATEN.beispielhaus = {
   });
   zahlFeld('r-flaeche', 0, 100000); zahlFeld('r-miete', 0, 10000000); zahlFeld('r-nul', 0, 10000000);
   zahlFeld('r-rueck', 0, 1000); zahlFeld('r-ausfall', 0, 100, '%');
+  zahlFeld('r-ms', -10, 20, '%'); zahlFeld('r-ks', -10, 20, '%'); zahlFeld('r-ws', -10, 20, '%'); zahlFeld('r-jahre', 1, 50, 'Jahre');
+  zahlFeld('r-baujahr', 1500, 2100); zahlFeld('r-gebanteil', 0, 100, '%'); zahlFeld('r-steuersatz', 0, 60, '%');
   zahlFeld('mz-betten', 0, 1000); zahlFeld('mz-preis', 0, 1000); zahlFeld('mz-beleg', 0, 100, '%');
   zahlFeld('mz-fix', 0, 10000000); zahlFeld('mz-var', 0, 1000); zahlFeld('mz-abgabe', 0, 100, '%');
   zahlFeld('am-miete', 0, 10000000); zahlFeld('am-sonst', 0, 10000000); zahlFeld('am-kaution', 0, 10000000);
@@ -4373,6 +4529,48 @@ window.DATEN.beispielhaus = {
       { t: 'Cashflow im Stress', w: vs ? euro(vs.cashflowMonat) : '-', k: vs ? vorzeichenKlasse(vs.cashflowMonat) : '', haupt: true }
     ]);
 
+    /* Schritt 5: langfristig und Steuer (R.langfrist), Angebot A mit gleicher Rate bis zur Tilgung */
+    var ms = wert('r-ms'), ks = wert('r-ks'), ws = wert('r-ws'), nJahre = wert('r-jahre');
+    var baujahr = $('r-baujahr').value.trim() === '' ? null : wert('r-baujahr');
+    var gebAnteil = wert('r-gebanteil'), steuersatz = wert('r-steuersatz');
+    var ok5 = v && A && ms !== null && ks !== null && ws !== null && nJahre !== null && gebAnteil !== null && steuersatz !== null &&
+      !($('r-baujahr').value.trim() !== '' && baujahr === null);
+    var afa = R.afaSatz(baujahr);
+    var lf = ok5 ? R.langfrist({
+      kaufpreis: preis, nebenkosten: nk.summe, ek: ek, darlehen: darlehen, zinsProzent: A.zins, plan: A.plan,
+      kaltmieteMonat: miete, ausfallProzent: ausfall, kostenMonat: nul, ruecklageMonat: rueck * flaeche / 12,
+      mietsteigerung: ms, kostensteigerung: ks, wertsteigerung: ws, jahre: nJahre,
+      gebaeudeanteil: gebAnteil, afaSatz: afa, steuersatz: steuersatz
+    }) : null;
+    var lfEnde = lf ? lf.jahre[lf.jahre.length - 1] : null;
+    wertDl('r-kennzahlen', [
+      { t: 'Preis je m² Wohnfläche', w: (fin && flaeche > 0) ? euro(preis / flaeche) : '-' },
+      { t: 'Kaufpreisfaktor (Preis ÷ Jahresmiete)', w: v ? faktor(v.kaufpreisfaktor) : '-' },
+      { t: 'Eigenkapitalrendite im 1. Jahr', w: lf ? (lf.ekRendite === null ? 'ohne eigenes Geld nicht berechenbar' : prozent(lf.ekRendite)) : '-' },
+      { t: 'Schuldendienstdeckung', w: lf && lf.dscr !== null ? fmt2.format(lf.dscr) : '-' },
+      { t: 'Schuldenfrei nach (Angebot A)', w: A ? monateText(A.laufzeitMonate) : '-' },
+      { t: 'Vermögen im Haus nach ' + (lf ? lf.jahre.length : '…') + ' Jahren', w: lfEnde ? euro(lfEnde.vermoegen) : '-', haupt: true }
+    ]);
+    var j1 = lf ? lf.jahre[0] : null;
+    wertDl('r-steuer-ergebnis', [
+      { t: 'Abschreibung (AfA) pro Jahr', w: lf ? euro(lf.afaJahr) + ' (' + fmt1.format(afa) + NB + '%)' : '-' },
+      { t: 'Einkünfte aus Vermietung, 1. Jahr', w: j1 ? euro(j1.einkuenfte) : '-', k: j1 ? vorzeichenKlasse(j1.einkuenfte) : '' },
+      { t: j1 && j1.steuer < 0 ? 'Steuerersparnis, 1. Jahr' : 'Steuer darauf, 1. Jahr', w: j1 ? euro(Math.abs(j1.steuer)) : '-' },
+      { t: 'Bleibt im Monat vor Steuern', w: j1 ? euro(j1.vorSteuer / 12) : '-', k: j1 ? vorzeichenKlasse(j1.vorSteuer) : '' },
+      { t: 'Bleibt im Monat nach Steuern', w: j1 ? euro(j1.nachSteuer / 12) : '-', k: j1 ? vorzeichenKlasse(j1.nachSteuer) : '', haupt: true }
+    ]);
+    $('r-steuer-formel').textContent = 'AfA = (Kaufpreis + Kaufnebenkosten) × Gebäudeanteil × AfA-Satz' + (baujahr === null ? ' (ohne Baujahr mit 2 % gerechnet)' : '') +
+      '. Einkünfte = Miete − Mietausfall − nicht umlagefähige Kosten − Zinsen − AfA. Die Rücklage zählt erst, wenn das Geld für Reparaturen ausgegeben wird. Steuer = Einkünfte × dein Steuersatz; sind die Einkünfte negativ, sinkt deine Steuer auf anderes Einkommen. Nach Steuern = vor Steuern − Steuer.';
+    $('r-langfrist-tabelle').querySelector('tbody').innerHTML = lf ? lf.jahre.map(function (j) {
+      return '<tr><td data-titel="Jahr">' + j.jahr + '</td><td class="z" data-titel="Miete">' + euro(j.miete) + '</td><td class="z ' + vorzeichenKlasse(j.vorSteuer) + '" data-titel="Bleibt vor Steuern">' + euro(j.vorSteuer) + '</td>' +
+        '<td class="z" data-titel="Steuer">' + euro(j.steuer) + '</td><td class="z ' + vorzeichenKlasse(j.nachSteuer) + '" data-titel="Bleibt nach Steuern">' + euro(j.nachSteuer) + '</td>' +
+        '<td class="z" data-titel="Restschuld">' + euro(j.rest) + '</td><td class="z" data-titel="Hauswert">' + euro(j.wert) + '</td><td class="z" data-titel="Vermögen im Haus">' + euro(j.vermoegen) + '</td></tr>';
+    }).join('') : '<tr><td colspan="8">Schritte 1 bis 3 und Angebot A vollständig ausfüllen.</td></tr>';
+    $('ch-vermoegen-text').textContent = lfEnde
+      ? 'Nach ' + lfEnde.jahr + ' Jahren: Hauswert ' + euro(lfEnde.wert) + ', Restschuld ' + euro(lfEnde.rest) + ', Vermögen im Haus ' + euro(lfEnde.vermoegen) +
+        '. Zusammengezählt blieben in dieser Zeit ' + euro(lfEnde.kumNachSteuer) + ' nach Steuern übrig' + (lfEnde.kumNachSteuer < 0 ? ' (das heißt: so viel musst du insgesamt zuschießen)' : '') + '. Annahmen, keine Vorhersage; Zinsänderung nach der Zinsbindung siehe Schritt 4.'
+      : '';
+
     stand = { preis: preis, notar: notar, ek: ek, A: A, nul: nul, rueck: rueck, ausfall: ausfall };
 
     /* Kennzahlen im Rechner und auf der Startseite; Euro-Beträge zählen beim Ändern sichtbar mit */
@@ -4394,7 +4592,8 @@ window.DATEN.beispielhaus = {
         { name: 'Rücklage', wert: -rueck * flaeche / 12 },
         { name: 'Kreditrate A', wert: -(A ? A.rate : 0) },
         { name: 'Cashflow', wert: v.cashflowMonat, summe: true }
-      ] : null
+      ] : null,
+      langfrist: lf
     };
     zeichneGrafiken();
 
@@ -4650,6 +4849,7 @@ window.DATEN.beispielhaus = {
     var A = d.angebote.a;
     G.tilgung($('ch-tilgung'), $('ch-tilgung-legende'), A ? A.plan : null, A ? A.bindung : 0);
     if (d.wasserfall) G.wasserfall($('ch-wasserfall'), d.wasserfall); else $('ch-wasserfall').innerHTML = '';
+    if (G.vermoegen && !$('ch-vermoegen').closest('.schritt').hidden) G.vermoegen($('ch-vermoegen'), $('ch-vermoegen-legende'), d.langfrist ? d.langfrist.jahre : null);
   }
   var groesseTimer = null;
   window.addEventListener('resize', function () {

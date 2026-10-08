@@ -43,5 +43,9 @@ window.DATEN.begriffe = [
   { w: ['Belegung'], t: 'Belegung', e: 'Wie viel Prozent der Betten im Durchschnitt pro Nacht bezahlt belegt sind.' },
   { w: ['Wohnfläche'], nurAnfang: true, t: 'Wohnfläche', e: 'Die Fläche, die als Wohnraum zählt. Stellen unter einer Dachschräge, die niedriger als 2 m sind, zählen nur halb, unter 1 m gar nicht. Balkone zählen meist zu einem Viertel. Keller und Garage zählen nicht. So steht es in der Wohnflächenverordnung.' },
   { w: ['Nutzfläche'], nurAnfang: true, t: 'Nutzfläche', e: 'Flächen, die keine Wohnfläche sind, aber genutzt werden können: Keller, Garage, Heizraum, Abstellraum. Manche davon kann man extra vermieten.' },
-  { w: ['Echte Länge'], t: 'Maßstab', e: 'Ein Bild weiß nicht, wie groß das Haus wirklich ist. Du zeigst der Seite eine Strecke, deren Länge du kennst, und sagst, wie lang sie in echt ist. Danach stimmen alle Flächen.' }
+  { w: ['Echte Länge'], t: 'Maßstab', e: 'Ein Bild weiß nicht, wie groß das Haus wirklich ist. Du zeigst der Seite eine Strecke, deren Länge du kennst, und sagst, wie lang sie in echt ist. Danach stimmen alle Flächen.' },
+  { w: ['Gebäudeanteil'], t: 'Gebäudeanteil', e: 'Beim Kauf bezahlst du Haus und Boden zusammen. Abschreiben darfst du nur das Haus, denn der Boden nutzt sich nicht ab. Der Gebäudeanteil sagt, wie viel vom Preis auf das Haus fällt. Das Finanzamt rechnet ihn mit einer eigenen Hilfe aus.' },
+  { w: ['persönlicher Steuersatz'], t: 'Persönlicher Steuersatz', e: 'Wie viel Prozent Steuer du auf einen zusätzlich verdienten Euro zahlst. Er hängt von deinem ganzen Einkommen ab. Wenn du ihn nicht kennst: Steuerberater fragen oder einen amtlichen Steuerrechner nutzen.' },
+  { w: ['Wertsteigerung des Hauses'], t: 'Wertsteigerung', e: 'Um wie viel Prozent das Haus jedes Jahr mehr wert wird. Das weiß niemand vorher. Probier auch 0 % oder einen Minuswert aus, um zu sehen, was dann passiert.' },
+  { w: ['Mietsteigerung'], t: 'Mietsteigerung', e: 'Um wie viel Prozent die Miete im Schnitt jedes Jahr steigt. Wie stark du die Miete erhöhen darfst, regelt das Mietrecht (zum Beispiel Mietspiegel und Kappungsgrenze).' }
 ];

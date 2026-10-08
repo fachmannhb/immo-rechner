@@ -139,6 +139,51 @@
     }).join('');
   }
 
+  /* ---------- 2b. Vermögen über die Jahre: Hauswert, Restschuld, Vermögen im Haus ---------- */
+  function vermoegen(el, legEl, jahre) {
+    var w = breite(el), h = 260, l = 64, r = 16, o = 12, u = 30;
+    if (!jahre || !jahre.length) { el.innerHTML = '<p class="klein">Schritte 1 bis 3 und Angebot A vollständig ausfüllen.</p>'; legEl.innerHTML = ''; return; }
+    var punkte = [{ jahr: 0, wert: jahre[0].wert / (jahre[1] ? jahre[1].wert / jahre[0].wert : 1), rest: jahre[0].rest + jahre[0].tilgung }].concat(jahre);
+    punkte[0].vermoegen = punkte[0].wert - punkte[0].rest;
+    var maxJ = jahre.length;
+    var maxY = Math.max.apply(null, punkte.map(function (p) { return Math.max(p.wert, p.rest, p.vermoegen); })) || 1;
+    var minY = Math.min(0, Math.min.apply(null, punkte.map(function (p) { return p.vermoegen; })));
+    var sx = function (j) { return l + j / maxJ * (w - l - r); };
+    var sy = function (y) { return o + (1 - (y - minY) / (maxY - minY)) * (h - o - u); };
+    var c1 = v('--c1'), c2 = v('--c2'), leise = v('--leise');
+    var s = '';
+    schritte(maxY - minY, 4).forEach(function (y0) {
+      var y = y0 + minY;
+      s += '<line class="gitter" x1="' + l + '" x2="' + (w - r) + '" y1="' + sy(y) + '" y2="' + sy(y) + '"/><text x="' + (l - 8) + '" y="' + (sy(y) + 4) + '" text-anchor="end">' + kurz(y) + '</text>';
+    });
+    schritte(maxJ, 6).forEach(function (j) { s += '<text x="' + sx(j) + '" y="' + (h - 8) + '" text-anchor="middle">' + j + '</text>'; });
+    s += '<line class="achse" x1="' + l + '" x2="' + (w - r) + '" y1="' + sy(0) + '" y2="' + sy(0) + '"/>';
+    function pfad(feld) { return punkte.map(function (p, i) { return (i ? 'L' : 'M') + sx(p.jahr).toFixed(1) + ' ' + sy(p[feld]).toFixed(1); }).join(' '); }
+    s += '<path d="' + pfad('vermoegen') + ' L' + sx(maxJ).toFixed(1) + ' ' + sy(0).toFixed(1) + ' L' + sx(0).toFixed(1) + ' ' + sy(0).toFixed(1) + 'Z" fill="' + c1 + '" fill-opacity=".18" stroke="none"/>';
+    s += '<path d="' + pfad('wert') + '" fill="none" stroke="' + c2 + '" stroke-width="2"/>';
+    s += '<path d="' + pfad('rest') + '" fill="none" stroke="' + leise + '" stroke-width="2" stroke-dasharray="6 4"/>';
+    s += '<path d="' + pfad('vermoegen') + '" fill="none" stroke="' + c1 + '" stroke-width="2.5"/>';
+    var e = punkte[punkte.length - 1];
+    s += '<circle cx="' + sx(e.jahr) + '" cy="' + sy(e.vermoegen) + '" r="4.5" fill="' + c1 + '" stroke="' + v('--karte') + '" stroke-width="2"/>';
+    s += '<text class="wertlabel" x="' + (sx(e.jahr) - 8) + '" y="' + (sy(e.vermoegen) - 9) + '" text-anchor="end">' + kurz(e.vermoegen) + '</text>';
+    s += '<line id="verm-kreuz" x1="0" x2="0" y1="' + o + '" y2="' + (h - u) + '" stroke="' + leise + '" stroke-width="1" visibility="hidden"/>';
+    s += '<rect class="fang" x="' + l + '" y="' + o + '" width="' + (w - l - r) + '" height="' + (h - o - u) + '" fill="transparent"/>';
+    el.innerHTML = svg(w, h, s, 'Hauswert, Restschuld und Vermögen im Haus über die Jahre');
+    var fang = el.querySelector('.fang'), kreuz = el.querySelector('#verm-kreuz');
+    fang.addEventListener('mousemove', function (ev) {
+      var box = el.querySelector('svg').getBoundingClientRect();
+      var x = (ev.clientX - box.left) * (w / box.width);
+      var j = Math.max(1, Math.min(maxJ, Math.round((x - l) / (w - l - r) * maxJ)));
+      var p = jahre[j - 1];
+      kreuz.setAttribute('x1', sx(j)); kreuz.setAttribute('x2', sx(j)); kreuz.setAttribute('visibility', 'visible');
+      zeigeTip(ev, '<b>Jahr ' + j + '</b><br><span style="color:' + c2 + '">■</span> Hauswert: ' + euro(p.wert) +
+        '<br><span style="color:' + leise + '">■</span> Restschuld: ' + euro(p.rest) + '<br><span style="color:' + c1 + '">■</span> Vermögen im Haus: ' + euro(p.vermoegen) +
+        '<br>Bleibt im Jahr nach Steuern: ' + euro(p.nachSteuer));
+    });
+    fang.addEventListener('mouseleave', function () { kreuz.setAttribute('visibility', 'hidden'); versteckeTip(); });
+    legEl.innerHTML = '<span><i class="linie" style="background:' + c2 + '"></i>Hauswert</span><span><i class="linie" style="background:' + leise + '"></i>Restschuld (gestrichelt)</span><span><i class="linie" style="background:' + c1 + '"></i>Vermögen im Haus = Hauswert − Restschuld</span>';
+  }
+
   /* ---------- 3. Zinsen und Tilgung je Jahr ---------- */
   function tilgung(el, legEl, plan, bindung) {
     var w = breite(el), h = 252, l = 58, r = 16, o = 26, u = 30;
@@ -301,5 +346,5 @@
       (d.kaufpreis > 0 ? '<span><i class="linie" style="background:' + v('--text') + '"></i>Kaufpreis ' + euro(d.kaufpreis) + '</span>' : '');
   }
 
-  window.GRAFIK = { werte: werte, mittel: mittel, restschuld: restschuld, tilgung: tilgung, wasserfall: wasserfall, belegung: belegung, versteckeTip: versteckeTip };
+  window.GRAFIK = { werte: werte, mittel: mittel, restschuld: restschuld, vermoegen: vermoegen, tilgung: tilgung, wasserfall: wasserfall, belegung: belegung, versteckeTip: versteckeTip };
 })();

@@ -286,7 +286,7 @@ __PALETTE_CSS__
   .band .kacheln { margin: 12px 0 0; grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .band .kz { padding: 10px 14px; }
   .band .kz dd { font-size: clamp(20px, 2vw, 26px); }
-  .schritte { list-style: none; padding: 0; margin: 12px 0 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .schritte { list-style: none; padding: 0; margin: 12px 0 18px; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px; }
   .schritte button { width: 100%; height: 100%; display: flex; gap: 10px; align-items: center; text-align: left; border: 2px solid transparent; border-radius: 14px; padding: 10px 12px; background: var(--karte); color: var(--leise); font: 600 16px var(--sans); cursor: pointer; }
   .schritte button b { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--linie); color: var(--text); font: 800 15px var(--display); }
   .schritte button[aria-current="step"] { border-color: var(--akzent); color: var(--text); background: var(--akzent-flaeche); }
@@ -295,7 +295,7 @@ __PALETTE_CSS__
   .schritt-fuss .knopf:only-child { margin-left: auto; }
   @media (max-width: 900px) {
     .band .kacheln { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .schritte { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .schritte { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   /* Merkliste als Karten */
@@ -701,7 +701,7 @@ __PALETTE_CSS__
     <div>
       <p class="etikett">Rechner</p>
       <h2>Kann ich mir das leisten?</h2>
-      <p class="lead">In vier Schritten: Kaufpreis, Kredit, Miete und der Fall, dass es schlechter läuft. Alles ändert sich sofort. Startwerte sind Beispiele, keine Angebote. Zahlen mit Punkt oder Komma (300.000 oder 5,5).</p>
+      <p class="lead">In fünf Schritten: Kaufpreis, Kredit, Miete, der Fall, dass es schlechter läuft, und der Blick auf viele Jahre mit Steuer. Alles ändert sich sofort. Startwerte sind Beispiele, keine Angebote. Zahlen mit Punkt oder Komma (300.000 oder 5,5).</p>
     </div>
   </header>
 
@@ -724,6 +724,7 @@ __PALETTE_CSS__
     <li><button type="button" data-schritt="2"><b>2</b>Kredit</button></li>
     <li><button type="button" data-schritt="3"><b>3</b>Miete</button></li>
     <li><button type="button" data-schritt="4"><b>4</b>Was, wenn es schlechter läuft?</button></li>
+    <li><button type="button" data-schritt="5"><b>5</b>Langfristig und Steuer</button></li>
   </ol>
 
   <form id="r-form" novalidate>
@@ -841,7 +842,46 @@ __PALETTE_CSS__
       </div>
       <dl class="ergebnisse" id="r-stress-ergebnis"></dl>
       <p class="formel">Anschlussrate = Restschuld nach Zinsbindung (Angebot A) × (Sollzins A + Aufschlag + Tilgung A) ÷ 12. Cashflow im Stress = Reinertrag mit gesenkter Miete und höherem Ausfall − Anschlussrate.</p>
-      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="3">← Zurück</button></div>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="3">← Zurück</button><button type="button" class="knopf" data-geh="5">Weiter zu Schritt 5: Langfristig und Steuer →</button></div>
+    </div>
+
+    <div class="karte schritt" data-schritt="5" hidden>
+      <h3>Schritt 5: Langfristig und Steuer</h3>
+      <p class="klein">Was bringt das Haus über die Jahre, wann ist es abbezahlt, und was bleibt nach Steuern? Gerechnet mit Angebot A und den Zahlen aus den Schritten 1 bis 3. Die Steigerungen sind Annahmen, keine Vorhersage. Ändere sie, um zu sehen, wie stark das Ergebnis davon abhängt.</p>
+      <dl class="ergebnisse" id="r-kennzahlen"></dl>
+      <p class="klein">So liest du das: <b>Kaufpreisfaktor</b> = wie viele Jahresmieten das Haus kostet. <b>Eigenkapitalrendite</b> = was dein eigenes Geld im ersten Jahr bringt (was nach Kosten und Zinsen übrig bleibt, plus die Tilgung, denn die gehört dir). <b>Schuldendienstdeckung</b> = Miete nach Kosten geteilt durch Zinsen und Tilgung; über 1 heißt, die Miete trägt die Rate. <b>Vermögen im Haus</b> = was das Haus dann wert ist, minus was du der Bank noch schuldest.</p>
+
+      <h4 style="margin:22px 0 8px">Annahmen für die Zukunft</h4>
+      <div class="raster">
+        <div><label for="r-ms">Mietsteigerung pro Jahr in % (Annahme)</label><input type="text" id="r-ms" inputmode="decimal" value="1,5" aria-describedby="r-ms-f"><div class="fehler" id="r-ms-f"></div></div>
+        <div><label for="r-ks">Kostensteigerung pro Jahr in % (Annahme)</label><input type="text" id="r-ks" inputmode="decimal" value="2" aria-describedby="r-ks-f"><div class="fehler" id="r-ks-f"></div></div>
+        <div><label for="r-ws">Wertsteigerung des Hauses pro Jahr in % (Annahme)</label><input type="text" id="r-ws" inputmode="decimal" value="1,5" aria-describedby="r-ws-f"><div class="fehler" id="r-ws-f"></div></div>
+        <div><label for="r-jahre">Wie viele Jahre betrachten?</label><input type="text" id="r-jahre" inputmode="decimal" value="30" aria-describedby="r-jahre-f"><div class="fehler" id="r-jahre-f"></div></div>
+      </div>
+      <figure class="diagramm" id="ch-vermoegen" style="margin-top:18px"></figure>
+      <div class="legende" id="ch-vermoegen-legende"></div>
+      <p class="klein" id="ch-vermoegen-text"></p>
+
+      <h4 style="margin:22px 0 8px">Steuer: Abschreibung und Ergebnis nach Steuern</h4>
+      <div class="raster">
+        <div><label for="r-baujahr">Baujahr (Fertigstellung)</label><input type="text" id="r-baujahr" inputmode="decimal" placeholder="z. B. 1965" aria-describedby="r-baujahr-f"><div class="fehler" id="r-baujahr-f"></div></div>
+        <div><label for="r-gebanteil">Gebäudeanteil am Kaufpreis in % (Annahme)</label><input type="text" id="r-gebanteil" inputmode="decimal" value="75" aria-describedby="r-gebanteil-f"><div class="fehler" id="r-gebanteil-f"></div></div>
+        <div><label for="r-steuersatz">Dein persönlicher Steuersatz in % (Annahme)</label><input type="text" id="r-steuersatz" inputmode="decimal" value="30" aria-describedby="r-steuersatz-f"><div class="fehler" id="r-steuersatz-f"></div></div>
+      </div>
+      <dl class="ergebnisse" id="r-steuer-ergebnis"></dl>
+      <p class="formel" id="r-steuer-formel"></p>
+      <p class="hinweis klein">Nur eine Rechnung zum Verstehen, keine Steuerberatung. Abschreibung nach § 7 Abs. 4 EStG (Wortlaut geprüft 08.10.2026 auf <a href="https://www.gesetze-im-internet.de/estg/__7.html" target="_blank" rel="noopener">gesetze-im-internet.de</a>): Baujahr ab 2023 3 %, 1925 bis 2022 2 %, vor 1925 2,5 % pro Jahr. Abgeschrieben wird nur das Gebäude, nicht der Boden. Wie das Finanzamt Boden und Gebäude aufteilt, kann von deiner Annahme abweichen. Nicht berücksichtigt: Sonderabschreibungen (Neubau, Denkmal), Renovierungskosten in den ersten drei Jahren, Möbel, Solidaritätszuschlag und Kirchensteuer. Vor dem Kauf und für die Steuererklärung (Anlage V) mit einem Steuerberater rechnen.</p>
+
+      <details class="rechenweg">
+        <summary>Jahr für Jahr als Tabelle</summary>
+        <div class="tabelle-kasten karten-kasten" style="margin-top:10px">
+          <table class="karten" id="r-langfrist-tabelle">
+            <thead><tr><th scope="col">Jahr</th><th scope="col" class="z">Miete</th><th scope="col" class="z">Bleibt vor Steuern</th><th scope="col" class="z">Steuer</th><th scope="col" class="z">Bleibt nach Steuern</th><th scope="col" class="z">Restschuld</th><th scope="col" class="z">Hauswert</th><th scope="col" class="z">Vermögen im Haus</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="4">← Zurück</button></div>
     </div>
   </form>
 </section>

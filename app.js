@@ -272,6 +272,8 @@
   });
   zahlFeld('r-flaeche', 0, 100000); zahlFeld('r-miete', 0, 10000000); zahlFeld('r-nul', 0, 10000000);
   zahlFeld('r-rueck', 0, 1000); zahlFeld('r-ausfall', 0, 100, '%');
+  zahlFeld('r-ms', -10, 20, '%'); zahlFeld('r-ks', -10, 20, '%'); zahlFeld('r-ws', -10, 20, '%'); zahlFeld('r-jahre', 1, 50, 'Jahre');
+  zahlFeld('r-baujahr', 1500, 2100); zahlFeld('r-gebanteil', 0, 100, '%'); zahlFeld('r-steuersatz', 0, 60, '%');
   zahlFeld('mz-betten', 0, 1000); zahlFeld('mz-preis', 0, 1000); zahlFeld('mz-beleg', 0, 100, '%');
   zahlFeld('mz-fix', 0, 10000000); zahlFeld('mz-var', 0, 1000); zahlFeld('mz-abgabe', 0, 100, '%');
   zahlFeld('am-miete', 0, 10000000); zahlFeld('am-sonst', 0, 10000000); zahlFeld('am-kaution', 0, 10000000);
@@ -457,6 +459,48 @@
       { t: 'Cashflow im Stress', w: vs ? euro(vs.cashflowMonat) : '-', k: vs ? vorzeichenKlasse(vs.cashflowMonat) : '', haupt: true }
     ]);
 
+    /* Schritt 5: langfristig und Steuer (R.langfrist), Angebot A mit gleicher Rate bis zur Tilgung */
+    var ms = wert('r-ms'), ks = wert('r-ks'), ws = wert('r-ws'), nJahre = wert('r-jahre');
+    var baujahr = $('r-baujahr').value.trim() === '' ? null : wert('r-baujahr');
+    var gebAnteil = wert('r-gebanteil'), steuersatz = wert('r-steuersatz');
+    var ok5 = v && A && ms !== null && ks !== null && ws !== null && nJahre !== null && gebAnteil !== null && steuersatz !== null &&
+      !($('r-baujahr').value.trim() !== '' && baujahr === null);
+    var afa = R.afaSatz(baujahr);
+    var lf = ok5 ? R.langfrist({
+      kaufpreis: preis, nebenkosten: nk.summe, ek: ek, darlehen: darlehen, zinsProzent: A.zins, plan: A.plan,
+      kaltmieteMonat: miete, ausfallProzent: ausfall, kostenMonat: nul, ruecklageMonat: rueck * flaeche / 12,
+      mietsteigerung: ms, kostensteigerung: ks, wertsteigerung: ws, jahre: nJahre,
+      gebaeudeanteil: gebAnteil, afaSatz: afa, steuersatz: steuersatz
+    }) : null;
+    var lfEnde = lf ? lf.jahre[lf.jahre.length - 1] : null;
+    wertDl('r-kennzahlen', [
+      { t: 'Preis je m² Wohnfläche', w: (fin && flaeche > 0) ? euro(preis / flaeche) : '-' },
+      { t: 'Kaufpreisfaktor (Preis ÷ Jahresmiete)', w: v ? faktor(v.kaufpreisfaktor) : '-' },
+      { t: 'Eigenkapitalrendite im 1. Jahr', w: lf ? (lf.ekRendite === null ? 'ohne eigenes Geld nicht berechenbar' : prozent(lf.ekRendite)) : '-' },
+      { t: 'Schuldendienstdeckung', w: lf && lf.dscr !== null ? fmt2.format(lf.dscr) : '-' },
+      { t: 'Schuldenfrei nach (Angebot A)', w: A ? monateText(A.laufzeitMonate) : '-' },
+      { t: 'Vermögen im Haus nach ' + (lf ? lf.jahre.length : '…') + ' Jahren', w: lfEnde ? euro(lfEnde.vermoegen) : '-', haupt: true }
+    ]);
+    var j1 = lf ? lf.jahre[0] : null;
+    wertDl('r-steuer-ergebnis', [
+      { t: 'Abschreibung (AfA) pro Jahr', w: lf ? euro(lf.afaJahr) + ' (' + fmt1.format(afa) + NB + '%)' : '-' },
+      { t: 'Einkünfte aus Vermietung, 1. Jahr', w: j1 ? euro(j1.einkuenfte) : '-', k: j1 ? vorzeichenKlasse(j1.einkuenfte) : '' },
+      { t: j1 && j1.steuer < 0 ? 'Steuerersparnis, 1. Jahr' : 'Steuer darauf, 1. Jahr', w: j1 ? euro(Math.abs(j1.steuer)) : '-' },
+      { t: 'Bleibt im Monat vor Steuern', w: j1 ? euro(j1.vorSteuer / 12) : '-', k: j1 ? vorzeichenKlasse(j1.vorSteuer) : '' },
+      { t: 'Bleibt im Monat nach Steuern', w: j1 ? euro(j1.nachSteuer / 12) : '-', k: j1 ? vorzeichenKlasse(j1.nachSteuer) : '', haupt: true }
+    ]);
+    $('r-steuer-formel').textContent = 'AfA = (Kaufpreis + Kaufnebenkosten) × Gebäudeanteil × AfA-Satz' + (baujahr === null ? ' (ohne Baujahr mit 2 % gerechnet)' : '') +
+      '. Einkünfte = Miete − Mietausfall − nicht umlagefähige Kosten − Zinsen − AfA. Die Rücklage zählt erst, wenn das Geld für Reparaturen ausgegeben wird. Steuer = Einkünfte × dein Steuersatz; sind die Einkünfte negativ, sinkt deine Steuer auf anderes Einkommen. Nach Steuern = vor Steuern − Steuer.';
+    $('r-langfrist-tabelle').querySelector('tbody').innerHTML = lf ? lf.jahre.map(function (j) {
+      return '<tr><td data-titel="Jahr">' + j.jahr + '</td><td class="z" data-titel="Miete">' + euro(j.miete) + '</td><td class="z ' + vorzeichenKlasse(j.vorSteuer) + '" data-titel="Bleibt vor Steuern">' + euro(j.vorSteuer) + '</td>' +
+        '<td class="z" data-titel="Steuer">' + euro(j.steuer) + '</td><td class="z ' + vorzeichenKlasse(j.nachSteuer) + '" data-titel="Bleibt nach Steuern">' + euro(j.nachSteuer) + '</td>' +
+        '<td class="z" data-titel="Restschuld">' + euro(j.rest) + '</td><td class="z" data-titel="Hauswert">' + euro(j.wert) + '</td><td class="z" data-titel="Vermögen im Haus">' + euro(j.vermoegen) + '</td></tr>';
+    }).join('') : '<tr><td colspan="8">Schritte 1 bis 3 und Angebot A vollständig ausfüllen.</td></tr>';
+    $('ch-vermoegen-text').textContent = lfEnde
+      ? 'Nach ' + lfEnde.jahr + ' Jahren: Hauswert ' + euro(lfEnde.wert) + ', Restschuld ' + euro(lfEnde.rest) + ', Vermögen im Haus ' + euro(lfEnde.vermoegen) +
+        '. Zusammengezählt blieben in dieser Zeit ' + euro(lfEnde.kumNachSteuer) + ' nach Steuern übrig' + (lfEnde.kumNachSteuer < 0 ? ' (das heißt: so viel musst du insgesamt zuschießen)' : '') + '. Annahmen, keine Vorhersage; Zinsänderung nach der Zinsbindung siehe Schritt 4.'
+      : '';
+
     stand = { preis: preis, notar: notar, ek: ek, A: A, nul: nul, rueck: rueck, ausfall: ausfall };
 
     /* Kennzahlen im Rechner und auf der Startseite; Euro-Beträge zählen beim Ändern sichtbar mit */
@@ -478,7 +522,8 @@
         { name: 'Rücklage', wert: -rueck * flaeche / 12 },
         { name: 'Kreditrate A', wert: -(A ? A.rate : 0) },
         { name: 'Cashflow', wert: v.cashflowMonat, summe: true }
-      ] : null
+      ] : null,
+      langfrist: lf
     };
     zeichneGrafiken();
 
@@ -734,6 +779,7 @@
     var A = d.angebote.a;
     G.tilgung($('ch-tilgung'), $('ch-tilgung-legende'), A ? A.plan : null, A ? A.bindung : 0);
     if (d.wasserfall) G.wasserfall($('ch-wasserfall'), d.wasserfall); else $('ch-wasserfall').innerHTML = '';
+    if (G.vermoegen && !$('ch-vermoegen').closest('.schritt').hidden) G.vermoegen($('ch-vermoegen'), $('ch-vermoegen-legende'), d.langfrist ? d.langfrist.jahre : null);
   }
   var groesseTimer = null;
   window.addEventListener('resize', function () {
