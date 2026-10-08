@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Immobilien-Werkzeuge</title>
+<meta name="theme-color" content="#fbf6ee">
+<!-- VORLAGE: hier ändern, dann "python -I -X utf8 bau.py" ausführen. index.html wird erzeugt, nie direkt bearbeiten. -->
+<script>
+  /* Design früh setzen, damit nichts flackert. Ohne gespeicherte Wahl folgt die Seite dem System. */
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('immo-thema'); } catch (e) {}
+    if (t === 'hell') t = 'light';
+    if (t === 'dunkel') t = 'dark';
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<style>
+__FONTS_CSS__
+  /* Gestaltung (Nutzerwahl 08.10.2026, Entwurf C): warmer Cremegrund, Violett führt, Blau als zweite Farbe,
+     kein Grün und kein Orange außer in der Ampel. Kacheln mit Farbband je Bereich, Ergebnis als großer Satz.
+     Schrift: Manrope fett für Überschriften und Zahlen, Source Sans 3 für Text. */
+  :root {
+    color-scheme: light;
+    --grund: #fbf6ee;
+    --karte: #ffffff;
+    --karte2: #f7f0e5;
+    --linie: #e8dfd1;
+    --linie2: #d3c6b3;
+    --text: #241d2e;
+    --leise: #5c5666;
+    --akzent: #6b3fa0;
+    --auf-akzent: #ffffff;
+    --akzent-text: #5b2f94;
+    --akzent-flaeche: rgba(107, 63, 160, .10);
+    --blau: #2f5fb3;
+    --schlecht-flaeche: rgba(178, 59, 43, .08);
+    --gut-fl: #e3f2e8; --warn-fl: #fbf0d2; --schlecht-fl: #f8e1dc; --leer-fl: #efe8f7;
+    --f1: #6b3fa0; --f2: #2f5fb3; --f3: #b0346b; --f4: #1f6f9e; --f5: #8e2f8a; --f6: #4f6170; --f7: #6b6470;
+    --schatten: 0 1px 2px rgba(60, 40, 10, .05), 0 8px 24px rgba(60, 40, 10, .07);
+    --display: 'Manrope', 'Segoe UI', system-ui, sans-serif;
+    --sans: 'Source Sans 3', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: var(--sans);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --grund: #1a1622; --karte: #241f2e; --karte2: #2c2638; --linie: #3a3346; --linie2: #4d4560;
+      --text: #f1ece3; --leise: #b3abbd; --akzent: #b994ec; --auf-akzent: #1a1024; --akzent-text: #c9a8f5;
+      --akzent-flaeche: rgba(185, 148, 236, .14); --blau: #7aa8f0;
+      --schlecht-flaeche: rgba(239, 138, 122, .10);
+      --gut-fl: #1c3a2a; --warn-fl: #3a3018; --schlecht-fl: #43231f; --leer-fl: #2f2740;
+      --f1: #b994ec; --f2: #7aa8f0; --f3: #ec86b1; --f4: #6cc3ee; --f5: #e3a0e0; --f6: #a3b4c2; --f7: #b3aab9;
+      --schatten: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .3);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --grund: #1a1622; --karte: #241f2e; --karte2: #2c2638; --linie: #3a3346; --linie2: #4d4560;
+    --text: #f1ece3; --leise: #b3abbd; --akzent: #b994ec; --auf-akzent: #1a1024; --akzent-text: #c9a8f5;
+    --akzent-flaeche: rgba(185, 148, 236, .14); --blau: #7aa8f0;
+    --schlecht-flaeche: rgba(239, 138, 122, .10);
+    --gut-fl: #1c3a2a; --warn-fl: #3a3018; --schlecht-fl: #43231f; --leer-fl: #2f2740;
+    --f1: #b994ec; --f2: #7aa8f0; --f3: #ec86b1; --f4: #6cc3ee; --f5: #e3a0e0; --f6: #a3b4c2; --f7: #b3aab9;
+    --schatten: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .3);
+  }
+
+  /* Diagramm- und Statusfarben: aus palette.json, von bau.py eingesetzt (R024) */
+__PALETTE_CSS__
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--grund); color: var(--text); font: 18px/1.6 var(--sans); touch-action: manipulation; }
+  figure, blockquote, dl, dd { margin: 0; }
+  h1, h2, h3 { line-height: 1.15; text-wrap: balance; margin: 0 0 .5em; font-family: var(--display); }
+  h1 { font-size: clamp(36px, 5vw, 58px); font-weight: 800; letter-spacing: -.02em; }
+  h1 em { font-style: normal; color: var(--akzent); }
+  h2 { font-size: clamp(28px, 3.4vw, 40px); font-weight: 800; letter-spacing: -.01em; }
+  h3 { font-size: 1.25rem; font-weight: 700; margin-top: 1.4em; }
+  p { margin: 0 0 .8em; }
+  a { color: var(--akzent-text); }
+  :focus-visible { outline: 3px solid var(--akzent); outline-offset: 2px; border-radius: 6px; }
+  h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
+  .sprung { position: absolute; left: -9999px; top: 0; }
+  .sprung:focus { left: 16px; top: 8px; z-index: 30; background: var(--karte); padding: 8px 12px; border-radius: 10px; }
+  .etikett { font: 600 14px/1.3 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--leise); margin-bottom: 6px; }
+  svg.sym { width: 1em; height: 1em; flex: none; }
+
+  /* Kopf: gleicher Grund wie die Seite, kein abgesetzter Balken */
+  .kopf { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--grund); }
+  .kopf-innen { max-width: 1180px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .marke { display: flex; align-items: center; gap: 10px; font: 800 20px var(--display); color: var(--text); background: none; border: 0; padding: 4px 0; cursor: pointer; white-space: nowrap; }
+  .marke svg { width: 32px; height: 32px; color: var(--akzent); }
+  .kopf-ort { color: var(--leise); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .kopf-ort:empty { display: none; }
+  .kopf-rechts { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .menue { position: relative; }
+  .menue > summary { list-style: none; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 1px solid var(--linie); border-radius: 999px; background: var(--karte); color: var(--text); font: 600 16px var(--sans); cursor: pointer; }
+  .menue > summary::-webkit-details-marker { display: none; }
+  .menue > summary svg { width: 18px; height: 18px; }
+  .menue-liste { position: absolute; right: 0; top: calc(100% + 8px); width: min(340px, calc(100vw - 32px)); background: var(--karte); border: 1px solid var(--linie); border-radius: 18px; box-shadow: var(--schatten); padding: 8px; display: grid; gap: 2px; z-index: 25; }
+  .bereich-knopf { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: none; border: 0; border-radius: 12px; padding: 10px 12px; font: 600 17px var(--sans); color: var(--text); cursor: pointer; }
+  .bereich-knopf svg { width: 26px; height: 26px; color: var(--f, var(--akzent)); }
+  .bereich-knopf:hover { background: var(--karte2); }
+  .bereich-knopf[aria-current="page"] { background: var(--akzent-flaeche); }
+  .bereich-knopf.optional { color: var(--leise); font-weight: 400; }
+  .themaknopf { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--linie); background: var(--karte); color: var(--text); cursor: pointer; display: grid; place-items: center; }
+  .themaknopf svg { width: 22px; height: 22px; }
+  @media (max-width: 640px) { .kopf-ort, .menue-wort { display: none; } .marke span { display: none; } }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 16px 20px 80px; }
+  main > section { scroll-margin-top: 90px; }
+  main > section:not([hidden]) { animation: rein .35s ease both; }
+  @keyframes rein { from { opacity: .4; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* Kopf jedes Bereichs */
+  .bereich-kopf { display: flex; gap: 18px; align-items: flex-start; border-top: 10px solid var(--f, var(--akzent)); background: var(--karte); border-radius: 14px; padding: 22px 24px; margin-bottom: 22px; box-shadow: var(--schatten); }
+  .bereich-kopf > svg { width: 52px; height: 52px; color: var(--f, var(--akzent)); flex: none; }
+  .bereich-kopf h2 { margin-bottom: .25em; }
+  .bereich-kopf p:last-child { margin-bottom: 0; }
+  .bereich-kopf .lead { font-size: 1.12rem; color: var(--leise); max-width: 70ch; }
+  .unternav { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+  .unternav button { border: 2px solid var(--linie); background: var(--karte2); color: var(--text); border-radius: 999px; padding: 6px 16px; font: 600 16px var(--sans); cursor: pointer; }
+  .unternav button[aria-current="true"] { border-color: var(--f, var(--akzent)); background: var(--akzent-flaeche); }
+  @media (max-width: 640px) { .bereich-kopf { flex-direction: column; gap: 8px; padding: 18px; } .bereich-kopf > svg { width: 40px; height: 40px; } }
+
+  /* Flächen */
+  .karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 18px; padding: 24px; margin-bottom: 20px; box-shadow: var(--schatten); }
+  .karte > h3:first-child, .karte > .kartenkopf:first-child h3 { margin-top: 0; }
+  .kartenkopf { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  .hinweis { background: var(--akzent-flaeche); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; }
+  .klein { font-size: .9rem; color: var(--leise); }
+  .raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 18px 20px; }
+  .zwei { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 20px; }
+  .zwei > * { min-width: 0; }
+  #pruefliste .zwei { grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); margin-bottom: 20px; }
+  #pruefliste .zwei .karte { margin-bottom: 0; }
+
+  /* Formulare */
+  label { display: block; font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  label .frag { margin-left: 6px; vertical-align: 1px; }
+  .raster > div { display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; }
+  input[type="text"], input[type="url"], select, textarea {
+    width: 100%; font: inherit; font-size: 18px; color: var(--text);
+    background: var(--karte2); border: 2px solid var(--linie); border-radius: 14px;
+    padding: 10px 14px; min-height: 50px; font-variant-numeric: tabular-nums;
+  }
+  input:hover, select:hover, textarea:hover { border-color: var(--linie2); }
+  input[type="text"]:focus, input[type="url"]:focus, select:focus, textarea:focus { border-color: var(--akzent); outline: none; box-shadow: 0 0 0 3px var(--akzent-flaeche); }
+  textarea { min-height: 80px; resize: vertical; }
+  input[aria-invalid="true"] { border-color: var(--schlecht); }
+  .fehler { color: var(--schlecht); font-size: .9rem; margin-top: 4px; }
+  .fehler:empty { display: none; }
+  input[type="range"] { width: 100%; accent-color: var(--akzent); min-height: 32px; }
+  input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--akzent); flex: 0 0 auto; margin: 3px 0 0; }
+  .knopf {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font: 700 16px/1 var(--sans); text-decoration: none;
+    min-height: 46px; padding: 0 22px; border-radius: 999px; cursor: pointer;
+    background: var(--akzent); color: var(--auf-akzent); border: 2px solid var(--akzent);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .knopf:hover { transform: translateY(-1px); box-shadow: 0 6px 18px var(--akzent-flaeche); }
+  .knopf.zweit { background: none; color: var(--akzent-text); }
+  .knopf[disabled] { opacity: .5; cursor: not-allowed; box-shadow: none; transform: none; }
+  .knopfreihe { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .meldung { margin-top: 10px; font-size: .95rem; }
+  .meldung:empty { display: none; }
+  details > summary { cursor: pointer; color: var(--akzent-text); font-weight: 700; min-height: 36px; padding: 6px 0; }
+  details.mehr { margin-top: 18px; border-top: 1px solid var(--linie); padding-top: 8px; }
+  details.mehr[open] > summary { margin-bottom: 12px; }
+
+  /* Ergebnis als Satz mit Ampel (eigene Einordnung, keine Empfehlung) */
+  .satz { display: flex; gap: 18px; align-items: center; border-radius: 22px; padding: 22px 26px; background: var(--leer-fl); }
+  .satz.gut { background: var(--gut-fl); } .satz.warn { background: var(--warn-fl); } .satz.schlecht { background: var(--schlecht-fl); }
+  .lampe { flex: none; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font: 800 24px var(--display); color: var(--auf-akzent); background: var(--akzent); }
+  .satz.gut .lampe { background: var(--gut); } .satz.warn .lampe { background: var(--warn); } .satz.schlecht .lampe { background: var(--schlecht); }
+  .satz.gut .lampe, .satz.warn .lampe, .satz.schlecht .lampe { color: var(--karte); }
+  .satz strong { display: block; font: 700 clamp(21px, 2.4vw, 30px)/1.3 var(--display); }
+  .satz small { display: block; color: var(--leise); font-size: 1rem; margin-top: 6px; }
+  .ampel-regel { margin: 10px 0 0; max-width: 95ch; }
+  .zahlen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 14px; margin-top: 14px; }
+
+  /* Kennzahlen */
+  .kacheln { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 14px; margin-bottom: 20px; }
+  .kz { background: var(--karte); border: 1px solid var(--linie); border-radius: 18px; padding: 14px 18px; min-width: 0; }
+  .kz dt { font-size: .95rem; color: var(--leise); }
+  .kz dd { font: 800 clamp(24px, 2.4vw, 32px)/1.2 var(--display); margin-top: 4px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .kz dd small { display: block; font: 400 .9rem/1.4 var(--sans); color: var(--leise); margin-top: 2px; }
+  .kz.haupt { border-color: color-mix(in srgb, var(--akzent) 45%, var(--linie)); }
+  .kz.haupt dd { color: var(--akzent-text); }
+
+  /* Ergebnisse in den Schritten */
+  .ergebnisse { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: 12px; margin-top: 18px; }
+  .wert { background: var(--karte2); border-radius: 14px; padding: 12px 14px; }
+  .wert dt { font-size: .9rem; color: var(--leise); }
+  .wert dd { font: 700 1.2rem/1.4 var(--display); font-variant-numeric: tabular-nums; }
+  .wert.haupt { background: var(--akzent-flaeche); }
+  .wert.haupt dd { color: var(--akzent-text); }
+  .neg, .wert dd.neg, .wert.haupt dd.neg, .kz dd.neg, .kz.haupt dd.neg { color: var(--schlecht); }
+  .pos, .wert dd.pos, .wert.haupt dd.pos, .kz dd.pos, .kz.haupt dd.pos { color: var(--gut); }
+  details.rechenweg { margin-top: 12px; }
+  details.rechenweg > summary { font-size: .95rem; }
+  .formel { font-size: .95rem; color: var(--leise); margin: 6px 0 0; }
+
+  /* Diagramme */
+  .diagramm { position: relative; margin-top: 14px; }
+  .diagramm svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .diagramm text { font-family: var(--sans); font-size: 12px; fill: var(--leise); }
+  .diagramm .wertlabel { fill: var(--text); font-size: 13px; }
+  .diagramm .achse { stroke: var(--linie2); stroke-width: 1; }
+  .diagramm .gitter { stroke: var(--linie); stroke-width: 1; stroke-dasharray: 2 4; }
+  .diagramm [data-tip] { cursor: default; }
+  .legende { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 8px; font-size: .92rem; color: var(--leise); }
+  .legende span { display: inline-flex; align-items: center; gap: 6px; }
+  .legende i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .legende i.linie { height: 3px; border-radius: 2px; width: 16px; }
+  #tip {
+    position: fixed; z-index: 40; pointer-events: none; max-width: 260px;
+    background: var(--karte); color: var(--text); border: 1px solid var(--linie2); border-radius: 12px;
+    padding: 8px 10px; font-size: .9rem; box-shadow: var(--schatten); font-variant-numeric: tabular-nums;
+  }
+  #tip b { font-weight: 700; }
+
+  /* Tabellen */
+  .tabelle-kasten { max-height: 72vh; overflow: auto; border: 1px solid var(--linie); border-radius: 14px; background: var(--karte); }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--linie); vertical-align: top; }
+  th { background: var(--karte2); font: 700 .9rem/1.3 var(--sans); color: var(--leise); position: sticky; top: 0; z-index: 1; }
+  tbody th { position: static; font: 600 .95rem/1.4 var(--sans); color: var(--text); }
+  td.z, th.z { text-align: right; }
+  tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+  tbody tr:hover td { background: color-mix(in srgb, var(--akzent-flaeche) 50%, transparent); }
+  #r-kredit-tabelle.nur-a th:nth-child(n+3), #r-kredit-tabelle.nur-a td:nth-child(n+3) { display: none; }
+
+  /* Ampel in der Merkliste */
+  .ampel { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+  .ampel::before { content: ""; width: 14px; height: 14px; border-radius: 50%; background: currentColor; }
+  .ampel.gruen { color: var(--gut); }
+  .ampel.gelb { color: var(--warn); }
+  .ampel.rot { color: var(--schlecht); }
+
+  /* Prüfliste */
+  .pruef { list-style: none; padding: 0; margin: 0; }
+  .pruef li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--linie); }
+  .pruef li:last-child { border-bottom: 0; }
+  .pruef label { color: var(--text); font-weight: 400; font-size: 1.02rem; margin: 0; cursor: pointer; display: block; }
+
+  /* Startseite */
+  .hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr); gap: 32px; align-items: center; padding-block: 12px 24px; }
+  .hero .lead { font-size: 1.25rem; color: var(--leise); max-width: 40ch; margin: 0; }
+  .szene { position: relative; aspect-ratio: 4 / 3.4; max-width: 100%; border-radius: 22px; overflow: hidden; background: radial-gradient(ellipse at 50% 35%, var(--akzent-flaeche), transparent 70%), var(--karte2); }
+  .szene canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: pan-y; }
+  .szene canvas:active { cursor: grabbing; }
+  .szene .szenen-text { position: absolute; left: 10px; bottom: 10px; right: 10px; display: flex; justify-content: space-between; gap: 8px; pointer-events: none; }
+  .szene .szenen-text span { background: color-mix(in srgb, var(--karte) 85%, transparent); border-radius: 999px; padding: 3px 10px; font-size: 13px; color: var(--leise); }
+  .szene .ersatz { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: var(--leise); }
+  .frage { font-size: clamp(26px, 3vw, 32px); margin: 40px 0 18px; }
+  .start-kacheln { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .start-kachel { display: flex; flex-direction: column; gap: 10px; text-align: left; background: var(--karte); color: var(--text); border: 1px solid var(--linie); border-top: 10px solid var(--f); border-radius: 14px; padding: 22px; cursor: pointer; font: inherit; transition: transform .2s ease, box-shadow .2s ease; }
+  .start-kachel:hover { transform: translateY(-4px); box-shadow: var(--schatten); }
+  .start-kachel > svg { width: 42px; height: 42px; color: var(--f); }
+  .start-kachel strong { font: 800 1.35rem/1.25 var(--display); }
+  .start-kachel span.text { color: var(--leise); font-size: 1rem; }
+  .start-kachel span.los { margin-top: auto; font-weight: 700; color: var(--f); }
+  .extra { margin-top: 18px; display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; border: 2px dashed var(--linie); border-radius: 18px; padding: 14px 18px; background: transparent; color: var(--leise); font: inherit; cursor: pointer; }
+  .extra:hover { border-color: var(--linie2); }
+  .extra svg { width: 30px; height: 30px; color: var(--f7); flex: none; }
+  .extra b { color: var(--text); }
+  .start-mehr { margin-top: 36px; display: grid; gap: 14px; }
+  .start-mehr > details { background: var(--karte); border: 1px solid var(--linie); border-radius: 18px; padding: 12px 22px; }
+  .start-mehr > details[open] { padding-bottom: 20px; }
+  .weg { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 0; }
+  .weg li { position: relative; padding: 4px 0 16px 50px; }
+  .weg li::before { content: attr(data-n); position: absolute; left: 0; top: 0; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 800 15px var(--display); color: var(--auf-akzent); background: var(--akzent); }
+  .weg li::after { content: ""; position: absolute; left: 16px; top: 36px; bottom: 0; width: 2px; background: var(--linie); }
+  .weg li:last-child::after { display: none; }
+  .weg strong { display: block; }
+
+  /* Rechner in Schritten */
+  .band { margin-bottom: 8px; }
+  .band .kacheln { margin: 12px 0 0; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .band .kz { padding: 10px 14px; }
+  .band .kz dd { font-size: clamp(20px, 2vw, 26px); }
+  .schritte { list-style: none; padding: 0; margin: 12px 0 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .schritte button { width: 100%; height: 100%; display: flex; gap: 10px; align-items: center; text-align: left; border: 2px solid transparent; border-radius: 14px; padding: 10px 12px; background: var(--karte); color: var(--leise); font: 600 16px var(--sans); cursor: pointer; }
+  .schritte button b { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--linie); color: var(--text); font: 800 15px var(--display); }
+  .schritte button[aria-current="step"] { border-color: var(--akzent); color: var(--text); background: var(--akzent-flaeche); }
+  .schritte button[aria-current="step"] b { background: var(--akzent); color: var(--auf-akzent); }
+  .schritt-fuss { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+  .schritt-fuss .knopf:only-child { margin-left: auto; }
+  @media (max-width: 900px) {
+    .band .kacheln { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .schritte { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  /* Merkliste als Karten */
+  .merk-karten { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 18px; margin-bottom: 18px; }
+  .merk-karte { background: var(--karte); border: 1px solid var(--linie); border-top: 8px solid var(--ampelfarbe, var(--linie2)); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--schatten); }
+  .merk-karte h3 { margin: 0; font-size: 1.25rem; }
+  .merk-karte .ort { color: var(--leise); font-size: .95rem; margin-top: -6px; }
+  .merk-karte .satzchen { font-weight: 600; }
+  .merk-karte dl { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-variant-numeric: tabular-nums; }
+  .merk-karte dt { color: var(--leise); }
+  .merk-karte dd { text-align: right; font-weight: 700; }
+  .merk-karte dd.best::after { content: " ★"; color: var(--akzent); }
+  .merk-karte .knopfreihe { margin-top: auto; }
+
+  /* Begriffe: (?) mit Erklärung in einfacher Sprache */
+  .frag { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 0; background: var(--akzent-flaeche); color: var(--akzent-text); font: 800 14px/1 var(--sans); cursor: pointer; display: inline-grid; place-items: center; padding: 0; }
+  .frag:hover { background: var(--akzent); color: var(--auf-akzent); }
+  #erklaerung { position: absolute; z-index: 45; max-width: min(360px, calc(100vw - 32px)); background: var(--karte); color: var(--text); border: 2px solid var(--akzent); border-radius: 16px; padding: 14px 16px; box-shadow: var(--schatten); font-size: 1rem; }
+  #erklaerung strong { display: block; font-family: var(--display); margin-bottom: 4px; }
+  #erklaerung p { margin: 0; }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: minmax(0, 1fr); }
+    .hero .szene { max-width: 480px; }
+    .start-kacheln { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  /* Handybreite: Tabellen als Karten */
+  @media (max-width: 760px) {
+    body { font-size: 17px; }
+    .karte { padding: 18px; }
+    .start-kacheln { grid-template-columns: minmax(0, 1fr); }
+    .karten thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .karten tr { display: block; border-bottom: 1px solid var(--linie); padding: 8px 0; }
+    .karten td, .karten tbody th { display: grid; grid-template-columns: minmax(0, 42%) minmax(0, 1fr); gap: 8px; border: 0; padding: 4px 12px; text-align: left; }
+    .karten td.z { text-align: left; }
+    .karten td::before { content: attr(data-titel); color: var(--leise); font: .85rem/1.4 var(--sans); }
+    .karten td, .karten tbody th { overflow-wrap: anywhere; hyphens: auto; }
+    .karten td > *, .karten td a { min-width: 0; }
+    .karten tbody th { display: block; }
+    .tabelle-kasten.karten-kasten { max-height: none; }
+    #r-kredit-tabelle.nur-a td:nth-child(n+3) { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-haus" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M6 22 24 7l18 15"/><path d="M11 18v22h26V18"/><path d="M20 40V28h8v12"/></symbol>
+  <symbol id="i-lupe" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="20" r="12"/><path d="m29 29 12 12"/><path d="M14 22l6-6 6 6M16 21v5h8v-5"/></symbol>
+  <symbol id="i-stern" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m24 6 5.5 11.5 12.5 1.7-9.1 8.7 2.3 12.4L24 34.3l-11.2 6 2.3-12.4L6 19.2l12.5-1.7z"/></symbol>
+  <symbol id="i-rechner" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="5" width="28" height="38" rx="4"/><rect x="15" y="10" width="18" height="8" rx="1.5"/><path d="M16 25h2M23 25h2M30 25h2M16 31h2M23 31h2M30 31h2M16 37h2M23 37h2M30 37h2"/></symbol>
+  <symbol id="i-waage" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6v34M14 42h20M10 12h28"/><path d="M10 12 4 26h12zM38 12l-6 14h12z"/></symbol>
+  <symbol id="i-werkzeug" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M30 6a9 9 0 0 0-8 12L7 33a4 4 0 0 0 6 6l15-15a9 9 0 0 0 12-8l-6 2-4-4z"/></symbol>
+  <symbol id="i-weg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M24 4v40M16 44h16"/><path d="M24 9h14l5 5-5 5H24zM24 22H10l-5 5 5 5h14z"/></symbol>
+  <symbol id="i-paragraf" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M31 11c-1-3-4-5-8-5-5 0-8 3-8 6 0 8 18 6 18 15 0 3-2 5-5 6M17 37c1 3 4 5 8 5 5 0 8-3 8-6 0-8-18-6-18-15 0-3 2-5 5-6"/></symbol>
+  <symbol id="i-bett" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12v28M5 32h38v8M5 26h38v6"/><rect x="9" y="18" width="10" height="8" rx="3"/></symbol>
+  <symbol id="i-menue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-sonne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-mond" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+</svg>
+
+<a class="sprung" href="#inhalt">Zum Inhalt springen</a>
+
+<header class="kopf">
+  <div class="kopf-innen">
+    <button type="button" class="marke" id="zur-start" aria-label="Zur Startseite">
+      <svg aria-hidden="true"><use href="#i-haus"/></svg><span>Immobilien-Werkzeuge</span>
+    </button>
+    <span class="kopf-ort" id="kopf-ort"></span>
+    <div class="kopf-rechts">
+      <details class="menue" id="menue">
+        <summary><svg aria-hidden="true"><use href="#i-menue"/></svg><span class="menue-wort">Alle Bereiche</span><span class="sprung">Alle Bereiche</span></summary>
+        <nav class="menue-liste" aria-label="Bereiche">
+          <button type="button" class="bereich-knopf" id="tab-uebersicht" data-ziel="uebersicht" style="--f:var(--akzent)"><svg aria-hidden="true"><use href="#i-haus"/></svg>Startseite</button>
+          <button type="button" class="bereich-knopf" id="tab-suche" data-ziel="suche" style="--f:var(--f1)"><svg aria-hidden="true"><use href="#i-lupe"/></svg>Haus suchen</button>
+          <button type="button" class="bereich-knopf" id="tab-merkliste" data-ziel="merkliste" style="--f:var(--f1)"><svg aria-hidden="true"><use href="#i-stern"/></svg>Meine Merkliste</button>
+          <button type="button" class="bereich-knopf" id="tab-rechner" data-ziel="rechner" style="--f:var(--f2)"><svg aria-hidden="true"><use href="#i-rechner"/></svg>Kann ich mir das leisten?</button>
+          <button type="button" class="bereich-knopf" id="tab-wert" data-ziel="wert" style="--f:var(--f3)"><svg aria-hidden="true"><use href="#i-waage"/></svg>Was ist das Haus wert?</button>
+          <button type="button" class="bereich-knopf" id="tab-umbau" data-ziel="umbau" style="--f:var(--f4)"><svg aria-hidden="true"><use href="#i-werkzeug"/></svg>Umbauen und renovieren</button>
+          <button type="button" class="bereich-knopf" id="tab-pruefliste" data-ziel="pruefliste" style="--f:var(--f5)"><svg aria-hidden="true"><use href="#i-weg"/></svg>Schritt für Schritt zum Kauf</button>
+          <button type="button" class="bereich-knopf" id="tab-recht" data-ziel="recht" style="--f:var(--f6)"><svg aria-hidden="true"><use href="#i-paragraf"/></svg>Gesetze und Hilfe</button>
+          <button type="button" class="bereich-knopf optional" id="tab-monteur" data-ziel="monteur" style="--f:var(--f7)"><svg aria-hidden="true"><use href="#i-bett"/></svg>Extra: Monteurzimmer</button>
+        </nav>
+      </details>
+      <button type="button" class="themaknopf" id="thema-knopf" aria-label="Dunkles Design einschalten">
+        <svg id="thema-sonne" aria-hidden="true"><use href="#i-sonne"/></svg>
+        <svg id="thema-mond" aria-hidden="true" hidden><use href="#i-mond"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="inhalt">
+
+<!-- STARTSEITE -->
+<section id="uebersicht" aria-label="Startseite">
+  <div class="hero">
+    <div>
+      <h1>Finde ein Haus, das sich <em>selbst trägt</em>.</h1>
+      <p class="lead">Suchen, rechnen, vergleichen und Schritt für Schritt kaufen. Alles an einem Ort, in einfachen Worten.</p>
+    </div>
+    <figure class="szene" id="haus-szene" aria-label="Dreidimensionales Modell eines Mehrfamilienhauses, mit der Maus drehbar">
+      <canvas id="haus3d"></canvas>
+      <div class="ersatz" id="haus-ersatz" hidden>3D-Ansicht nicht verfügbar (WebGL ist in diesem Browser aus). Alle Werkzeuge funktionieren trotzdem.</div>
+      <figcaption class="szenen-text"><span>ziehen zum Drehen</span><span id="haus-etikett"></span></figcaption>
+    </figure>
+  </div>
+
+  <div class="satz" id="ue-satz" aria-live="polite">
+    <div class="lampe" aria-hidden="true">?</div>
+    <div><strong id="ue-satz-text"></strong><small id="ue-satz-klein"></small></div>
+  </div>
+  <dl class="kacheln zahlen" id="ue-kacheln">
+    <div class="kz"><dt>Kredit</dt><dd id="ue-darlehen">-</dd></div>
+    <div class="kz"><dt>Rate im Monat</dt><dd id="ue-rate">-</dd></div>
+    <div class="kz"><dt>Bleibt im Monat</dt><dd id="ue-cashflow">-</dd></div>
+    <div class="kz"><dt>Bruttorendite</dt><dd id="ue-rendite">-</dd></div>
+  </dl>
+  <p class="klein">Die Zahlen kommen aus dem Rechner. Ampel: grün, wenn nach der Rate Geld übrig bleibt; gelb, wenn Geld fehlt, die Miete aber die Zinsen deckt; rot, wenn sie nicht einmal die Zinsen deckt. Eigene Einordnung, keine Kaufempfehlung. <a href="#rechner" id="ue-zum-rechner">Zum Rechner</a></p>
+
+  <h2 class="frage">Was willst du tun?</h2>
+  <div class="start-kacheln">
+    <button type="button" class="start-kachel" data-ziel="suche" style="--f:var(--f1)"><svg aria-hidden="true"><use href="#i-lupe"/></svg><strong>Haus finden</strong><span class="text">In den großen Portalen suchen und gute Angebote auf deine Merkliste setzen.</span><span class="los">Suchen und merken →</span></button>
+    <button type="button" class="start-kachel" data-ziel="rechner" style="--f:var(--f2)"><svg aria-hidden="true"><use href="#i-rechner"/></svg><strong>Kann ich mir das leisten?</strong><span class="text">Kaufpreis, Kredit und Miete eingeben. Du siehst sofort, ob die Miete die Rate trägt.</span><span class="los">Jetzt rechnen →</span></button>
+    <button type="button" class="start-kachel" data-ziel="wert" style="--f:var(--f3)"><svg aria-hidden="true"><use href="#i-waage"/></svg><strong>Was ist das Haus wert?</strong><span class="text">Grob schätzen, ob der Preis zur Miete und zum Grundstück passt.</span><span class="los">Wert schätzen →</span></button>
+    <button type="button" class="start-kachel" data-ziel="umbau" style="--f:var(--f4)"><svg aria-hidden="true"><use href="#i-werkzeug"/></svg><strong>Umbauen und renovieren</strong><span class="text">Was kosten Bad, Dach oder Heizung, und wie viel Miete bringt es zurück?</span><span class="los">Umbau planen →</span></button>
+    <button type="button" class="start-kachel" data-ziel="pruefliste" style="--f:var(--f5)"><svg aria-hidden="true"><use href="#i-weg"/></svg><strong>Schritt für Schritt zum Kauf</strong><span class="text">Zehn Etappen von der Bank bis zur Vermietung, zum Abhaken.</span><span class="los">Weg ansehen →</span></button>
+    <button type="button" class="start-kachel" data-ziel="recht" style="--f:var(--f6)"><svg aria-hidden="true"><use href="#i-paragraf"/></svg><strong>Gesetze und Hilfe</strong><span class="text">Welche Regeln gelten, und wen du fragen kannst.</span><span class="los">Nachschlagen →</span></button>
+  </div>
+  <button type="button" class="extra" data-ziel="monteur"><svg aria-hidden="true"><use href="#i-bett"/></svg><span><b>Extra: Monteurzimmer.</b> Für später, wenn du Zimmer an Handwerker vermieten willst.</span></button>
+
+  <div class="start-mehr">
+    <details>
+      <summary>Der Weg zum Kauf in sieben Schritten</summary>
+      <ol class="weg">
+        <li data-n="1"><strong>Geldrahmen klären</strong><span class="klein">Mit Bank oder Vermittler besprechen, was ohne oder mit wenig eigenem Geld möglich ist.</span></li>
+        <li data-n="2"><strong>Häuser suchen</strong><span class="klein">Ort, Preisrahmen und Art wählen, Portale öffnen.</span></li>
+        <li data-n="3"><strong>Vergleichen</strong><span class="klein">Gute Angebote auf die Merkliste setzen.</span></li>
+        <li data-n="4"><strong>Unterlagen und Besichtigung</strong><span class="klein">Für die besten zwei oder drei Häuser die Liste „Schritt für Schritt“ abarbeiten.</span></li>
+        <li data-n="5"><strong>Mit echten Zahlen rechnen</strong><span class="klein">Nebenkosten, Kreditangebote, Miete, Rücklagen und der Fall, dass es schlechter läuft.</span></li>
+        <li data-n="6"><strong>Fachleute fragen</strong><span class="klein">Steuerberater und, wo nötig, Rechtsanwalt: Rechtsform, Abschreibung, Vertragsentwurf.</span></li>
+        <li data-n="7"><strong>Kaufen und vermieten</strong><span class="klein">Notartermin, danach normale Vermietung oder als Option Monteurzimmer.</span></li>
+      </ol>
+    </details>
+    <details>
+      <summary>Wie aktuell sind die Daten?</summary>
+      <div class="tabelle-kasten karten-kasten" style="margin-top:8px">
+        <table class="karten" id="datenstand">
+          <thead><tr><th scope="col">Bereich</th><th scope="col">Geprüft am</th><th scope="col">Hinweis</th></tr></thead>
+          <tbody>
+            <tr><td data-titel="Bereich">Grunderwerbsteuer</td><td data-titel="Geprüft am" data-datum="2026-10-07">07.10.2026</td><td data-titel="Hinweis">Bremen amtlich, übrige Länder aus Übersichten</td></tr>
+            <tr><td data-titel="Bereich">Portal-Adressen</td><td data-titel="Geprüft am" data-datum="2026-10-07">07.10.2026</td><td data-titel="Hinweis">Prüfstand je Portal unter „Haus suchen“</td></tr>
+            <tr><td data-titel="Bereich">Monteurzimmer-Preise Bremen</td><td data-titel="Geprüft am" data-datum="2026-09-27">27.09.2026</td><td data-titel="Hinweis">aus der Präsentation, Angebotspreise</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="klein" id="datenstand-alt" style="margin-top:10px"></p>
+      <p class="klein">Merkliste und Abhak-Liste werden nur in diesem Browser gespeichert. Echte Sicherung: in der Merkliste „Als Datei sichern“.</p>
+    </details>
+  </div>
+  <p class="klein" style="margin-top:20px">Arbeitswerkzeug, keine Anlageberatung. Es ersetzt weder Bank noch Steuerberater, Rechtsanwalt oder Notar.</p>
+</section>
+
+<!-- OBJEKTSUCHE -->
+<section id="suche" aria-label="Haus suchen" hidden>
+  <header class="bereich-kopf" style="--f:var(--f1)">
+    <svg aria-hidden="true"><use href="#i-lupe"/></svg>
+    <div>
+      <p class="etikett">Haus finden</p>
+      <h2>Haus suchen</h2>
+      <p class="lead">Die Knöpfe öffnen die Suche der großen Portale in einem neuen Fenster, so weit wie möglich schon ausgefüllt. Was ein Portal nicht übernimmt, steht daneben.</p>
+      <div class="unternav"><button type="button" data-ziel="suche">Haus suchen</button><button type="button" data-ziel="merkliste">Meine Merkliste</button></div>
+    </div>
+  </header>
+  <form class="karte" id="suche-form" novalidate>
+    <div class="raster">
+      <div>
+        <label for="s-ort">Ort</label>
+        <input type="text" id="s-ort" value="Bremen" autocomplete="off" aria-describedby="s-ort-f">
+        <div class="fehler" id="s-ort-f"></div>
+      </div>
+      <div>
+        <label for="s-land">Bundesland</label>
+        <select id="s-land"></select>
+      </div>
+      <div>
+        <label for="s-art">Was für ein Haus?</label>
+        <select id="s-art">
+          <option value="haus">Haus</option>
+          <option value="wohnung">Eigentumswohnung</option>
+          <option value="mfh" selected>Mehrfamilienhaus</option>
+        </select>
+      </div>
+      <div>
+        <label for="s-preis">Höchstpreis in €</label>
+        <input type="text" id="s-preis" inputmode="decimal" value="300.000" aria-describedby="s-preis-f">
+        <div class="fehler" id="s-preis-f"></div>
+      </div>
+    </div>
+  </form>
+  <div class="tabelle-kasten karten-kasten">
+    <table class="karten" id="portal-tabelle">
+      <thead><tr><th scope="col" style="width:22%">Portal</th><th scope="col" style="width:20%">Öffnen</th><th scope="col">Was übernommen wird</th><th scope="col" style="width:22%">Prüfstand</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <p class="klein" style="margin-top:10px" id="volksbank-hinweis"></p>
+  <form id="zvg-form" method="post" action="https://www.zvg-portal.de/index.php?button=Suchen" target="_blank" hidden>
+    <input type="hidden" name="land_abk" value="hb">
+    <input type="hidden" name="ger_id" value="0">
+    <input type="hidden" name="order_by" value="2">
+    <input type="hidden" name="ort" value="Bremen">
+  </form>
+  <div class="knopfreihe"><button type="button" class="knopf" data-ziel="merkliste">Gefunden? Auf die Merkliste setzen →</button></div>
+</section>
+
+<!-- MERKLISTE -->
+<section id="merkliste" aria-label="Meine Merkliste" hidden>
+  <header class="bereich-kopf" style="--f:var(--f1)">
+    <svg aria-hidden="true"><use href="#i-stern"/></svg>
+    <div>
+      <p class="etikett">Haus finden</p>
+      <h2>Meine Merkliste</h2>
+      <p class="lead">Deine gemerkten Häuser im Vergleich. Gerechnet wird mit dem Bundesland des Hauses und mit Angebot A aus dem Rechner.</p>
+      <div class="unternav"><button type="button" data-ziel="suche">Haus suchen</button><button type="button" data-ziel="merkliste">Meine Merkliste</button></div>
+    </div>
+  </header>
+
+  <details class="karte" id="m-neu">
+    <summary id="m-form-titel">+ Haus hinzufügen</summary>
+    <form id="m-form" novalidate style="margin-top:12px">
+      <div class="raster">
+        <div><label for="m-titel">Name, damit du es wiedererkennst</label><input type="text" id="m-titel" placeholder="z. B. MFH Walle, 4 Wohnungen" aria-describedby="m-titel-f"><div class="fehler" id="m-titel-f"></div></div>
+        <div><label for="m-ort">Ort</label><input type="text" id="m-ort"></div>
+        <div><label for="m-land">Bundesland</label><select id="m-land"></select></div>
+        <div><label for="m-preis">Kaufpreis in €</label><input type="text" id="m-preis" inputmode="decimal" aria-describedby="m-preis-f"><div class="fehler" id="m-preis-f"></div></div>
+        <div><label for="m-miete">Kaltmiete pro Monat in € (Ist oder Schätzung)</label><input type="text" id="m-miete" inputmode="decimal" aria-describedby="m-miete-f"><div class="fehler" id="m-miete-f"></div></div>
+        <div><label for="m-flaeche">Wohnfläche in m²</label><input type="text" id="m-flaeche" inputmode="decimal" aria-describedby="m-flaeche-f"><div class="fehler" id="m-flaeche-f"></div></div>
+      </div>
+      <details class="mehr">
+        <summary>Mehr Angaben (für Wert, Monteurzimmer und Notizen)</summary>
+        <div class="raster">
+          <div><label for="m-zimmer">Zimmer</label><input type="text" id="m-zimmer" inputmode="decimal" aria-describedby="m-zimmer-f"><div class="fehler" id="m-zimmer-f"></div></div>
+          <div><label for="m-makler">Maklerprovision in %</label><input type="text" id="m-makler" inputmode="decimal" value="3,57" aria-describedby="m-makler-f"><div class="fehler" id="m-makler-f"></div></div>
+          <div><label for="m-we">Anzahl Wohnungen</label><input type="text" id="m-we" inputmode="decimal" aria-describedby="m-we-f"><div class="fehler" id="m-we-f"></div></div>
+          <div><label for="m-baujahr">Baujahr</label><input type="text" id="m-baujahr" inputmode="decimal" aria-describedby="m-baujahr-f"><div class="fehler" id="m-baujahr-f"></div></div>
+          <div><label for="m-grund">Grundstücksfläche in m²</label><input type="text" id="m-grund" inputmode="decimal" aria-describedby="m-grund-f"><div class="fehler" id="m-grund-f"></div></div>
+          <div><label for="m-brw">Bodenrichtwert in € pro m²</label><input type="text" id="m-brw" inputmode="decimal" aria-describedby="m-brw-f"><div class="fehler" id="m-brw-f"></div></div>
+          <div><label for="m-betten">Mögliche Betten (nur für Monteurzimmer)</label><input type="text" id="m-betten" inputmode="decimal" aria-describedby="m-betten-f"><div class="fehler" id="m-betten-f"></div></div>
+          <div><label for="m-link">Link zum Angebot</label><input type="url" id="m-link" placeholder="https://…" aria-describedby="m-link-f"><div class="fehler" id="m-link-f"></div></div>
+        </div>
+        <div style="margin-top:14px"><label for="m-notiz">Notiz</label><textarea id="m-notiz"></textarea></div>
+      </details>
+      <div class="knopfreihe">
+        <button type="submit" class="knopf" id="m-speichern">Auf die Merkliste setzen</button>
+        <button type="button" class="knopf zweit" id="m-abbrechen" hidden>Ändern abbrechen</button>
+      </div>
+    </form>
+  </details>
+  <div class="meldung" id="m-meldung" role="status" aria-live="polite" style="margin-bottom:14px"></div>
+
+  <div class="merk-karten" id="m-karten"></div>
+  <p class="klein" id="m-band-regel">Das Farbband oben auf jeder Karte folgt der Ampel im Rechner: grün, wenn nach der Rate Geld übrig bleibt; gelb, wenn Geld fehlt, die Miete aber die Zinsen deckt; rot, wenn sie nicht einmal die Zinsen deckt (Kredit wie Angebot A). Die Rendite-Ampel darunter richtet sich nur nach der Bruttorendite. Beides sind eigene Einordnungen, keine Kaufempfehlung.</p>
+  <p class="hinweis" id="m-leer">Noch keine Häuser auf der Merkliste. Klick oben auf „+ Haus hinzufügen“ oder such zuerst unter „Haus suchen“.</p>
+
+  <details class="karte" id="m-tabelle-box">
+    <summary>Alle Zahlen als Tabelle</summary>
+    <div class="tabelle-kasten karten-kasten" id="m-liste-kasten" style="margin-top:10px">
+      <table class="karten" id="m-tabelle">
+        <thead><tr>
+          <th scope="col" style="width:17%">Objekt</th>
+          <th scope="col" class="z">Kaufpreis</th>
+          <th scope="col" class="z">€/m²</th>
+          <th scope="col" class="z">Brutto&shy;rendite</th>
+          <th scope="col" class="z">Faktor</th>
+          <th scope="col" class="z">Gesamt&shy;kosten</th>
+          <th scope="col" class="z">Bleibt im Monat</th>
+          <th scope="col" class="z">Ertrags&shy;wert</th>
+          <th scope="col" class="z">Monteur-Ergebnis</th>
+          <th scope="col">Ampel</th>
+          <th scope="col" style="width:13%">Aktion</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="formel">Gesamtkosten = Kaufpreis + Grunderwerbsteuer des Landes + Notar/Grundbuch (Satz aus dem Rechner) + Makler. Bleibt im Monat (Cashflow) = Kaltmiete − Mietausfall − nicht umlagefähige Kosten − Rücklage − Kreditrate (Annahmen aus dem Rechner, Darlehen = Gesamtkosten − Eigenkapital laut Rechner). Monteur-Ergebnis mit den Annahmen aus dem Bereich Monteurzimmer, nur wenn Betten eingetragen sind. Ertragswert nach ImmoWertV mit den Annahmen aus „Was ist das Haus wert?“ (Liegenschaftszins, Bewirtschaftungskosten, Gesamtnutzungsdauer), nur wenn Miete, Wohnungen, Baujahr, Grundstück und Bodenrichtwert eingetragen sind; darunter der Kaufpreis in Prozent des Ertragswerts.</p>
+  </details>
+
+  <details class="karte">
+    <summary>Ampel einstellen (eigene Einordnung, keine Empfehlung)</summary>
+    <p class="klein" style="margin-top:10px">Die Ampel auf den Karten richtet sich nur nach der Bruttorendite (Jahreskaltmiete geteilt durch Kaufpreis) und nach den Schwellen hier. Sie sagt nichts über Lage, Zustand oder Risiko und ist keine Kauf- oder Verkaufsempfehlung.</p>
+    <div class="raster">
+      <div><label for="m-gruen">Grün ab Bruttorendite in %</label><input type="text" id="m-gruen" inputmode="decimal" value="6" aria-describedby="m-gruen-f"><div class="fehler" id="m-gruen-f"></div></div>
+      <div><label for="m-gelb">Gelb ab Bruttorendite in %</label><input type="text" id="m-gelb" inputmode="decimal" value="4,5" aria-describedby="m-gelb-f"><div class="fehler" id="m-gelb-f"></div></div>
+    </div>
+  </details>
+
+  <div class="karte">
+    <h3>Sichern und laden</h3>
+    <p class="klein">Die Merkliste liegt nur in diesem Browser. „Als Datei sichern“ lädt eine Datei herunter; das ist die einzige echte Sicherung.</p>
+    <div class="knopfreihe">
+      <button type="button" class="knopf zweit" id="m-export">Als Datei sichern</button>
+      <label class="knopf zweit" for="m-import" style="margin:0">Datei laden</label>
+      <input type="file" id="m-import" accept=".json,application/json" hidden>
+    </div>
+    <div id="m-import-wahl" class="hinweis" style="margin-top:12px" hidden>
+      <p id="m-import-text"></p>
+      <div class="knopfreihe">
+        <button type="button" class="knopf" id="m-import-dazu">Zur Liste hinzufügen</button>
+        <button type="button" class="knopf zweit" id="m-import-ersetzen">Liste ersetzen (vorher sichern)</button>
+        <button type="button" class="knopf zweit" id="m-import-abbruch">Abbrechen</button>
+      </div>
+    </div>
+    <div class="meldung" id="m-datei-meldung" role="status" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- RECHNER -->
+<section id="rechner" aria-label="Rechner" hidden>
+  <header class="bereich-kopf" style="--f:var(--f2)">
+    <svg aria-hidden="true"><use href="#i-rechner"/></svg>
+    <div>
+      <p class="etikett">Rechner</p>
+      <h2>Kann ich mir das leisten?</h2>
+      <p class="lead">In vier Schritten: Kaufpreis, Kredit, Miete und der Fall, dass es schlechter läuft. Alles ändert sich sofort. Startwerte sind Beispiele, keine Angebote. Zahlen mit Punkt oder Komma (300.000 oder 5,5).</p>
+    </div>
+  </header>
+
+  <div class="band">
+    <div class="satz" id="r-satz" aria-live="polite">
+      <div class="lampe" aria-hidden="true">?</div>
+      <div><strong id="r-satz-text"></strong><small id="r-satz-klein"></small></div>
+    </div>
+    <p class="klein ampel-regel">So liest du die Ampel: <b>grün</b>, wenn nach der Rate Geld übrig bleibt; <b>gelb</b>, wenn Geld fehlt, die Miete aber die Zinsen deckt (der Rest ist Tilgung, also Vermögen); <b>rot</b>, wenn die Miete nicht einmal die Zinsen deckt. Zinsen = Monatsdurchschnitt im ersten Jahr, Angebot A. Eigene Einordnung, keine Kaufempfehlung.</p>
+    <dl class="kacheln" id="r-kacheln">
+      <div class="kz haupt"><dt>Kredit</dt><dd id="k-darlehen">-</dd></div>
+      <div class="kz"><dt>Rate im Monat</dt><dd id="k-rate">-</dd></div>
+      <div class="kz"><dt>Bleibt im Monat</dt><dd id="k-cashflow">-</dd></div>
+      <div class="kz"><dt>Bruttorendite</dt><dd id="k-rendite">-</dd></div>
+    </dl>
+  </div>
+
+  <ol class="schritte" id="r-schritte" aria-label="Schritte im Rechner">
+    <li><button type="button" data-schritt="1" aria-current="step"><b>1</b>Kaufpreis</button></li>
+    <li><button type="button" data-schritt="2"><b>2</b>Kredit</button></li>
+    <li><button type="button" data-schritt="3"><b>3</b>Miete</button></li>
+    <li><button type="button" data-schritt="4"><b>4</b>Was, wenn es schlechter läuft?</button></li>
+  </ol>
+
+  <form id="r-form" novalidate>
+    <div class="karte schritt" data-schritt="1">
+      <h3>Schritt 1: Was kostet das Haus?</h3>
+      <div class="raster" style="margin-bottom:18px">
+        <div style="grid-column: 1 / -1; max-width: 560px">
+          <label for="r-objekt">Haus aus der Merkliste übernehmen (wenn du magst)</label>
+          <select id="r-objekt"><option value="">Eigene Eingabe</option></select>
+          <div class="klein" id="r-objekt-hinweis" style="margin-top:4px">Setzt Kaufpreis, Bundesland, Makler, Wohnfläche und Kaltmiete des Objekts ein. Danach kannst du jeden Wert ändern.</div>
+        </div>
+      </div>
+      <div class="raster">
+        <div><label for="r-preis">Kaufpreis in €</label><input type="text" id="r-preis" inputmode="decimal" value="" placeholder="z. B. 300.000" aria-describedby="r-preis-f"><div class="fehler" id="r-preis-f"></div></div>
+        <div><label for="r-land">Bundesland</label><select id="r-land"></select></div>
+        <div><label for="r-ek">Eigenes Geld in €</label><input type="text" id="r-ek" inputmode="decimal" value="0" aria-describedby="r-ek-f"><div class="fehler" id="r-ek-f"></div></div>
+      </div>
+      <details class="mehr">
+        <summary>Mehr Einstellungen: Notar, Makler, Renovierung</summary>
+        <div class="raster">
+          <div><label for="r-notar">Notar und Grundbuch in %</label><input type="text" id="r-notar" inputmode="decimal" value="2" aria-describedby="r-notar-f"><div class="fehler" id="r-notar-f"></div></div>
+          <div><label for="r-makler">Makler in %</label><input type="text" id="r-makler" inputmode="decimal" value="0" aria-describedby="r-makler-f"><div class="fehler" id="r-makler-f"></div></div>
+          <div><label for="r-zusatz">Renovierung und Sonstiges in €</label><input type="text" id="r-zusatz" inputmode="decimal" value="0" aria-describedby="r-zusatz-f"><div class="fehler" id="r-zusatz-f"></div></div>
+        </div>
+      </details>
+      <dl class="ergebnisse" id="r-nk-ergebnis"></dl>
+      <figure class="diagramm" id="ch-mittel" aria-describedby="ch-mittel-text"></figure>
+      <p class="klein" id="ch-mittel-text"></p>
+      <p class="formel" id="r-nk-formel"></p>
+      <p class="klein" id="r-nk-quelle"></p>
+      <div class="schritt-fuss"><button type="button" class="knopf" data-geh="2">Weiter zu Schritt 2: Kredit →</button></div>
+    </div>
+
+    <div class="karte schritt" data-schritt="2" hidden>
+      <h3>Schritt 2: Der Kredit</h3>
+      <p class="klein">Die Bank leiht dir den Rest. Jeden Monat zahlst du gleich viel: Zinsen plus Tilgung (Annuitätendarlehen). Angebot A zählt für alle Ergebnisse, auch für Merkliste und Monteurzimmer.</p>
+      <div class="tabelle-kasten karten-kasten">
+        <table class="karten nur-a" id="r-kredit-tabelle">
+          <thead><tr><th scope="col" style="width:24%"><span class="sprung">Merkmal</span></th><th scope="col">Angebot A</th><th scope="col">Angebot B</th><th scope="col">Angebot C</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Sollzins in %</th>
+              <td data-titel="A"><input type="text" id="r-zins-a" inputmode="decimal" value="4" aria-label="Sollzins Angebot A in Prozent"><div class="fehler" id="r-zins-a-f"></div></td>
+              <td data-titel="B"><input type="text" id="r-zins-b" inputmode="decimal" value="3,8" aria-label="Sollzins Angebot B in Prozent"><div class="fehler" id="r-zins-b-f"></div></td>
+              <td data-titel="C"><input type="text" id="r-zins-c" inputmode="decimal" value="" aria-label="Sollzins Angebot C in Prozent"><div class="fehler" id="r-zins-c-f"></div></td></tr>
+            <tr><th scope="row">Anfängliche Tilgung in %</th>
+              <td data-titel="A"><input type="text" id="r-tilg-a" inputmode="decimal" value="2" aria-label="Tilgung Angebot A in Prozent"><div class="fehler" id="r-tilg-a-f"></div></td>
+              <td data-titel="B"><input type="text" id="r-tilg-b" inputmode="decimal" value="1,5" aria-label="Tilgung Angebot B in Prozent"><div class="fehler" id="r-tilg-b-f"></div></td>
+              <td data-titel="C"><input type="text" id="r-tilg-c" inputmode="decimal" value="" aria-label="Tilgung Angebot C in Prozent"><div class="fehler" id="r-tilg-c-f"></div></td></tr>
+            <tr><th scope="row">Zinsbindung in Jahren</th>
+              <td data-titel="A"><input type="text" id="r-bind-a" inputmode="decimal" value="10" aria-label="Zinsbindung Angebot A in Jahren"><div class="fehler" id="r-bind-a-f"></div></td>
+              <td data-titel="B"><input type="text" id="r-bind-b" inputmode="decimal" value="15" aria-label="Zinsbindung Angebot B in Jahren"><div class="fehler" id="r-bind-b-f"></div></td>
+              <td data-titel="C"><input type="text" id="r-bind-c" inputmode="decimal" value="" aria-label="Zinsbindung Angebot C in Jahren"><div class="fehler" id="r-bind-c-f"></div></td></tr>
+            <tr><th scope="row">Monatsrate</th><td data-titel="A" class="z" id="r-rate-a"></td><td data-titel="B" class="z" id="r-rate-b"></td><td data-titel="C" class="z" id="r-rate-c"></td></tr>
+            <tr><th scope="row">Restschuld nach Zinsbindung</th><td data-titel="A" class="z" id="r-rest-a"></td><td data-titel="B" class="z" id="r-rest-b"></td><td data-titel="C" class="z" id="r-rest-c"></td></tr>
+            <tr><th scope="row">Zinsen in der Zinsbindung</th><td data-titel="A" class="z" id="r-zsum-a"></td><td data-titel="B" class="z" id="r-zsum-b"></td><td data-titel="C" class="z" id="r-zsum-c"></td></tr>
+            <tr><th scope="row">Laufzeit bis schuldenfrei</th><td data-titel="A" class="z" id="r-lauf-a"></td><td data-titel="B" class="z" id="r-lauf-b"></td><td data-titel="C" class="z" id="r-lauf-c"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="knopfreihe"><button type="button" class="knopf zweit" id="r-mehr-angebote" aria-pressed="false" aria-controls="r-kredit-tabelle">Weitere Angebote vergleichen (B und C)</button></div>
+      <div class="zwei" style="margin-top:6px">
+        <div>
+          <h3>So schnell sinkt die Schuld</h3>
+          <figure class="diagramm" id="ch-rest"></figure>
+          <div class="legende" id="ch-rest-legende"></div>
+        </div>
+        <div>
+          <h3>Zinsen und Tilgung je Jahr, Angebot A</h3>
+          <figure class="diagramm" id="ch-tilgung"></figure>
+          <div class="legende" id="ch-tilgung-legende"></div>
+        </div>
+      </div>
+      <p class="formel">Monatsrate = Darlehen × (Sollzins + Tilgung) ÷ 12. Restschuld und Laufzeit: Monat für Monat gerechnet, Zinsen = Restschuld × Sollzins ÷ 12. Gleicher Zins vorausgesetzt; nach der Zinsbindung gilt ein neuer Zins. Die gestrichelte Linie markiert das Ende der Zinsbindung.</p>
+      <details>
+        <summary>Tilgungsplan für Angebot A als Tabelle</summary>
+        <div class="tabelle-kasten karten-kasten" style="margin-top:8px">
+          <table class="karten" id="r-plan">
+            <thead><tr><th scope="col">Jahr</th><th scope="col" class="z">Zinsen</th><th scope="col" class="z">Tilgung</th><th scope="col" class="z">Restschuld am Jahresende</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="1">← Zurück</button><button type="button" class="knopf" data-geh="3">Weiter zu Schritt 3: Miete →</button></div>
+    </div>
+
+    <div class="karte schritt" data-schritt="3" hidden>
+      <h3>Schritt 3: Die Miete</h3>
+      <div class="raster">
+        <div><label for="r-flaeche">Wohnfläche in m²</label><input type="text" id="r-flaeche" inputmode="decimal" value="250" aria-describedby="r-flaeche-f"><div class="fehler" id="r-flaeche-f"></div></div>
+        <div><label for="r-miete">Kaltmiete pro Monat in €</label><input type="text" id="r-miete" inputmode="decimal" value="2.000" aria-describedby="r-miete-f"><div class="fehler" id="r-miete-f"></div></div>
+      </div>
+      <details class="mehr">
+        <summary>Mehr Einstellungen: Kosten, Rücklage, Leerstand</summary>
+        <div class="raster">
+          <div><label for="r-nul">Nicht umlagefähige Kosten pro Monat in €</label><input type="text" id="r-nul" inputmode="decimal" value="150" aria-describedby="r-nul-f"><div class="fehler" id="r-nul-f"></div></div>
+          <div><label for="r-rueck">Instandhaltungsrücklage in € pro m² und Jahr</label><input type="text" id="r-rueck" inputmode="decimal" value="12" aria-describedby="r-rueck-f"><div class="fehler" id="r-rueck-f"></div></div>
+          <div><label for="r-ausfall">Mietausfall und Leerstand in %</label><input type="text" id="r-ausfall" inputmode="decimal" value="3" aria-describedby="r-ausfall-f"><div class="fehler" id="r-ausfall-f"></div></div>
+        </div>
+        <p class="klein" style="margin-top:10px">Annahmen: Nicht umlagefähig sind z. B. Verwaltung, Kontoführung, Teile der Versicherung. Rücklage und Mietausfall sind Schätzwerte, keine Erfahrungswerte für ein bestimmtes Objekt.</p>
+      </details>
+      <dl class="ergebnisse" id="r-verm-ergebnis"></dl>
+      <h3>Von der Miete zu dem, was übrig bleibt</h3>
+      <figure class="diagramm" id="ch-wasserfall"></figure>
+      <p class="formel">Bruttorendite = Kaltmiete × 12 ÷ Kaufpreis. Kaufpreisfaktor = Kaufpreis ÷ Jahreskaltmiete. Nettorendite = (Kaltmiete − Mietausfall − nicht umlagefähige Kosten − Rücklage) × 12 ÷ Gesamtkosten. Cashflow = dieser Reinertrag − Monatsrate Angebot A, vor Steuern. Die Tilgung in der Rate baut Vermögen auf, kostet aber jeden Monat Geld.</p>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="2">← Zurück</button><button type="button" class="knopf" data-geh="4">Weiter zu Schritt 4: Was, wenn es schlechter läuft? →</button></div>
+    </div>
+
+    <div class="karte schritt" data-schritt="4" hidden>
+      <h3>Schritt 4: Was, wenn es schlechter läuft?</h3>
+      <p class="klein">Die Regler spielen schlechtere Zeiten durch. Sie ändern nur diese Rechnung, nicht deine Eingaben in den Schritten davor.</p>
+      <div class="raster">
+        <div><label for="r-st-zins">Zins nach der Zinsbindung höher um <output id="r-st-zins-w">2</output> Prozentpunkte</label><input type="range" id="r-st-zins" min="0" max="5" step="0.25" value="2"></div>
+        <div><label for="r-st-miete">Miete niedriger um <output id="r-st-miete-w">10</output> %</label><input type="range" id="r-st-miete" min="0" max="40" step="1" value="10"></div>
+        <div><label for="r-st-ausfall">Mietausfall höher um <output id="r-st-ausfall-w">5</output> Prozentpunkte</label><input type="range" id="r-st-ausfall" min="0" max="30" step="1" value="5"></div>
+      </div>
+      <dl class="ergebnisse" id="r-stress-ergebnis"></dl>
+      <p class="formel">Anschlussrate = Restschuld nach Zinsbindung (Angebot A) × (Sollzins A + Aufschlag + Tilgung A) ÷ 12. Cashflow im Stress = Reinertrag mit gesenkter Miete und höherem Ausfall − Anschlussrate.</p>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="3">← Zurück</button></div>
+    </div>
+  </form>
+</section>
+
+<!-- WERTERMITTLUNG -->
+<section id="wert" aria-label="Was ist das Haus wert?" hidden>
+  <header class="bereich-kopf" style="--f:var(--f3)">
+    <svg aria-hidden="true"><use href="#i-waage"/></svg>
+    <div>
+      <p class="etikett">Wertermittlung nach ImmoWertV 2021</p>
+      <h2>Was ist das Haus wert?</h2>
+      <p class="lead">Grob schätzen, ob der Preis zur Miete und zum Grundstück passt. Gerechnet wird nach den Formeln der Immobilienwertermittlungsverordnung. Das Ergebnis ist eine eigene Schätzung, kein Gutachten. Für Bank, Gericht oder eine Kaufentscheidung im Zweifel einen öffentlich bestellten Sachverständigen fragen.</p>
+    </div>
+  </header>
+
+  <div class="satz" id="w-satz" aria-live="polite" style="margin-bottom:16px">
+    <div class="lampe" aria-hidden="true">≈</div>
+    <div><strong id="w-satz-text"></strong><small id="w-satz-klein"></small></div>
+  </div>
+
+  <dl class="kacheln" id="w-kacheln" aria-live="polite">
+    <div class="kz"><dt>Bodenwert</dt><dd id="wk-boden">-</dd></div>
+    <div class="kz haupt"><dt>Ertragswert</dt><dd id="wk-ertrag">-</dd></div>
+    <div class="kz"><dt>Sachwert</dt><dd id="wk-sach">-</dd></div>
+    <div class="kz"><dt>Vergleichswert</dt><dd id="wk-vergleich">-</dd></div>
+    <div class="kz"><dt>Kaufpreis</dt><dd id="wk-kauf">-</dd></div>
+  </dl>
+
+  <form id="w-form" novalidate>
+    <div class="karte">
+      <div class="kartenkopf"><h3>1. Grundstück und Gebäude</h3>
+        <div class="knopfreihe" style="margin:0"><button type="button" class="knopf zweit" id="w-aus-rechner">Werte aus dem Rechner übernehmen</button></div></div>
+      <div class="raster">
+        <div><label for="w-grund">Grundstücksfläche in m²</label><input type="text" id="w-grund" inputmode="decimal" value="" placeholder="z. B. 450" aria-describedby="w-grund-f"><div class="fehler" id="w-grund-f"></div></div>
+        <div><label for="w-brw">Bodenrichtwert in € pro m²</label><input type="text" id="w-brw" inputmode="decimal" value="" placeholder="aus BORIS ablesen" aria-describedby="w-brw-f"><div class="fehler" id="w-brw-f"></div></div>
+        <div><label for="w-baujahr">Baujahr</label><input type="text" id="w-baujahr" inputmode="decimal" value="" placeholder="z. B. 1965" aria-describedby="w-baujahr-f"><div class="fehler" id="w-baujahr-f"></div></div>
+        <div><label for="w-stichjahr">Jahr der Bewertung</label><input type="text" id="w-stichjahr" inputmode="decimal" value="2026" aria-describedby="w-stichjahr-f"><div class="fehler" id="w-stichjahr-f"></div></div>
+        <div><label for="w-gnd">Gesamtnutzungsdauer in Jahren</label><input type="text" id="w-gnd" inputmode="decimal" value="80" aria-describedby="w-gnd-f"><div class="fehler" id="w-gnd-f"></div></div>
+        <div><label for="w-rnd">Restnutzungsdauer selbst festlegen (optional)</label><input type="text" id="w-rnd" inputmode="decimal" value="" placeholder="leer = berechnet" aria-describedby="w-rnd-f"><div class="fehler" id="w-rnd-f"></div></div>
+        <div><label for="w-wfl">Wohnfläche in m²</label><input type="text" id="w-wfl" inputmode="decimal" value="" aria-describedby="w-wfl-f"><div class="fehler" id="w-wfl-f"></div></div>
+        <div><label for="w-we">Anzahl Wohnungen</label><input type="text" id="w-we" inputmode="decimal" value="" placeholder="z. B. 4" aria-describedby="w-we-f"><div class="fehler" id="w-we-f"></div></div>
+      </div>
+      <p class="klein" id="w-boris">Bodenrichtwert kostenlos nachschlagen: <a href="https://www.bodenrichtwerte-deutschland.de" target="_blank" rel="noopener">BORIS-D (bundesweit)</a>, für Bremen und Niedersachsen <a href="https://immobilienmarkt.niedersachsen.de/" target="_blank" rel="noopener">BORIS Niedersachsen/Bremen</a> (Stichtag 01.01.2026, Links geprüft 07.10.2026). Gesamtnutzungsdauer 80 Jahre für Mehrfamilienhäuser laut Anlage 1 ImmoWertV.</p>
+      <dl class="ergebnisse" id="w-grund-ergebnis"></dl>
+      <p class="hinweis" id="w-rnd-hinweis" hidden></p>
+    </div>
+
+    <div class="karte">
+      <h3>2. Ertragswertverfahren (§§ 27 bis 34 ImmoWertV)</h3>
+      <div class="raster">
+        <div><label for="w-miete">Marktübliche Kaltmiete pro Monat in €</label><input type="text" id="w-miete" inputmode="decimal" value="" aria-describedby="w-miete-f"><div class="fehler" id="w-miete-f"></div></div>
+        <div><label for="w-verw">Verwaltungskosten in € je Wohnung und Jahr</label><input type="text" id="w-verw" inputmode="decimal" value="298" aria-describedby="w-verw-f"><div class="fehler" id="w-verw-f"></div></div>
+        <div><label for="w-inst">Instandhaltung in € je m² und Jahr</label><input type="text" id="w-inst" inputmode="decimal" value="11,70" aria-describedby="w-inst-f"><div class="fehler" id="w-inst-f"></div></div>
+        <div><label for="w-ausfall">Mietausfallwagnis in %</label><input type="text" id="w-ausfall" inputmode="decimal" value="2" aria-describedby="w-ausfall-f"><div class="fehler" id="w-ausfall-f"></div></div>
+        <div><label for="w-betrieb">Nicht umgelegte Betriebskosten in € pro Jahr</label><input type="text" id="w-betrieb" inputmode="decimal" value="0" aria-describedby="w-betrieb-f"><div class="fehler" id="w-betrieb-f"></div></div>
+        <div><label for="w-lz">Liegenschaftszinssatz in %</label><input type="text" id="w-lz" inputmode="decimal" value="4" aria-describedby="w-lz-f"><div class="fehler" id="w-lz-f"></div></div>
+      </div>
+      <p class="klein">Bewirtschaftungskosten: Modellwerte der Anlage 3 ImmoWertV, Stand 2021 (298 € Verwaltung je Wohnung, 11,70 € Instandhaltung je m², 2 % Mietausfallwagnis). Sie werden jährlich mit dem Verbraucherpreisindex fortgeschrieben; die fortgeschriebenen Werte stehen im Marktbericht des Gutachterausschusses. <strong>Liegenschaftszins 4 % ist eine Annahme</strong>: Den Wert für Mehrfamilienhäuser veröffentlicht der örtliche Gutachterausschuss, für Bremen im <a href="https://www.gutachterausschuss.bremen.de/marktbericht-1469" target="_blank" rel="noopener">Grundstücksmarktbericht</a>.</p>
+      <dl class="ergebnisse" id="w-ertrag-ergebnis"></dl>
+      <p class="formel">Reinertrag = Jahresrohertrag − Bewirtschaftungskosten (§ 31). Bodenwertverzinsung = Bodenwert × Liegenschaftszins. Ertragswert = (Reinertrag − Bodenwertverzinsung) × Kapitalisierungsfaktor + Bodenwert (§ 28). Vereinfacht: Reinertrag × Kapitalisierungsfaktor + Bodenwert × Abzinsungsfaktor (§ 29). Kapitalisierungsfaktor = (qⁿ − 1) ÷ (qⁿ × (q − 1)), Abzinsungsfaktor = 1 ÷ qⁿ, q = 1 + Liegenschaftszins, n = Restnutzungsdauer (§ 34). Beide Verfahren ergeben bei gleichen Eingaben denselben Wert.</p>
+    </div>
+
+    <details class="karte">
+      <summary>Für Fortgeschrittene: Sachwertverfahren (§§ 35 bis 39 ImmoWertV)</summary>
+      <div class="raster">
+        <div><label for="w-bgf">Brutto-Grundfläche in m²</label><input type="text" id="w-bgf" inputmode="decimal" value="" placeholder="aus Bauunterlagen" aria-describedby="w-bgf-f"><div class="fehler" id="w-bgf-f"></div></div>
+        <div><label for="w-art">Gebäudeart (Anlage 4)</label><select id="w-art">
+          <option value="4.1">4.1 Mehrfamilienhaus bis 6 Wohnungen</option>
+          <option value="4.2">4.2 Mehrfamilienhaus 7 bis 20 Wohnungen</option>
+          <option value="4.3">4.3 Mehrfamilienhaus über 20 Wohnungen</option>
+          <option value="5.1">5.1 Wohnhaus mit Mischnutzung</option>
+        </select></div>
+        <div><label for="w-stufe">Standardstufe</label><select id="w-stufe">
+          <option value="3">3 (mittel)</option><option value="4">4 (gehoben)</option><option value="5">5 (stark gehoben)</option>
+        </select></div>
+        <div><label for="w-korr-wg">Korrektur Wohnungsgröße</label><select id="w-korr-wg">
+          <option value="1.10">ca. 35 m² je Wohnung (1,10)</option><option value="1" selected>ca. 50 m² je Wohnung (1,00)</option><option value="0.85">ca. 135 m² je Wohnung (0,85)</option>
+        </select></div>
+        <div><label for="w-korr-gr">Korrektur Grundriss</label><select id="w-korr-gr">
+          <option value="1.05">Einspänner (1,05)</option><option value="1" selected>Zweispänner (1,00)</option><option value="0.97">Dreispänner (0,97)</option><option value="0.95">Vierspänner (0,95)</option>
+        </select></div>
+        <div><label for="w-bpi">Baupreisindex (2010 = 100)</label><input type="text" id="w-bpi" inputmode="decimal" value="189,1" aria-describedby="w-bpi-f"><div class="fehler" id="w-bpi-f"></div></div>
+        <div><label for="w-rf">Regionalfaktor</label><input type="text" id="w-rf" inputmode="decimal" value="1" aria-describedby="w-rf-f"><div class="fehler" id="w-rf-f"></div></div>
+        <div><label for="w-aussen">Außenanlagen in % des Gebäudewerts</label><input type="text" id="w-aussen" inputmode="decimal" value="0" aria-describedby="w-aussen-f"><div class="fehler" id="w-aussen-f"></div></div>
+        <div><label for="w-swf">Sachwertfaktor (Marktanpassung)</label><input type="text" id="w-swf" inputmode="decimal" value="1" aria-describedby="w-swf-f"><div class="fehler" id="w-swf-f"></div></div>
+        <div><label for="w-besonders">Besondere Merkmale in € (z. B. − Instandhaltungsstau)</label><input type="text" id="w-besonders" inputmode="decimal" value="0" aria-describedby="w-besonders-f"><div class="fehler" id="w-besonders-f"></div></div>
+      </div>
+      <p class="klein">Normalherstellungskosten NHK 2010 aus Anlage 4 ImmoWertV (inkl. 19 % Baunebenkosten bei Gebäudeart 4.1 bis 4.3), geprüft 07.10.2026. Baupreisindex 189,1 für Wohngebäude, Bewertungsjahr 2026, laut BMF-Schreiben vom 14.01.2026 (gilt dort für die steuerliche Bewertung, hier als Näherung). Regional- und Sachwertfaktor 1,0 sind Annahmen; die örtlichen Werte nennt der Gutachterausschuss.</p>
+      <dl class="ergebnisse" id="w-sach-ergebnis"></dl>
+      <p class="formel">Herstellungskosten = NHK × Korrekturfaktoren × Baupreisindex ÷ 100 × Brutto-Grundfläche × Regionalfaktor (§ 36). Alterswertminderungsfaktor = Restnutzungsdauer ÷ Gesamtnutzungsdauer (§ 38). Vorläufiger Sachwert = Gebäudewert + Außenanlagen + Bodenwert; marktangepasst × Sachwertfaktor (§§ 35, 39); dann besondere Merkmale.</p>
+    </details>
+
+    <div class="karte">
+      <h3>3. Vergleichswert (vereinfacht)</h3>
+      <div class="raster">
+        <div><label for="w-vgl">Vergleichspreis in € pro m² Wohnfläche</label><input type="text" id="w-vgl" inputmode="decimal" value="" placeholder="z. B. aus Marktbericht" aria-describedby="w-vgl-f"><div class="fehler" id="w-vgl-f"></div></div>
+      </div>
+      <div class="knopfreihe"><button type="button" class="knopf zweit" id="w-vgl-merk">Durchschnitt €/m² aus der Merkliste</button></div>
+      <p class="klein" id="w-vgl-hinweis">Ein echtes Vergleichswertverfahren nutzt Kaufpreise vergleichbarer Objekte aus der Kaufpreissammlung des Gutachterausschusses. Angebotspreise aus Portalen sind keine Kaufpreise und liegen oft darüber.</p>
+      <dl class="ergebnisse" id="w-vgl-ergebnis"></dl>
+    </div>
+
+    <div class="karte">
+      <h3>Ergebnis gegen Kaufpreis</h3>
+      <figure class="diagramm" id="ch-wert"></figure>
+      <div class="legende" id="ch-wert-legende"></div>
+      <p class="klein" id="w-fazit"></p>
+    </div>
+  </form>
+</section>
+
+<!-- UMBAU -->
+<section id="umbau" aria-label="Umbauen und renovieren" hidden>
+  <header class="bereich-kopf" style="--f:var(--f4)">
+    <svg aria-hidden="true"><use href="#i-werkzeug"/></svg>
+    <div>
+      <p class="etikett">Umbau, Sanierung, Ausbau</p>
+      <h2>Umbauen und renovieren</h2>
+      <p class="lead">Was kosten Bad, Dach oder Heizung, wie viel Förderung gibt es, und wie viel Miete bringt es zurück? Die Preise stammen aus Ratgeberseiten und sind nur eine Größenordnung. Ersetze sie durch echte Angebote.</p>
+    </div>
+  </header>
+
+  <dl class="kacheln" id="u-kacheln" aria-live="polite">
+    <div class="kz haupt"><dt>Gesamtkosten</dt><dd id="uk-gesamt">-</dd></div>
+    <div class="kz"><dt>Nach Förderung</dt><dd id="uk-netto">-</dd></div>
+    <div class="kz"><dt>Mehrmiete/Monat</dt><dd id="uk-miete">-</dd></div>
+    <div class="kz"><dt>Wertzuwachs</dt><dd id="uk-wert">-</dd></div>
+  </dl>
+
+  <form id="u-form" novalidate>
+    <div class="karte">
+      <h3>1. Kosten je Bauteil</h3>
+      <p class="klein">Menge eintragen, Preis je Einheit bei Bedarf anpassen. Vorgabe ist ein Wert innerhalb der recherchierten Spanne (Abruf 07.10.2026).</p>
+      <div class="tabelle-kasten karten-kasten">
+        <table class="karten" id="u-tabelle">
+          <thead><tr><th scope="col" style="width:30%">Bauteil</th><th scope="col" style="width:14%">Menge</th><th scope="col" style="width:16%">€ je Einheit</th><th scope="col" class="z" style="width:14%">Summe</th><th scope="col">Spanne und Quelle</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="raster" style="margin-top:14px">
+        <div><label for="u-planung">Planung in % der Baukosten</label><input type="text" id="u-planung" inputmode="decimal" value="13" aria-describedby="u-planung-f"><div class="fehler" id="u-planung-f"></div></div>
+        <div><label for="u-baustelle">Baustelle und Entsorgung in %</label><input type="text" id="u-baustelle" inputmode="decimal" value="7" aria-describedby="u-baustelle-f"><div class="fehler" id="u-baustelle-f"></div></div>
+        <div><label for="u-puffer">Puffer für Unvorhergesehenes in %</label><input type="text" id="u-puffer" inputmode="decimal" value="15" aria-describedby="u-puffer-f"><div class="fehler" id="u-puffer-f"></div></div>
+        <div><label for="u-foerder">Erwartete Förderung (Zuschüsse) in €</label><input type="text" id="u-foerder" inputmode="decimal" value="0" aria-describedby="u-foerder-f"><div class="fehler" id="u-foerder-f"></div></div>
+      </div>
+      <p class="klein" id="u-zuschlag-quelle"></p>
+      <dl class="ergebnisse" id="u-kosten-ergebnis"></dl>
+      <p class="formel">Gesamtkosten = Summe der Bauteile × (1 + Planung + Baustelle + Puffer). Nach Förderung = Gesamtkosten − erwartete Zuschüsse. Kredite (z. B. KfW 261) senken die Kosten nicht, sie verteilen sie.</p>
+    </div>
+
+    <div class="karte">
+      <h3>2. Mieterhöhung und Wertsteigerung</h3>
+      <div class="raster">
+        <div><label for="u-anteil">Anteil Modernisierung an den Kosten in %</label><input type="text" id="u-anteil" inputmode="decimal" value="70" aria-describedby="u-anteil-f"><div class="fehler" id="u-anteil-f"></div></div>
+        <div><label for="u-wfl">Wohnfläche in m²</label><input type="text" id="u-wfl" inputmode="decimal" value="" placeholder="wie im Rechner" aria-describedby="u-wfl-f"><div class="fehler" id="u-wfl-f"></div></div>
+        <div><label for="u-miete-alt">Kaltmiete heute pro Monat in €</label><input type="text" id="u-miete-alt" inputmode="decimal" value="" placeholder="wie im Rechner" aria-describedby="u-miete-alt-f"><div class="fehler" id="u-miete-alt-f"></div></div>
+        <div><label for="u-rnd-neu">Restnutzungsdauer nach Umbau in Jahren (optional)</label><input type="text" id="u-rnd-neu" inputmode="decimal" value="" placeholder="leer = wie vorher" aria-describedby="u-rnd-neu-f"><div class="fehler" id="u-rnd-neu-f"></div></div>
+        <div style="display:flex;flex-direction:row;justify-content:flex-start;gap:10px;align-items:flex-start;padding-top:26px"><input type="checkbox" id="u-heizung"><label for="u-heizung" style="margin:0;color:var(--text)">Nur Heizungstausch (Kappung 0,50 € je m²)</label></div>
+      </div>
+      <p class="klein">Bei bestehenden Mietverträgen darf die Jahresmiete nach Modernisierung um 8 % der Modernisierungskosten steigen; Kosten, die ohnehin für Erhaltung angefallen wären, zählen nicht mit. Die Monatsmiete darf in sechs Jahren um höchstens 3 € je m² steigen, bei weniger als 7 € je m² Ausgangsmiete um höchstens 2 €, bei Heizungstausch um höchstens 0,50 € (§ 559 BGB, Wortlaut geprüft 07.10.2026 auf <a href="https://www.gesetze-im-internet.de/bgb/__559.html" target="_blank" rel="noopener">gesetze-im-internet.de</a>). Härtefälle (§ 559 Abs. 4) und Ankündigungsfristen (§ 555c) beachten; vor einer Mieterhöhung Rechtsanwalt oder Mieterverein des Vermieters fragen.</p>
+      <dl class="ergebnisse" id="u-wert-ergebnis"></dl>
+      <figure class="diagramm" id="ch-umbau"></figure>
+      <div class="legende" id="ch-umbau-legende"></div>
+      <p class="formel">Mehrmiete = Kosten × Anteil Modernisierung × 8 % ÷ 12, höchstens Kappungsbetrag × Wohnfläche. Ertragswert vorher und nachher mit den Annahmen aus „Was ist das Haus wert?“ (Bodenwert, Liegenschaftszins, Bewirtschaftungskosten). Wertzuwachs = Ertragswert nachher − vorher. Rendite des Umbaus = Mehrmiete × 12 ÷ Kosten nach Förderung.</p>
+    </div>
+  </form>
+
+  <div class="karte">
+    <h3>3. Förderprogramme (Stand 07.10.2026)</h3>
+    <p class="klein">Förderbedingungen ändern sich oft; seit 21.07.2026 gelten neue Regeln der Bundesförderung für effiziente Gebäude. Vor jeder Beauftragung bei KfW, BAFA oder Bremer Aufbau-Bank und mit einem Energieeffizienz-Experten prüfen. Fast alle Programme verlangen den Antrag vor Beginn der Arbeiten.</p>
+    <div class="tabelle-kasten karten-kasten">
+      <table class="karten" id="u-foerder-tabelle">
+        <thead><tr><th scope="col" style="width:24%">Programm</th><th scope="col">Höhe</th><th scope="col" style="width:14%">Für Vermieter</th><th scope="col" style="width:16%">Antrag</th><th scope="col" style="width:16%">Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="karte">
+    <h3>4. Bauablauf und Genehmigung</h3>
+    <ol class="weg" id="u-ablauf"></ol>
+  </div>
+</section>
+
+<!-- PRÜFLISTE -->
+<section id="pruefliste" aria-label="Schritt für Schritt zum Kauf" hidden>
+  <header class="bereich-kopf" style="--f:var(--f5)">
+    <svg aria-hidden="true"><use href="#i-weg"/></svg>
+    <div>
+      <p class="etikett">Ablauf zum Abhaken</p>
+      <h2>Schritt für Schritt zum Kauf</h2>
+      <p class="lead">Zehn Etappen von der Planung bis zur Vermietung. Hak ab, was erledigt ist; der Stand bleibt in diesem Browser gespeichert. Die Liste ist eine Gedächtnisstütze und ersetzt nicht den Rat von Notar, Bank, Steuerberater und Rechtsanwalt.</p>
+    </div>
+  </header>
+  <div class="knopfreihe" style="margin:0 0 16px"><button type="button" class="knopf zweit" id="p-zuruecksetzen">Alle Haken entfernen</button><span class="klein" id="p-fortschritt" style="align-self:center"></span></div>
+  <div class="zwei">
+    <div class="karte">
+      <h3>1. Planung</h3>
+      <ul class="pruef">
+        <li><input type="checkbox" id="pa-ziel"><label for="pa-ziel">Ziel festlegen: Objektart, Region, normale Vermietung oder Monteurzimmer</label></li>
+        <li><input type="checkbox" id="pa-budget"><label for="pa-budget">Budget und Eigenkapital klären, Reserve für Nebenkosten und Reparaturen</label></li>
+        <li><input type="checkbox" id="pa-bank"><label for="pa-bank">Mit Bank oder Vermittler den Finanzierungsrahmen besprechen</label></li>
+        <li><input type="checkbox" id="pa-schufa"><label for="pa-schufa">Eigene Unterlagen bereitlegen: Einkommensnachweise, Selbstauskunft, Schufa</label></li>
+        <li><input type="checkbox" id="pa-rechtsform"><label for="pa-rechtsform">Rechtsform (privat oder GmbH) mit Steuerberater besprechen</label></li>
+      </ul>
+    </div>
+    <div class="karte">
+      <h3>2. Suchen und vergleichen</h3>
+      <ul class="pruef">
+        <li><input type="checkbox" id="pa-suchprofil"><label for="pa-suchprofil">Suchprofil in den Portalen anlegen (Bereich „Haus suchen“)</label></li>
+        <li><input type="checkbox" id="pa-merkliste"><label for="pa-merkliste">Angebote in die Merkliste eintragen und vergleichen</label></li>
+        <li><input type="checkbox" id="pa-wert"><label for="pa-wert">Für die besten Objekte den Wert ermitteln (Bereich „Was ist das Haus wert?“)</label></li>
+        <li><input type="checkbox" id="pa-bodenrichtwert"><label for="pa-bodenrichtwert">Bodenrichtwert und Bebauungsplan nachsehen</label></li>
+      </ul>
+    </div>
+  </div>
+  <div class="zwei">
+    <div class="karte">
+      <h3>3. Unterlagen anfordern und lesen</h3>
+      <ul class="pruef">
+        <li><input type="checkbox" id="p-expose"><label for="p-expose">Exposé mit Baujahr, Flächen, Mieten, Kosten</label></li>
+        <li><input type="checkbox" id="p-grundbuch"><label for="p-grundbuch">Aktueller Grundbuchauszug (Belastungen, Wegerechte)</label></li>
+        <li><input type="checkbox" id="p-baulast"><label for="p-baulast">Baulastenverzeichnis und Flurkarte</label></li>
+        <li><input type="checkbox" id="p-energie"><label for="p-energie">Energieausweis</label></li>
+        <li><input type="checkbox" id="p-mietvertraege"><label for="p-mietvertraege">Bestehende Mietverträge, Mieterliste, Mietrückstände</label></li>
+        <li><input type="checkbox" id="p-teilung"><label for="p-teilung">Bei Eigentumswohnung: Teilungserklärung</label></li>
+        <li><input type="checkbox" id="p-protokolle"><label for="p-protokolle">Bei Eigentumswohnung: Protokolle der Eigentümerversammlungen der letzten Jahre</label></li>
+        <li><input type="checkbox" id="p-hausgeld"><label for="p-hausgeld">Bei Eigentumswohnung: Wirtschaftsplan, Hausgeldabrechnung, Höhe der Erhaltungsrücklage</label></li>
+        <li><input type="checkbox" id="p-genehmigung"><label for="p-genehmigung">Baugenehmigung bzw. genehmigte Nutzung passt zur geplanten Nutzung</label></li>
+      </ul>
+    </div>
+    <div class="karte">
+      <h3>4. Besichtigung</h3>
+      <ul class="pruef">
+        <li><input type="checkbox" id="p-dach"><label for="p-dach">Dach und Fassade</label></li>
+        <li><input type="checkbox" id="p-keller"><label for="p-keller">Keller: Feuchtigkeit, Geruch, Risse</label></li>
+        <li><input type="checkbox" id="p-heizung"><label for="p-heizung">Heizung: Art, Alter, letzte Wartung</label></li>
+        <li><input type="checkbox" id="p-fenster"><label for="p-fenster">Fenster, Dämmung</label></li>
+        <li><input type="checkbox" id="p-elektrik"><label for="p-elektrik">Elektrik und Leitungen (Alter, Zustand)</label></li>
+        <li><input type="checkbox" id="p-lage"><label for="p-lage">Lage zu verschiedenen Tageszeiten ansehen</label></li>
+        <li><input type="checkbox" id="p-gutachter"><label for="p-gutachter">Bei Zweifeln: Bausachverständigen mitnehmen</label></li>
+      </ul>
+    </div>
+    <div class="karte">
+      <h3>5. Finanzierung</h3>
+      <ul class="pruef">
+        <li><input type="checkbox" id="p-angebote"><label for="p-angebote">Mindestens drei Kreditangebote eingeholt und im Rechner verglichen</label></li>
+        <li><input type="checkbox" id="p-zusage"><label for="p-zusage">Schriftliche Finanzierungszusage vor dem Notartermin</label></li>
+        <li><input type="checkbox" id="p-stress"><label for="p-stress">Stresstest gerechnet: Rate auch bei höherem Anschlusszins tragbar</label></li>
+        <li><input type="checkbox" id="p-reserve"><label for="p-reserve">Reserve für Reparaturen und Leerstand eingeplant</label></li>
+      </ul>
+    </div>
+    <div class="karte">
+      <h3>6. Recht, Steuer, Versicherung</h3>
+      <ul class="pruef">
+        <li><input type="checkbox" id="p-steuer"><label for="p-steuer">Steuerberater: Rechtsform, Abschreibung, Kaufpreisaufteilung Gebäude/Boden</label></li>
+        <li><input type="checkbox" id="p-vertrag"><label for="p-vertrag">Entwurf des Kaufvertrags rechtzeitig vor dem Termin erhalten und gelesen</label></li>
+        <li><input type="checkbox" id="p-anwalt"><label for="p-anwalt">Unklare Klauseln von Rechtsanwalt oder Notar erklären lassen</label></li>
+        <li><input type="checkbox" id="p-versicherung"><label for="p-versicherung">Gebäudeversicherung ab Besitzübergang, Haus- und Grundbesitzerhaftpflicht</label></li>
+      </ul>
+    </div>
+  </div>
+  <div class="zwei">
+    <div class="karte">
+      <h3>7. Kauf beim Notar</h3>
+      <p class="klein">Üblicher Ablauf; die Einzelheiten erklärt der Notar.</p>
+      <ul class="pruef">
+        <li><input type="checkbox" id="pk-entwurf"><label for="pk-entwurf">Vertragsentwurf vom Notar erhalten, in Ruhe gelesen, Fragen notiert</label></li>
+        <li><input type="checkbox" id="pk-termin"><label for="pk-termin">Beurkundungstermin, Ausweis mitnehmen</label></li>
+        <li><input type="checkbox" id="pk-grundschuld"><label for="pk-grundschuld">Grundschuld für die Bank bestellen lassen</label></li>
+        <li><input type="checkbox" id="pk-vormerkung"><label for="pk-vormerkung">Eintragung der Auflassungsvormerkung im Grundbuch abwarten</label></li>
+        <li><input type="checkbox" id="pk-grest"><label for="pk-grest">Grunderwerbsteuerbescheid bezahlen</label></li>
+        <li><input type="checkbox" id="pk-zahlung"><label for="pk-zahlung">Kaufpreis erst nach der Fälligkeitsmitteilung des Notars zahlen</label></li>
+        <li><input type="checkbox" id="pk-eigentum"><label for="pk-eigentum">Eintragung als Eigentümer im Grundbuch bestätigt</label></li>
+      </ul>
+    </div>
+    <div class="karte">
+      <h3>8. Übergabe</h3>
+      <ul class="pruef">
+        <li><input type="checkbox" id="pu-protokoll"><label for="pu-protokoll">Übergabeprotokoll mit Zählerständen und Mängeln, Fotos</label></li>
+        <li><input type="checkbox" id="pu-schluessel"><label for="pu-schluessel">Schlüssel vollständig übernommen</label></li>
+        <li><input type="checkbox" id="pu-mieter"><label for="pu-mieter">Mieter schriftlich über den Eigentümerwechsel und das neue Mietkonto informiert</label></li>
+        <li><input type="checkbox" id="pu-kautionen"><label for="pu-kautionen">Mietverträge und Kautionen vom Verkäufer übernommen</label></li>
+        <li><input type="checkbox" id="pu-versorger"><label for="pu-versorger">Versorger, Grundsteuer, Müll und Schornsteinfeger umgemeldet</label></li>
+      </ul>
+    </div>
+    <div class="karte">
+      <h3>9. Umbau</h3>
+      <ul class="pruef">
+        <li><input type="checkbox" id="pb-kosten"><label for="pb-kosten">Kosten und Wirkung im Bereich „Umbauen und renovieren“ gerechnet</label></li>
+        <li><input type="checkbox" id="pb-foerderung"><label for="pb-foerderung">Förderung vor Beauftragung beantragt</label></li>
+        <li><input type="checkbox" id="pb-genehmigung"><label for="pb-genehmigung">Genehmigungspflicht bei der Bauaufsicht geklärt</label></li>
+        <li><input type="checkbox" id="pb-ankuendigung"><label for="pb-ankuendigung">Modernisierung den Mietern rechtzeitig angekündigt</label></li>
+        <li><input type="checkbox" id="pb-abnahme"><label for="pb-abnahme">Abnahme mit Protokoll, Gewährleistungsfristen notiert</label></li>
+      </ul>
+    </div>
+    <div class="karte">
+      <h3>10. Vermietung und Verwaltung</h3>
+      <ul class="pruef">
+        <li><input type="checkbox" id="pv-miete"><label for="pv-miete">Miete festgelegt, Mietpreisbremse am Ort geprüft (Bereich „Gesetze und Hilfe“)</label></li>
+        <li><input type="checkbox" id="pv-vertrag"><label for="pv-vertrag">Mietvertrag aus geprüfter Vorlage, im Zweifel vom Rechtsanwalt prüfen lassen</label></li>
+        <li><input type="checkbox" id="pv-kaution"><label for="pv-kaution">Kaution getrennt vom eigenen Vermögen angelegt</label></li>
+        <li><input type="checkbox" id="pv-nebenkosten"><label for="pv-nebenkosten">Nebenkostenabrechnung jährlich nach Betriebskostenverordnung</label></li>
+        <li><input type="checkbox" id="pv-ruecklage"><label for="pv-ruecklage">Instandhaltungsrücklage monatlich zurückgelegt</label></li>
+        <li><input type="checkbox" id="pv-steuer"><label for="pv-steuer">Unterlagen für die Steuererklärung (Anlage V) an den Steuerberater</label></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- RECHT -->
+<section id="recht" aria-label="Gesetze und Hilfe" hidden>
+  <header class="bereich-kopf" style="--f:var(--f6)">
+    <svg aria-hidden="true"><use href="#i-paragraf"/></svg>
+    <div>
+      <p class="etikett">Gesetze, Verordnungen, Bauordnungen</p>
+      <h2>Gesetze und Hilfe</h2>
+      <p class="lead">Welche Regeln gelten, und wen du fragen kannst. Jeder Eintrag führt zum amtlichen, immer aktuellen Text (Titel abgelesen am 07.10.2026). „Wann wichtig“ ist eine eigene, vereinfachte Erklärung und keine Rechtsberatung. Bei Verträgen, Steuern oder Bauvorhaben Rechtsanwalt, Steuerberater oder Bauaufsicht fragen.</p>
+    </div>
+  </header>
+  <div class="karte">
+    <div class="raster">
+      <div><label for="re-suche">Suchen</label><input type="text" id="re-suche" placeholder="z. B. Miete, Heizung, Grundbuch" autocomplete="off"></div>
+      <div><label for="re-bereich">Bereich</label><select id="re-bereich">
+        <option value="">Alle Bereiche</option><option>Kauf</option><option>Vermietung</option><option>Umbau</option><option>Steuer</option><option>Wertermittlung</option><option>Verwaltung</option>
+      </select></div>
+    </div>
+    <p class="klein" id="re-anzahl" style="margin-top:8px"></p>
+  </div>
+  <div class="karte">
+    <h3>Bundesrecht</h3>
+    <div class="tabelle-kasten karten-kasten">
+      <table class="karten" id="re-bund"><thead><tr><th scope="col" style="width:16%">Kürzel</th><th scope="col" style="width:34%">Amtlicher Titel</th><th scope="col" style="width:14%">Bereich</th><th scope="col">Wann wichtig</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+  <div class="zwei">
+    <div class="karte">
+      <h3>Landesbauordnungen (alle 16 Länder)</h3>
+      <div class="tabelle-kasten karten-kasten">
+        <table class="karten" id="re-laender"><thead><tr><th scope="col" style="width:30%">Land</th><th scope="col">Bauordnung</th></tr></thead><tbody></tbody></table>
+      </div>
+      <p class="klein" style="margin-top:8px">Mit „im Browser gegenlesen“ markiert: Das Landesportal zeigt den Titel nur mit JavaScript; Titel aus dem Suchindex übernommen.</p>
+    </div>
+    <div class="karte">
+      <h3>Bremen und Niedersachsen</h3>
+      <div class="tabelle-kasten karten-kasten">
+        <table class="karten" id="re-regional"><thead><tr><th scope="col" style="width:22%">Land</th><th scope="col">Vorschrift und Bedeutung</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="karte">
+    <h3>Amtliche Anlaufstellen</h3>
+    <div class="tabelle-kasten karten-kasten">
+      <table class="karten" id="re-stellen"><thead><tr><th scope="col" style="width:34%">Stelle</th><th scope="col">Wofür</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- MONTEURZIMMER -->
+<section id="monteur" aria-label="Extra: Monteurzimmer" hidden>
+  <header class="bereich-kopf" style="--f:var(--f7)">
+    <svg aria-hidden="true"><use href="#i-bett"/></svg>
+    <div>
+      <p class="etikett">Extra, für später</p>
+      <h2>Monteurzimmer</h2>
+      <p class="lead">Eine mögliche Nutzung nach dem Kauf oder in angemieteten Räumen: Zimmer an Handwerker und Projektteams, bezahlt pro Person und Nacht.</p>
+    </div>
+  </header>
+  <p class="hinweis">Startwerte aus der Präsentation vom September 2026 (25 Betten, 16 € pro Person und Nacht, 4.500 € Fixkosten, 2,50 € variable Kosten je belegter Bett-Nacht). Planungswerte, keine Zusagen.</p>
+
+  <form id="mz-form" novalidate>
+    <div class="karte">
+      <h3>Erfolgsrechnung (gekauftes Objekt)</h3>
+      <div class="raster">
+        <div><label for="mz-betten">Betten</label><input type="text" id="mz-betten" inputmode="decimal" value="25" aria-describedby="mz-betten-f"><div class="fehler" id="mz-betten-f"></div></div>
+        <div><label for="mz-preis">Preis pro Person und Nacht in €</label><input type="text" id="mz-preis" inputmode="decimal" value="16" aria-describedby="mz-preis-f"><div class="fehler" id="mz-preis-f"></div></div>
+        <div><label for="mz-beleg">Belegung in %</label><input type="text" id="mz-beleg" inputmode="decimal" value="75" aria-describedby="mz-beleg-f"><div class="fehler" id="mz-beleg-f"></div></div>
+        <div><label for="mz-fix">Fixkosten pro Monat in € (ohne Kredit)</label><input type="text" id="mz-fix" inputmode="decimal" value="4.500" aria-describedby="mz-fix-f"><div class="fehler" id="mz-fix-f"></div></div>
+        <div><label for="mz-var">Variable Kosten je belegter Bett-Nacht in €</label><input type="text" id="mz-var" inputmode="decimal" value="2,50" aria-describedby="mz-var-f"><div class="fehler" id="mz-var-f"></div></div>
+        <div><label for="mz-abgabe">Abgaben auf den Umsatz in % (z. B. Citytax, Provision)</label><input type="text" id="mz-abgabe" inputmode="decimal" value="0" aria-describedby="mz-abgabe-f"><div class="fehler" id="mz-abgabe-f"></div></div>
+      </div>
+      <p class="klein">Offen aus der Präsentation: Ob in den 4.500 € Fixkosten schon eine Kreditrate steckt, ist nicht geklärt. Hier gelten sie als Kosten ohne Kredit; die Rate kommt aus Angebot A im Rechner: <strong id="mz-rate-anzeige"></strong>.</p>
+      <dl class="ergebnisse" id="mz-ergebnis"></dl>
+      <h3>Ergebnis je nach Belegung</h3>
+      <figure class="diagramm" id="ch-belegung"></figure>
+      <div class="legende" id="ch-belegung-legende"></div>
+      <p class="formel">Umsatz = Betten × Preis × Belegung × 30 Tage. Operatives Ergebnis = Umsatz − Abgaben − variable Kosten − Fixkosten. Break-even-Belegung = Fixkosten ÷ (Betten × 30 × (Preis × (1 − Abgabe) − variable Kosten)).</p>
+    </div>
+
+    <div class="karte">
+      <h3>Szenarien wie in der Präsentation</h3>
+      <div class="tabelle-kasten karten-kasten">
+        <table class="karten" id="mz-szenarien">
+          <thead><tr><th scope="col">Szenario</th><th scope="col" class="z">Betten</th><th scope="col" class="z">Preis</th><th scope="col" class="z">Belegung</th><th scope="col" class="z">Umsatz/Monat</th><th scope="col" class="z">Operativ</th><th scope="col" class="z">Nach Kredit</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="klein" style="margin-top:8px">Umsatzwerte wie Folie 5 (4.950 / 9.000 / 13.770 €); Ergebnisse mit den Kosten oben.</p>
+    </div>
+
+    <div class="karte">
+      <h3>Stresstest</h3>
+      <div class="raster">
+        <div><label for="mz-st-beleg">Belegung niedriger um <output id="mz-st-beleg-w">15</output> Prozentpunkte</label><input type="range" id="mz-st-beleg" min="0" max="50" step="1" value="15"></div>
+        <div><label for="mz-st-preis">Preis niedriger um <output id="mz-st-preis-w">2</output> €</label><input type="range" id="mz-st-preis" min="0" max="8" step="0.5" value="2"></div>
+      </div>
+      <dl class="ergebnisse" id="mz-stress"></dl>
+    </div>
+
+    <div class="karte">
+      <h3>Anmieten statt kaufen</h3>
+      <div class="raster">
+        <div><label for="am-miete">Warmmiete pro Monat in €</label><input type="text" id="am-miete" inputmode="decimal" value="2.500" aria-describedby="am-miete-f"><div class="fehler" id="am-miete-f"></div></div>
+        <div><label for="am-sonst">Sonstige Fixkosten pro Monat in €</label><input type="text" id="am-sonst" inputmode="decimal" value="1.500" aria-describedby="am-sonst-f"><div class="fehler" id="am-sonst-f"></div></div>
+        <div><label for="am-kaution">Kaution in €</label><input type="text" id="am-kaution" inputmode="decimal" value="7.500" aria-describedby="am-kaution-f"><div class="fehler" id="am-kaution-f"></div></div>
+        <div><label for="am-einr">Einrichtung in €</label><input type="text" id="am-einr" inputmode="decimal" value="30.000" aria-describedby="am-einr-f"><div class="fehler" id="am-einr-f"></div></div>
+        <div><label for="am-betten">Betten</label><input type="text" id="am-betten" inputmode="decimal" value="15" aria-describedby="am-betten-f"><div class="fehler" id="am-betten-f"></div></div>
+      </div>
+      <p class="klein">Preis, Belegung, variable Kosten und Abgaben wie oben. Untervermietung als Monteurzimmer muss der Mietvertrag ausdrücklich erlauben.</p>
+      <dl class="ergebnisse" id="am-ergebnis"></dl>
+      <p class="formel">Ergebnis = Umsatz − Abgaben − variable Kosten − Warmmiete − sonstige Fixkosten. Amortisation der Einrichtung = Einrichtung ÷ Ergebnis pro Monat. Startkapital = Kaution + Einrichtung.</p>
+    </div>
+  </form>
+
+  <div class="zwei">
+    <div class="karte">
+      <h3>Angebotspreise Bremen</h3>
+      <div class="tabelle-kasten karten-kasten">
+        <table class="karten" id="mz-preise"><thead><tr><th scope="col" style="width:30%">Gebiet</th><th scope="col">Beobachtung</th></tr></thead><tbody></tbody></table>
+      </div>
+      <p class="klein" id="mz-preise-quelle" style="margin-top:8px"></p>
+    </div>
+    <div class="karte">
+      <h3>Standorte Bremen (Orientierung)</h3>
+      <div class="tabelle-kasten karten-kasten">
+        <table class="karten" id="mz-standorte"><thead><tr><th scope="col" style="width:26%">Gebiet</th><th scope="col">Stadtteile</th><th scope="col">Merkmal</th></tr></thead><tbody></tbody></table>
+      </div>
+      <p class="klein" style="margin-top:8px">Aus der Präsentation (Folie 20), keine gemessene Nachfrage.</p>
+    </div>
+  </div>
+
+  <div class="karte">
+    <h3>Vor einer Monteurzimmer-Nutzung klären</h3>
+    <ul class="pruef">
+      <li><input type="checkbox" id="mzp-nutzung"><label for="mzp-nutzung">Genehmigte Nutzung: Beherbergung statt Wohnen braucht in der Regel eine Nutzungsänderung beim Bauamt</label></li>
+      <li><input type="checkbox" id="mzp-brand"><label for="mzp-brand">Brandschutz für die geplante Bettenzahl</label></li>
+      <li><input type="checkbox" id="mzp-wohnraum"><label for="mzp-wohnraum">Bremen: Wohnraumschutz (Zweckentfremdung von Wohnraum) prüfen</label></li>
+      <li><input type="checkbox" id="mzp-gewerbe"><label for="mzp-gewerbe">Gewerbeanmeldung und Meldepflichten für Gäste</label></li>
+      <li><input type="checkbox" id="mzp-citytax"><label for="mzp-citytax">Citytax: Gilt sie, und sind beruflich bedingte Übernachtungen befreit?</label></li>
+      <li><input type="checkbox" id="mzp-versicherung"><label for="mzp-versicherung">Versicherung für Beherbergungsbetrieb</label></li>
+    </ul>
+    <p class="klein" style="margin-top:8px">Die genauen Regeln sind noch nicht amtlich geprüft (Recherche 03 wird in Stufe 2 gegengelesen). Vor einer Entscheidung beim Bauamt und Steuerberater nachfragen.</p>
+  </div>
+</section>
+
+</main>
+<div id="tip" role="tooltip" hidden></div>
+
+<script>__THREE_JS__</script>
+<script src="daten/grest.js"></script>
+<script src="daten/portale.js"></script>
+<script src="daten/monteur_bremen.js"></script>
+<script src="daten/sanierung.js"></script>
+<script src="daten/recht.js"></script>
+<script src="daten/begriffe.js"></script>
+<script src="rechner.js"></script>
+<script src="grafik.js"></script>
+<script src="haus3d.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

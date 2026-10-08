@@ -1,0 +1,19 @@
+{
+  "_hinweis": "Einzige Stelle für Diagramm- und Statusfarben (Regel R024). bau.py erzeugt daraus die CSS-Variablen für hell und dunkel. c1 bis c3 sind die Diagrammfarben in fester Reihenfolge (Violett, Himmelblau, Himbeere; Nutzerwunsch 08.10.2026: kein Grün, kein Orange, außer Ampel 'gut'); nach jeder Änderung mit dem dataviz-Prüfskript (validate_palette.js --pairs all) gegen die Kartenfläche prüfen. Geprüft 08.10.2026: hell gegen #ffffff, dunkel gegen #241f2e, alle Prüfungen bestanden. Vorher (07.10.2026): Petrol #008b7f, Gold #b07d16, Blau #4a6fd1.",
+  "hell": {
+    "c1": "#6332a8",
+    "c2": "#1f9bd1",
+    "c3": "#d0567f",
+    "gut": "#1f7542",
+    "warn": "#8a6400",
+    "schlecht": "#b23b2b"
+  },
+  "dunkel": {
+    "c1": "#8a5cd6",
+    "c2": "#28a0d8",
+    "c3": "#d9628f",
+    "gut": "#5cc48a",
+    "warn": "#e0b84a",
+    "schlecht": "#ef8a7a"
+  }
+}

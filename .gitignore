@@ -1,0 +1,12 @@
+# Bleibt lokal (R004): Arbeitsmaterial, Recherche, Tests, Fotos, private Exporte
+.playwright/
+.playwright-cli/
+entwuerfe/
+recherche/
+tmp/
+LEARNINGS_webdesign.md
+merkliste_*.json
+__pycache__/
+# nicht mehr verwendete Schriften
+fonts/jetbrains-mono-latin-400-normal.woff2
+fonts/manrope-latin-300-normal.woff2
