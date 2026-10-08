@@ -122,6 +122,7 @@
     }
     if (window.GRAFIK) window.GRAFIK.versteckeTip();
     if (window.GRUNDRISS) window.GRUNDRISS.zeigt(ziel === 'grundriss');
+    if (window.KARTE) window.KARTE.zeigt(ziel === 'karte');
     zeichneGrafiken(); /* Breite ist erst messbar, wenn der Bereich sichtbar ist */
   }
   function zeigeBereich(ziel, fokus) {
@@ -1028,8 +1029,24 @@
     if (g === null || y === null || !isFinite(brutto) || brutto === 0) return null;
     return brutto >= g ? 'gruen' : brutto >= y ? 'gelb' : 'rot';
   }
+  /* Gebiet aus der Deutschlandkarte (karte.js): Ampel und Sterne des Landkreises; „top“ = Gebiet grün und Rendite-Ampel grün */
+  var STERN_KURZ = { werk: function (s) { return s.text.split(',')[0]; }, hochschule: function () { return 'Hochschulort'; }, pendler: function () { return 'Pendlerzentrum'; } };
+  function gebietHtml(g, top) {
+    if (!g) return '<div class="klein merk-gebiet">Gebiet: Ort nicht erkannt. Im Formular („Ändern“) den Landkreis wählen.</div>';
+    var name = { gut: 'gefragt', warn: 'mittel', schlecht: 'schwächer' }[g.ampel] || 'keine Daten';
+    return '<div class="merk-gebiet">' + (top ? '<span class="merk-top">★ Gefragtes Gebiet und gute Rendite</span><br>' : '') +
+      '<span class="ampel-punkt ' + (g.ampel || 'leer') + '" aria-hidden="true"></span>Gebiet ' + esc(name) + ': ' + esc(g.name) + (g.sicher ? '' : ' (vermutlich, bitte prüfen)') +
+      g.sterne.map(function (s) { return ' <span class="k-st ' + s.art + '" aria-hidden="true">★</span>' + esc(STERN_KURZ[s.art](s)); }).join('') +
+      ' <button type="button" class="k-zeige" data-karte="' + esc(g.ags) + '">auf der Karte</button>' +
+      '<div class="klein">Eigene Einordnung nach deinen Kartenregeln (Ebene ' + esc(g.ebene) + '), keine Kaufempfehlung.</div></div>';
+  }
   function zeigeMerkKarten() {
     var daten = liste.map(function (ob) { return { ob: ob, z: kennzahlen(ob) }; });
+    daten.forEach(function (d) {
+      d.g = window.KARTE ? window.KARTE.gebietFuer(d.ob) : null;
+      d.top = !!(d.g && d.g.ampel === 'gut' && d.ob.miete && d.z.v && ampelArt(d.z.v.bruttorendite) === 'gruen');
+    });
+    if ($('m-top-zuerst').checked) daten.sort(function (a, b) { return (b.top ? 1 : 0) - (a.top ? 1 : 0); });
     function werte(d) {
       var ob = d.ob, z = d.z, mitCf = ob.miete && z.k;
       return {
@@ -1073,6 +1090,7 @@
           (ob.flaeche ? ', ' + fmt0.format(ob.flaeche) + NB + 'm²' : '') + '</div>' +
         '<div class="satzchen">' + (cfArt ? '<span class="sprung">' + { gut: 'Ampel grün: ', warn: 'Ampel gelb: ', schlecht: 'Ampel rot: ' }[cfArt] + '</span>' : '') + esc(satz) + '</div>' +
         (art ? '<div class="klein"><span class="ampel ' + art + '">Rendite-Ampel ' + art.replace('ue', 'ü') + '</span> (Bruttorendite ' + schwelle + ')</div>' : '') +
+        gebietHtml(d.g, d.top) +
         '<dl>' +
           zeile('Kaufpreis', euro(ob.preis), 'preis', w) +
           (w.qm !== null ? zeile('Preis pro m²', euro(w.qm), 'qm', w) : '') +
@@ -1089,6 +1107,37 @@
         '</div></article>';
     }).join('');
   }
+
+  /* Häuser für die Karte (Punkte, Steckbrief) und neu zeichnen, wenn sich Kartenregeln ändern */
+  window.KARTE_HAEUSER = function () {
+    return liste.map(function (ob) {
+      var g = window.KARTE && window.KARTE.gebietFuer(ob);
+      if (!g) return null;
+      var z = kennzahlen(ob), b = ob.miete && z.v ? z.v.bruttorendite : null, a = b != null ? ampelArt(b) : null;
+      return { ags: g.ags, titel: ob.titel, brutto: b, art: { gruen: 'gut', gelb: 'warn', rot: 'schlecht' }[a] || null };
+    }).filter(Boolean);
+  };
+  window.KARTE_GEAENDERT = function () { if (liste.length) zeigeMerkKarten(); };
+  $('m-top-zuerst').addEventListener('change', zeigeMerkKarten);
+  $('m-karten').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-karte]');
+    if (!b || !window.KARTE) return;
+    zeigeBereich('karte', true);
+    window.KARTE.waehle(b.getAttribute('data-karte'));
+  });
+  /* Landkreis-Auswahl im Formular und Hinweis, was aus dem Ort erkannt wurde */
+  if (window.KARTE) {
+    $('m-kreis').innerHTML = '<option value="">automatisch aus dem Ort</option>' + window.KARTE.kreisListe().map(function (k) {
+      return '<option value="' + esc(k.ags) + '">' + esc(k.name + ' (' + k.land + ')') + '</option>';
+    }).join('');
+  }
+  function kreisHinweis() {
+    var h = $('m-kreis-hinweis');
+    if (!window.KARTE || $('m-kreis').value) { h.textContent = ''; return; }
+    var g = window.KARTE.gebietFuer({ ort: $('m-ort').value, land: $('m-land').value });
+    h.textContent = !$('m-ort').value.trim() ? '' : g ? 'Erkannt: ' + g.name + (g.sicher ? '' : ' (mehrere Orte heißen so, bitte prüfen)') : 'Ort nicht erkannt, bitte Landkreis wählen.';
+  }
+  ['m-ort', 'm-land', 'm-kreis'].forEach(function (id) { $(id).addEventListener('input', kreisHinweis); $(id).addEventListener('change', kreisHinweis); });
 
   function zeigeMerkliste() {
     var tb = $('m-tabelle').querySelector('tbody');
@@ -1121,7 +1170,7 @@
     }).join('');
   }
 
-  var mFelder = ['m-titel', 'm-ort', 'm-land', 'm-preis', 'm-flaeche', 'm-zimmer', 'm-miete', 'm-makler', 'm-betten', 'm-we', 'm-baujahr', 'm-grund', 'm-brw', 'm-link', 'm-notiz'];
+  var mFelder = ['m-titel', 'm-ort', 'm-land', 'm-kreis', 'm-preis', 'm-flaeche', 'm-zimmer', 'm-miete', 'm-makler', 'm-betten', 'm-we', 'm-baujahr', 'm-grund', 'm-brw', 'm-link', 'm-notiz'];
   var mZahlen = [['m-preis', 'preis'], ['m-flaeche', 'flaeche'], ['m-zimmer', 'zimmer'], ['m-miete', 'miete'], ['m-makler', 'makler'], ['m-betten', 'betten'],
     ['m-we', 'we'], ['m-baujahr', 'baujahr'], ['m-grund', 'grund'], ['m-brw', 'brw']];
   function formularLeeren() {
@@ -1213,6 +1262,7 @@
       link: link, notiz: $('m-notiz').value.trim(),
       geaendert: new Date().toISOString().slice(0, 10)
     };
+    if ($('m-kreis').value) ob.kreis = $('m-kreis').value; /* von Hand gewählter Landkreis, sonst aus dem Ort */
     var war = bearbeiteId;
     if (war) liste = liste.map(function (x) { return x.id === war ? ob : x; });
     else liste.push(ob);
@@ -1237,6 +1287,7 @@
         $(p[0]).value = ob[p[1]] ? (p[1] === 'baujahr' ? String(ob[p[1]]) : String(ob[p[1]]).replace('.', ',')) : '';
       });
       $('m-link').value = ob.link || ''; $('m-notiz').value = ob.notiz || '';
+      $('m-kreis').value = ob.kreis || ''; kreisHinweis();
       $('m-form-titel').textContent = 'Haus ändern: ' + ob.titel;
       $('m-speichern').textContent = 'Änderung speichern';
       $('m-neu').open = true;

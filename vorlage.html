@@ -261,6 +261,7 @@ __PALETTE_CSS__
   .start-kacheln { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
   /* allein stehende letzte Kachel über die ganze Breite statt einer Lücke */
   .start-kacheln > :last-child:nth-child(3n+1) { grid-column: 1 / -1; }
+  .start-kacheln > :last-child:nth-child(3n+2) { grid-column: span 2; }
   .start-kachel { display: flex; flex-direction: column; gap: 10px; text-align: left; background: var(--karte); color: var(--text); border: 1px solid var(--linie); border-top: 10px solid var(--f); border-radius: 14px; padding: 22px; cursor: pointer; font: inherit; transition: transform .2s ease, box-shadow .2s ease; }
   .start-kachel:hover { transform: translateY(-4px); box-shadow: var(--schatten); }
   .start-kachel > svg { width: 42px; height: 42px; color: var(--f); }
@@ -377,7 +378,60 @@ __PALETTE_CSS__
   .g-check label { margin: 0; color: var(--text); }
   .g-frage { background: var(--akzent-flaeche); border-radius: 14px; padding: 14px 16px; margin-top: 12px; }
   .g-frage[hidden] { display: none; }
+  /* Deutschlandkarte */
+  .k-buehne { height: min(82vh, 820px); }
+  #k-karte { display: block; width: 100%; height: 100%; touch-action: none; user-select: none; cursor: grab; }
+  #k-karte .k-flaeche { stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; fill-opacity: .78; stroke-opacity: .78; cursor: pointer; }
+  #k-karte .k-flaeche:hover { fill-opacity: 1; stroke-opacity: 1; }
+  #k-karte .k-grenze { fill: none; stroke: var(--karte); stroke-width: .7; stroke-opacity: .7; vector-effect: non-scaling-stroke; }
+  /* Flächen: Ampelfarben der Palette, mit der Kartenfarbe aufgehellt (Gelb sonst bräunlich) */
+  .k-buehne { --k-gut: color-mix(in srgb, var(--gut) 70%, var(--karte)); --k-warn: color-mix(in srgb, var(--warn) 60%, var(--warn-fl)); --k-schlecht: color-mix(in srgb, var(--schlecht) 72%, var(--karte)); }
+  #k-karte .k-flaeche.gut { fill: var(--k-gut); stroke: var(--k-gut); }
+  #k-karte .k-flaeche.warn { fill: var(--k-warn); stroke: var(--k-warn); }
+  #k-karte .k-flaeche.schlecht { fill: var(--k-schlecht); stroke: var(--k-schlecht); }
+  .ampel-punkt.gut { background: var(--gut); } .ampel-punkt.warn { background: var(--warn); } .ampel-punkt.schlecht { background: var(--schlecht); }
+  #k-karte .k-flaeche.leer, .ampel-punkt.leer { fill: var(--linie2); stroke: var(--linie2); background: var(--linie2); }
+  #k-karte .k-land { fill: none; stroke: var(--text); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+  #k-karte .k-auswahl { fill: none; stroke: var(--akzent); stroke-width: 4; vector-effect: non-scaling-stroke; pointer-events: none; }
+  #k-karte .k-name { fill: var(--text); font-family: var(--sans); font-weight: 700; text-anchor: middle; paint-order: stroke; stroke: var(--karte); stroke-linejoin: round; pointer-events: none; }
+  #k-karte .k-stern { stroke: var(--karte); stroke-width: 1.2; vector-effect: non-scaling-stroke; cursor: pointer; }
+  .k-stern.werk, .k-st.werk { fill: var(--c3); color: var(--c3); }
+  .k-stern.hochschule, .k-st.hochschule { fill: var(--c1); color: var(--c1); }
+  .k-stern.pendler, .k-st.pendler { fill: var(--c2); color: var(--c2); }
+  #k-karte .k-portal { fill: var(--text); fill-opacity: .85; stroke: var(--karte); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  #k-karte .k-haus { stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; }
+  #k-karte .k-haus.gut { fill: var(--gut); } #k-karte .k-haus.warn { fill: var(--warn); } #k-karte .k-haus.schlecht { fill: var(--schlecht); } #k-karte .k-haus.leer { fill: var(--karte); }
+  .ampel-punkt { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+  .k-st { font-size: 1.05rem; line-height: 1; }
+  .k-legende { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .92rem; color: var(--leise); margin-top: 6px; }
+  .k-legende span { display: inline-flex; align-items: center; gap: 4px; }
+  .k-raute { display: inline-block; width: 9px; height: 9px; background: var(--text); transform: rotate(45deg); margin-right: 4px; }
+  .k-haus-punkt { display: inline-block; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--text); margin-right: 4px; }
+  .k-steckbrief h4 { font-size: 1.15rem; }
+  .k-ampel-satz { font-weight: 700; padding: 8px 10px; border-radius: 10px; background: var(--leer-fl); }
+  .k-ampel-satz.gut { background: var(--gut-fl); } .k-ampel-satz.warn { background: var(--warn-fl); } .k-ampel-satz.schlecht { background: var(--schlecht-fl); }
+  .k-sterne { list-style: none; padding: 0; margin: 8px 0; font-size: .95rem; }
+  .k-sterne li { margin: 4px 0; }
+  .k-eb { width: 100%; border-collapse: collapse; font-size: .92rem; margin: 6px 0 10px; }
+  .k-eb th { text-align: left; font-weight: 600; padding: 3px 8px 3px 0; white-space: nowrap; width: 1%; }
+  .k-balken { display: inline-block; width: calc(100% - 40px); max-width: 160px; height: 9px; border-radius: 5px; background: var(--linie); vertical-align: middle; overflow: hidden; }
+  .k-balken span { display: block; height: 100%; }
+  .k-balken .gut { background: var(--gut); } .k-balken .warn { background: var(--warn); } .k-balken .schlecht { background: var(--schlecht); }
+  .k-zahlen { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; font-size: .92rem; font-variant-numeric: tabular-nums; }
+  .k-zahlen dt { color: var(--leise); } .k-zahlen dd { margin: 0; text-align: right; font-weight: 600; }
+  .k-sort { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: inherit; cursor: pointer; text-align: inherit; }
+  .k-zeige { background: none; border: 0; padding: 0; font: inherit; color: var(--akzent-text); text-decoration: underline; cursor: pointer; text-align: left; }
+  #k-tabelle tr.gewaehlt { background: var(--akzent-flaeche); }
+  #k-streu .k-punkt { stroke: var(--karte); stroke-width: .8; cursor: pointer; }
+  #k-streu .k-punkt.gut { fill: var(--gut); } #k-streu .k-punkt.warn { fill: var(--warn); } #k-streu .k-punkt.schlecht { fill: var(--schlecht); } #k-streu .k-punkt.leer { fill: var(--linie2); }
+  #k-streu .k-punkt.gewaehlt { stroke: var(--text); stroke-width: 2.5; }
+  #k-streu .k-quadrant { fill: var(--gut-fl); }
+  #k-streu .k-qtext { fill: var(--leise); font-size: 12px; }
+  .merk-gebiet { font-size: .95rem; }
+  .merk-gebiet .k-st { margin-left: 2px; }
+  .merk-top { display: inline-block; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--gut-fl); color: var(--text); border: 2px solid var(--gut); }
   @media (max-width: 1000px) {
+    .k-buehne { height: min(70vh, 620px); }
     .g-flaeche { grid-template-columns: minmax(0, 1fr); }
     .g-buehne { height: min(62vh, 520px); }
   }
@@ -386,7 +440,7 @@ __PALETTE_CSS__
     .hero { grid-template-columns: minmax(0, 1fr); }
     .hero .szene { max-width: 480px; }
     .start-kacheln { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .start-kacheln > :last-child:nth-child(3n+1) { grid-column: auto; }
+    .start-kacheln > :last-child:nth-child(3n+1), .start-kacheln > :last-child:nth-child(3n+2) { grid-column: auto; }
     .start-kacheln > :last-child:nth-child(2n+1) { grid-column: 1 / -1; }
   }
   /* Handybreite: Tabellen als Karten */
@@ -420,6 +474,7 @@ __PALETTE_CSS__
   <symbol id="i-paragraf" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M31 11c-1-3-4-5-8-5-5 0-8 3-8 6 0 8 18 6 18 15 0 3-2 5-5 6M17 37c1 3 4 5 8 5 5 0 8-3 8-6 0-8-18-6-18-15 0-3 2-5 5-6"/></symbol>
   <symbol id="i-bett" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12v28M5 32h38v8M5 26h38v6"/><rect x="9" y="18" width="10" height="8" rx="3"/></symbol>
   <symbol id="i-grundriss" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7" width="38" height="34" rx="2"/><path d="M22 7v13M22 27v14M22 24h21M5 24h9"/><path d="M30 33h7"/></symbol>
+  <symbol id="i-karte" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l12-5 14 5 12-5v31l-12 5-14-5-12 5z"/><path d="M17 6v31M31 11v31"/></symbol>
   <symbol id="i-menue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
   <symbol id="i-sonne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
   <symbol id="i-mond" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
@@ -439,6 +494,7 @@ __PALETTE_CSS__
         <nav class="menue-liste" aria-label="Bereiche">
           <button type="button" class="bereich-knopf" id="tab-uebersicht" data-ziel="uebersicht" style="--f:var(--akzent)"><svg aria-hidden="true"><use href="#i-haus"/></svg>Startseite</button>
           <button type="button" class="bereich-knopf" id="tab-suche" data-ziel="suche" style="--f:var(--f1)"><svg aria-hidden="true"><use href="#i-lupe"/></svg>Haus suchen</button>
+          <button type="button" class="bereich-knopf" id="tab-karte" data-ziel="karte" style="--f:var(--f2)"><svg aria-hidden="true"><use href="#i-karte"/></svg>Wo ist Wohnen gefragt?</button>
           <button type="button" class="bereich-knopf" id="tab-merkliste" data-ziel="merkliste" style="--f:var(--f1)"><svg aria-hidden="true"><use href="#i-stern"/></svg>Meine Merkliste</button>
           <button type="button" class="bereich-knopf" id="tab-rechner" data-ziel="rechner" style="--f:var(--f2)"><svg aria-hidden="true"><use href="#i-rechner"/></svg>Kann ich mir das leisten?</button>
           <button type="button" class="bereich-knopf" id="tab-wert" data-ziel="wert" style="--f:var(--f3)"><svg aria-hidden="true"><use href="#i-waage"/></svg>Was ist das Haus wert?</button>
@@ -488,6 +544,7 @@ __PALETTE_CSS__
   <h2 class="frage">Was willst du tun?</h2>
   <div class="start-kacheln">
     <button type="button" class="start-kachel" data-ziel="suche" style="--f:var(--f1)"><svg aria-hidden="true"><use href="#i-lupe"/></svg><strong>Haus finden</strong><span class="text">In den großen Portalen suchen und gute Angebote auf deine Merkliste setzen.</span><span class="los">Suchen und merken →</span></button>
+    <button type="button" class="start-kachel" data-ziel="karte" style="--f:var(--f2)"><svg aria-hidden="true"><use href="#i-karte"/></svg><strong>Wo ist Wohnen gefragt?</strong><span class="text">Deutschlandkarte mit Ampel je Landkreis, Sternen für Hochschulen, Werke und Pendlerzentren.</span><span class="los">Karte ansehen →</span></button>
     <button type="button" class="start-kachel" data-ziel="rechner" style="--f:var(--f2)"><svg aria-hidden="true"><use href="#i-rechner"/></svg><strong>Kann ich mir das leisten?</strong><span class="text">Kaufpreis, Kredit und Miete eingeben. Du siehst sofort, ob die Miete die Rate trägt.</span><span class="los">Jetzt rechnen →</span></button>
     <button type="button" class="start-kachel" data-ziel="wert" style="--f:var(--f3)"><svg aria-hidden="true"><use href="#i-waage"/></svg><strong>Was ist das Haus wert?</strong><span class="text">Grob schätzen, ob der Preis zur Miete und zum Grundstück passt.</span><span class="los">Wert schätzen →</span></button>
     <button type="button" class="start-kachel" data-ziel="umbau" style="--f:var(--f4)"><svg aria-hidden="true"><use href="#i-werkzeug"/></svg><strong>Umbauen und renovieren</strong><span class="text">Was kosten Bad, Dach oder Heizung, und wie viel Miete bringt es zurück?</span><span class="los">Umbau planen →</span></button>
@@ -612,6 +669,7 @@ __PALETTE_CSS__
         <div><label for="m-titel">Name, damit du es wiedererkennst</label><input type="text" id="m-titel" placeholder="z. B. MFH Walle, 4 Wohnungen" aria-describedby="m-titel-f"><div class="fehler" id="m-titel-f"></div></div>
         <div><label for="m-ort">Ort</label><input type="text" id="m-ort"></div>
         <div><label for="m-land">Bundesland</label><select id="m-land"></select></div>
+        <div><label for="m-kreis">Landkreis (für die Gebietsampel)</label><select id="m-kreis"><option value="">automatisch aus dem Ort</option></select><div class="klein" id="m-kreis-hinweis" aria-live="polite"></div></div>
         <div><label for="m-preis">Kaufpreis in €</label><input type="text" id="m-preis" inputmode="decimal" aria-describedby="m-preis-f"><div class="fehler" id="m-preis-f"></div></div>
         <div><label for="m-miete">Kaltmiete pro Monat in € (Ist oder Schätzung)</label><input type="text" id="m-miete" inputmode="decimal" aria-describedby="m-miete-f"><div class="fehler" id="m-miete-f"></div></div>
         <div><label for="m-flaeche">Wohnfläche in m²</label><input type="text" id="m-flaeche" inputmode="decimal" aria-describedby="m-flaeche-f"><div class="fehler" id="m-flaeche-f"></div></div>
@@ -638,6 +696,7 @@ __PALETTE_CSS__
   </details>
   <div class="meldung" id="m-meldung" role="status" aria-live="polite" style="margin-bottom:14px"></div>
 
+  <div class="g-check" style="margin:0 0 12px"><input type="checkbox" id="m-top-zuerst"><label for="m-top-zuerst">Häuser mit „★ Gefragtes Gebiet und gute Rendite“ zuerst zeigen</label></div>
   <div class="merk-karten" id="m-karten"></div>
   <p class="klein" id="m-band-regel">Das Farbband oben auf jeder Karte folgt der Ampel im Rechner: grün, wenn nach der Rate Geld übrig bleibt; gelb, wenn Geld fehlt, die Miete aber die Zinsen deckt; rot, wenn sie nicht einmal die Zinsen deckt (Kredit wie Angebot A). Die Rendite-Ampel darunter richtet sich nur nach der Bruttorendite. Beides sind eigene Einordnungen, keine Kaufempfehlung.</p>
   <p class="hinweis" id="m-leer">Noch keine Häuser auf der Merkliste. Klick oben auf „+ Haus hinzufügen“ oder such zuerst unter „Haus suchen“.</p>
@@ -1244,6 +1303,95 @@ __PALETTE_CSS__
   </div>
 </section>
 
+<!-- DEUTSCHLANDKARTE -->
+<section id="karte" aria-label="Wo ist Wohnen gefragt?" hidden>
+  <header class="bereich-kopf" style="--f:var(--f2)">
+    <svg aria-hidden="true"><use href="#i-karte"/></svg>
+    <div>
+      <p class="etikett">Deutschlandkarte, 400 Landkreise</p>
+      <h2>Wo ist Wohnen gefragt?</h2>
+      <p class="lead">Grün heißt: Hier sprechen die Zahlen für viel Nachfrage. Gelb ist Mittelfeld, rot schwächer. Sterne zeigen Hochschulorte, große Werke und Pendlerzentren. Die Farben sind eine eigene Einordnung nach Regeln, die du unten selbst einstellst. Sie sind keine Vorhersage und keine Kaufempfehlung.</p>
+    </div>
+  </header>
+
+  <div class="karte">
+    <div class="g-leiste">
+      <div class="g-gruppe" role="group" aria-label="Ebene"><span>Ebene:</span><span id="k-ebenen" class="g-gruppe"></span></div>
+      <div class="g-gruppe" role="group" aria-label="Ansicht"><span>Ansicht:</span><button type="button" class="chip" id="k-ansicht-2d" aria-pressed="true">Karte</button><button type="button" class="chip" id="k-ansicht-3d" aria-pressed="false">3D-Säulen</button></div>
+    </div>
+    <p class="klein" id="k-ebene-text" style="margin:-4px 0 12px"></p>
+    <div class="g-flaeche">
+      <div class="g-buehne k-buehne" id="k-buehne">
+        <svg id="k-karte" role="img" aria-label="Deutschlandkarte mit Ampelfarben je Gebiet. Ziehen verschiebt, Plus und Minus zoomen. Die gleichen Zahlen stehen in der Tabelle unten."></svg>
+        <figure class="szene g-szene" id="k-szene" aria-label="Dreidimensionale Säulenkarte, mit der Maus drehbar" hidden>
+          <canvas id="k-3d"></canvas>
+          <div class="ersatz" id="k-3d-ersatz" hidden>3D-Ansicht nicht verfügbar (WebGL ist in diesem Browser aus). Die flache Karte funktioniert trotzdem.</div>
+          <figcaption class="szenen-text"><span>ziehen zum Drehen, Strg + Mausrad zoomt</span></figcaption>
+        </figure>
+        <div class="g-zoom" id="k-zoom">
+          <button type="button" class="chip klein" id="k-zoom-aus" aria-label="Verkleinern">−</button>
+          <button type="button" class="chip klein" id="k-zoom-ein" aria-label="Vergrößern">+</button>
+          <button type="button" class="chip" id="k-zoom-passt">Ganz Deutschland</button>
+        </div>
+      </div>
+      <div class="g-seite">
+        <div class="g-panel">
+          <label for="k-suche">Ort oder Landkreis suchen</label>
+          <div style="display:flex;gap:8px"><input type="text" id="k-suche" placeholder="z. B. Delmenhorst oder 28217"><button type="button" class="knopf" id="k-suche-los">Zeigen</button></div>
+          <div class="meldung" id="k-suche-meldung" role="status" aria-live="polite"></div>
+        </div>
+        <div class="g-panel k-steckbrief" id="k-steckbrief" aria-live="polite"></div>
+      </div>
+    </div>
+    <p class="klein" id="k-zoom-hinweis" style="margin-top:10px"></p>
+    <div class="k-legende">
+      <span><i class="ampel-punkt gut"></i>gefragt</span><span><i class="ampel-punkt warn"></i>mittel</span><span><i class="ampel-punkt schlecht"></i>schwächer</span><span><i class="ampel-punkt leer"></i>keine Daten</span>
+      <span><b class="k-st werk">★</b>Großes Werk</span><span><b class="k-st hochschule">★</b>Hochschulort (ab 20.000 Studierenden)</span><span><b class="k-st pendler">★</b>Pendlerzentrum (ab 100.000 Einpendlern)</span>
+      <span><i class="k-raute"></i>Großstadt mit Portalpreis</span><span><i class="k-haus-punkt"></i>Dein Haus aus der Merkliste</span>
+    </div>
+  </div>
+
+  <div class="karte">
+    <h3>Regeln einstellen</h3>
+    <p class="klein">Jede Kennzahl wird als Rang verglichen: 100 heißt besser als alle anderen Kreise, 0 schlechter als alle. Die Gesamtampel mischt die Ebenen mit diesen Gewichten (0 = zählt nicht).</p>
+    <div class="raster" id="k-gewichte"></div>
+    <div class="raster" style="margin-top:14px">
+      <div><label for="k-gruen">Grün ab Wert <output id="k-gruen-w">66</output></label><input type="range" id="k-gruen" min="1" max="100" step="1" value="66"></div>
+      <div><label for="k-gelb">Gelb ab Wert <output id="k-gelb-w">33</output></label><input type="range" id="k-gelb" min="0" max="99" step="1" value="33"></div>
+    </div>
+    <div class="g-gruppe" role="group" aria-label="Auf der Karte zeigen" style="margin-top:16px;gap:14px">
+      <span>Zeigen:</span>
+      <span class="g-check"><input type="checkbox" id="k-s-werk"><label for="k-s-werk">Große Werke</label></span>
+      <span class="g-check"><input type="checkbox" id="k-s-hochschule"><label for="k-s-hochschule">Hochschulorte</label></span>
+      <span class="g-check"><input type="checkbox" id="k-s-pendler"><label for="k-s-pendler">Pendlerzentren</label></span>
+      <span class="g-check"><input type="checkbox" id="k-s-portal"><label for="k-s-portal">Portalpreise</label></span>
+      <span class="g-check"><input type="checkbox" id="k-s-haeuser"><label for="k-s-haeuser">Meine Häuser</label></span>
+    </div>
+  </div>
+
+  <div class="karte">
+    <h3>Alle Gebiete als Tabelle</h3>
+    <div class="raster" style="margin-bottom:12px">
+      <div><label for="k-filter">Name enthält</label><input type="text" id="k-filter" placeholder="z. B. Oldenburg"></div>
+      <div><label for="k-land">Land</label><select id="k-land"></select></div>
+      <div><label for="k-amp">Ampel</label><select id="k-amp"><option value="">Alle</option><option value="gut">nur grün</option><option value="warn">nur gelb</option><option value="schlecht">nur rot</option></select></div>
+    </div>
+    <p class="klein" id="k-anzahl"></p>
+    <div class="tabelle-kasten karten-kasten" style="max-height:480px"><table class="karten" id="k-tabelle"><thead></thead><tbody></tbody></table></div>
+  </div>
+
+  <div class="karte">
+    <h3>Nachfrage gegen Miete im Verhältnis zum Bodenpreis</h3>
+    <p class="klein">Jeder Punkt ist ein Landkreis. Oben rechts liegen Gebiete mit viel Nachfrage, in denen die Miete im Verhältnis zum Bodenpreis hoch ist. Echte Kaufpreise für Häuser gibt es je Landkreis nicht frei, deshalb ist das nur ein grober Anzeiger. Die echte Rendite deiner Häuser steht in der Merkliste.</p>
+    <figure class="diagramm" id="k-streu"></figure>
+  </div>
+
+  <div class="karte">
+    <p class="klein">Grenzen: Die Zahlen stammen aus verschiedenen Jahren (Zensus 2022, INKAR 2022 bis 2024), jede Zahl nennt ihr Jahr. Ein Landkreis ist groß; innerhalb eines Kreises kann es sehr verschieden sein. Die Portalpreise sind Angebotswerte eines Maklerportals, keine amtlichen Preise. Mercedes-Benz und weitere Werke fehlen noch, weil ihre Konzernseiten den Abruf gesperrt haben. Die Ampel ist eine eigene Einordnung, keine Prognose und keine Kaufempfehlung.</p>
+    <p class="klein" id="k-quellen"></p>
+  </div>
+</section>
+
 <!-- PRÜFLISTE -->
 <section id="pruefliste" aria-label="Schritt für Schritt zum Kauf" hidden>
   <header class="bereich-kopf" style="--f:var(--f5)">
@@ -1527,11 +1675,17 @@ __PALETTE_CSS__
 <script src="daten/begriffe.js"></script>
 <script src="daten/moebel.js"></script>
 <script src="daten/beispielhaus.js"></script>
+<script src="daten/karte_geo.js"></script>
+<script src="daten/karte_werte.js"></script>
+<script src="daten/karte_werke.js"></script>
+<script src="daten/karte_orte.js"></script>
 <script src="rechner.js"></script>
 <script src="grafik.js"></script>
 <script src="haus3d.js"></script>
 <script src="grundriss3d.js"></script>
 <script src="grundriss.js"></script>
+<script src="karte3d.js"></script>
+<script src="karte.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

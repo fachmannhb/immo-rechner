@@ -411,7 +411,40 @@
     return w;
   }
 
+  /* ---------- Deutschlandkarte: Kennzahlen vergleichbar machen und zur Ampel mischen ----------
+     rang(werte, hochIstGut): je Wert der Anteil der übrigen Werte, die schlechter sind, 0 bis 100
+     (Gleichstand zählt halb). Fehlende Werte (null) bleiben null und zählen nicht mit. */
+  function rang(werte, hochIstGut) {
+    var da = werte.filter(function (w) { return w != null && isFinite(w); });
+    var n = da.length;
+    return werte.map(function (w) {
+      if (w == null || !isFinite(w)) return null;
+      if (n < 2) return 50;
+      var schlechter = 0, gleich = 0;
+      da.forEach(function (x) { if (x === w) gleich++; else if (hochIstGut ? x < w : x > w) schlechter++; });
+      return (schlechter + (gleich - 1) / 2) / (n - 1) * 100;
+    });
+  }
+  /* gesamtwert({ebene: rang}, {ebene: gewicht}): gewichteter Mittelwert der vorhandenen Ränge;
+     null, wenn keine gewichtete Ebene einen Wert hat. */
+  function gesamtwert(raenge, gewichte) {
+    var s = 0, g = 0;
+    Object.keys(gewichte).forEach(function (k) {
+      var r = raenge[k], w = zahl(gewichte[k]);
+      if (r != null && w > 0) { s += r * w; g += w; }
+    });
+    return g > 0 ? s / g : null;
+  }
+  /* ampelVon(wert, gruenAb, gelbAb): 'gut' | 'warn' | 'schlecht' | null */
+  function ampelVon(wert, gruenAb, gelbAb) {
+    if (wert == null) return null;
+    return wert >= zahl(gruenAb) ? 'gut' : (wert >= zahl(gelbAb) ? 'warn' : 'schlecht');
+  }
+
   var api = {
+    rang: rang,
+    gesamtwert: gesamtwert,
+    ampelVon: ampelVon,
     anzeigeLesen: anzeigeLesen,
     afaSatz: afaSatz,
     langfrist: langfrist,
