@@ -4,7 +4,9 @@ Eine lokale Webseite zum Suchen, Vergleichen, Durchrechnen und Kaufen von Immobi
 
 Aufbau seit 08.10.2026: Startseite „Was willst du tun?“ mit sieben Kacheln und einer kleinen Extra-Kachel (Monteurzimmer), alle Bereiche zusätzlich über „Alle Bereiche“ oben rechts. Der Rechner hat vier Schritte und zeigt oben das Ergebnis als Satz mit Ampel (eigene Einordnung, keine Empfehlung). Fachbegriffe haben ein (?) mit Erklärung in einfacher Sprache. Profi-Teile (Formeln, Tilgungsplan, Sachwert) sind eingeklappt. Farben: Violett und Blau, hell und dunkel (Knopf mit Sonne oder Halbmond).
 
-Bereich „Grundriss und Einrichtung“ (seit 08.10.2026): Grundrissbild aus dem Exposé laden, Maßstab an einer bekannten Strecke festlegen, Räume nachzeichnen (Rechteck, Ecke für Ecke oder mit Maßen), Möbel und Umbau-Teile hineinstellen, Ansicht von oben oder in 3D, mehrere Etagen. Ergebnis: Wohnfläche nach WoFlV §§ 2 und 4, Nutzfläche (Keller, Garage, separat vermietbar), Kostenliste und Schlafplätze je Zimmer; Wohnfläche und Summe lassen sich in den Rechner übernehmen. Der Plan wird im Browser gespeichert (Schlüssel `immo-grundriss`) und kann als Datei gesichert werden.
+Bereich „Grundriss und Einrichtung“ (seit 08.10.2026): Grundrissbild aus dem Exposé laden, Maßstab an einer bekannten Strecke festlegen, Räume nachzeichnen (Rechteck, Ecke für Ecke oder mit Maßen), Möbel und Umbau-Teile hineinstellen, Ansicht von oben oder in 3D, mehrere Etagen. Ergebnis: Wohnfläche nach WoFlV §§ 2 und 4, Nutzfläche (Keller, Garage, separat vermietbar), Kostenliste und Schlafplätze je Zimmer; Wohnfläche und Summe lassen sich in den Rechner übernehmen. Der Plan wird im Browser gespeichert (Schlüssel `immo-grundriss`) und kann als Datei gesichert werden. Der Knopf „Beispielhaus laden“ trägt ein erfundenes Haus ein (`daten/beispielhaus.js`: 6 Zimmer auf zwei Etagen, Keller, Garage, eingerichtet).
+
+Merkliste „Anzeige einfügen“ (seit 08.10.2026): Text einer Portalanzeige (Strg+A, Strg+C) und Link einfügen, „Daten herauslesen“ füllt Kaufpreis, Wohnfläche, Zimmer, Grundstück, Baujahr, Miete, Wohnungen, Provision und Ort ins Formular; gespeichert wird erst nach Prüfung. Nur mit dem Link geht es nicht: Eine Webseite darf fremde Portalseiten nicht abrufen. Geprüft an nachgebauten Texten (ImmoScout-, Immowelt-, Kleinanzeigen-Aufbau) und an einer echten Kleinanzeigen-Anzeige.
 
 ## Starten
 
@@ -45,6 +47,7 @@ Für den privaten Link: `python -I -X utf8 tmp/artifact_bauen.py <ziel.html>` un
 ## Prüfen
 
     node tmp/rechner_test.js
+    node tmp/anzeige_test.js
     powershell -NoProfile -File tmp\pruef_seite.ps1 -Fotos
     powershell -NoProfile -File tmp\bedien_test.ps1
     powershell -NoProfile -File tmp\grundriss_test.ps1

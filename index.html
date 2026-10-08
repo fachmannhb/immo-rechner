@@ -599,8 +599,19 @@
   </header>
 
   <details class="karte" id="m-neu">
-    <summary id="m-form-titel">+ Haus hinzufügen</summary>
+    <summary id="m-form-titel">+ Haus hinzufügen (auch per Anzeige einfügen)</summary>
     <form id="m-form" novalidate style="margin-top:12px">
+      <div class="g-panel" id="m-anzeige" style="margin-bottom:18px">
+        <h4>Schneller: Anzeige einfügen</h4>
+        <p>Öffne die Anzeige im Portal, drücke dort <b>Strg+A</b> (alles markieren) und <b>Strg+C</b> (kopieren). Hier ins große Feld klicken und <b>Strg+V</b> drücken. Am Handy: lange auf den Text tippen, „Alles auswählen“, „Kopieren“, hier „Einfügen“. Die Seite liest die Zahlen heraus und trägt sie unten ein. Bitte danach alles prüfen.</p>
+        <div class="raster">
+          <div style="grid-column: 1 / -1"><label for="m-anzeige-link">Link zur Anzeige (aus der Adresszeile kopieren)</label><input type="url" id="m-anzeige-link" placeholder="https://…"></div>
+          <div style="grid-column: 1 / -1"><label for="m-anzeige-text">Text der Anzeige</label><textarea id="m-anzeige-text" rows="4" placeholder="Hier den kopierten Text einfügen"></textarea></div>
+        </div>
+        <div class="knopfreihe"><button type="button" class="knopf" id="m-anzeige-lesen">Daten herauslesen</button></div>
+        <div class="meldung" id="m-anzeige-meldung" role="status" aria-live="polite"></div>
+        <p class="klein" style="margin:8px 0 0">Der Text bleibt auf deinem Gerät und wird nach dem Herauslesen nicht gespeichert. Grundriss-Bilder aus der Anzeige speicherst du per Rechtsklick und lädst sie unter „Grundriss und Einrichtung“.</p>
+      </div>
       <div class="raster">
         <div><label for="m-titel">Name, damit du es wiedererkennst</label><input type="text" id="m-titel" placeholder="z. B. MFH Walle, 4 Wohnungen" aria-describedby="m-titel-f"><div class="fehler" id="m-titel-f"></div></div>
         <div><label for="m-ort">Ort</label><input type="text" id="m-ort"></div>
@@ -2179,7 +2190,64 @@ window.DATEN.beispielhaus = {
     return { einrichtung: e, umbau: u, summe: e + u };
   }
 
+  /* ---------- Anzeige einfügen: Werte aus kopiertem Anzeigentext lesen ----------
+     Der Text kommt aus Strg+A/Strg+C auf einer Portalseite; Beschriftung und Wert stehen dort
+     oft in getrennten Zeilen („Kaufpreis\n349.000 €“). Gesucht wird die erste Zahl kurz nach der
+     Beschriftung, bei Einheiten nur mit passender Einheit. Ergebnis wird immer zum Prüfen angezeigt. */
+  var ZAHL = '(\\d{1,3}(?:[.\\s\\u00a0]\\d{3})+(?:,\\d+)?|\\d+(?:[.,]\\d+)?)';
+  function zahlAusText(s) {
+    return leseZahl(String(s).replace(/[\s\u00a0]/g, function () { return '.'; }));
+  }
+  function nachBeschriftung(text, beschriftungen, einheit, abstand) {
+    for (var i = 0; i < beschriftungen.length; i++) {
+      var re = new RegExp(beschriftungen[i] + '[^\\d\\n]{0,' + (abstand || 30) + '}\\n?[^\\d\\n]{0,20}' + ZAHL + '\\s*' + (einheit || ''), 'i');
+      var m = re.exec(text);
+      if (m) { var n = zahlAusText(m[1]); if (n != null) return { wert: n, treffer: m[0] }; }
+    }
+    return null;
+  }
+  function anzeigeLesen(text) {
+    var t = String(text || '').replace(/\r/g, '').replace(/[ \t\u00a0]+/g, ' ');
+    var w = {}, x;
+    var EURO = '(?:€|EUR|Euro)', QM = '(?:m²|m2|qm)';
+    x = nachBeschriftung(t, ['Kaufpreis', 'Preis(?![ \\t]*(?:/|pro|je)[ \\t]*m)'], EURO);
+    if (x && x.wert >= 10000) w.preis = x.wert;
+    else {
+      /* Kleinanzeigen: Preis ohne Beschriftung unter der Überschrift („339.000 € VB“) */
+      var re2 = new RegExp(ZAHL + '\\s*' + EURO, 'g'), m2;
+      while ((m2 = re2.exec(t))) { var n2 = zahlAusText(m2[1]); if (n2 != null && n2 >= 10000) { w.preis = n2; break; } }
+    }
+    x = nachBeschriftung(t, ['Wohnfläche'], QM);
+    if (x && x.wert > 5 && x.wert < 20000) w.flaeche = x.wert;
+    x = nachBeschriftung(t, ['Grundstücksfläche', 'Grundstücksfl\\.?', 'Grundstück'], QM);
+    if (x && x.wert > 5) w.grund = x.wert;
+    x = nachBeschriftung(t, ['Zimmeranzahl', 'Anzahl Zimmer', 'Zimmer(?!-)'], '', 12);
+    if (x && x.wert > 0 && x.wert < 100) w.zimmer = x.wert;
+    else { var mz = /(\d+(?:,5)?)\s*-?\s*Zimmer/i.exec(t); if (mz) w.zimmer = zahlAusText(mz[1]); }
+    x = nachBeschriftung(t, ['Baujahr'], '', 20);
+    if (x && x.wert >= 1700 && x.wert <= 2100 && x.wert % 1 === 0) w.baujahr = x.wert;
+    x = nachBeschriftung(t, ['Mieteinnahmen pro Jahr', 'Mieteinnahmen p\\.\\s?a\\.', 'Jahresnettokaltmiete', 'Jahresmiete', 'Jahreskaltmiete'], EURO);
+    if (x) { w.miete = Math.round(x.wert / 12); w.mieteJahr = true; }
+    else {
+      x = nachBeschriftung(t, ['Mieteinnahmen pro Monat', 'Mieteinnahmen', 'Nettokaltmiete', 'Ist-Miete', 'Kaltmiete'], EURO);
+      if (x) w.miete = x.wert;
+    }
+    x = nachBeschriftung(t, ['Anzahl Wohneinheiten', 'Wohneinheiten', 'Anzahl Wohnungen'], '', 15);
+    if (x && x.wert > 0 && x.wert < 1000 && x.wert % 1 === 0) w.we = x.wert;
+    if (/provisionsfrei|keine (?:Käufer)?provision/i.test(t)) w.makler = 0;
+    else {
+      x = nachBeschriftung(t, ['Käuferprovision', 'Provision für Käufer', 'Maklerprovision', 'Provision', 'Courtage'], '%', 40);
+      if (x && x.wert <= 10) w.makler = x.wert;
+    }
+    var mo = /\b(\d{5})\s+([A-ZÄÖÜ][a-zäöüß]+(?:[\- ](?:[A-ZÄÖÜ][a-zäöüß]+|an der|am|im|ob der)){0,3})/.exec(t);
+    if (mo) { w.plz = mo[1]; w.ort = mo[2].trim(); }
+    var ml = /https?:\/\/[^\s"<>]+/.exec(t);
+    if (ml) w.link = ml[0];
+    return w;
+  }
+
   var api = {
+    anzeigeLesen: anzeigeLesen,
     polygonFlaeche: polygonFlaeche,
     punktImPolygon: punktImPolygon,
     wohnflaecheRaum: wohnflaecheRaum,
@@ -4920,10 +4988,53 @@ window.DATEN.beispielhaus = {
       if ($(id + '-f')) $(id + '-f').textContent = '';
     });
     bearbeiteId = null;
-    $('m-form-titel').textContent = '+ Haus hinzufügen';
+    $('m-form-titel').textContent = '+ Haus hinzufügen (auch per Anzeige einfügen)';
     $('m-speichern').textContent = 'Auf die Merkliste setzen';
     $('m-abbrechen').hidden = true;
   }
+
+  /* Anzeige einfügen: kopierten Anzeigentext lesen (RECHNER.anzeigeLesen) und ins Formular setzen.
+     Gespeichert wird erst mit „Auf die Merkliste setzen“, damit der Nutzer vorher prüft. */
+  $('m-anzeige-lesen').addEventListener('click', function () {
+    var text = $('m-anzeige-text').value, link = $('m-anzeige-link').value.trim(), meld = $('m-anzeige-meldung');
+    if (!text.trim() && !link) { meld.textContent = 'Bitte zuerst den Text der Anzeige einfügen (Strg+A, Strg+C auf der Anzeige, dann hier Strg+V).'; $('m-anzeige-text').focus(); return; }
+    var w = window.RECHNER.anzeigeLesen(text);
+    if (link && !/^https?:\/\//i.test(link)) { meld.textContent = 'Der Link muss mit http:// oder https:// beginnen. Bitte aus der Adresszeile des Browsers kopieren.'; $('m-anzeige-link').focus(); return; }
+    var gefunden = [], fehlt = [];
+    function setze(id, wert, name, text) {
+      if (wert == null) { fehlt.push(name); return; }
+      $(id).value = text; $(id).removeAttribute('aria-invalid'); if ($(id + '-f')) $(id + '-f').textContent = '';
+      gefunden.push(name + ' ' + text.replace(/\s/g, ' '));
+    }
+    setze('m-preis', w.preis, 'Kaufpreis', w.preis != null ? fmt0.format(w.preis) + ' €' : '');
+    setze('m-flaeche', w.flaeche, 'Wohnfläche', w.flaeche != null ? String(w.flaeche).replace('.', ',') + ' m²' : '');
+    setze('m-miete', w.miete, 'Kaltmiete', w.miete != null ? fmt0.format(w.miete) + ' €' + (w.mieteJahr ? ' (Jahresmiete ÷ 12)' : '') : '');
+    setze('m-zimmer', w.zimmer, 'Zimmer', w.zimmer != null ? String(w.zimmer).replace('.', ',') : '');
+    setze('m-grund', w.grund, 'Grundstück', w.grund != null ? fmt0.format(w.grund) + ' m²' : '');
+    setze('m-baujahr', w.baujahr, 'Baujahr', w.baujahr != null ? String(w.baujahr) : '');
+    setze('m-makler', w.makler, 'Provision', w.makler != null ? String(w.makler).replace('.', ',') + ' %' : '');
+    if (w.we != null) setze('m-we', w.we, 'Wohnungen', String(w.we));
+    /* Einheiten nur in der Meldung; in die Felder kommt die reine Zahl */
+    ['m-preis', 'm-flaeche', 'm-miete', 'm-grund', 'm-makler'].forEach(function (id) { $(id).value = $(id).value.replace(/\s*(€|m²|%).*$/, ''); });
+    if (w.ort) {
+      $('m-ort').value = (w.plz ? w.plz + ' ' : '') + w.ort; gefunden.push('Ort ' + $('m-ort').value);
+      /* Stadtstaaten: Ort = Bundesland (Bremen, Hamburg, Berlin); sonst bleibt die Auswahl */
+      var stadtstaat = satzVon(w.ort);
+      if (stadtstaat) $('m-land').value = stadtstaat.land;
+    } else fehlt.push('Ort');
+    var url = link || w.link || '';
+    if (url) $('m-link').value = url;
+    if (!$('m-titel').value.trim()) {
+      $('m-titel').value = (w.zimmer ? String(w.zimmer).replace('.', ',') + '-Zimmer-Haus' : 'Haus') + (w.ort ? ' ' + w.ort : '') + (w.flaeche ? ', ' + String(w.flaeche).replace('.', ',') + ' m²' : '');
+    }
+    if (!$('m-notiz').value.trim()) $('m-notiz').value = 'Aus Anzeige übernommen am ' + new Date().toLocaleDateString('de-DE') + '.';
+    if (w.zimmer != null || w.grund != null || w.baujahr != null || w.we != null || url) document.querySelector('#m-form details.mehr').open = true;
+    $('m-anzeige-text').value = '';
+    meld.textContent = gefunden.length
+      ? 'Gefunden: ' + gefunden.join(', ') + '.' + (fehlt.length ? ' Nicht gefunden: ' + fehlt.join(', ') + '.' : '') + ' Bundesland bitte prüfen. Alles kontrollieren, dann unten „Auf die Merkliste setzen“.'
+      : 'Im Text wurden keine Angaben erkannt. Bitte prüfen, ob der ganze Text der Anzeige kopiert wurde (Strg+A auf der Anzeige), oder die Werte unten selbst eintragen.';
+    $('m-titel').focus();
+  });
 
   $('m-form').addEventListener('submit', function (ev) {
     ev.preventDefault();

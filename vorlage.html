@@ -593,8 +593,19 @@ __PALETTE_CSS__
   </header>
 
   <details class="karte" id="m-neu">
-    <summary id="m-form-titel">+ Haus hinzufügen</summary>
+    <summary id="m-form-titel">+ Haus hinzufügen (auch per Anzeige einfügen)</summary>
     <form id="m-form" novalidate style="margin-top:12px">
+      <div class="g-panel" id="m-anzeige" style="margin-bottom:18px">
+        <h4>Schneller: Anzeige einfügen</h4>
+        <p>Öffne die Anzeige im Portal, drücke dort <b>Strg+A</b> (alles markieren) und <b>Strg+C</b> (kopieren). Hier ins große Feld klicken und <b>Strg+V</b> drücken. Am Handy: lange auf den Text tippen, „Alles auswählen“, „Kopieren“, hier „Einfügen“. Die Seite liest die Zahlen heraus und trägt sie unten ein. Bitte danach alles prüfen.</p>
+        <div class="raster">
+          <div style="grid-column: 1 / -1"><label for="m-anzeige-link">Link zur Anzeige (aus der Adresszeile kopieren)</label><input type="url" id="m-anzeige-link" placeholder="https://…"></div>
+          <div style="grid-column: 1 / -1"><label for="m-anzeige-text">Text der Anzeige</label><textarea id="m-anzeige-text" rows="4" placeholder="Hier den kopierten Text einfügen"></textarea></div>
+        </div>
+        <div class="knopfreihe"><button type="button" class="knopf" id="m-anzeige-lesen">Daten herauslesen</button></div>
+        <div class="meldung" id="m-anzeige-meldung" role="status" aria-live="polite"></div>
+        <p class="klein" style="margin:8px 0 0">Der Text bleibt auf deinem Gerät und wird nach dem Herauslesen nicht gespeichert. Grundriss-Bilder aus der Anzeige speicherst du per Rechtsklick und lädst sie unter „Grundriss und Einrichtung“.</p>
+      </div>
       <div class="raster">
         <div><label for="m-titel">Name, damit du es wiedererkennst</label><input type="text" id="m-titel" placeholder="z. B. MFH Walle, 4 Wohnungen" aria-describedby="m-titel-f"><div class="fehler" id="m-titel-f"></div></div>
         <div><label for="m-ort">Ort</label><input type="text" id="m-ort"></div>

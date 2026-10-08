@@ -292,7 +292,64 @@
     return { einrichtung: e, umbau: u, summe: e + u };
   }
 
+  /* ---------- Anzeige einfügen: Werte aus kopiertem Anzeigentext lesen ----------
+     Der Text kommt aus Strg+A/Strg+C auf einer Portalseite; Beschriftung und Wert stehen dort
+     oft in getrennten Zeilen („Kaufpreis\n349.000 €“). Gesucht wird die erste Zahl kurz nach der
+     Beschriftung, bei Einheiten nur mit passender Einheit. Ergebnis wird immer zum Prüfen angezeigt. */
+  var ZAHL = '(\\d{1,3}(?:[.\\s\\u00a0]\\d{3})+(?:,\\d+)?|\\d+(?:[.,]\\d+)?)';
+  function zahlAusText(s) {
+    return leseZahl(String(s).replace(/[\s\u00a0]/g, function () { return '.'; }));
+  }
+  function nachBeschriftung(text, beschriftungen, einheit, abstand) {
+    for (var i = 0; i < beschriftungen.length; i++) {
+      var re = new RegExp(beschriftungen[i] + '[^\\d\\n]{0,' + (abstand || 30) + '}\\n?[^\\d\\n]{0,20}' + ZAHL + '\\s*' + (einheit || ''), 'i');
+      var m = re.exec(text);
+      if (m) { var n = zahlAusText(m[1]); if (n != null) return { wert: n, treffer: m[0] }; }
+    }
+    return null;
+  }
+  function anzeigeLesen(text) {
+    var t = String(text || '').replace(/\r/g, '').replace(/[ \t\u00a0]+/g, ' ');
+    var w = {}, x;
+    var EURO = '(?:€|EUR|Euro)', QM = '(?:m²|m2|qm)';
+    x = nachBeschriftung(t, ['Kaufpreis', 'Preis(?![ \\t]*(?:/|pro|je)[ \\t]*m)'], EURO);
+    if (x && x.wert >= 10000) w.preis = x.wert;
+    else {
+      /* Kleinanzeigen: Preis ohne Beschriftung unter der Überschrift („339.000 € VB“) */
+      var re2 = new RegExp(ZAHL + '\\s*' + EURO, 'g'), m2;
+      while ((m2 = re2.exec(t))) { var n2 = zahlAusText(m2[1]); if (n2 != null && n2 >= 10000) { w.preis = n2; break; } }
+    }
+    x = nachBeschriftung(t, ['Wohnfläche'], QM);
+    if (x && x.wert > 5 && x.wert < 20000) w.flaeche = x.wert;
+    x = nachBeschriftung(t, ['Grundstücksfläche', 'Grundstücksfl\\.?', 'Grundstück'], QM);
+    if (x && x.wert > 5) w.grund = x.wert;
+    x = nachBeschriftung(t, ['Zimmeranzahl', 'Anzahl Zimmer', 'Zimmer(?!-)'], '', 12);
+    if (x && x.wert > 0 && x.wert < 100) w.zimmer = x.wert;
+    else { var mz = /(\d+(?:,5)?)\s*-?\s*Zimmer/i.exec(t); if (mz) w.zimmer = zahlAusText(mz[1]); }
+    x = nachBeschriftung(t, ['Baujahr'], '', 20);
+    if (x && x.wert >= 1700 && x.wert <= 2100 && x.wert % 1 === 0) w.baujahr = x.wert;
+    x = nachBeschriftung(t, ['Mieteinnahmen pro Jahr', 'Mieteinnahmen p\\.\\s?a\\.', 'Jahresnettokaltmiete', 'Jahresmiete', 'Jahreskaltmiete'], EURO);
+    if (x) { w.miete = Math.round(x.wert / 12); w.mieteJahr = true; }
+    else {
+      x = nachBeschriftung(t, ['Mieteinnahmen pro Monat', 'Mieteinnahmen', 'Nettokaltmiete', 'Ist-Miete', 'Kaltmiete'], EURO);
+      if (x) w.miete = x.wert;
+    }
+    x = nachBeschriftung(t, ['Anzahl Wohneinheiten', 'Wohneinheiten', 'Anzahl Wohnungen'], '', 15);
+    if (x && x.wert > 0 && x.wert < 1000 && x.wert % 1 === 0) w.we = x.wert;
+    if (/provisionsfrei|keine (?:Käufer)?provision/i.test(t)) w.makler = 0;
+    else {
+      x = nachBeschriftung(t, ['Käuferprovision', 'Provision für Käufer', 'Maklerprovision', 'Provision', 'Courtage'], '%', 40);
+      if (x && x.wert <= 10) w.makler = x.wert;
+    }
+    var mo = /\b(\d{5})\s+([A-ZÄÖÜ][a-zäöüß]+(?:[\- ](?:[A-ZÄÖÜ][a-zäöüß]+|an der|am|im|ob der)){0,3})/.exec(t);
+    if (mo) { w.plz = mo[1]; w.ort = mo[2].trim(); }
+    var ml = /https?:\/\/[^\s"<>]+/.exec(t);
+    if (ml) w.link = ml[0];
+    return w;
+  }
+
   var api = {
+    anzeigeLesen: anzeigeLesen,
     polygonFlaeche: polygonFlaeche,
     punktImPolygon: punktImPolygon,
     wohnflaecheRaum: wohnflaecheRaum,

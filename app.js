@@ -1087,10 +1087,53 @@
       if ($(id + '-f')) $(id + '-f').textContent = '';
     });
     bearbeiteId = null;
-    $('m-form-titel').textContent = '+ Haus hinzufügen';
+    $('m-form-titel').textContent = '+ Haus hinzufügen (auch per Anzeige einfügen)';
     $('m-speichern').textContent = 'Auf die Merkliste setzen';
     $('m-abbrechen').hidden = true;
   }
+
+  /* Anzeige einfügen: kopierten Anzeigentext lesen (RECHNER.anzeigeLesen) und ins Formular setzen.
+     Gespeichert wird erst mit „Auf die Merkliste setzen“, damit der Nutzer vorher prüft. */
+  $('m-anzeige-lesen').addEventListener('click', function () {
+    var text = $('m-anzeige-text').value, link = $('m-anzeige-link').value.trim(), meld = $('m-anzeige-meldung');
+    if (!text.trim() && !link) { meld.textContent = 'Bitte zuerst den Text der Anzeige einfügen (Strg+A, Strg+C auf der Anzeige, dann hier Strg+V).'; $('m-anzeige-text').focus(); return; }
+    var w = window.RECHNER.anzeigeLesen(text);
+    if (link && !/^https?:\/\//i.test(link)) { meld.textContent = 'Der Link muss mit http:// oder https:// beginnen. Bitte aus der Adresszeile des Browsers kopieren.'; $('m-anzeige-link').focus(); return; }
+    var gefunden = [], fehlt = [];
+    function setze(id, wert, name, text) {
+      if (wert == null) { fehlt.push(name); return; }
+      $(id).value = text; $(id).removeAttribute('aria-invalid'); if ($(id + '-f')) $(id + '-f').textContent = '';
+      gefunden.push(name + ' ' + text.replace(/\s/g, ' '));
+    }
+    setze('m-preis', w.preis, 'Kaufpreis', w.preis != null ? fmt0.format(w.preis) + ' €' : '');
+    setze('m-flaeche', w.flaeche, 'Wohnfläche', w.flaeche != null ? String(w.flaeche).replace('.', ',') + ' m²' : '');
+    setze('m-miete', w.miete, 'Kaltmiete', w.miete != null ? fmt0.format(w.miete) + ' €' + (w.mieteJahr ? ' (Jahresmiete ÷ 12)' : '') : '');
+    setze('m-zimmer', w.zimmer, 'Zimmer', w.zimmer != null ? String(w.zimmer).replace('.', ',') : '');
+    setze('m-grund', w.grund, 'Grundstück', w.grund != null ? fmt0.format(w.grund) + ' m²' : '');
+    setze('m-baujahr', w.baujahr, 'Baujahr', w.baujahr != null ? String(w.baujahr) : '');
+    setze('m-makler', w.makler, 'Provision', w.makler != null ? String(w.makler).replace('.', ',') + ' %' : '');
+    if (w.we != null) setze('m-we', w.we, 'Wohnungen', String(w.we));
+    /* Einheiten nur in der Meldung; in die Felder kommt die reine Zahl */
+    ['m-preis', 'm-flaeche', 'm-miete', 'm-grund', 'm-makler'].forEach(function (id) { $(id).value = $(id).value.replace(/\s*(€|m²|%).*$/, ''); });
+    if (w.ort) {
+      $('m-ort').value = (w.plz ? w.plz + ' ' : '') + w.ort; gefunden.push('Ort ' + $('m-ort').value);
+      /* Stadtstaaten: Ort = Bundesland (Bremen, Hamburg, Berlin); sonst bleibt die Auswahl */
+      var stadtstaat = satzVon(w.ort);
+      if (stadtstaat) $('m-land').value = stadtstaat.land;
+    } else fehlt.push('Ort');
+    var url = link || w.link || '';
+    if (url) $('m-link').value = url;
+    if (!$('m-titel').value.trim()) {
+      $('m-titel').value = (w.zimmer ? String(w.zimmer).replace('.', ',') + '-Zimmer-Haus' : 'Haus') + (w.ort ? ' ' + w.ort : '') + (w.flaeche ? ', ' + String(w.flaeche).replace('.', ',') + ' m²' : '');
+    }
+    if (!$('m-notiz').value.trim()) $('m-notiz').value = 'Aus Anzeige übernommen am ' + new Date().toLocaleDateString('de-DE') + '.';
+    if (w.zimmer != null || w.grund != null || w.baujahr != null || w.we != null || url) document.querySelector('#m-form details.mehr').open = true;
+    $('m-anzeige-text').value = '';
+    meld.textContent = gefunden.length
+      ? 'Gefunden: ' + gefunden.join(', ') + '.' + (fehlt.length ? ' Nicht gefunden: ' + fehlt.join(', ') + '.' : '') + ' Bundesland bitte prüfen. Alles kontrollieren, dann unten „Auf die Merkliste setzen“.'
+      : 'Im Text wurden keine Angaben erkannt. Bitte prüfen, ob der ganze Text der Anzeige kopiert wurde (Strg+A auf der Anzeige), oder die Werte unten selbst eintragen.';
+    $('m-titel').focus();
+  });
 
   $('m-form').addEventListener('submit', function (ev) {
     ev.preventDefault();
