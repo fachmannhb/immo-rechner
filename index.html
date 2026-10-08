@@ -1071,7 +1071,14 @@
 
       <div class="g-seite">
         <div class="g-panel" data-gpanel="1">
-          <h4>1. Grundriss laden</h4>
+          <h4>Erst einmal ausprobieren?</h4>
+          <p>Das Beispielhaus ist ein erfundenes kleines Haus mit 6 Zimmern auf zwei Etagen, Keller und Garage, schon eingerichtet.</p>
+          <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-beispiel">Beispielhaus laden</button></div>
+          <div class="g-frage" id="g-beispiel-frage" hidden>
+            <p style="margin:0 0 10px">Dein jetziger Plan wird durch das Beispielhaus ersetzt. Vorher als Datei sichern?</p>
+            <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-beispiel-sichern">Sichern und Beispiel laden</button><button type="button" class="knopf zweit" id="g-beispiel-ohne">Ohne Sichern ersetzen</button><button type="button" class="knopf zweit" id="g-beispiel-nein">Abbrechen</button></div>
+          </div>
+          <h4 style="margin-top:18px">1. Grundriss laden</h4>
           <p>Ein Bild oder Foto des Grundrisses aus dem Exposé wählen (JPG oder PNG). Ohne Bild kannst du auf dem Raster zeichnen, ein Kästchen ist 1 m.</p>
           <input type="file" id="g-bild-datei" accept="image/png,image/jpeg,image/webp" hidden>
           <div class="knopfreihe"><label class="knopf" for="g-bild-datei" tabindex="0" role="button" id="g-bild-knopf">Bild wählen</label><button type="button" class="knopf zweit" id="g-bild-weg">Bild entfernen</button></div>
@@ -1815,6 +1822,66 @@ window.DATEN = window.DATEN || {};
     ]
   };
 })();
+
+</script>
+<script>/* daten/beispielhaus.js */
+/* Beispielhaus für „Grundriss und Einrichtung“ (Nutzerwunsch 08.10.2026): erfundenes kleines Haus,
+   Grundfläche 10 × 8 m, 6 Zimmer auf zwei Etagen, dazu Küche, 2 Bäder, Flure, Terrasse, Garage, Keller.
+   Alle Maße erfunden, keine echten Daten. Möbelmaße (w, d) ergänzt grundriss.js aus daten/moebel.js.
+   Sollwerte (tmp/grundriss_test.ps1): Wohnfläche EG 80 + Terrasse 16,5 × 25 % = 84,125;
+   DG 18 + 18 + 11,2 + 8,75 + 12,25 = 68,2; zusammen 152,3 m². Nutzfläche Garage 18 + Keller 80 = 98 m². */
+window.DATEN = window.DATEN || {};
+window.DATEN.beispielhaus = {
+  app: 'immo-grundriss', version: 1, aktiv: 0, wandhoehe: 2.5, beispiel: true,
+  preise: {}, mengen: { leuchte: 11, vorhang: 12, matratze140: 2 },
+  etagen: [
+    {
+      name: 'Beispiel: Erdgeschoss', bild: null, raeume: [
+        { name: 'Wohnzimmer', art: 'voll', punkte: [[0, 0], [5.5, 0], [5.5, 4.5], [0, 4.5]] },
+        { name: 'Esszimmer', art: 'voll', punkte: [[5.5, 0], [10, 0], [10, 4.5], [5.5, 4.5]] },
+        { name: 'Arbeitszimmer', art: 'voll', punkte: [[0, 4.5], [3, 4.5], [3, 8], [0, 8]] },
+        { name: 'Bad', art: 'voll', punkte: [[3, 4.5], [4.5, 4.5], [4.5, 8], [3, 8]] },
+        { name: 'Flur', art: 'voll', punkte: [[4.5, 4.5], [6, 4.5], [6, 8], [4.5, 8]] },
+        { name: 'Küche', art: 'voll', punkte: [[6, 4.5], [10, 4.5], [10, 8], [6, 8]] },
+        { name: 'Terrasse', art: 'balkon', balkon: 25, punkte: [[0, -3], [5.5, -3], [5.5, 0], [0, 0]] },
+        { name: 'Garage', art: 'zubehoer', separat: true, punkte: [[10, 0], [13, 0], [13, 6], [10, 6]] }
+      ],
+      teile: [
+        { art: 'sofa', x: 2.75, y: 3.9 }, { art: 'couchtisch', x: 2.75, y: 2.9 }, { art: 'tvboard', x: 2.75, y: 0.3 },
+        { art: 'esstisch', x: 7.75, y: 2.25 },
+        { art: 'stuhl', x: 7.4, y: 1.55 }, { art: 'stuhl', x: 8.1, y: 1.55 },
+        { art: 'stuhl', x: 7.4, y: 2.95, dreh: 180 }, { art: 'stuhl', x: 8.1, y: 2.95, dreh: 180 },
+        { art: 'kueche', x: 8.5, y: 7.7 }, { art: 'kuehlschrank', x: 6.4, y: 7.7 },
+        { art: 'schreibtisch', x: 1.5, y: 7.7 }, { art: 'buerostuhl', x: 1.5, y: 7.0 }, { art: 'regal', x: 0.2, y: 6, dreh: 90 },
+        { art: 'waschmaschine', x: 3.35, y: 7.65 }, { art: 'spiegelschrank', x: 4.05, y: 7.9 },
+        { art: 'tuer', x: 5.0, y: 4.5 }, { art: 'tuer', x: 1.5, y: 4.5 },
+        { art: 'tuer', x: 6, y: 6.5, dreh: 90 }, { art: 'tuer', x: 4.5, y: 6.5, dreh: 90 }
+      ]
+    },
+    {
+      name: 'Beispiel: Dachgeschoss', bild: null, raeume: [
+        { name: 'Schlafzimmer', art: 'voll', teil12: 20, teil0: 10, punkte: [[0, 0], [5, 0], [5, 4.5], [0, 4.5]] },
+        { name: 'Kinderzimmer 1', art: 'voll', teil12: 20, teil0: 10, punkte: [[5, 0], [10, 0], [10, 4.5], [5, 4.5]] },
+        { name: 'Kinderzimmer 2', art: 'voll', teil12: 20, teil0: 10, punkte: [[0, 4.5], [4, 4.5], [4, 8], [0, 8]] },
+        { name: 'Bad', art: 'voll', punkte: [[4, 4.5], [6.5, 4.5], [6.5, 8], [4, 8]] },
+        { name: 'Flur', art: 'voll', punkte: [[6.5, 4.5], [10, 4.5], [10, 8], [6.5, 8]] }
+      ],
+      teile: [
+        { art: 'bett180', x: 2.5, y: 1.25 }, { art: 'nachttisch', x: 1.1, y: 0.4 }, { art: 'nachttisch', x: 3.9, y: 0.4 }, { art: 'schrank3', x: 2.5, y: 4.2 },
+        { art: 'bett140', x: 6.0, y: 1.25 }, { art: 'schrank2', x: 9.4, y: 4.2 }, { art: 'schreibtisch', x: 8.5, y: 0.4 },
+        { art: 'bett140', x: 1.0, y: 6.35 }, { art: 'schreibtisch', x: 3.0, y: 7.65 }, { art: 'schrank2', x: 3.4, y: 4.85 },
+        { art: 'spiegelschrank', x: 5.25, y: 7.9 }
+      ]
+    },
+    {
+      name: 'Beispiel: Keller', bild: null, raeume: [
+        { name: 'Kellerraum', art: 'zubehoer', punkte: [[0, 0], [6, 0], [6, 8], [0, 8]] },
+        { name: 'Heizraum', art: 'zubehoer', punkte: [[6, 0], [10, 0], [10, 8], [6, 8]] }
+      ],
+      teile: [{ art: 'trockner', x: 0.5, y: 0.5 }]
+    }
+  ]
+};
 
 </script>
 <script>/* rechner.js */
@@ -2934,6 +3001,7 @@ window.DATEN = window.DATEN || {};
       return n;
     });
     neu.aktiv = Math.min(neu.etagen.length - 1, Math.max(0, zahlOk(p.aktiv, 0) | 0));
+    if (p.beispiel === true) neu.beispiel = true;
     return neu;
   }
   function laden() {
@@ -3553,11 +3621,12 @@ window.DATEN = window.DATEN || {};
     var box = $('g-satz'), titel, klein, art = 'leer', zeichen = '?';
     if (!nRaeume) {
       titel = 'Noch kein Raum gezeichnet.';
-      klein = 'Fang mit Schritt 1 an: Grundrissbild laden, oder gleich in Schritt 2 auf dem Raster zeichnen.';
+      klein = 'Fang mit Schritt 1 an: Grundrissbild laden oder das Beispielhaus ausprobieren, oder gleich in Schritt 2 auf dem Raster zeichnen.';
     } else {
       titel = qm(s.wfl) + ' Wohnfläche' + (s.summe ? ', Einrichtung und Umbau etwa ' + euro(s.summe) : '') + '.';
       klein = (s.nfl ? 'Dazu ' + qm(s.nfl) + ' Nutzfläche' + (s.sep ? ', davon ' + qm(s.sep) + ' separat vermietbar' : '') + '. ' : '') +
         (s.betten ? s.betten + ' Schlafplätze. ' : '') + 'Preise sind Richtwerte, keine Angebote.';
+      if (plan.beispiel) klein = 'Beispielhaus mit erfundenen Maßen. ' + klein;
       zeichen = '✓'; art = 'gut';
       if (s.ohneMassstab.length) {
         art = 'warn'; zeichen = '!';
@@ -3692,6 +3761,29 @@ window.DATEN = window.DATEN || {};
   $('g-neu-sichern').addEventListener('click', function () { if (dateiSichern('_alt')) { neuBeginnen(); $('g-datei-meldung').textContent = 'Alter Plan als Datei gesichert, neuer Plan begonnen.'; } });
   $('g-neu-ohne').addEventListener('click', function () { neuBeginnen(); $('g-datei-meldung').textContent = 'Neuer Plan begonnen.'; });
   $('g-neu-nein').addEventListener('click', function () { $('g-neu-frage').hidden = true; });
+
+  /* ---------- Beispielhaus (daten/beispielhaus.js) ---------- */
+  function beispielLaden() {
+    var vorlage = window.DATEN && window.DATEN.beispielhaus;
+    if (!vorlage) { meldung('Das Beispielhaus fehlt in dieser Fassung der Seite.'); return; }
+    var p = JSON.parse(JSON.stringify(vorlage));
+    p.etagen.forEach(function (e) {
+      e.raeume.forEach(function (r) { r.id = neueId('r'); });
+      e.teile.forEach(function (t) { var a = ART[t.art]; t.id = neueId('t'); if (a) { t.w = a.breite / 100; t.d = a.tiefe / 100; } });
+    });
+    var neu = pruefePlan(p);
+    if (!neu) { meldung('Das Beispielhaus konnte nicht geladen werden.'); return; }
+    plan = neu; gewaehlt = null; vb = null; $('g-beispiel-frage').hidden = true;
+    speichern(); allesZeigen();
+    meldung('Beispielhaus geladen: oben bei „Etage“ zwischen Erdgeschoss, Dachgeschoss und Keller wechseln, mit „3D“ ansehen. Alle Maße sind erfunden.');
+  }
+  $('g-beispiel').addEventListener('click', function () {
+    if (leer()) { beispielLaden(); return; }
+    $('g-beispiel-frage').hidden = false; $('g-beispiel-sichern').focus();
+  });
+  $('g-beispiel-sichern').addEventListener('click', function () { if (dateiSichern('_vor_beispiel')) beispielLaden(); });
+  $('g-beispiel-ohne').addEventListener('click', beispielLaden);
+  $('g-beispiel-nein').addEventListener('click', function () { $('g-beispiel-frage').hidden = true; $('g-beispiel').focus(); });
 
   /* ---------- Ansicht von oben / 3D ---------- */
   function dreiD() {

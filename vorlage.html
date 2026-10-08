@@ -1065,7 +1065,14 @@ __PALETTE_CSS__
 
       <div class="g-seite">
         <div class="g-panel" data-gpanel="1">
-          <h4>1. Grundriss laden</h4>
+          <h4>Erst einmal ausprobieren?</h4>
+          <p>Das Beispielhaus ist ein erfundenes kleines Haus mit 6 Zimmern auf zwei Etagen, Keller und Garage, schon eingerichtet.</p>
+          <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-beispiel">Beispielhaus laden</button></div>
+          <div class="g-frage" id="g-beispiel-frage" hidden>
+            <p style="margin:0 0 10px">Dein jetziger Plan wird durch das Beispielhaus ersetzt. Vorher als Datei sichern?</p>
+            <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-beispiel-sichern">Sichern und Beispiel laden</button><button type="button" class="knopf zweit" id="g-beispiel-ohne">Ohne Sichern ersetzen</button><button type="button" class="knopf zweit" id="g-beispiel-nein">Abbrechen</button></div>
+          </div>
+          <h4 style="margin-top:18px">1. Grundriss laden</h4>
           <p>Ein Bild oder Foto des Grundrisses aus dem Exposé wählen (JPG oder PNG). Ohne Bild kannst du auf dem Raster zeichnen, ein Kästchen ist 1 m.</p>
           <input type="file" id="g-bild-datei" accept="image/png,image/jpeg,image/webp" hidden>
           <div class="knopfreihe"><label class="knopf" for="g-bild-datei" tabindex="0" role="button" id="g-bild-knopf">Bild wählen</label><button type="button" class="knopf zweit" id="g-bild-weg">Bild entfernen</button></div>
@@ -1466,6 +1473,7 @@ __PALETTE_CSS__
 <script src="daten/recht.js"></script>
 <script src="daten/begriffe.js"></script>
 <script src="daten/moebel.js"></script>
+<script src="daten/beispielhaus.js"></script>
 <script src="rechner.js"></script>
 <script src="grafik.js"></script>
 <script src="haus3d.js"></script>

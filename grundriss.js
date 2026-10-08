@@ -76,6 +76,7 @@
       return n;
     });
     neu.aktiv = Math.min(neu.etagen.length - 1, Math.max(0, zahlOk(p.aktiv, 0) | 0));
+    if (p.beispiel === true) neu.beispiel = true;
     return neu;
   }
   function laden() {
@@ -695,11 +696,12 @@
     var box = $('g-satz'), titel, klein, art = 'leer', zeichen = '?';
     if (!nRaeume) {
       titel = 'Noch kein Raum gezeichnet.';
-      klein = 'Fang mit Schritt 1 an: Grundrissbild laden, oder gleich in Schritt 2 auf dem Raster zeichnen.';
+      klein = 'Fang mit Schritt 1 an: Grundrissbild laden oder das Beispielhaus ausprobieren, oder gleich in Schritt 2 auf dem Raster zeichnen.';
     } else {
       titel = qm(s.wfl) + ' Wohnfläche' + (s.summe ? ', Einrichtung und Umbau etwa ' + euro(s.summe) : '') + '.';
       klein = (s.nfl ? 'Dazu ' + qm(s.nfl) + ' Nutzfläche' + (s.sep ? ', davon ' + qm(s.sep) + ' separat vermietbar' : '') + '. ' : '') +
         (s.betten ? s.betten + ' Schlafplätze. ' : '') + 'Preise sind Richtwerte, keine Angebote.';
+      if (plan.beispiel) klein = 'Beispielhaus mit erfundenen Maßen. ' + klein;
       zeichen = '✓'; art = 'gut';
       if (s.ohneMassstab.length) {
         art = 'warn'; zeichen = '!';
@@ -834,6 +836,29 @@
   $('g-neu-sichern').addEventListener('click', function () { if (dateiSichern('_alt')) { neuBeginnen(); $('g-datei-meldung').textContent = 'Alter Plan als Datei gesichert, neuer Plan begonnen.'; } });
   $('g-neu-ohne').addEventListener('click', function () { neuBeginnen(); $('g-datei-meldung').textContent = 'Neuer Plan begonnen.'; });
   $('g-neu-nein').addEventListener('click', function () { $('g-neu-frage').hidden = true; });
+
+  /* ---------- Beispielhaus (daten/beispielhaus.js) ---------- */
+  function beispielLaden() {
+    var vorlage = window.DATEN && window.DATEN.beispielhaus;
+    if (!vorlage) { meldung('Das Beispielhaus fehlt in dieser Fassung der Seite.'); return; }
+    var p = JSON.parse(JSON.stringify(vorlage));
+    p.etagen.forEach(function (e) {
+      e.raeume.forEach(function (r) { r.id = neueId('r'); });
+      e.teile.forEach(function (t) { var a = ART[t.art]; t.id = neueId('t'); if (a) { t.w = a.breite / 100; t.d = a.tiefe / 100; } });
+    });
+    var neu = pruefePlan(p);
+    if (!neu) { meldung('Das Beispielhaus konnte nicht geladen werden.'); return; }
+    plan = neu; gewaehlt = null; vb = null; $('g-beispiel-frage').hidden = true;
+    speichern(); allesZeigen();
+    meldung('Beispielhaus geladen: oben bei „Etage“ zwischen Erdgeschoss, Dachgeschoss und Keller wechseln, mit „3D“ ansehen. Alle Maße sind erfunden.');
+  }
+  $('g-beispiel').addEventListener('click', function () {
+    if (leer()) { beispielLaden(); return; }
+    $('g-beispiel-frage').hidden = false; $('g-beispiel-sichern').focus();
+  });
+  $('g-beispiel-sichern').addEventListener('click', function () { if (dateiSichern('_vor_beispiel')) beispielLaden(); });
+  $('g-beispiel-ohne').addEventListener('click', beispielLaden);
+  $('g-beispiel-nein').addEventListener('click', function () { $('g-beispiel-frage').hidden = true; $('g-beispiel').focus(); });
 
   /* ---------- Ansicht von oben / 3D ---------- */
   function dreiD() {
