@@ -442,6 +442,15 @@
       b.setAttribute('aria-pressed', i === plan.aktiv ? 'true' : 'false');
       b.addEventListener('click', function () { plan.aktiv = i; gewaehlt = null; massPunkte = []; entwurf = []; vb = null; speichern(); allesZeigen(); });
       box.appendChild(b);
+      if (i === plan.aktiv && plan.etagen.length > 1) {
+        var x = document.createElement('button');
+        x.type = 'button'; x.className = 'chip klein etage-weg'; x.textContent = '×';
+        x.setAttribute('aria-label', 'Etage „' + e.name + '“ löschen');
+        x.title = 'Diese Etage löschen';
+        x.addEventListener('click', function () { etageLoeschen(x, 'Wirklich löschen?'); });
+        x.addEventListener('blur', function () { if (etageWegBestaetigt === x) { etageWegBestaetigt = null; x.textContent = '×'; } });
+        box.appendChild(x);
+      }
     });
     var e = etage();
     $('g-etage-name').value = e.name;
@@ -471,21 +480,25 @@
     f.textContent = ''; this.removeAttribute('aria-invalid');
     plan.wandhoehe = v; speichern(); if (ansicht3d) dreiD();
   });
-  var etageWegBestaetigt = false;
-  $('g-etage-weg').addEventListener('click', function () {
+  /* Etage löschen, vom Knopf in Schritt 1 und vom „ד an der Etage oben. Mit Inhalt erst
+     beim zweiten Klick (der Knopf zeigt dann frageText), leer sofort. */
+  var etageWegBestaetigt = null;
+  function etageLoeschen(knopf, frageText) {
     var e = etage();
     if (plan.etagen.length < 2) return;
-    if ((e.raeume.length || e.teile.length || e.bild) && !etageWegBestaetigt) {
-      etageWegBestaetigt = true; this.textContent = 'Wirklich löschen? Nochmal klicken';
-      meldung('„' + e.name + '“ enthält ' + e.raeume.length + ' Räume und ' + e.teile.length + ' Teile. Zum Löschen den Knopf noch einmal drücken; vorher kannst du unten den Plan als Datei sichern.');
+    if ((e.raeume.length || e.teile.length || e.bild) && etageWegBestaetigt !== knopf) {
+      etageWegBestaetigt = knopf; knopf.textContent = frageText;
+      meldung('„' + e.name + '“ enthält ' + e.raeume.length + ' Räume und ' + e.teile.length + ' Teile. Zum Löschen noch einmal klicken; vorher kannst du unten den Plan als Datei sichern.');
       return;
     }
     plan.etagen.splice(plan.aktiv, 1); plan.aktiv = Math.max(0, plan.aktiv - 1);
-    etageWegBestaetigt = false; this.textContent = 'Diese Etage löschen';
+    etageWegBestaetigt = null; $('g-etage-weg').textContent = 'Diese Etage löschen';
     gewaehlt = null; vb = null; speichern(); allesZeigen();
     meldung('Etage „' + e.name + '“ gelöscht.');
-  });
-  $('g-etage-weg').addEventListener('blur', function () { if (etageWegBestaetigt) { etageWegBestaetigt = false; this.textContent = 'Diese Etage löschen'; } });
+    var b = $('g-etagen').children[0]; if (b) b.focus();
+  }
+  $('g-etage-weg').addEventListener('click', function () { etageLoeschen(this, 'Wirklich löschen? Nochmal klicken'); });
+  $('g-etage-weg').addEventListener('blur', function () { if (etageWegBestaetigt === this) { etageWegBestaetigt = null; this.textContent = 'Diese Etage löschen'; } });
 
   /* ---------- Bild und Maßstab ---------- */
   function labelAlsKnopf(id, inputId) {
