@@ -235,7 +235,69 @@
     return isFinite(n) ? n : null;
   }
 
+  /* ---------- Grundriss ---------- */
+
+  /* Fläche eines Vielecks aus Eckpunkten [[x,y], …] in Metern (Gaußsche Trapezformel). */
+  function polygonFlaeche(punkte) {
+    var s = 0, n = punkte ? punkte.length : 0;
+    if (n < 3) return 0;
+    for (var i = 0; i < n; i++) {
+      var a = punkte[i], b = punkte[(i + 1) % n];
+      s += zahl(a[0]) * zahl(b[1]) - zahl(b[0]) * zahl(a[1]);
+    }
+    return Math.abs(s) / 2;
+  }
+
+  /* Liegt der Punkt im Vieleck? (Strahlverfahren) */
+  function punktImPolygon(x, y, punkte) {
+    var drin = false, n = punkte ? punkte.length : 0;
+    for (var i = 0, j = n - 1; i < n; j = i++) {
+      var xi = punkte[i][0], yi = punkte[i][1], xj = punkte[j][0], yj = punkte[j][1];
+      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) drin = !drin;
+    }
+    return drin;
+  }
+
+  /* Angerechnete Wohnfläche eines Raums nach WoFlV §§ 2 und 4 (Wortlaut geprüft 08.10.2026).
+     art: 'voll' (Wohnraum), 'wintergarten' (unbeheizt, zur Hälfte), 'balkon' (Balkon, Loggia,
+     Terrasse: balkonProzent, in der Regel 25, höchstens 50), 'zubehoer' (Keller, Heizraum,
+     Garage: zählt nicht). teil12 = Anteil der Fläche mit 1 bis unter 2 m lichter Höhe in %,
+     teil0 = Anteil unter 1 m in % (zählt nicht). */
+  function wohnflaecheRaum(r) {
+    var f = zahl(r.flaeche);
+    if (r.art === 'zubehoer') return 0;
+    if (r.art === 'balkon') {
+      var p = r.balkonProzent == null ? 25 : Math.min(50, Math.max(0, zahl(r.balkonProzent)));
+      return f * p / 100;
+    }
+    var t12 = Math.min(100, Math.max(0, zahl(r.teil12)));
+    var t0 = Math.min(100 - t12, Math.max(0, zahl(r.teil0)));
+    var hoehe = f * (100 - t12 - t0) / 100 + f * t12 / 100 * 0.5;
+    return r.art === 'wintergarten' ? hoehe * 0.5 : hoehe;
+  }
+
+  /* Nutzfläche außerhalb der Wohnfläche (Keller, Garage, Heizraum …), voll gezählt,
+     damit sie getrennt geplant oder vermietet werden kann. */
+  function nutzflaecheRaum(r) {
+    return r.art === 'zubehoer' ? zahl(r.flaeche) : 0;
+  }
+
+  /* Summen der Kostenliste: posten [{menge, preis, gruppe:'umbau'|sonst}] */
+  function einrichtungskosten(posten) {
+    var e = 0, u = 0;
+    (posten || []).forEach(function (p) {
+      var s = zahl(p.menge) * zahl(p.preis);
+      if (p.gruppe === 'umbau') u += s; else e += s;
+    });
+    return { einrichtung: e, umbau: u, summe: e + u };
+  }
+
   var api = {
+    polygonFlaeche: polygonFlaeche,
+    punktImPolygon: punktImPolygon,
+    wohnflaecheRaum: wohnflaecheRaum,
+    nutzflaecheRaum: nutzflaecheRaum,
+    einrichtungskosten: einrichtungskosten,
     leseZahl: leseZahl,
     barwertfaktoren: barwertfaktoren,
     restnutzungsdauer: restnutzungsdauer,

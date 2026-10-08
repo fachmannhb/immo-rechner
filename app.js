@@ -121,6 +121,7 @@
       if (kopf) { kopf.setAttribute('tabindex', '-1'); kopf.focus({ preventScroll: true }); }
     }
     if (window.GRAFIK) window.GRAFIK.versteckeTip();
+    if (window.GRUNDRISS) window.GRUNDRISS.zeigt(ziel === 'grundriss');
     zeichneGrafiken(); /* Breite ist erst messbar, wenn der Bereich sichtbar ist */
   }
   function zeigeBereich(ziel, fokus) {

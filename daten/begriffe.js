@@ -4,6 +4,9 @@
    nurAnfang: nur wenn die Beschriftung mit dem Wort beginnt (z. B. nicht bei „Fixkosten (ohne Kredit)“).
    app.js hängt an passende Beschriftungen ein (?) an, das die Erklärung zeigt. */
 window.DATEN = window.DATEN || {};
+/* Begriffe für „Grundriss und Einrichtung“ (08.10.2026) stehen am Ende der Liste. Die Felder im
+   Auswahlkasten des Grundrisses entstehen erst beim Anklicken und bekommen darum kein (?);
+   ihre Erklärung steht direkt darunter. */
 window.DATEN.begriffe = [
   { w: ['Grunderwerbsteuer'], t: 'Grunderwerbsteuer', e: 'Eine Steuer, die du beim Kauf einmal an das Bundesland zahlst. Wie hoch sie ist, hängt vom Bundesland ab; der Satz steht in der Auswahl „Bundesland“.' },
   { w: ['Notar und Grundbuch'], t: 'Notar und Grundbuch', e: 'Der Notar beurkundet den Kaufvertrag. Das Grundbuchamt trägt dich danach als neuen Eigentümer ein. Beides kostet Gebühren, die zum Kaufpreis dazukommen.' },
@@ -37,5 +40,8 @@ window.DATEN.begriffe = [
   { w: ['Restnutzungsdauer'], t: 'Restnutzungsdauer', e: 'Wie viele Jahre das Gebäude voraussichtlich noch wirtschaftlich genutzt werden kann. Eine Modernisierung kann sie verlängern.' },
   { w: ['Brutto-Grundfläche'], t: 'Brutto-Grundfläche', e: 'Die Fläche aller Geschosse, außen gemessen. Sie steht in den Bauunterlagen.' },
   { w: ['Modernisierung'], t: 'Modernisierung', e: 'Ein Umbau, der das Haus verbessert, zum Beispiel Dämmung oder ein neues Bad. Danach darf die Miete bei bestehenden Verträgen in Grenzen steigen; reine Reparaturen zählen nicht dazu.' },
-  { w: ['Belegung'], t: 'Belegung', e: 'Wie viel Prozent der Betten im Durchschnitt pro Nacht bezahlt belegt sind.' }
+  { w: ['Belegung'], t: 'Belegung', e: 'Wie viel Prozent der Betten im Durchschnitt pro Nacht bezahlt belegt sind.' },
+  { w: ['Wohnfläche'], nurAnfang: true, t: 'Wohnfläche', e: 'Die Fläche, die als Wohnraum zählt. Stellen unter einer Dachschräge, die niedriger als 2 m sind, zählen nur halb, unter 1 m gar nicht. Balkone zählen meist zu einem Viertel. Keller und Garage zählen nicht. So steht es in der Wohnflächenverordnung.' },
+  { w: ['Nutzfläche'], nurAnfang: true, t: 'Nutzfläche', e: 'Flächen, die keine Wohnfläche sind, aber genutzt werden können: Keller, Garage, Heizraum, Abstellraum. Manche davon kann man extra vermieten.' },
+  { w: ['Echte Länge'], t: 'Maßstab', e: 'Ein Bild weiß nicht, wie groß das Haus wirklich ist. Du zeigst der Seite eine Strecke, deren Länge du kennst, und sagst, wie lang sie in echt ist. Danach stimmen alle Flächen.' }
 ];

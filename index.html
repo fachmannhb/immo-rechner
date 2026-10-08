@@ -42,7 +42,7 @@
     --blau: #2f5fb3;
     --schlecht-flaeche: rgba(178, 59, 43, .08);
     --gut-fl: #e3f2e8; --warn-fl: #fbf0d2; --schlecht-fl: #f8e1dc; --leer-fl: #efe8f7;
-    --f1: #6b3fa0; --f2: #2f5fb3; --f3: #b0346b; --f4: #1f6f9e; --f5: #8e2f8a; --f6: #4f6170; --f7: #6b6470;
+    --f1: #6b3fa0; --f2: #2f5fb3; --f3: #b0346b; --f4: #1f6f9e; --f5: #8e2f8a; --f6: #4f6170; --f7: #6b6470; --f8: #4a4fb5;
     --schatten: 0 1px 2px rgba(60, 40, 10, .05), 0 8px 24px rgba(60, 40, 10, .07);
     --display: 'Manrope', 'Segoe UI', system-ui, sans-serif;
     --sans: 'Source Sans 3', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -56,7 +56,7 @@
       --akzent-flaeche: rgba(185, 148, 236, .14); --blau: #7aa8f0;
       --schlecht-flaeche: rgba(239, 138, 122, .10);
       --gut-fl: #1c3a2a; --warn-fl: #3a3018; --schlecht-fl: #43231f; --leer-fl: #2f2740;
-      --f1: #b994ec; --f2: #7aa8f0; --f3: #ec86b1; --f4: #6cc3ee; --f5: #e3a0e0; --f6: #a3b4c2; --f7: #b3aab9;
+      --f1: #b994ec; --f2: #7aa8f0; --f3: #ec86b1; --f4: #6cc3ee; --f5: #e3a0e0; --f6: #a3b4c2; --f7: #b3aab9; --f8: #a3a8f2;
       --schatten: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .3);
     }
   }
@@ -67,7 +67,7 @@
     --akzent-flaeche: rgba(185, 148, 236, .14); --blau: #7aa8f0;
     --schlecht-flaeche: rgba(239, 138, 122, .10);
     --gut-fl: #1c3a2a; --warn-fl: #3a3018; --schlecht-fl: #43231f; --leer-fl: #2f2740;
-    --f1: #b994ec; --f2: #7aa8f0; --f3: #ec86b1; --f4: #6cc3ee; --f5: #e3a0e0; --f6: #a3b4c2; --f7: #b3aab9;
+    --f1: #b994ec; --f2: #7aa8f0; --f3: #ec86b1; --f4: #6cc3ee; --f5: #e3a0e0; --f6: #a3b4c2; --f7: #b3aab9; --f8: #a3a8f2;
     --schatten: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .3);
   }
 
@@ -265,6 +265,8 @@
   .szene .ersatz { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: var(--leise); }
   .frage { font-size: clamp(26px, 3vw, 32px); margin: 40px 0 18px; }
   .start-kacheln { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  /* allein stehende letzte Kachel über die ganze Breite statt einer Lücke */
+  .start-kacheln > :last-child:nth-child(3n+1) { grid-column: 1 / -1; }
   .start-kachel { display: flex; flex-direction: column; gap: 10px; text-align: left; background: var(--karte); color: var(--text); border: 1px solid var(--linie); border-top: 10px solid var(--f); border-radius: 14px; padding: 22px; cursor: pointer; font: inherit; transition: transform .2s ease, box-shadow .2s ease; }
   .start-kachel:hover { transform: translateY(-4px); box-shadow: var(--schatten); }
   .start-kachel > svg { width: 42px; height: 42px; color: var(--f); }
@@ -321,10 +323,75 @@
   #erklaerung strong { display: block; font-family: var(--display); margin-bottom: 4px; }
   #erklaerung p { margin: 0; }
 
+  /* Grundriss und Einrichtung */
+  .g-leiste { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .g-gruppe { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .g-gruppe > span { color: var(--leise); font-size: .95rem; margin-right: 2px; }
+  .chip { border: 2px solid var(--linie2); background: var(--karte); color: var(--text); border-radius: 999px; padding: 6px 14px; font: 600 15px var(--sans); cursor: pointer; min-height: 40px; }
+  .chip:hover { border-color: var(--f8); }
+  .chip[aria-pressed="true"] { background: var(--f8); border-color: var(--f8); color: var(--grund); }
+  .chip.klein { min-width: 40px; padding: 6px 10px; }
+  .g-flaeche { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 18px; align-items: start; }
+  .g-buehne { position: relative; border: 1px solid var(--linie); border-radius: 16px; overflow: hidden; background: var(--karte2); height: min(68vh, 640px); min-height: 360px; }
+  #g-plan { display: block; width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; cursor: default; }
+  #g-plan.zeichnen { cursor: crosshair; }
+  #g-plan.schieben { cursor: grab; }
+  #g-plan .raster-linie { stroke: var(--linie2); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  #g-plan .raster-linie.meter { stroke: var(--linie); }
+  #g-plan .raum { stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; fill-opacity: .28; cursor: pointer; }
+  #g-plan .raum.gewaehlt { stroke: var(--f8); stroke-width: 4; fill-opacity: .4; }
+  #g-plan .raum-text { fill: var(--text); font-family: var(--sans); font-weight: 700; text-anchor: middle; pointer-events: none; paint-order: stroke; stroke: var(--karte2); stroke-linejoin: round; }
+  #g-plan .raum-text tspan.leise { font-weight: 400; }
+  #g-plan .teil rect { stroke: var(--text); stroke-width: 1.5; vector-effect: non-scaling-stroke; cursor: move; }
+  #g-plan .teil.wohnung rect.koerper { fill: color-mix(in srgb, var(--f2) 45%, var(--karte)); }
+  #g-plan .teil.monteur rect.koerper { fill: color-mix(in srgb, var(--f5) 45%, var(--karte)); }
+  #g-plan .teil.umbau rect.koerper { fill: color-mix(in srgb, var(--f3) 40%, var(--karte)); }
+  #g-plan .teil.wandweg rect.koerper { fill: var(--schlecht-flaeche); stroke: var(--schlecht); stroke-dasharray: 6 4; }
+  #g-plan .teil .kissen { fill: var(--karte); pointer-events: none; }
+  #g-plan .teil.gewaehlt rect.koerper { stroke: var(--f8); stroke-width: 4; }
+  #g-plan .teil text { fill: var(--text); font-family: var(--sans); font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  #g-plan :focus { outline: none; }
+  #g-plan :focus-visible > .raum, #g-plan .teil:focus-visible rect.koerper { stroke: var(--akzent); stroke-width: 5; }
+  #g-plan .griff { fill: var(--karte); stroke: var(--f8); stroke-width: 3; vector-effect: non-scaling-stroke; cursor: move; }
+  #g-plan .hilfslinie { stroke: var(--f8); stroke-width: 3; vector-effect: non-scaling-stroke; fill: none; stroke-dasharray: 8 5; }
+  #g-plan .hilfsflaeche { fill: var(--f8); fill-opacity: .15; stroke: var(--f8); stroke-width: 3; vector-effect: non-scaling-stroke; }
+  #g-plan .hilfspunkt { fill: var(--f8); }
+  .raum.art-voll { fill: var(--f2); } .raum.art-balkon { fill: var(--f4); } .raum.art-wintergarten { fill: var(--f1); } .raum.art-zubehoer { fill: var(--f7); }
+  .g-tipp { position: absolute; left: 10px; right: 10px; top: 10px; pointer-events: none; display: flex; justify-content: center; }
+  .g-tipp span { background: color-mix(in srgb, var(--karte) 92%, transparent); border: 1px solid var(--linie2); border-radius: 12px; padding: 6px 12px; font-size: .95rem; max-width: 100%; }
+  .g-tipp span:empty { display: none; }
+  .g-zoom { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 6px; }
+  .g-zoom .chip { background: var(--karte); }
+  .g-szene { position: absolute; inset: 0; aspect-ratio: auto; border-radius: 0; }
+  .g-seite { display: flex; flex-direction: column; gap: 14px; }
+  .g-seite h4 { margin: 0 0 6px; font: 700 1.05rem var(--display); }
+  .g-panel { background: var(--karte2); border-radius: 14px; padding: 14px 16px; }
+  .g-panel p { margin: 0 0 10px; }
+  .g-panel .knopfreihe { margin-top: 10px; }
+  .g-panel label { font-size: .95rem; }
+  .g-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .g-katalog { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 330px; overflow-y: auto; padding: 2px; }
+  .g-katalog button { text-align: left; border: 2px solid var(--linie); background: var(--karte); color: var(--text); border-radius: 12px; padding: 8px 10px; font: 600 14px/1.25 var(--sans); cursor: pointer; }
+  .g-katalog button small { display: block; color: var(--leise); font-weight: 400; }
+  .g-katalog button:hover { border-color: var(--f8); }
+  .g-auswahl:empty { display: none; }
+  .g-auswahl { border: 2px solid var(--f8); background: var(--karte); }
+  .g-check { display: flex; gap: 10px; align-items: flex-start; }
+  .g-check input { margin-top: 4px; width: 20px; height: 20px; flex: none; }
+  .g-check label { margin: 0; color: var(--text); }
+  .g-frage { background: var(--akzent-flaeche); border-radius: 14px; padding: 14px 16px; margin-top: 12px; }
+  .g-frage[hidden] { display: none; }
+  @media (max-width: 1000px) {
+    .g-flaeche { grid-template-columns: minmax(0, 1fr); }
+    .g-buehne { height: min(62vh, 520px); }
+  }
+
   @media (max-width: 900px) {
     .hero { grid-template-columns: minmax(0, 1fr); }
     .hero .szene { max-width: 480px; }
     .start-kacheln { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .start-kacheln > :last-child:nth-child(3n+1) { grid-column: auto; }
+    .start-kacheln > :last-child:nth-child(2n+1) { grid-column: 1 / -1; }
   }
   /* Handybreite: Tabellen als Karten */
   @media (max-width: 760px) {
@@ -356,6 +423,7 @@
   <symbol id="i-weg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M24 4v40M16 44h16"/><path d="M24 9h14l5 5-5 5H24zM24 22H10l-5 5 5 5h14z"/></symbol>
   <symbol id="i-paragraf" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M31 11c-1-3-4-5-8-5-5 0-8 3-8 6 0 8 18 6 18 15 0 3-2 5-5 6M17 37c1 3 4 5 8 5 5 0 8-3 8-6 0-8-18-6-18-15 0-3 2-5 5-6"/></symbol>
   <symbol id="i-bett" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12v28M5 32h38v8M5 26h38v6"/><rect x="9" y="18" width="10" height="8" rx="3"/></symbol>
+  <symbol id="i-grundriss" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7" width="38" height="34" rx="2"/><path d="M22 7v13M22 27v14M22 24h21M5 24h9"/><path d="M30 33h7"/></symbol>
   <symbol id="i-menue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
   <symbol id="i-sonne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
   <symbol id="i-mond" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
@@ -379,6 +447,7 @@
           <button type="button" class="bereich-knopf" id="tab-rechner" data-ziel="rechner" style="--f:var(--f2)"><svg aria-hidden="true"><use href="#i-rechner"/></svg>Kann ich mir das leisten?</button>
           <button type="button" class="bereich-knopf" id="tab-wert" data-ziel="wert" style="--f:var(--f3)"><svg aria-hidden="true"><use href="#i-waage"/></svg>Was ist das Haus wert?</button>
           <button type="button" class="bereich-knopf" id="tab-umbau" data-ziel="umbau" style="--f:var(--f4)"><svg aria-hidden="true"><use href="#i-werkzeug"/></svg>Umbauen und renovieren</button>
+          <button type="button" class="bereich-knopf" id="tab-grundriss" data-ziel="grundriss" style="--f:var(--f8)"><svg aria-hidden="true"><use href="#i-grundriss"/></svg>Grundriss und Einrichtung</button>
           <button type="button" class="bereich-knopf" id="tab-pruefliste" data-ziel="pruefliste" style="--f:var(--f5)"><svg aria-hidden="true"><use href="#i-weg"/></svg>Schritt für Schritt zum Kauf</button>
           <button type="button" class="bereich-knopf" id="tab-recht" data-ziel="recht" style="--f:var(--f6)"><svg aria-hidden="true"><use href="#i-paragraf"/></svg>Gesetze und Hilfe</button>
           <button type="button" class="bereich-knopf optional" id="tab-monteur" data-ziel="monteur" style="--f:var(--f7)"><svg aria-hidden="true"><use href="#i-bett"/></svg>Extra: Monteurzimmer</button>
@@ -426,6 +495,7 @@
     <button type="button" class="start-kachel" data-ziel="rechner" style="--f:var(--f2)"><svg aria-hidden="true"><use href="#i-rechner"/></svg><strong>Kann ich mir das leisten?</strong><span class="text">Kaufpreis, Kredit und Miete eingeben. Du siehst sofort, ob die Miete die Rate trägt.</span><span class="los">Jetzt rechnen →</span></button>
     <button type="button" class="start-kachel" data-ziel="wert" style="--f:var(--f3)"><svg aria-hidden="true"><use href="#i-waage"/></svg><strong>Was ist das Haus wert?</strong><span class="text">Grob schätzen, ob der Preis zur Miete und zum Grundstück passt.</span><span class="los">Wert schätzen →</span></button>
     <button type="button" class="start-kachel" data-ziel="umbau" style="--f:var(--f4)"><svg aria-hidden="true"><use href="#i-werkzeug"/></svg><strong>Umbauen und renovieren</strong><span class="text">Was kosten Bad, Dach oder Heizung, und wie viel Miete bringt es zurück?</span><span class="los">Umbau planen →</span></button>
+    <button type="button" class="start-kachel" data-ziel="grundriss" style="--f:var(--f8)"><svg aria-hidden="true"><use href="#i-grundriss"/></svg><strong>Grundriss und Einrichtung</strong><span class="text">Grundriss aus dem Exposé nachzeichnen, Möbel hineinstellen, Wohnfläche und Kosten sehen.</span><span class="los">Räume planen →</span></button>
     <button type="button" class="start-kachel" data-ziel="pruefliste" style="--f:var(--f5)"><svg aria-hidden="true"><use href="#i-weg"/></svg><strong>Schritt für Schritt zum Kauf</strong><span class="text">Zehn Etappen von der Bank bis zur Vermietung, zum Abhaken.</span><span class="los">Weg ansehen →</span></button>
     <button type="button" class="start-kachel" data-ziel="recht" style="--f:var(--f6)"><svg aria-hidden="true"><use href="#i-paragraf"/></svg><strong>Gesetze und Hilfe</strong><span class="text">Welche Regeln gelten, und wen du fragen kannst.</span><span class="los">Nachschlagen →</span></button>
   </div>
@@ -949,6 +1019,177 @@
   </div>
 </section>
 
+<!-- GRUNDRISS -->
+<section id="grundriss" aria-label="Grundriss und Einrichtung" hidden>
+  <header class="bereich-kopf" style="--f:var(--f8)">
+    <svg aria-hidden="true"><use href="#i-grundriss"/></svg>
+    <div>
+      <p class="etikett">Wohnfläche, Möbel, Umbau</p>
+      <h2>Grundriss und Einrichtung</h2>
+      <p class="lead">Lade den Grundriss aus dem Exposé, zeichne die Räume nach und stelle Möbel hinein. Du siehst sofort die Wohnfläche und was die Einrichtung kostet. Das Bild bleibt auf deinem Gerät, es wird nirgends hochgeladen.</p>
+    </div>
+  </header>
+
+  <div class="satz" id="g-satz" aria-live="polite">
+    <div class="lampe" aria-hidden="true">?</div>
+    <div><strong id="g-satz-text"></strong><small id="g-satz-klein"></small></div>
+  </div>
+  <dl class="kacheln" id="g-kacheln">
+    <div class="kz haupt"><dt>Wohnfläche</dt><dd id="g-wfl">-</dd></div>
+    <div class="kz"><dt>Nutzfläche (Keller, Garage)</dt><dd id="g-nfl">-</dd></div>
+    <div class="kz"><dt>Einrichtung</dt><dd id="g-einr">-</dd></div>
+    <div class="kz"><dt>Umbau</dt><dd id="g-umb">-</dd></div>
+  </dl>
+
+  <ol class="schritte" id="g-schritte" aria-label="Schritte im Grundriss">
+    <li><button type="button" data-gschritt="1" aria-current="step"><b>1</b>Bild und Maßstab</button></li>
+    <li><button type="button" data-gschritt="2"><b>2</b>Räume zeichnen</button></li>
+    <li><button type="button" data-gschritt="3"><b>3</b>Einrichten</button></li>
+    <li><button type="button" data-gschritt="4"><b>4</b>Kosten und übernehmen</button></li>
+  </ol>
+
+  <div class="karte">
+    <div class="g-leiste">
+      <div class="g-gruppe" role="group" aria-label="Etagen"><span>Etage:</span><span id="g-etagen" class="g-gruppe"></span><button type="button" class="chip klein" id="g-etage-neu" aria-label="Etage hinzufügen">+</button></div>
+      <div class="g-gruppe" role="group" aria-label="Ansicht"><span>Ansicht:</span><button type="button" class="chip" id="g-ansicht-plan" aria-pressed="true">Von oben</button><button type="button" class="chip" id="g-ansicht-3d" aria-pressed="false">3D</button></div>
+    </div>
+    <div class="g-flaeche">
+      <div class="g-buehne" id="g-buehne">
+        <svg id="g-plan" role="application" aria-label="Grundriss. Räume und Möbel anklicken oder mit Tab auswählen; Pfeiltasten verschieben, R dreht, Entf löscht."></svg>
+        <figure class="szene g-szene" id="g-szene" aria-label="Dreidimensionale Ansicht des Grundrisses, mit der Maus drehbar" hidden>
+          <canvas id="g-3d"></canvas>
+          <div class="ersatz" id="g-3d-ersatz" hidden>3D-Ansicht nicht verfügbar (WebGL ist in diesem Browser aus). Der Plan von oben funktioniert trotzdem.</div>
+          <figcaption class="szenen-text"><span>ziehen zum Drehen</span><span id="g-3d-etikett"></span></figcaption>
+        </figure>
+        <div class="g-tipp" aria-live="polite"><span id="g-tipp"></span></div>
+        <div class="g-zoom" id="g-zoom">
+          <button type="button" class="chip klein" id="g-zoom-aus" aria-label="Verkleinern">−</button>
+          <button type="button" class="chip klein" id="g-zoom-ein" aria-label="Vergrößern">+</button>
+          <button type="button" class="chip" id="g-zoom-passt">Alles zeigen</button>
+        </div>
+      </div>
+
+      <div class="g-seite">
+        <div class="g-panel" data-gpanel="1">
+          <h4>1. Grundriss laden</h4>
+          <p>Ein Bild oder Foto des Grundrisses aus dem Exposé wählen (JPG oder PNG). Ohne Bild kannst du auf dem Raster zeichnen, ein Kästchen ist 1 m.</p>
+          <input type="file" id="g-bild-datei" accept="image/png,image/jpeg,image/webp" hidden>
+          <div class="knopfreihe"><label class="knopf" for="g-bild-datei" tabindex="0" role="button" id="g-bild-knopf">Bild wählen</label><button type="button" class="knopf zweit" id="g-bild-weg">Bild entfernen</button></div>
+          <h4 style="margin-top:16px">Maßstab festlegen</h4>
+          <p>Klicke auf den Anfang und das Ende einer Wand, deren Länge du kennst (steht oft im Grundriss), und gib die Länge ein.</p>
+          <div class="knopfreihe"><button type="button" class="knopf" id="g-mass-start">Strecke anklicken</button></div>
+          <div id="g-mass-frage" hidden style="margin-top:12px">
+            <label for="g-mass-laenge">Echte Länge dieser Strecke in m</label>
+            <input type="text" id="g-mass-laenge" inputmode="decimal" placeholder="z. B. 4,20" aria-describedby="g-mass-laenge-f">
+            <div class="fehler" id="g-mass-laenge-f"></div>
+            <div class="knopfreihe"><button type="button" class="knopf" id="g-mass-ok">Maßstab übernehmen</button><button type="button" class="knopf zweit" id="g-mass-abbruch">Abbrechen</button></div>
+          </div>
+          <p class="klein" id="g-mass-stand"></p>
+          <div class="g-mini" style="margin-top:12px">
+            <div><label for="g-etage-name">Name der Etage</label><input type="text" id="g-etage-name"></div>
+            <div><label for="g-wandhoehe">Raumhöhe in m (für 3D)</label><input type="text" id="g-wandhoehe" inputmode="decimal" aria-describedby="g-wandhoehe-f"><div class="fehler" id="g-wandhoehe-f"></div></div>
+          </div>
+          <div class="knopfreihe"><button type="button" class="knopf zweit" id="g-etage-weg">Diese Etage löschen</button></div>
+        </div>
+
+        <div class="g-panel" data-gpanel="2" hidden>
+          <h4>2. Räume nachzeichnen</h4>
+          <p>Rechteck: drücken und ziehen. Andere Formen: Ecke für Ecke klicken und auf den ersten Punkt klicken (oder Enter), um den Raum zu schließen. Esc bricht ab.</p>
+          <div class="g-gruppe" role="group" aria-label="Zeichenart">
+            <button type="button" class="chip" data-gmodus="rechteck" aria-pressed="false">Rechteck ziehen</button>
+            <button type="button" class="chip" data-gmodus="ecken" aria-pressed="false">Ecke für Ecke</button>
+            <button type="button" class="chip" data-gmodus="auswahl" aria-pressed="true">Auswählen</button>
+          </div>
+          <h4 style="margin-top:16px">Oder Raum mit Maßen anlegen</h4>
+          <div class="g-mini">
+            <div><label for="g-neu-b">Breite in m</label><input type="text" id="g-neu-b" inputmode="decimal" placeholder="4,0" aria-describedby="g-neu-b-f"><div class="fehler" id="g-neu-b-f"></div></div>
+            <div><label for="g-neu-l">Länge in m</label><input type="text" id="g-neu-l" inputmode="decimal" placeholder="3,5" aria-describedby="g-neu-l-f"><div class="fehler" id="g-neu-l-f"></div></div>
+          </div>
+          <div class="knopfreihe"><button type="button" class="knopf" id="g-neu-raum">Raum hinzufügen</button></div>
+        </div>
+
+        <div class="g-panel" data-gpanel="3" hidden>
+          <h4>3. Möbel und Umbau</h4>
+          <p>Antippen stellt das Teil in die Mitte des Plans (oder in den gewählten Raum). Dann ziehen, mit R drehen, mit Entf löschen.</p>
+          <div class="g-gruppe" role="group" aria-label="Gruppe" style="margin-bottom:10px">
+            <button type="button" class="chip" data-ggruppe="wohnung" aria-pressed="true">Wohnung</button>
+            <button type="button" class="chip" data-ggruppe="monteur" aria-pressed="false">Monteurzimmer</button>
+            <button type="button" class="chip" data-ggruppe="umbau" aria-pressed="false">Umbau</button>
+          </div>
+          <div class="g-katalog" id="g-katalog"></div>
+        </div>
+
+        <div class="g-panel" data-gpanel="4" hidden>
+          <h4>4. Kosten und übernehmen</h4>
+          <p>Die Kostenliste steht unter dem Plan. Dort kannst du jeden Preis durch dein Angebot ersetzen. Mit dem Knopf gehen Wohnfläche und Summe in „Kann ich mir das leisten?“.</p>
+          <div class="knopfreihe"><button type="button" class="knopf" id="g-zur-liste">Zur Kostenliste</button></div>
+        </div>
+
+        <div class="g-panel g-auswahl" id="g-auswahl" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="meldung" id="g-meldung" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="karte">
+    <h3>Räume und Flächen</h3>
+    <div class="tabelle-kasten karten-kasten">
+      <table class="karten" id="g-raeume">
+        <thead><tr><th scope="col" style="width:22%">Raum</th><th scope="col" style="width:16%">Etage</th><th scope="col" style="width:20%">Art</th><th scope="col" class="z" style="width:14%">Grundfläche</th><th scope="col" class="z" style="width:14%">Wohnfläche</th><th scope="col" class="z">Nutzfläche</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="formel">Wohnfläche nach Wohnflächenverordnung (WoFlV, Wortlaut §§ 2 und 4 geprüft 08.10.2026 auf <a href="https://www.gesetze-im-internet.de/woflv/__4.html" target="_blank" rel="noopener">gesetze-im-internet.de</a>): Flächen mit mindestens 2 m lichter Höhe voll, mit 1 bis unter 2 m zur Hälfte, unter 1 m gar nicht. Unbeheizte Wintergärten zur Hälfte. Balkone, Loggien und Terrassen in der Regel zu einem Viertel, höchstens zur Hälfte. Keller, Garage, Heizraum und Abstellräume außerhalb der Wohnung zählen nicht zur Wohnfläche; sie stehen hier getrennt als Nutzfläche, weil man sie oft extra vermieten kann.</p>
+  </div>
+
+  <div class="karte" id="g-kosten-karte">
+    <h3>Was kostet die Einrichtung?</h3>
+    <p class="klein" id="g-preis-hinweis"></p>
+    <div class="tabelle-kasten karten-kasten">
+      <table class="karten" id="g-kosten">
+        <thead><tr><th scope="col" style="width:28%">Teil</th><th scope="col" class="z" style="width:10%">Menge</th><th scope="col" style="width:16%">€ je Stück</th><th scope="col" class="z" style="width:14%">Summe</th><th scope="col">Spanne und Quelle</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <dl class="ergebnisse" id="g-kosten-ergebnis"></dl>
+    <div id="g-betten-block" hidden>
+      <h4 style="margin:18px 0 6px">Schlafplätze je Zimmer</h4>
+      <div class="tabelle-kasten karten-kasten">
+        <table class="karten" id="g-betten">
+          <thead><tr><th scope="col">Zimmer</th><th scope="col" class="z">Schlafplätze</th><th scope="col" class="z">m² je Schlafplatz</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="klein">Nur zur Übersicht. Wie viele Betten erlaubt sind, regeln Bauordnung und Brandschutz des Landes (siehe „Extra: Monteurzimmer“ und „Gesetze und Hilfe“).</p>
+    </div>
+    <div class="knopfreihe">
+      <button type="button" class="knopf" id="g-uebernehmen">In den Rechner übernehmen</button>
+    </div>
+    <div class="g-frage" id="g-frage" hidden>
+      <p id="g-frage-text" style="margin:0 0 10px"></p>
+      <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-frage-ersetzen">Ersetzen</button><button type="button" class="knopf zweit" id="g-frage-dazu">Kosten dazurechnen</button><button type="button" class="knopf zweit" id="g-frage-nein">Abbrechen</button></div>
+    </div>
+    <div class="meldung" id="g-uebernahme-meldung" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="karte">
+    <h3>Plan sichern</h3>
+    <p class="klein">Der Plan wird in diesem Browser automatisch gespeichert. Als Datei sichern, wenn du ihn auf ein anderes Gerät mitnehmen oder aufbewahren willst.</p>
+    <div class="knopfreihe">
+      <button type="button" class="knopf zweit" id="g-sichern">Als Datei sichern</button>
+      <input type="file" id="g-laden-datei" accept=".json,application/json" hidden>
+      <label class="knopf zweit" for="g-laden-datei" tabindex="0" role="button" id="g-laden-knopf">Datei laden</label>
+      <button type="button" class="knopf zweit" id="g-neu">Neuen Plan beginnen</button>
+    </div>
+    <div class="g-frage" id="g-neu-frage" hidden>
+      <p style="margin:0 0 10px">Der jetzige Plan wird gelöscht. Vorher als Datei sichern?</p>
+      <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-neu-sichern">Sichern und neu beginnen</button><button type="button" class="knopf zweit" id="g-neu-ohne">Ohne Sichern löschen</button><button type="button" class="knopf zweit" id="g-neu-nein">Abbrechen</button></div>
+    </div>
+    <div class="meldung" id="g-datei-meldung" role="status" aria-live="polite"></div>
+    <p class="klein">Grenzen: kein Bauplan. Wände sind die Ränder der Räume, ohne Wandstärke; Dachschrägen werden nur als Anteil der Fläche gerechnet, nicht in 3D gezeigt. Die Wohnfläche ist eine Näherung zum Prüfen der Exposé-Angabe, kein Aufmaß. Alle Preise sind Richtwerte.</p>
+  </div>
+</section>
+
 <!-- PRÜFLISTE -->
 <section id="pruefliste" aria-label="Schritt für Schritt zum Kauf" hidden>
   <header class="bereich-kopf" style="--f:var(--f5)">
@@ -1468,6 +1709,9 @@ window.DATEN.recht = {
    nurAnfang: nur wenn die Beschriftung mit dem Wort beginnt (z. B. nicht bei „Fixkosten (ohne Kredit)“).
    app.js hängt an passende Beschriftungen ein (?) an, das die Erklärung zeigt. */
 window.DATEN = window.DATEN || {};
+/* Begriffe für „Grundriss und Einrichtung“ (08.10.2026) stehen am Ende der Liste. Die Felder im
+   Auswahlkasten des Grundrisses entstehen erst beim Anklicken und bekommen darum kein (?);
+   ihre Erklärung steht direkt darunter. */
 window.DATEN.begriffe = [
   { w: ['Grunderwerbsteuer'], t: 'Grunderwerbsteuer', e: 'Eine Steuer, die du beim Kauf einmal an das Bundesland zahlst. Wie hoch sie ist, hängt vom Bundesland ab; der Satz steht in der Auswahl „Bundesland“.' },
   { w: ['Notar und Grundbuch'], t: 'Notar und Grundbuch', e: 'Der Notar beurkundet den Kaufvertrag. Das Grundbuchamt trägt dich danach als neuen Eigentümer ein. Beides kostet Gebühren, die zum Kaufpreis dazukommen.' },
@@ -1501,8 +1745,76 @@ window.DATEN.begriffe = [
   { w: ['Restnutzungsdauer'], t: 'Restnutzungsdauer', e: 'Wie viele Jahre das Gebäude voraussichtlich noch wirtschaftlich genutzt werden kann. Eine Modernisierung kann sie verlängern.' },
   { w: ['Brutto-Grundfläche'], t: 'Brutto-Grundfläche', e: 'Die Fläche aller Geschosse, außen gemessen. Sie steht in den Bauunterlagen.' },
   { w: ['Modernisierung'], t: 'Modernisierung', e: 'Ein Umbau, der das Haus verbessert, zum Beispiel Dämmung oder ein neues Bad. Danach darf die Miete bei bestehenden Verträgen in Grenzen steigen; reine Reparaturen zählen nicht dazu.' },
-  { w: ['Belegung'], t: 'Belegung', e: 'Wie viel Prozent der Betten im Durchschnitt pro Nacht bezahlt belegt sind.' }
+  { w: ['Belegung'], t: 'Belegung', e: 'Wie viel Prozent der Betten im Durchschnitt pro Nacht bezahlt belegt sind.' },
+  { w: ['Wohnfläche'], nurAnfang: true, t: 'Wohnfläche', e: 'Die Fläche, die als Wohnraum zählt. Stellen unter einer Dachschräge, die niedriger als 2 m sind, zählen nur halb, unter 1 m gar nicht. Balkone zählen meist zu einem Viertel. Keller und Garage zählen nicht. So steht es in der Wohnflächenverordnung.' },
+  { w: ['Nutzfläche'], nurAnfang: true, t: 'Nutzfläche', e: 'Flächen, die keine Wohnfläche sind, aber genutzt werden können: Keller, Garage, Heizraum, Abstellraum. Manche davon kann man extra vermieten.' },
+  { w: ['Echte Länge'], t: 'Maßstab', e: 'Ein Bild weiß nicht, wie groß das Haus wirklich ist. Du zeigst der Seite eine Strecke, deren Länge du kennst, und sagst, wie lang sie in echt ist. Danach stimmen alle Flächen.' }
 ];
+
+</script>
+<script>/* daten/moebel.js */
+/* Möbel und Umbau-Elemente für „Grundriss und Einrichtung“.
+   Preise: Bericht recherche/08_moebel_preise.md, Abruf 08.10.2026, fast nur IKEA Deutschland
+   (Einstiegs- bis oberes IKEA-Niveau, kein belegtes Mittelsegment anderer Händler).
+   Stichproben selbst geprüft 08.10.2026: KLEPPSTAD 2-/3-türig, Innentür clean-invoice.
+   Maße in cm (Breite × Tiefe × Höhe); „masz:'geschätzt'“ = Zeichenmaß nicht von der Quelle.
+   start:null = kein geprüfter Preis, die Seite zeigt „Preis eintragen“.
+   gruppe: wohnung | monteur | umbau (umbau zählt als Umbau, alles andere als Einrichtung);
+   auch: in welchen weiteren Katalog-Gruppen das Teil erscheint.
+   einheit 'm': Menge = Länge des Teils im Plan (Breite). betten: Schlafplätze.
+   zeichnen:false = nicht im Plan, Menge in der Kostenliste; jeBett = Menge je Schlafplatz. */
+window.DATEN = window.DATEN || {};
+(function () {
+  var san = (window.DATEN.sanierung && window.DATEN.sanierung.bauteile) || [];
+  function ausSanierung(id) { return san.filter(function (b) { return b.id === id; })[0] || {}; }
+  var bad = ausSanierung('bad'), tuer = ausSanierung('tueren');
+  var IK = 'ikea.com/de, Abruf 08.10.2026';
+
+  window.DATEN.moebel = {
+    abruf: '08.10.2026',
+    artikel: [
+      /* Wohnung */
+      { id: 'bett140', gruppe: 'wohnung', auch: ['monteur'], name: 'Doppelbett 140×200 (Gestell und Lattenrost, ohne Matratze)', kurz: 'Bett 140', form: 'bett', betten: 2, breite: 150, tiefe: 210, hoehe: 90, masz: 'geschätzt', von: 140, bis: 348, start: 259, quelle: IK + '; Gestell 90–179 €, Lattenrost 50–169 €' },
+      { id: 'matratze140', gruppe: 'wohnung', name: 'Matratze 140×200', zeichnen: false, von: null, bis: null, start: null, quelle: 'Noch kein geprüfter Preis' },
+      { id: 'bett180', gruppe: 'wohnung', name: 'Doppelbett 180×200 (nur Gestell)', kurz: 'Bett 180', form: 'bett', betten: 2, breite: 190, tiefe: 210, hoehe: 90, masz: 'geschätzt', von: 299, bis: 499, start: 299, quelle: IK + '; Lattenrost und Matratze kommen dazu' },
+      { id: 'schrank2', gruppe: 'wohnung', auch: ['monteur'], name: 'Kleiderschrank 2-türig', kurz: 'Schrank', breite: 79, tiefe: 55, hoehe: 176, von: 69, bis: 89.99, start: 79, quelle: IK + ' (KLEPPSTAD, BRIMNES)' },
+      { id: 'schrank3', gruppe: 'wohnung', name: 'Kleiderschrank 3-türig', kurz: 'Schrank', breite: 117, tiefe: 55, hoehe: 176, von: 99.99, bis: 282, start: 115, quelle: IK + ' (KLEPPSTAD bis PAX)' },
+      { id: 'sofa', gruppe: 'wohnung', name: 'Sofa 3-Sitzer', kurz: 'Sofa', breite: 218, tiefe: 88, hoehe: 88, von: 279, bis: 899, start: 499, quelle: IK + ' (EKTORP)' },
+      { id: 'couchtisch', gruppe: 'wohnung', name: 'Couchtisch', kurz: 'Tisch', breite: 90, tiefe: 55, hoehe: 45, masz: 'Höhe geschätzt', von: 19.99, bis: 149, start: 59.99, quelle: IK },
+      { id: 'esstisch', gruppe: 'wohnung', name: 'Esstisch für 4', kurz: 'Esstisch', breite: 125, tiefe: 75, hoehe: 74, masz: 'Höhe geschätzt', von: 59.99, bis: 159, start: 129, quelle: IK },
+      { id: 'stuhl', gruppe: 'wohnung', auch: ['monteur'], name: 'Stuhl', kurz: 'Stuhl', breite: 45, tiefe: 50, hoehe: 80, masz: 'geschätzt', von: 69.99, bis: 99.99, start: 79.99, quelle: IK },
+      { id: 'schreibtisch', gruppe: 'wohnung', auch: ['monteur'], name: 'Schreibtisch', kurz: 'Schreibtisch', breite: 120, tiefe: 60, hoehe: 75, masz: 'Höhe geschätzt', von: 39.99, bis: 249, start: 89.98, quelle: IK },
+      { id: 'buerostuhl', gruppe: 'wohnung', name: 'Bürostuhl', kurz: 'Stuhl', breite: 60, tiefe: 60, hoehe: 100, masz: 'geschätzt', von: 25, bis: 349, start: 79.99, quelle: IK },
+      { id: 'kommode', gruppe: 'wohnung', name: 'Kommode', kurz: 'Kommode', breite: 70, tiefe: 50, hoehe: 75, von: 49, bis: 199, start: 99.99, quelle: IK },
+      { id: 'regal', gruppe: 'wohnung', name: 'Regal', kurz: 'Regal', breite: 80, tiefe: 28, hoehe: 202, von: 29, bis: 99, start: 59.99, quelle: IK + ' (BILLY)' },
+      { id: 'nachttisch', gruppe: 'wohnung', auch: ['monteur'], name: 'Nachttisch', kurz: 'NT', breite: 39, tiefe: 41, hoehe: 53, von: 14, bis: 119, start: 29.99, quelle: IK },
+      { id: 'tvboard', gruppe: 'wohnung', name: 'TV-Board', kurz: 'TV', breite: 120, tiefe: 41, hoehe: 53, von: 18, bis: 399, start: 59.99, quelle: IK },
+      { id: 'kueche', gruppe: 'wohnung', auch: ['monteur'], name: 'Küchenzeile 270 cm mit Geräten', kurz: 'Küche', breite: 270, tiefe: 60, hoehe: 200, von: 1299, bis: 2349, start: 1299, quelle: 'poco.de, Abruf 08.10.2026; Versand extra' },
+      { id: 'kuehlschrank', gruppe: 'wohnung', name: 'Kühlschrank', kurz: 'Kühl', breite: 55, tiefe: 57, hoehe: 83, von: 119, bis: 229, start: 229, quelle: IK },
+      { id: 'waschmaschine', gruppe: 'wohnung', auch: ['monteur'], name: 'Waschmaschine', kurz: 'WM', breite: 60, tiefe: 57, hoehe: 86, von: 299, bis: 429, start: 299, quelle: IK },
+      { id: 'trockner', gruppe: 'wohnung', auch: ['monteur'], name: 'Wäschetrockner', kurz: 'Tr', breite: 60, tiefe: 60, hoehe: 85, von: 299.99, bis: 364.95, start: 329.99, quelle: 'poco.de, Abruf 08.10.2026' },
+      { id: 'spiegelschrank', gruppe: 'wohnung', name: 'Spiegelschrank Bad', kurz: 'Spiegel', breite: 50, tiefe: 17, hoehe: 75, von: 89, bis: 289, start: 119, quelle: IK },
+      { id: 'leuchte', gruppe: 'wohnung', name: 'Deckenleuchte (Anzahl eintragen)', zeichnen: false, von: 6.99, bis: 59.99, start: 29.99, quelle: IK },
+      { id: 'vorhang', gruppe: 'wohnung', name: 'Vorhang (Anzahl eintragen)', zeichnen: false, von: 7.99, bis: 69.99, start: 24.99, quelle: IK + '; ob je Stück oder Paar, sagt die Seite nicht' },
+
+      /* Monteurzimmer */
+      { id: 'einzelbett', gruppe: 'monteur', name: 'Einzelbett 90×200 mit Matratze (ohne Lattenrost)', kurz: 'Bett', form: 'bett', betten: 1, breite: 95, tiefe: 205, hoehe: 80, masz: 'geschätzt', von: 110, bis: 368, start: 159, quelle: IK },
+      { id: 'etagenbett', gruppe: 'monteur', name: 'Etagenbett 90×200 mit 2 Matratzen', kurz: 'Etagenbett', form: 'bett', betten: 2, breite: 100, tiefe: 210, hoehe: 160, masz: 'geschätzt', von: 229, bis: 527, start: 327, quelle: IK + '; Summe aus Gestell und Matratzen gerechnet' },
+      { id: 'spind', gruppe: 'monteur', name: 'Metallspind 1-türig', kurz: 'Spind', breite: 38, tiefe: 45, hoehe: 180, masz: 'vor Zeichnen prüfen', von: 105.99, bis: 319.99, start: 290, quelle: 'otto.de, Abruf 08.10.2026' },
+      { id: 'tischkuehl', gruppe: 'monteur', name: 'Tisch-Kühlschrank', kurz: 'Kühl', breite: 47, tiefe: 45, hoehe: 49, von: 119, bis: 119, start: 119, quelle: IK + ' (ein Gerät)' },
+      { id: 'gemeinschaftstisch', gruppe: 'monteur', name: 'Tisch für 6', kurz: 'Tisch 6', breite: 170, tiefe: 80, hoehe: 74, masz: 'Höhe geschätzt', von: 159, bis: 499, start: 159, quelle: IK },
+      { id: 'waesche', gruppe: 'monteur', name: 'Bettwäsche und 2 Handtücher', zeichnen: false, jeBett: 1, von: 21.77, bis: 65.97, start: 27.97, quelle: IK + '; Summe gerechnet' },
+
+      /* Umbau */
+      { id: 'tuer', gruppe: 'umbau', name: 'Innentür mit Zarge und Einbau', kurz: 'Tür', form: 'tuer', breite: 90, tiefe: 10, hoehe: 200, von: tuer.von || 250, bis: tuer.bis || 450, start: tuer.start || 350, quelle: 'wie „Umbauen und renovieren“: ' + (tuer.quelle || 'clean-invoice.com') },
+      { id: 'fenster', gruppe: 'umbau', name: 'Fenster tauschen (Kunststoff, mit Einbau)', kurz: 'Fenster', form: 'fenster', breite: 120, tiefe: 15, hoehe: 130, von: 340, bis: 580, start: 420, quelle: 'Preisratgeber, Abruf 08.10.2026, einfache Verglasung' },
+      { id: 'wandneu', gruppe: 'umbau', name: 'Trockenbauwand neu (je m Länge, 2,5 m hoch)', kurz: 'neue Wand', form: 'wand', einheit: 'm', breite: 300, tiefe: 10, hoehe: 250, von: 125, bis: 262.5, start: 155, quelle: '50–105 €/m² × 2,5 m Höhe, Abruf 08.10.2026' },
+      { id: 'wandweg', gruppe: 'umbau', name: 'Nicht tragende Wand entfernen (je m Länge, 2,5 m hoch)', kurz: 'Wand weg', form: 'wandweg', einheit: 'm', breite: 300, tiefe: 15, hoehe: 250, von: null, bis: null, start: 700, quelle: 'Nur eine Quelle (sanier.de, ca. 280 €/m² × 2,5 m), unsicher. Vorher Statiker fragen, ob die Wand wirklich nicht trägt.' },
+      { id: 'badneu', gruppe: 'umbau', name: 'Bad komplett einbauen', kurz: 'Bad neu', form: 'flaeche', breite: 200, tiefe: 250, hoehe: 5, von: bad.von || 16000, bis: bad.bis || 28000, start: bad.start || 20000, quelle: 'wie „Umbauen und renovieren“: ' + (bad.quelle || '') },
+      { id: 'kuechemontage', gruppe: 'umbau', name: 'Küche montieren (je m Küchenzeile)', kurz: 'Küchenmontage', form: 'flaeche', einheit: 'm', breite: 270, tiefe: 60, hoehe: 5, von: 150, bis: 350, start: 250, quelle: 'Preisratgeber, Abruf 08.10.2026; Wasser und Elektro extra (Elektro nur Fachbetrieb)' }
+    ]
+  };
+})();
 
 </script>
 <script>/* rechner.js */
@@ -1743,7 +2055,69 @@ window.DATEN.begriffe = [
     return isFinite(n) ? n : null;
   }
 
+  /* ---------- Grundriss ---------- */
+
+  /* Fläche eines Vielecks aus Eckpunkten [[x,y], …] in Metern (Gaußsche Trapezformel). */
+  function polygonFlaeche(punkte) {
+    var s = 0, n = punkte ? punkte.length : 0;
+    if (n < 3) return 0;
+    for (var i = 0; i < n; i++) {
+      var a = punkte[i], b = punkte[(i + 1) % n];
+      s += zahl(a[0]) * zahl(b[1]) - zahl(b[0]) * zahl(a[1]);
+    }
+    return Math.abs(s) / 2;
+  }
+
+  /* Liegt der Punkt im Vieleck? (Strahlverfahren) */
+  function punktImPolygon(x, y, punkte) {
+    var drin = false, n = punkte ? punkte.length : 0;
+    for (var i = 0, j = n - 1; i < n; j = i++) {
+      var xi = punkte[i][0], yi = punkte[i][1], xj = punkte[j][0], yj = punkte[j][1];
+      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) drin = !drin;
+    }
+    return drin;
+  }
+
+  /* Angerechnete Wohnfläche eines Raums nach WoFlV §§ 2 und 4 (Wortlaut geprüft 08.10.2026).
+     art: 'voll' (Wohnraum), 'wintergarten' (unbeheizt, zur Hälfte), 'balkon' (Balkon, Loggia,
+     Terrasse: balkonProzent, in der Regel 25, höchstens 50), 'zubehoer' (Keller, Heizraum,
+     Garage: zählt nicht). teil12 = Anteil der Fläche mit 1 bis unter 2 m lichter Höhe in %,
+     teil0 = Anteil unter 1 m in % (zählt nicht). */
+  function wohnflaecheRaum(r) {
+    var f = zahl(r.flaeche);
+    if (r.art === 'zubehoer') return 0;
+    if (r.art === 'balkon') {
+      var p = r.balkonProzent == null ? 25 : Math.min(50, Math.max(0, zahl(r.balkonProzent)));
+      return f * p / 100;
+    }
+    var t12 = Math.min(100, Math.max(0, zahl(r.teil12)));
+    var t0 = Math.min(100 - t12, Math.max(0, zahl(r.teil0)));
+    var hoehe = f * (100 - t12 - t0) / 100 + f * t12 / 100 * 0.5;
+    return r.art === 'wintergarten' ? hoehe * 0.5 : hoehe;
+  }
+
+  /* Nutzfläche außerhalb der Wohnfläche (Keller, Garage, Heizraum …), voll gezählt,
+     damit sie getrennt geplant oder vermietet werden kann. */
+  function nutzflaecheRaum(r) {
+    return r.art === 'zubehoer' ? zahl(r.flaeche) : 0;
+  }
+
+  /* Summen der Kostenliste: posten [{menge, preis, gruppe:'umbau'|sonst}] */
+  function einrichtungskosten(posten) {
+    var e = 0, u = 0;
+    (posten || []).forEach(function (p) {
+      var s = zahl(p.menge) * zahl(p.preis);
+      if (p.gruppe === 'umbau') u += s; else e += s;
+    });
+    return { einrichtung: e, umbau: u, summe: e + u };
+  }
+
   var api = {
+    polygonFlaeche: polygonFlaeche,
+    punktImPolygon: punktImPolygon,
+    wohnflaecheRaum: wohnflaecheRaum,
+    nutzflaecheRaum: nutzflaecheRaum,
+    einrichtungskosten: einrichtungskosten,
     leseZahl: leseZahl,
     barwertfaktoren: barwertfaktoren,
     restnutzungsdauer: restnutzungsdauer,
@@ -2328,6 +2702,1042 @@ window.DATEN.begriffe = [
 })();
 
 </script>
+<script>/* grundriss3d.js */
+/* 3D-Ansicht für „Grundriss und Einrichtung“ (Three.js r160, global THREE).
+   Zeigt die aktive Etage: Grundrissbild als Boden, Räume als Böden mit Wänden entlang der
+   Ränder, Möbel als Klötze in echter Größe. Zeichnet nur bei Änderung oder Drehen, ohne
+   Dauerschleife (dadurch auch bei „Bewegung reduzieren“ ruhig). Planpunkt (x,y) → 3D (x,0,y). */
+(function () {
+  'use strict';
+  var canvas = document.getElementById('g-3d');
+  var ersatz = document.getElementById('g-3d-ersatz');
+  if (!canvas) return;
+  function kaputt() { ersatz.hidden = false; canvas.hidden = true; }
+  if (typeof THREE === 'undefined') { window.GRUNDRISS3D = { zeige: kaputt }; return; }
+  function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  var renderer = null, szene, kamera, gruppe, licht = {};
+  var ziel = new THREE.Vector3(), winkel = 0.7, hoehe = 0.75, abstand = 20, grund = 20;
+  var texturen = {}, gedreht = false;
+
+  function anlegen() {
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
+    } catch (e) { kaputt(); return false; }
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    szene = new THREE.Scene();
+    kamera = new THREE.PerspectiveCamera(35, 1, 0.1, 500);
+    licht.himmel = new THREE.HemisphereLight(0xffffff, 0x404040, 1.0);
+    licht.sonne = new THREE.DirectionalLight(0xffffff, 1.4);
+    licht.sonne.position.set(8, 20, 12);
+    szene.add(licht.himmel); szene.add(licht.sonne);
+    gruppe = new THREE.Group(); szene.add(gruppe);
+
+    var ziehen = null;
+    canvas.addEventListener('pointerdown', function (ev) { ziehen = { x: ev.clientX, y: ev.clientY, w: winkel, h: hoehe }; canvas.setPointerCapture(ev.pointerId); });
+    canvas.addEventListener('pointermove', function (ev) {
+      if (!ziehen) return;
+      winkel = ziehen.w - (ev.clientX - ziehen.x) * 0.008;
+      hoehe = Math.max(0.15, Math.min(1.45, ziehen.h + (ev.clientY - ziehen.y) * 0.005));
+      gedreht = true;
+      zeichnen();
+    });
+    function los() { ziehen = null; }
+    canvas.addEventListener('pointerup', los); canvas.addEventListener('pointercancel', los);
+    canvas.addEventListener('wheel', function (ev) {
+      if (!ev.ctrlKey) return;
+      ev.preventDefault();
+      abstand = Math.max(grund * 0.3, Math.min(grund * 3, abstand * (ev.deltaY > 0 ? 1.12 : 1 / 1.12)));
+      zeichnen();
+    }, { passive: false });
+    if ('ResizeObserver' in window) new ResizeObserver(groesse).observe(canvas);
+    return true;
+  }
+  function groesse() {
+    if (!renderer) return;
+    var w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    kamera.aspect = w / h; kamera.updateProjectionMatrix();
+    zeichnen();
+  }
+  function zeichnen() {
+    if (!renderer) return;
+    kamera.position.set(
+      ziel.x + abstand * Math.cos(hoehe) * Math.sin(winkel),
+      ziel.y + abstand * Math.sin(hoehe),
+      ziel.z + abstand * Math.cos(hoehe) * Math.cos(winkel));
+    kamera.lookAt(ziel);
+    renderer.render(szene, kamera);
+  }
+  function leeren() {
+    while (gruppe.children.length) {
+      var o = gruppe.children.pop();
+      if (o.geometry) o.geometry.dispose();
+      if (o.material) { if (o.material.map && !o.material.map.userData.cache) o.material.map.dispose(); o.material.dispose(); }
+    }
+  }
+  function kasten(b, h, t, farbe, x, y, z, drehY, opak) {
+    var m = new THREE.Mesh(new THREE.BoxGeometry(b, h, t), new THREE.MeshLambertMaterial({ color: farbe, transparent: opak < 1, opacity: opak }));
+    m.position.set(x, y, z); m.rotation.y = drehY || 0;
+    gruppe.add(m);
+    return m;
+  }
+  function textur(url) {
+    if (texturen[url]) return texturen[url];
+    var t = new THREE.TextureLoader().load(url, function () { zeichnen(); });
+    t.colorSpace = THREE.SRGBColorSpace; t.userData.cache = true;
+    texturen = {}; texturen[url] = t; /* nur das aktuelle Bild behalten */
+    return t;
+  }
+
+  function zeige(plan, ART) {
+    if (!renderer && !anlegen()) return;
+    var e = plan.etagen[plan.aktiv] || plan.etagen[0], H = plan.wandhoehe || 2.5;
+    var dunkel = document.documentElement.getAttribute('data-theme') === 'dark' ||
+      (!document.documentElement.getAttribute('data-theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    leeren();
+    licht.himmel.intensity = dunkel ? 0.7 : 1.05;
+    licht.sonne.intensity = dunkel ? 1.0 : 1.4;
+    var farbe = { voll: css('--f2'), balkon: css('--f4'), wintergarten: css('--f1'), zubehoer: css('--f7') };
+    var teilFarbe = { wohnung: css('--f2'), monteur: css('--f5'), umbau: css('--f3') };
+    var wand = new THREE.Color(dunkel ? css('--linie2') : '#f3efe8');
+
+    var x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
+    function nimm(x, z) { x0 = Math.min(x0, x); z0 = Math.min(z0, z); x1 = Math.max(x1, x); z1 = Math.max(z1, z); }
+
+    if (e.bild) {
+      var bw = e.bildB * e.mpp, bh = e.bildH * e.mpp;
+      var boden = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), new THREE.MeshBasicMaterial({ map: textur(e.bild), transparent: true, opacity: 0.9 }));
+      boden.rotation.x = -Math.PI / 2; boden.position.set(bw / 2, -0.01, bh / 2);
+      gruppe.add(boden);
+      nimm(0, 0); nimm(bw, bh);
+    }
+    e.raeume.forEach(function (r) {
+      var form = new THREE.Shape();
+      r.punkte.forEach(function (p, i) { if (i) form.lineTo(p[0], -p[1]); else form.moveTo(p[0], -p[1]); nimm(p[0], p[1]); });
+      var b = new THREE.Mesh(new THREE.ShapeGeometry(form), new THREE.MeshLambertMaterial({ color: farbe[r.art] || farbe.voll, transparent: true, opacity: 0.55, side: THREE.DoubleSide }));
+      b.rotation.x = -Math.PI / 2; b.position.y = 0.01;
+      gruppe.add(b);
+      var hoch = r.art === 'balkon' ? 1.0 : H; /* Balkon: Brüstung */
+      r.punkte.forEach(function (p, i) {
+        var q = r.punkte[(i + 1) % r.punkte.length], dx = q[0] - p[0], dz = q[1] - p[1], L = Math.hypot(dx, dz);
+        if (L < 0.01) return;
+        /* leicht durchscheinend, damit Möbel hinter Wänden sichtbar bleiben */
+        var m = kasten(L + 0.1, hoch, 0.1, wand, (p[0] + q[0]) / 2, hoch / 2, (p[1] + q[1]) / 2, -Math.atan2(dz, dx), 0.55);
+        m.material.depthWrite = false; m.renderOrder = 2;
+      });
+    });
+    e.teile.forEach(function (t) {
+      var a = ART[t.art]; if (!a) return;
+      var drehY = -t.dreh * Math.PI / 180, h = (a.hoehe || 80) / 100, y = h / 2, opak = 1;
+      var f = new THREE.Color(teilFarbe[a.gruppe] || teilFarbe.wohnung);
+      if (a.form === 'wand') { h = H; y = H / 2; }
+      if (a.form === 'wandweg') { h = H; y = H / 2; f = new THREE.Color(css('--schlecht')); opak = 0.35; }
+      if (a.form === 'fenster') { y = 0.9 + h / 2; f = new THREE.Color(css('--c2')); opak = 0.55; }
+      if (a.form === 'flaeche') { h = 0.04; y = 0.03; opak = 0.6; }
+      kasten(t.w, h, t.d, f, t.x, y, t.y, drehY, opak);
+      nimm(t.x - t.w / 2, t.y - t.w / 2); nimm(t.x + t.w / 2, t.y + t.w / 2);
+    });
+    if (!isFinite(x0)) { x0 = 0; z0 = 0; x1 = 10; z1 = 8; }
+    ziel.set((x0 + x1) / 2, 0, (z0 + z1) / 2);
+    grund = Math.max(6, Math.hypot(x1 - x0, z1 - z0));
+    abstand = grund * 1.55;
+    if (!gedreht) { hoehe = 1.0; winkel = 0.35; } /* schräg von oben, von derselben Seite wie der Plan */
+    var etikett = document.getElementById('g-3d-etikett');
+    if (etikett) etikett.textContent = e.name + (e.raeume.length ? '' : ' (noch keine Räume)');
+    groesse();
+    zeichnen();
+  }
+
+  window.GRUNDRISS3D = { zeige: zeige };
+})();
+
+</script>
+<script>/* grundriss.js */
+/* Bereich „Grundriss und Einrichtung“: Bild laden, Maßstab, Räume zeichnen, Möbel stellen,
+   Wohnfläche (WoFlV) und Kosten. Alle Koordinaten in Metern; das Bild liegt mit der linken
+   oberen Ecke auf (0,0) und ist mpp Meter je Bildpunkt groß. Speichert unter „immo-grundriss“.
+   Rechnet mit RECHNER (rechner.js), zeichnet 3D über GRUNDRISS3D (grundriss3d.js). */
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var svg = $('g-plan');
+  if (!svg || !window.RECHNER) return;
+  var R = window.RECHNER;
+  var KAT = (window.DATEN && window.DATEN.moebel) || { artikel: [] };
+  var ART = {};
+  KAT.artikel.forEach(function (a) { ART[a.id] = a; });
+  var SCHLUESSEL = 'immo-grundriss';
+  var NS = 'http://www.w3.org/2000/svg';
+  var fmt1 = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  var fmt0 = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
+  function euro(x) { return fmt0.format(Math.round(x)) + ' €'; }
+  function qm(x) { return fmt1.format(x) + ' m²'; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function zahl(s) { var n = R.leseZahl(s); return n == null ? null : n; }
+  function neueId(p) { return p + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36); }
+  function rund(x, schritt) { return Math.round(x / schritt) * schritt; }
+
+  var ARTEN = [
+    ['voll', 'Wohnraum (Zimmer, Küche, Bad, Flur)'],
+    ['balkon', 'Balkon, Loggia, Terrasse'],
+    ['wintergarten', 'Wintergarten (unbeheizt)'],
+    ['zubehoer', 'Keller, Garage, Heizraum, Abstellraum außerhalb']
+  ];
+
+  /* ---------- Zustand ---------- */
+  function neueEtage(name) { return { name: name, bild: null, bildB: 0, bildH: 0, mpp: 0.01, massstab: false, raeume: [], teile: [] }; }
+  function leererPlan() { return { app: 'immo-grundriss', version: 1, aktiv: 0, wandhoehe: 2.5, preise: {}, mengen: {}, etagen: [neueEtage('Erdgeschoss')] }; }
+  var plan = laden() || leererPlan();
+  var gewaehlt = null;      /* { typ:'raum'|'teil', id } */
+  var modus = 'auswahl';    /* auswahl | rechteck | ecken | massstab */
+  var entwurf = [];         /* Punkte beim Zeichnen Ecke für Ecke */
+  var maus = null;          /* letzte Mausposition im Plan */
+  var massPunkte = [];
+  var ziehen = null;
+  var ansicht3d = false;
+  var gruppe = 'wohnung';
+  var vb = null;            /* sichtbarer Ausschnitt {x,y,w,h} */
+  var sichtbar = false;
+
+  function etage() { return plan.etagen[plan.aktiv] || plan.etagen[0]; }
+
+  /* ---------- Speichern ---------- */
+  function pruefePlan(p) {
+    if (!p || typeof p !== 'object' || p.app !== 'immo-grundriss' || !Array.isArray(p.etagen) || !p.etagen.length) return null;
+    var zahlOk = function (x, d) { x = Number(x); return isFinite(x) ? x : d; };
+    var neu = leererPlan();
+    neu.wandhoehe = Math.min(6, Math.max(1.8, zahlOk(p.wandhoehe, 2.5)));
+    neu.preise = {}; neu.mengen = {};
+    Object.keys(p.preise || {}).forEach(function (k) { var v = Number(p.preise[k]); if (isFinite(v) && v >= 0) neu.preise[k] = v; });
+    Object.keys(p.mengen || {}).forEach(function (k) { var v = Number(p.mengen[k]); if (isFinite(v) && v >= 0) neu.mengen[k] = v; });
+    neu.etagen = p.etagen.slice(0, 12).map(function (e, i) {
+      var n = neueEtage(String(e.name || ('Etage ' + (i + 1))).slice(0, 40));
+      if (typeof e.bild === 'string' && /^data:image\/(png|jpeg|webp);base64,/.test(e.bild)) {
+        n.bild = e.bild; n.bildB = zahlOk(e.bildB, 0); n.bildH = zahlOk(e.bildH, 0);
+      }
+      n.mpp = zahlOk(e.mpp, 0.01) > 0 ? zahlOk(e.mpp, 0.01) : 0.01;
+      n.massstab = !!e.massstab;
+      n.raeume = (e.raeume || []).filter(function (r) { return r && Array.isArray(r.punkte) && r.punkte.length >= 3; }).map(function (r) {
+        return {
+          id: String(r.id || neueId('r')), name: String(r.name || 'Raum').slice(0, 40),
+          art: ARTEN.some(function (a) { return a[0] === r.art; }) ? r.art : 'voll',
+          punkte: r.punkte.map(function (q) { return [zahlOk(q[0], 0), zahlOk(q[1], 0)]; }),
+          teil12: zahlOk(r.teil12, 0), teil0: zahlOk(r.teil0, 0), balkon: zahlOk(r.balkon, 25), separat: !!r.separat
+        };
+      });
+      n.teile = (e.teile || []).filter(function (t) { return t && ART[t.art]; }).map(function (t) {
+        return { id: String(t.id || neueId('t')), art: t.art, x: zahlOk(t.x, 0), y: zahlOk(t.y, 0), w: Math.max(0.05, zahlOk(t.w, 1)), d: Math.max(0.02, zahlOk(t.d, 1)), dreh: [0, 90, 180, 270].indexOf(Number(t.dreh)) >= 0 ? Number(t.dreh) : 0 };
+      });
+      return n;
+    });
+    neu.aktiv = Math.min(neu.etagen.length - 1, Math.max(0, zahlOk(p.aktiv, 0) | 0));
+    return neu;
+  }
+  function laden() {
+    try { var t = localStorage.getItem(SCHLUESSEL); return t ? pruefePlan(JSON.parse(t)) : null; } catch (e) { return null; }
+  }
+  var speicherTimer = null;
+  function speichern() {
+    clearTimeout(speicherTimer);
+    speicherTimer = setTimeout(function () {
+      try {
+        localStorage.setItem(SCHLUESSEL, JSON.stringify(plan));
+        if (meldungArt === 'speicher') meldung('');
+      } catch (e) {
+        /* meist zu groß wegen der Bilder: Plan ohne Bilder speichern und sagen, warum */
+        var ohne = JSON.parse(JSON.stringify(plan));
+        ohne.etagen.forEach(function (et) { et.bild = null; });
+        try {
+          localStorage.setItem(SCHLUESSEL, JSON.stringify(ohne));
+          meldung('Der Plan ist gespeichert, das Grundrissbild aber nicht: es ist zu groß für den Speicher dieses Browsers. Sichere den Plan als Datei („Plan sichern“ unten), dann bleibt auch das Bild erhalten.', 'speicher');
+        } catch (e2) {
+          meldung('Der Plan konnte in diesem Browser nicht gespeichert werden (Speicher voll oder gesperrt, z. B. im privaten Fenster). Sichere ihn als Datei, sonst ist er nach dem Schließen weg.', 'speicher');
+        }
+      }
+    }, 300);
+  }
+  var meldungArt = '';
+  function meldung(text, art) { $('g-meldung').textContent = text; meldungArt = text ? (art || '') : ''; }
+
+  /* ---------- Ansicht ---------- */
+  function px2m() { var b = svg.clientWidth || 800; return vb ? vb.w / b : 0.02; }
+  function grenzen() {
+    var e = etage(), x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    function nimm(x, y) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+    if (e.bild) { nimm(0, 0); nimm(e.bildB * e.mpp, e.bildH * e.mpp); }
+    e.raeume.forEach(function (r) { r.punkte.forEach(function (p) { nimm(p[0], p[1]); }); });
+    e.teile.forEach(function (t) { nimm(t.x - t.w / 2, t.y - t.w / 2); nimm(t.x + t.w / 2, t.y + t.w / 2); });
+    if (!isFinite(x0)) { x0 = 0; y0 = 0; x1 = 14; y1 = 10; }
+    return { x0: x0, y0: y0, x1: x1, y1: y1 };
+  }
+  function einpassen() {
+    var g = grenzen(), rand = 1;
+    var w = Math.max(4, g.x1 - g.x0) + 2 * rand, h = Math.max(4, g.y1 - g.y0) + 2 * rand;
+    var bw = svg.clientWidth || 800, bh = svg.clientHeight || 500;
+    if (w / h < bw / bh) w = h * bw / bh; else h = w * bh / bw;
+    vb = { x: (g.x0 + g.x1) / 2 - w / 2, y: (g.y0 + g.y1) / 2 - h / 2, w: w, h: h };
+  }
+  function zoomen(f, cx, cy) {
+    if (!vb) einpassen();
+    var nw = Math.min(400, Math.max(1.5, vb.w * f)), k = nw / vb.w;
+    if (cx == null) { cx = vb.x + vb.w / 2; cy = vb.y + vb.h / 2; }
+    vb = { x: cx - (cx - vb.x) * k, y: cy - (cy - vb.y) * k, w: nw, h: vb.h * k };
+    zeichnen();
+  }
+  function seitenverhaeltnis() {
+    if (!vb) return;
+    var bw = svg.clientWidth, bh = svg.clientHeight;
+    if (!bw || !bh) return;
+    var h = vb.w * bh / bw;
+    vb.y += (vb.h - h) / 2; vb.h = h;
+  }
+
+  /* ---------- Zeichnen ---------- */
+  function schwerpunkt(p) {
+    var a = 0, cx = 0, cy = 0;
+    for (var i = 0; i < p.length; i++) {
+      var q = p[i], r = p[(i + 1) % p.length], k = q[0] * r[1] - r[0] * q[1];
+      a += k; cx += (q[0] + r[0]) * k; cy += (q[1] + r[1]) * k;
+    }
+    if (Math.abs(a) < 1e-9) {
+      return [p.reduce(function (s, q) { return s + q[0]; }, 0) / p.length, p.reduce(function (s, q) { return s + q[1]; }, 0) / p.length];
+    }
+    return [cx / (3 * a), cy / (3 * a)];
+  }
+  function flaeche(r) { return R.polygonFlaeche(r.punkte); }
+  function el(name, attr, eltern) {
+    var e = document.createElementNS(NS, name);
+    Object.keys(attr || {}).forEach(function (k) { e.setAttribute(k, attr[k]); });
+    if (eltern) eltern.appendChild(e);
+    return e;
+  }
+  function zeichnen() {
+    if (!sichtbar || ansicht3d) return;
+    if (!vb) einpassen();
+    var fokusId = document.activeElement && svg.contains(document.activeElement) ? document.activeElement.getAttribute('data-id') : null;
+    var e = etage(), s = px2m();
+    svg.setAttribute('viewBox', vb.x + ' ' + vb.y + ' ' + vb.w + ' ' + vb.h);
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    if (e.bild) el('image', { href: e.bild, x: 0, y: 0, width: e.bildB * e.mpp, height: e.bildH * e.mpp, preserveAspectRatio: 'none', opacity: 0.85 }, svg);
+    /* Raster: 1 m, bei großem Ausschnitt 5 m */
+    var schritt = vb.w > 80 ? 5 : 1, gr = el('g', { 'aria-hidden': 'true' }, svg);
+    for (var x = Math.floor(vb.x / schritt) * schritt; x <= vb.x + vb.w; x += schritt) el('line', { x1: x, y1: vb.y, x2: x, y2: vb.y + vb.h, class: 'raster-linie' + (x % (schritt * 5) === 0 ? ' meter' : '') }, gr);
+    for (var y = Math.floor(vb.y / schritt) * schritt; y <= vb.y + vb.h; y += schritt) el('line', { x1: vb.x, y1: y, x2: vb.x + vb.w, y2: y, class: 'raster-linie' + (y % (schritt * 5) === 0 ? ' meter' : '') }, gr);
+
+    e.raeume.forEach(function (r) {
+      var g = el('g', { 'data-raum': r.id, 'data-id': r.id, tabindex: 0, role: 'button', 'aria-label': 'Raum ' + r.name + ', ' + qm(flaeche(r)) }, svg);
+      el('polygon', { points: r.punkte.map(function (p) { return p[0] + ',' + p[1]; }).join(' '), class: 'raum art-' + r.art + (gewaehlt && gewaehlt.id === r.id ? ' gewaehlt' : '') }, g);
+    });
+    e.teile.forEach(function (t) {
+      var a = ART[t.art];
+      var g = el('g', { 'data-teil': t.id, 'data-id': t.id, tabindex: 0, role: 'button', 'aria-label': a.name + (t.dreh ? ', gedreht ' + t.dreh + ' Grad' : ''), transform: 'translate(' + t.x + ' ' + t.y + ') rotate(' + t.dreh + ')', class: 'teil ' + (a.form === 'wandweg' ? 'wandweg' : a.gruppe) + (gewaehlt && gewaehlt.id === t.id ? ' gewaehlt' : '') }, svg);
+      el('rect', { x: -t.w / 2, y: -t.d / 2, width: t.w, height: t.d, class: 'koerper', rx: Math.min(t.w, t.d) * 0.06 }, g);
+      if (a.form === 'bett') {
+        var k = Math.min(0.5, t.w * 0.4), n = t.w > 1.2 ? 2 : 1;
+        for (var i = 0; i < n; i++) el('rect', { x: -t.w / 2 + 0.08 + i * (t.w - 0.16) / n, y: -t.d / 2 + 0.08, width: (t.w - 0.16) / n - (n > 1 ? 0.06 : 0), height: Math.min(0.35, t.d * 0.2), class: 'kissen', rx: 0.05 }, g);
+        void k;
+      }
+      if (a.form === 'tuer') el('path', { d: 'M ' + (-t.w / 2) + ' ' + (t.d / 2) + ' A ' + t.w + ' ' + t.w + ' 0 0 0 ' + (t.w / 2) + ' ' + (t.d / 2 - t.w), class: 'hilfslinie', style: 'stroke-dasharray:4 4;stroke-width:1.5' }, g);
+      var fs = 11 * s, kurz = a.kurz || a.name;
+      if (t.w > kurz.length * fs * 0.55 && t.d > fs * 1.4) {
+        var tx = el('text', { x: 0, y: a.form === 'bett' ? t.d * 0.12 : 0, 'font-size': fs, transform: t.dreh % 180 ? 'rotate(' + (-t.dreh) + ')' : (t.dreh === 180 ? 'rotate(180)' : '') }, g);
+        tx.textContent = kurz;
+      }
+    });
+    /* Raumnamen über den Möbeln; Konturbreite in Metern, weil im Plan eine Einheit ein Meter ist */
+    e.raeume.forEach(function (r) {
+      var c = schwerpunkt(r.punkte), t = el('text', { x: c[0], y: c[1], class: 'raum-text', 'font-size': 14 * s, 'stroke-width': 3 * s }, svg);
+      var a = el('tspan', { x: c[0], dy: 0 }, t); a.textContent = r.name;
+      var b = el('tspan', { x: c[0], dy: 17 * s, class: 'leise', 'font-size': 13 * s }, t); b.textContent = qm(flaeche(r));
+    });
+    /* Griffe am gewählten Raum */
+    if (gewaehlt && gewaehlt.typ === 'raum' && modus === 'auswahl') {
+      var rg = findeRaum(gewaehlt.id);
+      if (rg) rg.punkte.forEach(function (p, i) { el('circle', { cx: p[0], cy: p[1], r: 7 * s, class: 'griff', 'data-griff': i }, svg); });
+    }
+    /* Hilfslinien beim Zeichnen */
+    if (ziehen && ziehen.typ === 'rechteck' && ziehen.b) {
+      var a0 = ziehen.a, b0 = ziehen.b;
+      el('rect', { x: Math.min(a0[0], b0[0]), y: Math.min(a0[1], b0[1]), width: Math.abs(b0[0] - a0[0]), height: Math.abs(b0[1] - a0[1]), class: 'hilfsflaeche' }, svg);
+      var mt = el('text', { x: (a0[0] + b0[0]) / 2, y: (a0[1] + b0[1]) / 2, class: 'raum-text', 'font-size': 14 * s, 'stroke-width': 3 * s }, svg);
+      mt.textContent = fmt1.format(Math.abs(b0[0] - a0[0])) + ' × ' + fmt1.format(Math.abs(b0[1] - a0[1])) + ' m';
+    }
+    if (modus === 'ecken' && entwurf.length) {
+      var pts = entwurf.concat(maus ? [maus] : []);
+      el('polyline', { points: pts.map(function (p) { return p[0] + ',' + p[1]; }).join(' '), class: 'hilfslinie' }, svg);
+      entwurf.forEach(function (p, i) { el('circle', { cx: p[0], cy: p[1], r: (i === 0 ? 8 : 5) * s, class: 'hilfspunkt' }, svg); });
+    }
+    if (massPunkte.length) {
+      var mp = massPunkte.concat(modus === 'massstab' && maus && massPunkte.length === 1 ? [maus] : []);
+      if (mp.length > 1) el('line', { x1: mp[0][0], y1: mp[0][1], x2: mp[1][0], y2: mp[1][1], class: 'hilfslinie' }, svg);
+      massPunkte.forEach(function (p) { el('circle', { cx: p[0], cy: p[1], r: 6 * s, class: 'hilfspunkt' }, svg); });
+    }
+    svg.setAttribute('class', modus === 'auswahl' ? '' : 'zeichnen');
+    if (fokusId) { var f = svg.querySelector('[data-id="' + fokusId + '"]'); if (f) f.focus({ preventScroll: true }); }
+  }
+
+  function findeRaum(id) { return etage().raeume.filter(function (r) { return r.id === id; })[0]; }
+  function findeTeil(id) { return etage().teile.filter(function (t) { return t.id === id; })[0]; }
+
+  /* ---------- Maus und Finger ---------- */
+  function imPlan(ev) {
+    var m = svg.getScreenCTM();
+    if (!m) return [0, 0];
+    var p = svg.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY;
+    p = p.matrixTransform(m.inverse());
+    return [p.x, p.y];
+  }
+  /* Einrasten an vorhandenen Raumecken, sonst auf 5 cm */
+  function einrasten(p, ohneId) {
+    var tol = 10 * px2m(), best = null, bd = tol;
+    etage().raeume.forEach(function (r) {
+      if (r.id === ohneId) return;
+      r.punkte.forEach(function (q) { var d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd) { bd = d; best = q; } });
+    });
+    return best ? [best[0], best[1]] : [rund(p[0], 0.05), rund(p[1], 0.05)];
+  }
+  svg.addEventListener('pointerdown', function (ev) {
+    if (ev.button > 0) return;
+    var p = imPlan(ev);
+    if (modus === 'rechteck') {
+      ziehen = { typ: 'rechteck', a: einrasten(p), b: null };
+    } else if (modus === 'ecken') {
+      var q = einrasten(p);
+      if (entwurf.length >= 3 && Math.hypot(q[0] - entwurf[0][0], q[1] - entwurf[0][1]) < 12 * px2m()) { eckenFertig(); return; }
+      entwurf.push(q); tipp(); zeichnen(); return;
+    } else if (modus === 'massstab') {
+      massPunkte.push([p[0], p[1]]);
+      if (massPunkte.length === 2) { modusSetzen('auswahl'); $('g-mass-frage').hidden = false; $('g-mass-laenge').focus(); }
+      zeichnen(); return;
+    } else {
+      var griff = ev.target.closest('[data-griff]'), teil = ev.target.closest('[data-teil]'), raum = ev.target.closest('[data-raum]');
+      if (griff && gewaehlt && gewaehlt.typ === 'raum') {
+        ziehen = { typ: 'griff', id: gewaehlt.id, i: Number(griff.getAttribute('data-griff')) };
+      } else if (teil) {
+        var t = findeTeil(teil.getAttribute('data-teil'));
+        waehle('teil', t.id);
+        ziehen = { typ: 'teil', id: t.id, dx: t.x - p[0], dy: t.y - p[1], bewegt: false };
+      } else if (raum) {
+        var r = findeRaum(raum.getAttribute('data-raum'));
+        waehle('raum', r.id);
+        ziehen = { typ: 'raum', id: r.id, start: p, alt: r.punkte.map(function (q) { return q.slice(); }), bewegt: false };
+      } else {
+        if (gewaehlt) waehle(null);
+        ziehen = { typ: 'schieben', cx: ev.clientX, cy: ev.clientY, vb: { x: vb.x, y: vb.y, w: vb.w, h: vb.h } };
+        svg.classList.add('schieben');
+      }
+    }
+    try { svg.setPointerCapture(ev.pointerId); } catch (e) {}
+    ev.preventDefault();
+  });
+  svg.addEventListener('pointermove', function (ev) {
+    var p = imPlan(ev);
+    if (!ziehen) {
+      if (modus === 'ecken' && entwurf.length || modus === 'massstab' && massPunkte.length === 1) { maus = modus === 'ecken' ? einrasten(p) : p; zeichnen(); }
+      return;
+    }
+    if (ziehen.typ === 'rechteck') { ziehen.b = einrasten(p); zeichnen(); }
+    else if (ziehen.typ === 'schieben') {
+      var k = px2m();
+      vb.x = ziehen.vb.x - (ev.clientX - ziehen.cx) * k; vb.y = ziehen.vb.y - (ev.clientY - ziehen.cy) * k;
+      svg.setAttribute('viewBox', vb.x + ' ' + vb.y + ' ' + vb.w + ' ' + vb.h);
+    } else if (ziehen.typ === 'teil') {
+      var t = findeTeil(ziehen.id);
+      t.x = rund(p[0] + ziehen.dx, 0.1); t.y = rund(p[1] + ziehen.dy, 0.1); ziehen.bewegt = true; zeichnen();
+    } else if (ziehen.typ === 'raum') {
+      var r = findeRaum(ziehen.id), dx = rund(p[0] - ziehen.start[0], 0.05), dy = rund(p[1] - ziehen.start[1], 0.05);
+      r.punkte = ziehen.alt.map(function (q) { return [q[0] + dx, q[1] + dy]; }); ziehen.bewegt = dx || dy; zeichnen();
+    } else if (ziehen.typ === 'griff') {
+      var rr = findeRaum(ziehen.id); rr.punkte[ziehen.i] = einrasten(p, rr.id); zeichnen();
+    }
+  });
+  function loslassen() {
+    if (!ziehen) return;
+    var z = ziehen; ziehen = null;
+    svg.classList.remove('schieben');
+    if (z.typ === 'rechteck' && z.b) {
+      var a = z.a, b = z.b;
+      if (Math.abs(b[0] - a[0]) >= 0.3 && Math.abs(b[1] - a[1]) >= 0.3) {
+        var x0 = Math.min(a[0], b[0]), x1 = Math.max(a[0], b[0]), y0 = Math.min(a[1], b[1]), y1 = Math.max(a[1], b[1]);
+        neuerRaum([[x0, y0], [x1, y0], [x1, y1], [x0, y1]]);
+        return;
+      }
+    }
+    if (z.typ !== 'schieben') geaendert(); else zeichnen();
+  }
+  svg.addEventListener('pointerup', loslassen);
+  svg.addEventListener('pointercancel', loslassen);
+  svg.addEventListener('dblclick', function () { if (modus === 'ecken') eckenFertig(); });
+  svg.addEventListener('wheel', function (ev) {
+    if (!ev.ctrlKey) return; /* ohne Strg scrollt die Seite normal */
+    ev.preventDefault();
+    var p = imPlan(ev);
+    zoomen(ev.deltaY > 0 ? 1.15 : 1 / 1.15, p[0], p[1]);
+  }, { passive: false });
+  svg.addEventListener('focusin', function (ev) {
+    var g = ev.target.closest('[data-id]');
+    if (!g) return;
+    var id = g.getAttribute('data-id');
+    if (!gewaehlt || gewaehlt.id !== id) waehle(g.hasAttribute('data-teil') ? 'teil' : 'raum', id);
+  });
+
+  /* ---------- Tastatur ---------- */
+  document.addEventListener('keydown', function (ev) {
+    if (!sichtbar || ansicht3d) return;
+    var imFeld = /^(INPUT|SELECT|TEXTAREA)$/.test(ev.target.tagName);
+    if (ev.key === 'Escape') {
+      if (modus !== 'auswahl' || entwurf.length || massPunkte.length) { entwurf = []; massPunkte = []; $('g-mass-frage').hidden = true; modusSetzen('auswahl'); zeichnen(); ev.preventDefault(); }
+      return;
+    }
+    if (imFeld) return;
+    if (ev.key === 'Enter' && modus === 'ecken') { eckenFertig(); ev.preventDefault(); return; }
+    if (!svg.contains(document.activeElement) || !gewaehlt) return;
+    var schritt = ev.shiftKey ? 0.5 : 0.1, dx = 0, dy = 0;
+    if (ev.key === 'ArrowLeft') dx = -schritt; else if (ev.key === 'ArrowRight') dx = schritt;
+    else if (ev.key === 'ArrowUp') dy = -schritt; else if (ev.key === 'ArrowDown') dy = schritt;
+    if (dx || dy) {
+      if (gewaehlt.typ === 'teil') { var t = findeTeil(gewaehlt.id); t.x = rund(t.x + dx, 0.05); t.y = rund(t.y + dy, 0.05); }
+      else { var r = findeRaum(gewaehlt.id); r.punkte = r.punkte.map(function (q) { return [rund(q[0] + dx, 0.05), rund(q[1] + dy, 0.05)]; }); }
+      geaendert(); ev.preventDefault(); return;
+    }
+    if ((ev.key === 'r' || ev.key === 'R') && gewaehlt.typ === 'teil') { drehen(); ev.preventDefault(); return; }
+    if (ev.key === 'Delete' || ev.key === 'Backspace') { loeschen(); ev.preventDefault(); }
+  });
+
+  /* ---------- Aktionen ---------- */
+  function geaendert() { speichern(); zeichnen(); auswerten(); }
+  function raumNummer() {
+    var n = 0; plan.etagen.forEach(function (e) { n += e.raeume.length; }); return n + 1;
+  }
+  function neuerRaum(punkte) {
+    var r = { id: neueId('r'), name: 'Raum ' + raumNummer(), art: 'voll', punkte: punkte, teil12: 0, teil0: 0, balkon: 25, separat: false };
+    etage().raeume.push(r);
+    gewaehlt = { typ: 'raum', id: r.id };
+    geaendert(); auswahlZeigen();
+    meldung('Raum angelegt (' + qm(flaeche(r)) + '). Rechts kannst du ihm einen Namen und eine Art geben.');
+  }
+  function eckenFertig() {
+    if (entwurf.length < 3) { tipp('Mindestens drei Ecken setzen, dann schließen.'); return; }
+    var p = entwurf; entwurf = []; maus = null;
+    neuerRaum(p); tipp();
+  }
+  function waehle(typ, id) {
+    gewaehlt = typ ? { typ: typ, id: id } : null;
+    zeichnen(); auswahlZeigen();
+  }
+  function drehen() {
+    var t = gewaehlt && gewaehlt.typ === 'teil' && findeTeil(gewaehlt.id);
+    if (!t) return;
+    t.dreh = (t.dreh + 90) % 360; geaendert(); auswahlZeigen();
+  }
+  function loeschen() {
+    if (!gewaehlt) return;
+    var e = etage(), name;
+    if (gewaehlt.typ === 'teil') { var t = findeTeil(gewaehlt.id); name = ART[t.art].name; e.teile = e.teile.filter(function (x) { return x.id !== gewaehlt.id; }); }
+    else { var r = findeRaum(gewaehlt.id); name = r.name; e.raeume = e.raeume.filter(function (x) { return x.id !== gewaehlt.id; }); }
+    gewaehlt = null;
+    geaendert(); auswahlZeigen();
+    meldung('„' + name + '“ gelöscht.');
+    svg.focus();
+  }
+  function teilHinzu(artId) {
+    var a = ART[artId], e = etage(), x, y;
+    var r = gewaehlt && gewaehlt.typ === 'raum' && findeRaum(gewaehlt.id);
+    if (r) { var c = schwerpunkt(r.punkte); x = c[0]; y = c[1]; }
+    else { if (!vb) einpassen(); x = vb.x + vb.w / 2; y = vb.y + vb.h / 2; }
+    var t = { id: neueId('t'), art: artId, x: rund(x, 0.1), y: rund(y, 0.1), w: a.breite / 100, d: a.tiefe / 100, dreh: 0 };
+    e.teile.push(t);
+    gewaehlt = { typ: 'teil', id: t.id };
+    geaendert(); auswahlZeigen();
+    var g = svg.querySelector('[data-id="' + t.id + '"]'); if (g) g.focus({ preventScroll: true });
+  }
+
+  /* ---------- Modus, Schritte, Tipps ---------- */
+  function tipp(text) {
+    var t = text;
+    if (!t) {
+      if (modus === 'rechteck') t = 'Drücken und ziehen, um einen rechteckigen Raum zu zeichnen.';
+      else if (modus === 'ecken') t = entwurf.length ? entwurf.length + ' Ecken gesetzt. Auf den ersten Punkt klicken oder Enter drückt den Raum zu.' : 'Klicke die erste Ecke des Raums an.';
+      else if (modus === 'massstab') t = massPunkte.length ? 'Jetzt das Ende der Strecke anklicken.' : 'Klicke den Anfang einer Strecke an, deren Länge du kennst.';
+      else t = '';
+    }
+    $('g-tipp').textContent = t;
+  }
+  function modusSetzen(m) {
+    modus = m;
+    if (m !== 'ecken') { entwurf = []; maus = null; }
+    document.querySelectorAll('[data-gmodus]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-gmodus') === m ? 'true' : 'false'); });
+    tipp(); zeichnen();
+  }
+  function schrittZeigen(n) {
+    n = String(n);
+    document.querySelectorAll('#g-schritte button').forEach(function (b) {
+      if (b.getAttribute('data-gschritt') === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+    });
+    document.querySelectorAll('[data-gpanel]').forEach(function (p) { p.hidden = p.getAttribute('data-gpanel') !== n; });
+    if (n === '2') modusSetzen(etage().raeume.length ? 'auswahl' : 'rechteck');
+    else if (modus !== 'auswahl') modusSetzen('auswahl');
+  }
+  document.querySelectorAll('#g-schritte button').forEach(function (b) {
+    b.addEventListener('click', function () { schrittZeigen(b.getAttribute('data-gschritt')); });
+  });
+  document.querySelectorAll('[data-gmodus]').forEach(function (b) {
+    b.addEventListener('click', function () { modusSetzen(b.getAttribute('data-gmodus')); });
+  });
+  $('g-zur-liste').addEventListener('click', function () { $('g-kosten-karte').scrollIntoView({ block: 'start' }); var h = $('g-kosten-karte').querySelector('h3'); h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); });
+
+  /* ---------- Etagen ---------- */
+  function etagenZeigen() {
+    var box = $('g-etagen');
+    box.innerHTML = '';
+    plan.etagen.forEach(function (e, i) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.textContent = e.name;
+      b.setAttribute('aria-pressed', i === plan.aktiv ? 'true' : 'false');
+      b.addEventListener('click', function () { plan.aktiv = i; gewaehlt = null; massPunkte = []; entwurf = []; vb = null; speichern(); allesZeigen(); });
+      box.appendChild(b);
+    });
+    var e = etage();
+    $('g-etage-name').value = e.name;
+    $('g-wandhoehe').value = fmt1.format(plan.wandhoehe).replace(/,0$/, ',0');
+    $('g-etage-weg').disabled = plan.etagen.length < 2;
+    $('g-bild-weg').disabled = !e.bild;
+    $('g-mass-start').disabled = !e.bild;
+    $('g-mass-stand').textContent = !e.bild ? 'Ohne Bild ist der Maßstab fest: ein Kästchen = 1 m.' :
+      e.massstab ? 'Maßstab festgelegt. Du kannst ihn jederzeit neu festlegen; gezeichnete Räume wandern mit.' :
+        'Noch kein Maßstab: Das Bild ist vorläufig 15 m breit angenommen. Flächen stimmen erst nach dem Festlegen.';
+  }
+  $('g-etage-neu').addEventListener('click', function () {
+    var namen = ['Erdgeschoss', 'Obergeschoss', 'Dachgeschoss', 'Keller', '2. Obergeschoss'];
+    var frei = namen.filter(function (n) { return !plan.etagen.some(function (e) { return e.name === n; }); })[0] || ('Etage ' + (plan.etagen.length + 1));
+    plan.etagen.push(neueEtage(frei)); plan.aktiv = plan.etagen.length - 1; gewaehlt = null; vb = null;
+    speichern(); allesZeigen(); schrittZeigen(1);
+    meldung('Etage „' + frei + '“ angelegt. Lade ihr Grundrissbild oder zeichne direkt.');
+  });
+  $('g-etage-name').addEventListener('input', function () {
+    etage().name = this.value.trim().slice(0, 40) || 'Etage'; speichern();
+    var b = $('g-etagen').children[plan.aktiv]; if (b) b.textContent = etage().name;
+    auswerten();
+  });
+  $('g-wandhoehe').addEventListener('input', function () {
+    var v = zahl(this.value), f = $('g-wandhoehe-f');
+    if (v == null || v < 1.8 || v > 6) { f.textContent = 'Bitte eine Höhe zwischen 1,8 und 6 m eingeben.'; this.setAttribute('aria-invalid', 'true'); return; }
+    f.textContent = ''; this.removeAttribute('aria-invalid');
+    plan.wandhoehe = v; speichern(); if (ansicht3d) dreiD();
+  });
+  var etageWegBestaetigt = false;
+  $('g-etage-weg').addEventListener('click', function () {
+    var e = etage();
+    if (plan.etagen.length < 2) return;
+    if ((e.raeume.length || e.teile.length || e.bild) && !etageWegBestaetigt) {
+      etageWegBestaetigt = true; this.textContent = 'Wirklich löschen? Nochmal klicken';
+      meldung('„' + e.name + '“ enthält ' + e.raeume.length + ' Räume und ' + e.teile.length + ' Teile. Zum Löschen den Knopf noch einmal drücken; vorher kannst du unten den Plan als Datei sichern.');
+      return;
+    }
+    plan.etagen.splice(plan.aktiv, 1); plan.aktiv = Math.max(0, plan.aktiv - 1);
+    etageWegBestaetigt = false; this.textContent = 'Diese Etage löschen';
+    gewaehlt = null; vb = null; speichern(); allesZeigen();
+    meldung('Etage „' + e.name + '“ gelöscht.');
+  });
+  $('g-etage-weg').addEventListener('blur', function () { if (etageWegBestaetigt) { etageWegBestaetigt = false; this.textContent = 'Diese Etage löschen'; } });
+
+  /* ---------- Bild und Maßstab ---------- */
+  function labelAlsKnopf(id, inputId) {
+    $(id).addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); $(inputId).click(); } });
+  }
+  labelAlsKnopf('g-bild-knopf', 'g-bild-datei');
+  labelAlsKnopf('g-laden-knopf', 'g-laden-datei');
+  $('g-bild-datei').addEventListener('change', function () {
+    var datei = this.files && this.files[0];
+    this.value = '';
+    if (!datei) return;
+    if (!/^image\/(png|jpeg|webp)$/.test(datei.type)) { meldung('Nicht geladen: „' + datei.name + '“ ist kein JPG-, PNG- oder WebP-Bild. Ein PDF-Grundriss lässt sich vorher als Bild speichern (z. B. Bildschirmfoto).'); return; }
+    if (datei.size > 25 * 1024 * 1024) { meldung('Nicht geladen: Das Bild ist größer als 25 MB.'); return; }
+    var url = URL.createObjectURL(datei), img = new Image();
+    img.onload = function () {
+      var max = 1600, k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      var ctx = c.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      var e = etage(), hatteRaeume = e.raeume.length > 0;
+      e.bild = c.toDataURL('image/jpeg', 0.85); e.bildB = c.width; e.bildH = c.height;
+      e.mpp = 15 / c.width; e.massstab = false; massPunkte = [];
+      vb = null; speichern(); allesZeigen();
+      meldung('Bild geladen. Lege jetzt den Maßstab fest: „Strecke anklicken“ und eine bekannte Wandlänge eingeben.' + (hatteRaeume ? ' Achtung: Die schon gezeichneten Räume dieser Etage werden beim Maßstab mit vergrößert oder verkleinert.' : ''));
+      $('g-mass-start').focus();
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); meldung('Das Bild „' + datei.name + '“ konnte nicht gelesen werden (Datei beschädigt oder Format unbekannt).'); };
+    img.src = url;
+  });
+  $('g-bild-weg').addEventListener('click', function () {
+    var e = etage(); if (!e.bild) return;
+    e.bild = null; e.bildB = 0; e.bildH = 0; e.massstab = false; massPunkte = [];
+    speichern(); allesZeigen(); meldung('Bild entfernt. Die Räume bleiben.');
+  });
+  $('g-mass-start').addEventListener('click', function () {
+    massPunkte = []; $('g-mass-frage').hidden = true; modusSetzen('massstab');
+    $('g-buehne').scrollIntoView({ block: 'nearest' });
+  });
+  function massAbbruch() { massPunkte = []; $('g-mass-frage').hidden = true; $('g-mass-laenge-f').textContent = ''; modusSetzen('auswahl'); }
+  $('g-mass-abbruch').addEventListener('click', massAbbruch);
+  function massOk() {
+    var feld = $('g-mass-laenge'), L = zahl(feld.value), f = $('g-mass-laenge-f');
+    if (L == null || L <= 0.1 || L > 200) { f.textContent = 'Bitte eine Länge zwischen 0,1 und 200 m eingeben, z. B. 4,20.'; feld.setAttribute('aria-invalid', 'true'); feld.focus(); return; }
+    var a = massPunkte[0], b = massPunkte[1], d = a && b ? Math.hypot(b[0] - a[0], b[1] - a[1]) : 0;
+    if (d < 1e-6) { f.textContent = 'Die beiden Punkte liegen aufeinander. Bitte die Strecke neu anklicken.'; return; }
+    f.textContent = ''; feld.removeAttribute('aria-invalid');
+    var k = L / d, e = etage();
+    e.mpp *= k; e.massstab = true;
+    e.raeume.forEach(function (r) { r.punkte = r.punkte.map(function (q) { return [q[0] * k, q[1] * k]; }); });
+    e.teile.forEach(function (t) { t.x *= k; t.y *= k; });
+    massPunkte = []; $('g-mass-frage').hidden = true; feld.value = '';
+    vb = null; speichern(); allesZeigen();
+    meldung('Maßstab festgelegt: Das Bild ist jetzt ' + fmt1.format(e.bildB * e.mpp) + ' m breit. Weiter mit Schritt 2: Räume zeichnen.');
+  }
+  $('g-mass-ok').addEventListener('click', massOk);
+  $('g-mass-laenge').addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); massOk(); } });
+
+  /* ---------- Raum mit Maßen ---------- */
+  $('g-neu-raum').addEventListener('click', function () {
+    var b = zahl($('g-neu-b').value), l = zahl($('g-neu-l').value), ok = true;
+    [['g-neu-b', b], ['g-neu-l', l]].forEach(function (p) {
+      var f = $(p[0] + '-f');
+      if (p[1] == null || p[1] < 0.3 || p[1] > 100) { f.textContent = 'Bitte 0,3 bis 100 m eingeben.'; $(p[0]).setAttribute('aria-invalid', 'true'); ok = false; }
+      else { f.textContent = ''; $(p[0]).removeAttribute('aria-invalid'); }
+    });
+    if (!ok) return;
+    /* rechts neben die vorhandenen Räume legen */
+    var e = etage(), x0 = 0, y0 = 0;
+    if (e.raeume.length) { var g = grenzen(); x0 = rund(g.x1 + 0.5, 0.05); y0 = rund(g.y0, 0.05); }
+    neuerRaum([[x0, y0], [x0 + b, y0], [x0 + b, y0 + l], [x0, y0 + l]]);
+    vb = null; zeichnen();
+  });
+
+  /* ---------- Katalog ---------- */
+  function katalogZeigen() {
+    var box = $('g-katalog');
+    box.innerHTML = '';
+    KAT.artikel.filter(function (a) { return (a.gruppe === gruppe || (a.auch || []).indexOf(gruppe) >= 0) && a.zeichnen !== false; }).forEach(function (a) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = esc(a.name) + '<small>' + esc(a.breite + ' × ' + a.tiefe + ' cm') + '</small>';
+      b.setAttribute('aria-label', a.name + ' hinzufügen, ' + a.breite + ' mal ' + a.tiefe + ' Zentimeter');
+      b.addEventListener('click', function () { teilHinzu(a.id); });
+      box.appendChild(b);
+    });
+  }
+  document.querySelectorAll('[data-ggruppe]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      gruppe = b.getAttribute('data-ggruppe');
+      document.querySelectorAll('[data-ggruppe]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      katalogZeigen();
+    });
+  });
+
+  /* ---------- Auswahl bearbeiten ---------- */
+  function feld(id, label, wert, hilfe) {
+    return '<div><label for="' + id + '">' + esc(label) + '</label><input type="text" id="' + id + '" inputmode="decimal" value="' + esc(wert) + '" aria-describedby="' + id + '-f">' +
+      '<div class="fehler" id="' + id + '-f"></div>' + (hilfe ? '<div class="klein">' + esc(hilfe) + '</div>' : '') + '</div>';
+  }
+  function auswahlZeigen() {
+    var box = $('g-auswahl');
+    if (!gewaehlt) { box.innerHTML = ''; return; }
+    if (gewaehlt.typ === 'raum') {
+      var r = findeRaum(gewaehlt.id); if (!r) { box.innerHTML = ''; return; }
+      var f = flaeche(r);
+      var h = '<h4>Raum: ' + esc(r.name) + '</h4><p>Grundfläche <b>' + qm(f) + '</b>, davon Wohnfläche <b>' + qm(R.wohnflaecheRaum(raumDaten(r))) + '</b>.</p>' +
+        '<div style="display:grid;gap:12px"><div><label for="g-r-name">Name</label><input type="text" id="g-r-name" value="' + esc(r.name) + '"></div>' +
+        '<div><label for="g-r-art">Art des Raums</label><select id="g-r-art">' + ARTEN.map(function (a) { return '<option value="' + a[0] + '"' + (a[0] === r.art ? ' selected' : '') + '>' + esc(a[1]) + '</option>'; }).join('') + '</select></div>';
+      if (r.art === 'voll' || r.art === 'wintergarten') {
+        h += '<div class="g-mini">' + feld('g-r-t12', 'Anteil 1 bis 2 m hoch, in %', fmt0.format(r.teil12), '') + feld('g-r-t0', 'Anteil unter 1 m hoch, in %', fmt0.format(r.teil0), '') + '</div>' +
+          '<p class="klein" style="margin:0">Nur bei Dachschrägen: welcher Teil der Fläche niedriger ist. Zählt halb bzw. gar nicht.</p>';
+      } else if (r.art === 'balkon') {
+        h += feld('g-r-balkon', 'Angerechnet in % (Regel 25, höchstens 50)', fmt0.format(r.balkon), '');
+      } else {
+        h += '<div class="g-check"><input type="checkbox" id="g-r-separat"' + (r.separat ? ' checked' : '') + '><label for="g-r-separat">Kann separat vermietet werden (z. B. Garage, Lagerraum)</label></div>';
+      }
+      h += '</div><div class="knopfreihe"><button type="button" class="knopf zweit" id="g-r-weg">Raum löschen</button></div>' +
+        '<p class="klein" style="margin:8px 0 0">Ecken verschieben: an den Kreisen ziehen. Ganzen Raum: in der Fläche ziehen oder Pfeiltasten.</p>';
+      box.innerHTML = h;
+      $('g-r-name').addEventListener('input', function () { r.name = this.value.trim().slice(0, 40) || 'Raum'; box.querySelector('h4').textContent = 'Raum: ' + r.name; speichern(); zeichnen(); auswerten(); });
+      $('g-r-art').addEventListener('change', function () { r.art = this.value; geaendert(); auswahlZeigen(); $('g-r-art').focus(); });
+      prozentFeld('g-r-t12', function (v) { r.teil12 = v; }, 100);
+      prozentFeld('g-r-t0', function (v) { r.teil0 = v; }, 100);
+      prozentFeld('g-r-balkon', function (v) { r.balkon = v; }, 50);
+      if ($('g-r-separat')) $('g-r-separat').addEventListener('change', function () { r.separat = this.checked; speichern(); auswerten(); });
+      $('g-r-weg').addEventListener('click', loeschen);
+    } else {
+      var t = findeTeil(gewaehlt.id); if (!t) { box.innerHTML = ''; return; }
+      var a = ART[t.art];
+      box.innerHTML = '<h4>' + esc(a.name) + '</h4>' +
+        '<div class="g-mini">' + feld('g-t-b', 'Breite in cm', fmt0.format(t.w * 100), '') + feld('g-t-d', 'Tiefe in cm', fmt0.format(t.d * 100), '') + '</div>' +
+        (a.einheit === 'm' ? '<p class="klein" style="margin:6px 0 0">Kosten nach Länge: ' + fmt1.format(t.w) + ' m.</p>' : '') +
+        (a.masz ? '<p class="klein" style="margin:6px 0 0">Vorgabemaß ' + esc(a.masz) + '; bitte mit dem echten Möbel vergleichen.</p>' : '') +
+        '<div class="knopfreihe"><button type="button" class="knopf zweit" id="g-t-dreh">Drehen (R)</button><button type="button" class="knopf zweit" id="g-t-weg">Löschen (Entf)</button></div>' +
+        '<p class="klein" style="margin:8px 0 0">Verschieben: ziehen oder Pfeiltasten (mit Umschalt in größeren Schritten).</p>';
+      [['g-t-b', 'w'], ['g-t-d', 'd']].forEach(function (p) {
+        $(p[0]).addEventListener('input', function () {
+          var v = zahl(this.value), fe = $(p[0] + '-f');
+          if (v == null || v < 2 || v > 2000) { fe.textContent = 'Bitte 2 bis 2000 cm eingeben.'; this.setAttribute('aria-invalid', 'true'); return; }
+          fe.textContent = ''; this.removeAttribute('aria-invalid');
+          t[p[1]] = v / 100; geaendert();
+        });
+      });
+      $('g-t-dreh').addEventListener('click', drehen);
+      $('g-t-weg').addEventListener('click', loeschen);
+    }
+  }
+  function prozentFeld(id, setzen, max) {
+    var e = $(id); if (!e) return;
+    e.addEventListener('input', function () {
+      var v = zahl(this.value), f = $(id + '-f');
+      if (v == null || v < 0 || v > max) { f.textContent = 'Bitte 0 bis ' + max + ' eingeben.'; this.setAttribute('aria-invalid', 'true'); return; }
+      f.textContent = ''; this.removeAttribute('aria-invalid');
+      setzen(v); speichern(); auswerten();
+      var p = $('g-auswahl').querySelector('p'); var r = findeRaum(gewaehlt.id);
+      if (p && r) p.innerHTML = 'Grundfläche <b>' + qm(flaeche(r)) + '</b>, davon Wohnfläche <b>' + qm(R.wohnflaecheRaum(raumDaten(r))) + '</b>.';
+    });
+  }
+  function raumDaten(r) { return { flaeche: flaeche(r), art: r.art, teil12: r.teil12, teil0: r.teil0, balkonProzent: r.balkon }; }
+
+  /* ---------- Auswertung ---------- */
+  function preisVon(a) { return plan.preise[a.id] != null ? plan.preise[a.id] : a.start; }
+  function summen() {
+    var wfl = 0, nfl = 0, sep = 0, betten = 0, mengen = {}, raeumeRows = [], bettRows = [], monteur = false;
+    plan.etagen.forEach(function (e) {
+      e.raeume.forEach(function (r) {
+        var d = raumDaten(r), w = R.wohnflaecheRaum(d), n = R.nutzflaecheRaum(d);
+        wfl += w; nfl += n; if (r.separat && n) sep += n;
+        raeumeRows.push({ r: r, etage: e.name, f: d.flaeche, w: w, n: n });
+      });
+      var jeRaum = {};
+      e.teile.forEach(function (t) {
+        var a = ART[t.art];
+        mengen[a.id] = (mengen[a.id] || 0) + (a.einheit === 'm' ? t.w : 1);
+        if (a.gruppe === 'monteur') monteur = true;
+        if (a.betten) {
+          betten += a.betten;
+          var r = e.raeume.filter(function (x) { return R.punktImPolygon(t.x, t.y, x.punkte); })[0];
+          var k = r ? r.id : '_';
+          jeRaum[k] = jeRaum[k] || { name: r ? r.name : 'außerhalb der Räume', etage: e.name, f: r ? flaeche(r) : 0, n: 0 };
+          jeRaum[k].n += a.betten;
+        }
+      });
+      Object.keys(jeRaum).forEach(function (k) { bettRows.push(jeRaum[k]); });
+    });
+    var posten = [];
+    KAT.artikel.forEach(function (a) {
+      var m;
+      if (a.jeBett) m = monteur ? betten * a.jeBett : 0;
+      else if (a.zeichnen === false) m = plan.mengen[a.id] || 0;
+      else m = mengen[a.id] || 0;
+      if (m > 0 || a.zeichnen === false && !a.jeBett) posten.push({ a: a, menge: m, preis: preisVon(a), gruppe: a.gruppe });
+    });
+    var k = R.einrichtungskosten(posten.map(function (p) { return { menge: p.menge, preis: p.preis || 0, gruppe: p.gruppe }; }));
+    var ohneMassstab = plan.etagen.filter(function (e) { return e.bild && !e.massstab && e.raeume.length; }).map(function (e) { return e.name; });
+    var ohnePreis = posten.filter(function (p) { return p.menge > 0 && p.preis == null; }).length;
+    return { wfl: wfl, nfl: nfl, sep: sep, betten: betten, einrichtung: k.einrichtung, umbau: k.umbau, summe: k.summe, posten: posten, raeume: raeumeRows, bettRows: bettRows, ohneMassstab: ohneMassstab, ohnePreis: ohnePreis };
+  }
+  function auswerten() {
+    var s = summen(), nRaeume = s.raeume.length;
+    $('g-wfl').textContent = nRaeume ? qm(s.wfl) : '-';
+    $('g-nfl').textContent = nRaeume ? qm(s.nfl) : '-';
+    $('g-einr').textContent = s.einrichtung ? euro(s.einrichtung) : '-';
+    $('g-umb').textContent = s.umbau ? euro(s.umbau) : '-';
+    var box = $('g-satz'), titel, klein, art = 'leer', zeichen = '?';
+    if (!nRaeume) {
+      titel = 'Noch kein Raum gezeichnet.';
+      klein = 'Fang mit Schritt 1 an: Grundrissbild laden, oder gleich in Schritt 2 auf dem Raster zeichnen.';
+    } else {
+      titel = qm(s.wfl) + ' Wohnfläche' + (s.summe ? ', Einrichtung und Umbau etwa ' + euro(s.summe) : '') + '.';
+      klein = (s.nfl ? 'Dazu ' + qm(s.nfl) + ' Nutzfläche' + (s.sep ? ', davon ' + qm(s.sep) + ' separat vermietbar' : '') + '. ' : '') +
+        (s.betten ? s.betten + ' Schlafplätze. ' : '') + 'Preise sind Richtwerte, keine Angebote.';
+      zeichen = '✓'; art = 'gut';
+      if (s.ohneMassstab.length) {
+        art = 'warn'; zeichen = '!';
+        klein = 'Achtung: Für ' + s.ohneMassstab.join(', ') + ' ist noch kein Maßstab festgelegt, die Flächen stimmen erst danach. ' + klein;
+      }
+    }
+    box.className = 'satz ' + art;
+    box.querySelector('.lampe').textContent = zeichen;
+    $('g-satz-text').textContent = titel;
+    $('g-satz-klein').textContent = klein;
+
+    /* Räume */
+    var tb = $('g-raeume').querySelector('tbody');
+    tb.innerHTML = s.raeume.length ? s.raeume.map(function (x) {
+      var artName = ARTEN.filter(function (a) { return a[0] === x.r.art; })[0][1];
+      return '<tr><td data-titel="Raum">' + esc(x.r.name) + (x.r.separat && x.n ? ' <span class="klein">(separat vermietbar)</span>' : '') + '</td><td data-titel="Etage">' + esc(x.etage) + '</td><td data-titel="Art">' + esc(artName) + '</td>' +
+        '<td class="z" data-titel="Grundfläche">' + qm(x.f) + '</td><td class="z" data-titel="Wohnfläche">' + qm(x.w) + '</td><td class="z" data-titel="Nutzfläche">' + (x.n ? qm(x.n) : '-') + '</td></tr>';
+    }).join('') + '<tr><th scope="row" colspan="3">Summe</th><td class="z" data-titel="Grundfläche"><b>' + qm(s.raeume.reduce(function (a, x) { return a + x.f; }, 0)) + '</b></td><td class="z" data-titel="Wohnfläche"><b>' + qm(s.wfl) + '</b></td><td class="z" data-titel="Nutzfläche"><b>' + qm(s.nfl) + '</b></td></tr>'
+      : '<tr><td colspan="6">Noch keine Räume.</td></tr>';
+
+    /* Kosten */
+    var kb = $('g-kosten').querySelector('tbody');
+    var aktiv = document.activeElement && kb.contains(document.activeElement) ? document.activeElement.id : null;
+    if (!aktiv) {
+      kb.innerHTML = s.posten.length ? s.posten.map(function (p) {
+        var a = p.a, mengeZelle;
+        if (a.zeichnen === false && !a.jeBett) mengeZelle = '<input type="text" inputmode="decimal" id="g-m-' + a.id + '" value="' + (p.menge ? fmt0.format(p.menge) : '') + '" placeholder="0" aria-label="Menge ' + esc(a.name) + '">';
+        else mengeZelle = a.einheit === 'm' ? fmt1.format(p.menge) + ' m' : fmt0.format(p.menge);
+        var spanne = a.von != null ? euro(a.von) + ' bis ' + euro(a.bis) + (a.einheit === 'm' ? ' je m' : '') : 'keine geprüfte Spanne';
+        return '<tr><td data-titel="Teil">' + esc(a.name) + (a.jeBett ? ' <span class="klein">(je Schlafplatz)</span>' : '') + '</td><td class="z" data-titel="Menge">' + mengeZelle + '</td>' +
+          '<td data-titel="€ je ' + (a.einheit === 'm' ? 'm' : 'Stück') + '"><input type="text" inputmode="decimal" id="g-p-' + a.id + '" value="' + (p.preis != null ? fmt0.format(p.preis) : '') + '" placeholder="Preis eintragen" aria-label="Preis je ' + (a.einheit === 'm' ? 'Meter' : 'Stück') + ' ' + esc(a.name) + '"></td>' +
+          '<td class="z" data-titel="Summe" id="g-s-' + a.id + '">' + (p.preis != null ? euro(p.menge * p.preis) : '-') + '</td>' +
+          '<td data-titel="Spanne und Quelle" class="klein">' + esc(spanne) + (a.quelle ? '<br>' + esc(a.quelle) : '') + '</td></tr>';
+      }).join('') : '<tr><td colspan="5">Noch keine Möbel oder Umbau-Teile im Plan.</td></tr>';
+    } else {
+      s.posten.forEach(function (p) { var z = $('g-s-' + p.a.id); if (z) z.textContent = p.preis != null ? euro(p.menge * p.preis) : '-'; });
+    }
+    $('g-kosten-ergebnis').innerHTML =
+      '<div class="wert"><dt>Einrichtung</dt><dd>' + euro(s.einrichtung) + '</dd></div>' +
+      '<div class="wert"><dt>Umbau</dt><dd>' + euro(s.umbau) + '</dd></div>' +
+      '<div class="wert haupt"><dt>Zusammen</dt><dd>' + euro(s.summe) + '</dd></div>';
+    $('g-preis-hinweis').textContent = 'Preise sind Richtwerte' + (KAT.abruf ? ' (Abruf ' + KAT.abruf + ')' : '') + ', keine Angebote: bitte eigene Preise eintragen.' + (s.ohnePreis ? ' ' + s.ohnePreis + ' Teile haben noch keinen Preis und zählen mit 0 €.' : '');
+
+    /* Schlafplätze */
+    $('g-betten-block').hidden = !s.betten;
+    $('g-betten').querySelector('tbody').innerHTML = s.bettRows.map(function (b) {
+      return '<tr><td data-titel="Zimmer">' + esc(b.name) + ' <span class="klein">(' + esc(b.etage) + ')</span></td><td class="z" data-titel="Schlafplätze">' + b.n + '</td><td class="z" data-titel="m² je Schlafplatz">' + (b.f ? fmt1.format(b.f / b.n) : '-') + '</td></tr>';
+    }).join('');
+    if (ansicht3d) dreiD();
+  }
+  $('g-kosten').addEventListener('input', function (ev) {
+    var id = ev.target.id, v = ev.target.value.trim(), n = v === '' ? null : zahl(v);
+    if (v !== '' && (n == null || n < 0)) { ev.target.setAttribute('aria-invalid', 'true'); return; }
+    ev.target.removeAttribute('aria-invalid');
+    if (id.indexOf('g-p-') === 0) { var a = id.slice(4); if (n == null) delete plan.preise[a]; else plan.preise[a] = n; }
+    else if (id.indexOf('g-m-') === 0) { plan.mengen[id.slice(4)] = n || 0; }
+    speichern(); auswerten();
+  });
+  $('g-kosten').addEventListener('focusout', function () { setTimeout(function () { if (!$('g-kosten').contains(document.activeElement)) auswerten(); }, 0); });
+
+  /* ---------- In den Rechner übernehmen ---------- */
+  var fmtFlaeche = function (x) { return fmt1.format(x); };
+  function setzeFeld(id, wert) {
+    var e = $(id); if (!e) return;
+    e.value = wert;
+    e.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  function uebernehmen(art) {
+    var s = summen(), alt = R.leseZahl($('r-zusatz').value) || 0;
+    var kosten = art === 'dazu' ? alt + s.summe : s.summe;
+    if (s.raeume.length) setzeFeld('r-flaeche', fmtFlaeche(s.wfl));
+    setzeFeld('r-zusatz', fmt0.format(Math.round(kosten)));
+    $('g-frage').hidden = true;
+    $('g-uebernahme-meldung').innerHTML = 'Übernommen: ' + (s.raeume.length ? 'Wohnfläche ' + esc(qm(s.wfl)) + ', ' : '') + 'zusätzliche Kosten ' + esc(euro(kosten)) + '. <a href="#rechner" data-ziel="rechner">Zum Rechner</a>';
+  }
+  $('g-uebernehmen').addEventListener('click', function () {
+    var s = summen();
+    if (!s.raeume.length && !s.summe) { $('g-uebernahme-meldung').textContent = 'Es gibt noch nichts zu übernehmen: zeichne zuerst Räume oder stelle Möbel in den Plan.'; return; }
+    var alt = R.leseZahl($('r-zusatz').value) || 0, altF = R.leseZahl($('r-flaeche').value) || 0;
+    if (alt > 0 || (altF > 0 && s.raeume.length && Math.abs(altF - s.wfl) > 0.05)) {
+      $('g-frage-text').textContent = 'Im Rechner steht schon etwas: ' + (altF ? 'Wohnfläche ' + qm(altF) + ', ' : '') + 'zusätzliche Kosten ' + euro(alt) + '. ' +
+        'Neu aus dem Grundriss: ' + (s.raeume.length ? 'Wohnfläche ' + qm(s.wfl) + ', ' : '') + 'Einrichtung und Umbau ' + euro(s.summe) + '. Die Wohnfläche wird in beiden Fällen ersetzt.';
+      $('g-frage').hidden = false; $('g-frage-ersetzen').focus();
+      return;
+    }
+    uebernehmen('ersetzen');
+  });
+  $('g-frage-ersetzen').addEventListener('click', function () { uebernehmen('ersetzen'); });
+  $('g-frage-dazu').addEventListener('click', function () { uebernehmen('dazu'); });
+  $('g-frage-nein').addEventListener('click', function () { $('g-frage').hidden = true; $('g-uebernahme-meldung').textContent = 'Nichts übernommen.'; });
+
+  /* ---------- Datei sichern, laden, neu ---------- */
+  function heute() { var d = new Date(); return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); }
+  function dateiSichern(zusatz) {
+    try {
+      var daten = JSON.parse(JSON.stringify(plan)); daten.exportiert = new Date().toISOString();
+      var blob = new Blob([JSON.stringify(daten)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = 'grundriss_' + heute() + (zusatz || '') + '.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      return true;
+    } catch (e) {
+      $('g-datei-meldung').textContent = 'Die Datei konnte nicht erzeugt werden: ' + (e && e.message ? e.message : 'unbekannter Fehler') + '.';
+      return false;
+    }
+  }
+  function leer() { return plan.etagen.every(function (e) { return !e.raeume.length && !e.teile.length && !e.bild; }); }
+  $('g-sichern').addEventListener('click', function () {
+    if (dateiSichern('')) $('g-datei-meldung').textContent = 'Datei „grundriss_' + heute() + '.json“ wird heruntergeladen. Erscheint nichts, erlaubt diese Ansicht keine Downloads; dann die Seite direkt im Browser öffnen.';
+  });
+  $('g-laden-datei').addEventListener('change', function () {
+    var datei = this.files && this.files[0]; this.value = '';
+    if (!datei) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      var neu = null;
+      try { neu = pruefePlan(JSON.parse(rd.result)); } catch (e) { neu = null; }
+      if (!neu) { $('g-datei-meldung').textContent = 'Nicht geladen: „' + datei.name + '“ ist keine Grundriss-Datei dieser Seite.'; return; }
+      var gesichert = !leer() && dateiSichern('_vorher');
+      plan = neu; gewaehlt = null; vb = null; speichern(); allesZeigen();
+      $('g-datei-meldung').textContent = 'Geladen: ' + neu.etagen.length + ' Etagen.' + (gesichert ? ' Der bisherige Plan wurde vorher als „grundriss_' + heute() + '_vorher.json“ gesichert.' : '');
+    };
+    rd.onerror = function () { $('g-datei-meldung').textContent = 'Die Datei konnte nicht gelesen werden.'; };
+    rd.readAsText(datei);
+  });
+  $('g-neu').addEventListener('click', function () {
+    if (leer()) return;
+    $('g-neu-frage').hidden = false; $('g-neu-sichern').focus();
+  });
+  function neuBeginnen() { plan = leererPlan(); gewaehlt = null; vb = null; $('g-neu-frage').hidden = true; speichern(); allesZeigen(); schrittZeigen(1); }
+  $('g-neu-sichern').addEventListener('click', function () { if (dateiSichern('_alt')) { neuBeginnen(); $('g-datei-meldung').textContent = 'Alter Plan als Datei gesichert, neuer Plan begonnen.'; } });
+  $('g-neu-ohne').addEventListener('click', function () { neuBeginnen(); $('g-datei-meldung').textContent = 'Neuer Plan begonnen.'; });
+  $('g-neu-nein').addEventListener('click', function () { $('g-neu-frage').hidden = true; });
+
+  /* ---------- Ansicht von oben / 3D ---------- */
+  function dreiD() {
+    if (!window.GRUNDRISS3D) return;
+    window.GRUNDRISS3D.zeige(plan, ART);
+  }
+  function ansichtSetzen(drei) {
+    ansicht3d = drei && !!window.GRUNDRISS3D;
+    $('g-ansicht-plan').setAttribute('aria-pressed', ansicht3d ? 'false' : 'true');
+    $('g-ansicht-3d').setAttribute('aria-pressed', ansicht3d ? 'true' : 'false');
+    svg.style.visibility = ansicht3d ? 'hidden' : '';
+    $('g-szene').hidden = !ansicht3d;
+    $('g-zoom').hidden = ansicht3d;
+    $('g-tipp').textContent = ansicht3d ? '' : $('g-tipp').textContent;
+    if (ansicht3d) dreiD(); else zeichnen();
+  }
+  $('g-ansicht-plan').addEventListener('click', function () { ansichtSetzen(false); });
+  $('g-ansicht-3d').addEventListener('click', function () { ansichtSetzen(true); });
+  $('g-zoom-ein').addEventListener('click', function () { zoomen(1 / 1.3); });
+  $('g-zoom-aus').addEventListener('click', function () { zoomen(1.3); });
+  $('g-zoom-passt').addEventListener('click', function () { einpassen(); zeichnen(); });
+
+  if ('ResizeObserver' in window) new ResizeObserver(function () { if (sichtbar && !ansicht3d) { seitenverhaeltnis(); zeichnen(); } }).observe($('g-buehne'));
+  window.addEventListener('themagewechselt', function () { if (ansicht3d) dreiD(); });
+
+  function allesZeigen() { etagenZeigen(); zeichnen(); auswahlZeigen(); auswerten(); }
+
+  katalogZeigen();
+  auswerten();
+
+  window.GRUNDRISS = {
+    /* von app.js beim Reiterwechsel gerufen: Größe ist erst messbar, wenn der Bereich sichtbar ist */
+    zeigt: function (an) {
+      sichtbar = !!an;
+      if (!sichtbar) return;
+      if (!vb) einpassen(); else seitenverhaeltnis();
+      allesZeigen(); tipp();
+    },
+    summen: summen,
+    plan: function () { return plan; },
+    /* für Prüfskripte: Plan setzen, geprüft wie beim Datei-Import */
+    setzePlan: function (p) { var n = pruefePlan(p); if (!n) return false; plan = n; gewaehlt = null; vb = null; speichern(); allesZeigen(); return true; }
+  };
+})();
+
+</script>
 <script>/* app.js */
 /* Bedienlogik der Werkzeugseite. Rechnet nur über window.RECHNER (rechner.js). */
 (function () {
@@ -2452,6 +3862,7 @@ window.DATEN.begriffe = [
       if (kopf) { kopf.setAttribute('tabindex', '-1'); kopf.focus({ preventScroll: true }); }
     }
     if (window.GRAFIK) window.GRAFIK.versteckeTip();
+    if (window.GRUNDRISS) window.GRUNDRISS.zeigt(ziel === 'grundriss');
     zeichneGrafiken(); /* Breite ist erst messbar, wenn der Bereich sichtbar ist */
   }
   function zeigeBereich(ziel, fokus) {

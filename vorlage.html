@@ -38,7 +38,7 @@ __FONTS_CSS__
     --blau: #2f5fb3;
     --schlecht-flaeche: rgba(178, 59, 43, .08);
     --gut-fl: #e3f2e8; --warn-fl: #fbf0d2; --schlecht-fl: #f8e1dc; --leer-fl: #efe8f7;
-    --f1: #6b3fa0; --f2: #2f5fb3; --f3: #b0346b; --f4: #1f6f9e; --f5: #8e2f8a; --f6: #4f6170; --f7: #6b6470;
+    --f1: #6b3fa0; --f2: #2f5fb3; --f3: #b0346b; --f4: #1f6f9e; --f5: #8e2f8a; --f6: #4f6170; --f7: #6b6470; --f8: #4a4fb5;
     --schatten: 0 1px 2px rgba(60, 40, 10, .05), 0 8px 24px rgba(60, 40, 10, .07);
     --display: 'Manrope', 'Segoe UI', system-ui, sans-serif;
     --sans: 'Source Sans 3', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -52,7 +52,7 @@ __FONTS_CSS__
       --akzent-flaeche: rgba(185, 148, 236, .14); --blau: #7aa8f0;
       --schlecht-flaeche: rgba(239, 138, 122, .10);
       --gut-fl: #1c3a2a; --warn-fl: #3a3018; --schlecht-fl: #43231f; --leer-fl: #2f2740;
-      --f1: #b994ec; --f2: #7aa8f0; --f3: #ec86b1; --f4: #6cc3ee; --f5: #e3a0e0; --f6: #a3b4c2; --f7: #b3aab9;
+      --f1: #b994ec; --f2: #7aa8f0; --f3: #ec86b1; --f4: #6cc3ee; --f5: #e3a0e0; --f6: #a3b4c2; --f7: #b3aab9; --f8: #a3a8f2;
       --schatten: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .3);
     }
   }
@@ -63,7 +63,7 @@ __FONTS_CSS__
     --akzent-flaeche: rgba(185, 148, 236, .14); --blau: #7aa8f0;
     --schlecht-flaeche: rgba(239, 138, 122, .10);
     --gut-fl: #1c3a2a; --warn-fl: #3a3018; --schlecht-fl: #43231f; --leer-fl: #2f2740;
-    --f1: #b994ec; --f2: #7aa8f0; --f3: #ec86b1; --f4: #6cc3ee; --f5: #e3a0e0; --f6: #a3b4c2; --f7: #b3aab9;
+    --f1: #b994ec; --f2: #7aa8f0; --f3: #ec86b1; --f4: #6cc3ee; --f5: #e3a0e0; --f6: #a3b4c2; --f7: #b3aab9; --f8: #a3a8f2;
     --schatten: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .3);
   }
 
@@ -259,6 +259,8 @@ __PALETTE_CSS__
   .szene .ersatz { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: var(--leise); }
   .frage { font-size: clamp(26px, 3vw, 32px); margin: 40px 0 18px; }
   .start-kacheln { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  /* allein stehende letzte Kachel über die ganze Breite statt einer Lücke */
+  .start-kacheln > :last-child:nth-child(3n+1) { grid-column: 1 / -1; }
   .start-kachel { display: flex; flex-direction: column; gap: 10px; text-align: left; background: var(--karte); color: var(--text); border: 1px solid var(--linie); border-top: 10px solid var(--f); border-radius: 14px; padding: 22px; cursor: pointer; font: inherit; transition: transform .2s ease, box-shadow .2s ease; }
   .start-kachel:hover { transform: translateY(-4px); box-shadow: var(--schatten); }
   .start-kachel > svg { width: 42px; height: 42px; color: var(--f); }
@@ -315,10 +317,75 @@ __PALETTE_CSS__
   #erklaerung strong { display: block; font-family: var(--display); margin-bottom: 4px; }
   #erklaerung p { margin: 0; }
 
+  /* Grundriss und Einrichtung */
+  .g-leiste { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .g-gruppe { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .g-gruppe > span { color: var(--leise); font-size: .95rem; margin-right: 2px; }
+  .chip { border: 2px solid var(--linie2); background: var(--karte); color: var(--text); border-radius: 999px; padding: 6px 14px; font: 600 15px var(--sans); cursor: pointer; min-height: 40px; }
+  .chip:hover { border-color: var(--f8); }
+  .chip[aria-pressed="true"] { background: var(--f8); border-color: var(--f8); color: var(--grund); }
+  .chip.klein { min-width: 40px; padding: 6px 10px; }
+  .g-flaeche { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 18px; align-items: start; }
+  .g-buehne { position: relative; border: 1px solid var(--linie); border-radius: 16px; overflow: hidden; background: var(--karte2); height: min(68vh, 640px); min-height: 360px; }
+  #g-plan { display: block; width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; cursor: default; }
+  #g-plan.zeichnen { cursor: crosshair; }
+  #g-plan.schieben { cursor: grab; }
+  #g-plan .raster-linie { stroke: var(--linie2); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  #g-plan .raster-linie.meter { stroke: var(--linie); }
+  #g-plan .raum { stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; fill-opacity: .28; cursor: pointer; }
+  #g-plan .raum.gewaehlt { stroke: var(--f8); stroke-width: 4; fill-opacity: .4; }
+  #g-plan .raum-text { fill: var(--text); font-family: var(--sans); font-weight: 700; text-anchor: middle; pointer-events: none; paint-order: stroke; stroke: var(--karte2); stroke-linejoin: round; }
+  #g-plan .raum-text tspan.leise { font-weight: 400; }
+  #g-plan .teil rect { stroke: var(--text); stroke-width: 1.5; vector-effect: non-scaling-stroke; cursor: move; }
+  #g-plan .teil.wohnung rect.koerper { fill: color-mix(in srgb, var(--f2) 45%, var(--karte)); }
+  #g-plan .teil.monteur rect.koerper { fill: color-mix(in srgb, var(--f5) 45%, var(--karte)); }
+  #g-plan .teil.umbau rect.koerper { fill: color-mix(in srgb, var(--f3) 40%, var(--karte)); }
+  #g-plan .teil.wandweg rect.koerper { fill: var(--schlecht-flaeche); stroke: var(--schlecht); stroke-dasharray: 6 4; }
+  #g-plan .teil .kissen { fill: var(--karte); pointer-events: none; }
+  #g-plan .teil.gewaehlt rect.koerper { stroke: var(--f8); stroke-width: 4; }
+  #g-plan .teil text { fill: var(--text); font-family: var(--sans); font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  #g-plan :focus { outline: none; }
+  #g-plan :focus-visible > .raum, #g-plan .teil:focus-visible rect.koerper { stroke: var(--akzent); stroke-width: 5; }
+  #g-plan .griff { fill: var(--karte); stroke: var(--f8); stroke-width: 3; vector-effect: non-scaling-stroke; cursor: move; }
+  #g-plan .hilfslinie { stroke: var(--f8); stroke-width: 3; vector-effect: non-scaling-stroke; fill: none; stroke-dasharray: 8 5; }
+  #g-plan .hilfsflaeche { fill: var(--f8); fill-opacity: .15; stroke: var(--f8); stroke-width: 3; vector-effect: non-scaling-stroke; }
+  #g-plan .hilfspunkt { fill: var(--f8); }
+  .raum.art-voll { fill: var(--f2); } .raum.art-balkon { fill: var(--f4); } .raum.art-wintergarten { fill: var(--f1); } .raum.art-zubehoer { fill: var(--f7); }
+  .g-tipp { position: absolute; left: 10px; right: 10px; top: 10px; pointer-events: none; display: flex; justify-content: center; }
+  .g-tipp span { background: color-mix(in srgb, var(--karte) 92%, transparent); border: 1px solid var(--linie2); border-radius: 12px; padding: 6px 12px; font-size: .95rem; max-width: 100%; }
+  .g-tipp span:empty { display: none; }
+  .g-zoom { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 6px; }
+  .g-zoom .chip { background: var(--karte); }
+  .g-szene { position: absolute; inset: 0; aspect-ratio: auto; border-radius: 0; }
+  .g-seite { display: flex; flex-direction: column; gap: 14px; }
+  .g-seite h4 { margin: 0 0 6px; font: 700 1.05rem var(--display); }
+  .g-panel { background: var(--karte2); border-radius: 14px; padding: 14px 16px; }
+  .g-panel p { margin: 0 0 10px; }
+  .g-panel .knopfreihe { margin-top: 10px; }
+  .g-panel label { font-size: .95rem; }
+  .g-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .g-katalog { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 330px; overflow-y: auto; padding: 2px; }
+  .g-katalog button { text-align: left; border: 2px solid var(--linie); background: var(--karte); color: var(--text); border-radius: 12px; padding: 8px 10px; font: 600 14px/1.25 var(--sans); cursor: pointer; }
+  .g-katalog button small { display: block; color: var(--leise); font-weight: 400; }
+  .g-katalog button:hover { border-color: var(--f8); }
+  .g-auswahl:empty { display: none; }
+  .g-auswahl { border: 2px solid var(--f8); background: var(--karte); }
+  .g-check { display: flex; gap: 10px; align-items: flex-start; }
+  .g-check input { margin-top: 4px; width: 20px; height: 20px; flex: none; }
+  .g-check label { margin: 0; color: var(--text); }
+  .g-frage { background: var(--akzent-flaeche); border-radius: 14px; padding: 14px 16px; margin-top: 12px; }
+  .g-frage[hidden] { display: none; }
+  @media (max-width: 1000px) {
+    .g-flaeche { grid-template-columns: minmax(0, 1fr); }
+    .g-buehne { height: min(62vh, 520px); }
+  }
+
   @media (max-width: 900px) {
     .hero { grid-template-columns: minmax(0, 1fr); }
     .hero .szene { max-width: 480px; }
     .start-kacheln { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .start-kacheln > :last-child:nth-child(3n+1) { grid-column: auto; }
+    .start-kacheln > :last-child:nth-child(2n+1) { grid-column: 1 / -1; }
   }
   /* Handybreite: Tabellen als Karten */
   @media (max-width: 760px) {
@@ -350,6 +417,7 @@ __PALETTE_CSS__
   <symbol id="i-weg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M24 4v40M16 44h16"/><path d="M24 9h14l5 5-5 5H24zM24 22H10l-5 5 5 5h14z"/></symbol>
   <symbol id="i-paragraf" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M31 11c-1-3-4-5-8-5-5 0-8 3-8 6 0 8 18 6 18 15 0 3-2 5-5 6M17 37c1 3 4 5 8 5 5 0 8-3 8-6 0-8-18-6-18-15 0-3 2-5 5-6"/></symbol>
   <symbol id="i-bett" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12v28M5 32h38v8M5 26h38v6"/><rect x="9" y="18" width="10" height="8" rx="3"/></symbol>
+  <symbol id="i-grundriss" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7" width="38" height="34" rx="2"/><path d="M22 7v13M22 27v14M22 24h21M5 24h9"/><path d="M30 33h7"/></symbol>
   <symbol id="i-menue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
   <symbol id="i-sonne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
   <symbol id="i-mond" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
@@ -373,6 +441,7 @@ __PALETTE_CSS__
           <button type="button" class="bereich-knopf" id="tab-rechner" data-ziel="rechner" style="--f:var(--f2)"><svg aria-hidden="true"><use href="#i-rechner"/></svg>Kann ich mir das leisten?</button>
           <button type="button" class="bereich-knopf" id="tab-wert" data-ziel="wert" style="--f:var(--f3)"><svg aria-hidden="true"><use href="#i-waage"/></svg>Was ist das Haus wert?</button>
           <button type="button" class="bereich-knopf" id="tab-umbau" data-ziel="umbau" style="--f:var(--f4)"><svg aria-hidden="true"><use href="#i-werkzeug"/></svg>Umbauen und renovieren</button>
+          <button type="button" class="bereich-knopf" id="tab-grundriss" data-ziel="grundriss" style="--f:var(--f8)"><svg aria-hidden="true"><use href="#i-grundriss"/></svg>Grundriss und Einrichtung</button>
           <button type="button" class="bereich-knopf" id="tab-pruefliste" data-ziel="pruefliste" style="--f:var(--f5)"><svg aria-hidden="true"><use href="#i-weg"/></svg>Schritt für Schritt zum Kauf</button>
           <button type="button" class="bereich-knopf" id="tab-recht" data-ziel="recht" style="--f:var(--f6)"><svg aria-hidden="true"><use href="#i-paragraf"/></svg>Gesetze und Hilfe</button>
           <button type="button" class="bereich-knopf optional" id="tab-monteur" data-ziel="monteur" style="--f:var(--f7)"><svg aria-hidden="true"><use href="#i-bett"/></svg>Extra: Monteurzimmer</button>
@@ -420,6 +489,7 @@ __PALETTE_CSS__
     <button type="button" class="start-kachel" data-ziel="rechner" style="--f:var(--f2)"><svg aria-hidden="true"><use href="#i-rechner"/></svg><strong>Kann ich mir das leisten?</strong><span class="text">Kaufpreis, Kredit und Miete eingeben. Du siehst sofort, ob die Miete die Rate trägt.</span><span class="los">Jetzt rechnen →</span></button>
     <button type="button" class="start-kachel" data-ziel="wert" style="--f:var(--f3)"><svg aria-hidden="true"><use href="#i-waage"/></svg><strong>Was ist das Haus wert?</strong><span class="text">Grob schätzen, ob der Preis zur Miete und zum Grundstück passt.</span><span class="los">Wert schätzen →</span></button>
     <button type="button" class="start-kachel" data-ziel="umbau" style="--f:var(--f4)"><svg aria-hidden="true"><use href="#i-werkzeug"/></svg><strong>Umbauen und renovieren</strong><span class="text">Was kosten Bad, Dach oder Heizung, und wie viel Miete bringt es zurück?</span><span class="los">Umbau planen →</span></button>
+    <button type="button" class="start-kachel" data-ziel="grundriss" style="--f:var(--f8)"><svg aria-hidden="true"><use href="#i-grundriss"/></svg><strong>Grundriss und Einrichtung</strong><span class="text">Grundriss aus dem Exposé nachzeichnen, Möbel hineinstellen, Wohnfläche und Kosten sehen.</span><span class="los">Räume planen →</span></button>
     <button type="button" class="start-kachel" data-ziel="pruefliste" style="--f:var(--f5)"><svg aria-hidden="true"><use href="#i-weg"/></svg><strong>Schritt für Schritt zum Kauf</strong><span class="text">Zehn Etappen von der Bank bis zur Vermietung, zum Abhaken.</span><span class="los">Weg ansehen →</span></button>
     <button type="button" class="start-kachel" data-ziel="recht" style="--f:var(--f6)"><svg aria-hidden="true"><use href="#i-paragraf"/></svg><strong>Gesetze und Hilfe</strong><span class="text">Welche Regeln gelten, und wen du fragen kannst.</span><span class="los">Nachschlagen →</span></button>
   </div>
@@ -943,6 +1013,177 @@ __PALETTE_CSS__
   </div>
 </section>
 
+<!-- GRUNDRISS -->
+<section id="grundriss" aria-label="Grundriss und Einrichtung" hidden>
+  <header class="bereich-kopf" style="--f:var(--f8)">
+    <svg aria-hidden="true"><use href="#i-grundriss"/></svg>
+    <div>
+      <p class="etikett">Wohnfläche, Möbel, Umbau</p>
+      <h2>Grundriss und Einrichtung</h2>
+      <p class="lead">Lade den Grundriss aus dem Exposé, zeichne die Räume nach und stelle Möbel hinein. Du siehst sofort die Wohnfläche und was die Einrichtung kostet. Das Bild bleibt auf deinem Gerät, es wird nirgends hochgeladen.</p>
+    </div>
+  </header>
+
+  <div class="satz" id="g-satz" aria-live="polite">
+    <div class="lampe" aria-hidden="true">?</div>
+    <div><strong id="g-satz-text"></strong><small id="g-satz-klein"></small></div>
+  </div>
+  <dl class="kacheln" id="g-kacheln">
+    <div class="kz haupt"><dt>Wohnfläche</dt><dd id="g-wfl">-</dd></div>
+    <div class="kz"><dt>Nutzfläche (Keller, Garage)</dt><dd id="g-nfl">-</dd></div>
+    <div class="kz"><dt>Einrichtung</dt><dd id="g-einr">-</dd></div>
+    <div class="kz"><dt>Umbau</dt><dd id="g-umb">-</dd></div>
+  </dl>
+
+  <ol class="schritte" id="g-schritte" aria-label="Schritte im Grundriss">
+    <li><button type="button" data-gschritt="1" aria-current="step"><b>1</b>Bild und Maßstab</button></li>
+    <li><button type="button" data-gschritt="2"><b>2</b>Räume zeichnen</button></li>
+    <li><button type="button" data-gschritt="3"><b>3</b>Einrichten</button></li>
+    <li><button type="button" data-gschritt="4"><b>4</b>Kosten und übernehmen</button></li>
+  </ol>
+
+  <div class="karte">
+    <div class="g-leiste">
+      <div class="g-gruppe" role="group" aria-label="Etagen"><span>Etage:</span><span id="g-etagen" class="g-gruppe"></span><button type="button" class="chip klein" id="g-etage-neu" aria-label="Etage hinzufügen">+</button></div>
+      <div class="g-gruppe" role="group" aria-label="Ansicht"><span>Ansicht:</span><button type="button" class="chip" id="g-ansicht-plan" aria-pressed="true">Von oben</button><button type="button" class="chip" id="g-ansicht-3d" aria-pressed="false">3D</button></div>
+    </div>
+    <div class="g-flaeche">
+      <div class="g-buehne" id="g-buehne">
+        <svg id="g-plan" role="application" aria-label="Grundriss. Räume und Möbel anklicken oder mit Tab auswählen; Pfeiltasten verschieben, R dreht, Entf löscht."></svg>
+        <figure class="szene g-szene" id="g-szene" aria-label="Dreidimensionale Ansicht des Grundrisses, mit der Maus drehbar" hidden>
+          <canvas id="g-3d"></canvas>
+          <div class="ersatz" id="g-3d-ersatz" hidden>3D-Ansicht nicht verfügbar (WebGL ist in diesem Browser aus). Der Plan von oben funktioniert trotzdem.</div>
+          <figcaption class="szenen-text"><span>ziehen zum Drehen</span><span id="g-3d-etikett"></span></figcaption>
+        </figure>
+        <div class="g-tipp" aria-live="polite"><span id="g-tipp"></span></div>
+        <div class="g-zoom" id="g-zoom">
+          <button type="button" class="chip klein" id="g-zoom-aus" aria-label="Verkleinern">−</button>
+          <button type="button" class="chip klein" id="g-zoom-ein" aria-label="Vergrößern">+</button>
+          <button type="button" class="chip" id="g-zoom-passt">Alles zeigen</button>
+        </div>
+      </div>
+
+      <div class="g-seite">
+        <div class="g-panel" data-gpanel="1">
+          <h4>1. Grundriss laden</h4>
+          <p>Ein Bild oder Foto des Grundrisses aus dem Exposé wählen (JPG oder PNG). Ohne Bild kannst du auf dem Raster zeichnen, ein Kästchen ist 1 m.</p>
+          <input type="file" id="g-bild-datei" accept="image/png,image/jpeg,image/webp" hidden>
+          <div class="knopfreihe"><label class="knopf" for="g-bild-datei" tabindex="0" role="button" id="g-bild-knopf">Bild wählen</label><button type="button" class="knopf zweit" id="g-bild-weg">Bild entfernen</button></div>
+          <h4 style="margin-top:16px">Maßstab festlegen</h4>
+          <p>Klicke auf den Anfang und das Ende einer Wand, deren Länge du kennst (steht oft im Grundriss), und gib die Länge ein.</p>
+          <div class="knopfreihe"><button type="button" class="knopf" id="g-mass-start">Strecke anklicken</button></div>
+          <div id="g-mass-frage" hidden style="margin-top:12px">
+            <label for="g-mass-laenge">Echte Länge dieser Strecke in m</label>
+            <input type="text" id="g-mass-laenge" inputmode="decimal" placeholder="z. B. 4,20" aria-describedby="g-mass-laenge-f">
+            <div class="fehler" id="g-mass-laenge-f"></div>
+            <div class="knopfreihe"><button type="button" class="knopf" id="g-mass-ok">Maßstab übernehmen</button><button type="button" class="knopf zweit" id="g-mass-abbruch">Abbrechen</button></div>
+          </div>
+          <p class="klein" id="g-mass-stand"></p>
+          <div class="g-mini" style="margin-top:12px">
+            <div><label for="g-etage-name">Name der Etage</label><input type="text" id="g-etage-name"></div>
+            <div><label for="g-wandhoehe">Raumhöhe in m (für 3D)</label><input type="text" id="g-wandhoehe" inputmode="decimal" aria-describedby="g-wandhoehe-f"><div class="fehler" id="g-wandhoehe-f"></div></div>
+          </div>
+          <div class="knopfreihe"><button type="button" class="knopf zweit" id="g-etage-weg">Diese Etage löschen</button></div>
+        </div>
+
+        <div class="g-panel" data-gpanel="2" hidden>
+          <h4>2. Räume nachzeichnen</h4>
+          <p>Rechteck: drücken und ziehen. Andere Formen: Ecke für Ecke klicken und auf den ersten Punkt klicken (oder Enter), um den Raum zu schließen. Esc bricht ab.</p>
+          <div class="g-gruppe" role="group" aria-label="Zeichenart">
+            <button type="button" class="chip" data-gmodus="rechteck" aria-pressed="false">Rechteck ziehen</button>
+            <button type="button" class="chip" data-gmodus="ecken" aria-pressed="false">Ecke für Ecke</button>
+            <button type="button" class="chip" data-gmodus="auswahl" aria-pressed="true">Auswählen</button>
+          </div>
+          <h4 style="margin-top:16px">Oder Raum mit Maßen anlegen</h4>
+          <div class="g-mini">
+            <div><label for="g-neu-b">Breite in m</label><input type="text" id="g-neu-b" inputmode="decimal" placeholder="4,0" aria-describedby="g-neu-b-f"><div class="fehler" id="g-neu-b-f"></div></div>
+            <div><label for="g-neu-l">Länge in m</label><input type="text" id="g-neu-l" inputmode="decimal" placeholder="3,5" aria-describedby="g-neu-l-f"><div class="fehler" id="g-neu-l-f"></div></div>
+          </div>
+          <div class="knopfreihe"><button type="button" class="knopf" id="g-neu-raum">Raum hinzufügen</button></div>
+        </div>
+
+        <div class="g-panel" data-gpanel="3" hidden>
+          <h4>3. Möbel und Umbau</h4>
+          <p>Antippen stellt das Teil in die Mitte des Plans (oder in den gewählten Raum). Dann ziehen, mit R drehen, mit Entf löschen.</p>
+          <div class="g-gruppe" role="group" aria-label="Gruppe" style="margin-bottom:10px">
+            <button type="button" class="chip" data-ggruppe="wohnung" aria-pressed="true">Wohnung</button>
+            <button type="button" class="chip" data-ggruppe="monteur" aria-pressed="false">Monteurzimmer</button>
+            <button type="button" class="chip" data-ggruppe="umbau" aria-pressed="false">Umbau</button>
+          </div>
+          <div class="g-katalog" id="g-katalog"></div>
+        </div>
+
+        <div class="g-panel" data-gpanel="4" hidden>
+          <h4>4. Kosten und übernehmen</h4>
+          <p>Die Kostenliste steht unter dem Plan. Dort kannst du jeden Preis durch dein Angebot ersetzen. Mit dem Knopf gehen Wohnfläche und Summe in „Kann ich mir das leisten?“.</p>
+          <div class="knopfreihe"><button type="button" class="knopf" id="g-zur-liste">Zur Kostenliste</button></div>
+        </div>
+
+        <div class="g-panel g-auswahl" id="g-auswahl" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="meldung" id="g-meldung" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="karte">
+    <h3>Räume und Flächen</h3>
+    <div class="tabelle-kasten karten-kasten">
+      <table class="karten" id="g-raeume">
+        <thead><tr><th scope="col" style="width:22%">Raum</th><th scope="col" style="width:16%">Etage</th><th scope="col" style="width:20%">Art</th><th scope="col" class="z" style="width:14%">Grundfläche</th><th scope="col" class="z" style="width:14%">Wohnfläche</th><th scope="col" class="z">Nutzfläche</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="formel">Wohnfläche nach Wohnflächenverordnung (WoFlV, Wortlaut §§ 2 und 4 geprüft 08.10.2026 auf <a href="https://www.gesetze-im-internet.de/woflv/__4.html" target="_blank" rel="noopener">gesetze-im-internet.de</a>): Flächen mit mindestens 2 m lichter Höhe voll, mit 1 bis unter 2 m zur Hälfte, unter 1 m gar nicht. Unbeheizte Wintergärten zur Hälfte. Balkone, Loggien und Terrassen in der Regel zu einem Viertel, höchstens zur Hälfte. Keller, Garage, Heizraum und Abstellräume außerhalb der Wohnung zählen nicht zur Wohnfläche; sie stehen hier getrennt als Nutzfläche, weil man sie oft extra vermieten kann.</p>
+  </div>
+
+  <div class="karte" id="g-kosten-karte">
+    <h3>Was kostet die Einrichtung?</h3>
+    <p class="klein" id="g-preis-hinweis"></p>
+    <div class="tabelle-kasten karten-kasten">
+      <table class="karten" id="g-kosten">
+        <thead><tr><th scope="col" style="width:28%">Teil</th><th scope="col" class="z" style="width:10%">Menge</th><th scope="col" style="width:16%">€ je Stück</th><th scope="col" class="z" style="width:14%">Summe</th><th scope="col">Spanne und Quelle</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <dl class="ergebnisse" id="g-kosten-ergebnis"></dl>
+    <div id="g-betten-block" hidden>
+      <h4 style="margin:18px 0 6px">Schlafplätze je Zimmer</h4>
+      <div class="tabelle-kasten karten-kasten">
+        <table class="karten" id="g-betten">
+          <thead><tr><th scope="col">Zimmer</th><th scope="col" class="z">Schlafplätze</th><th scope="col" class="z">m² je Schlafplatz</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="klein">Nur zur Übersicht. Wie viele Betten erlaubt sind, regeln Bauordnung und Brandschutz des Landes (siehe „Extra: Monteurzimmer“ und „Gesetze und Hilfe“).</p>
+    </div>
+    <div class="knopfreihe">
+      <button type="button" class="knopf" id="g-uebernehmen">In den Rechner übernehmen</button>
+    </div>
+    <div class="g-frage" id="g-frage" hidden>
+      <p id="g-frage-text" style="margin:0 0 10px"></p>
+      <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-frage-ersetzen">Ersetzen</button><button type="button" class="knopf zweit" id="g-frage-dazu">Kosten dazurechnen</button><button type="button" class="knopf zweit" id="g-frage-nein">Abbrechen</button></div>
+    </div>
+    <div class="meldung" id="g-uebernahme-meldung" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="karte">
+    <h3>Plan sichern</h3>
+    <p class="klein">Der Plan wird in diesem Browser automatisch gespeichert. Als Datei sichern, wenn du ihn auf ein anderes Gerät mitnehmen oder aufbewahren willst.</p>
+    <div class="knopfreihe">
+      <button type="button" class="knopf zweit" id="g-sichern">Als Datei sichern</button>
+      <input type="file" id="g-laden-datei" accept=".json,application/json" hidden>
+      <label class="knopf zweit" for="g-laden-datei" tabindex="0" role="button" id="g-laden-knopf">Datei laden</label>
+      <button type="button" class="knopf zweit" id="g-neu">Neuen Plan beginnen</button>
+    </div>
+    <div class="g-frage" id="g-neu-frage" hidden>
+      <p style="margin:0 0 10px">Der jetzige Plan wird gelöscht. Vorher als Datei sichern?</p>
+      <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-neu-sichern">Sichern und neu beginnen</button><button type="button" class="knopf zweit" id="g-neu-ohne">Ohne Sichern löschen</button><button type="button" class="knopf zweit" id="g-neu-nein">Abbrechen</button></div>
+    </div>
+    <div class="meldung" id="g-datei-meldung" role="status" aria-live="polite"></div>
+    <p class="klein">Grenzen: kein Bauplan. Wände sind die Ränder der Räume, ohne Wandstärke; Dachschrägen werden nur als Anteil der Fläche gerechnet, nicht in 3D gezeigt. Die Wohnfläche ist eine Näherung zum Prüfen der Exposé-Angabe, kein Aufmaß. Alle Preise sind Richtwerte.</p>
+  </div>
+</section>
+
 <!-- PRÜFLISTE -->
 <section id="pruefliste" aria-label="Schritt für Schritt zum Kauf" hidden>
   <header class="bereich-kopf" style="--f:var(--f5)">
@@ -1224,9 +1465,12 @@ __PALETTE_CSS__
 <script src="daten/sanierung.js"></script>
 <script src="daten/recht.js"></script>
 <script src="daten/begriffe.js"></script>
+<script src="daten/moebel.js"></script>
 <script src="rechner.js"></script>
 <script src="grafik.js"></script>
 <script src="haus3d.js"></script>
+<script src="grundriss3d.js"></script>
+<script src="grundriss.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
