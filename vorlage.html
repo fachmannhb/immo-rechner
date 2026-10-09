@@ -631,7 +631,20 @@ __PALETTE_CSS__
   details.pflichten .pf-titel::after { content: " ▾"; }
   details.pflichten[open] .pf-titel::after { content: " ▴"; }
   details.pflichten .pf-unter { font: 400 16px var(--sans); color: var(--leise); }
+  #r-gebanteil-quelle, #st-d-geb-quelle { margin: 10px 0 14px; }
+  #r-gebanteil-quelle:empty, #st-d-geb-quelle:empty { display: none; }
   #hz-box { padding: 0 24px 24px; }
+  /* Felder einer Zeile bündig: jede Zelle belegt fünf Zeilen des Rasters (Beschriftung, Feld, Fehlertext, Begriffs-Hinweis, Hinweis darunter) und teilt sie mit den Nachbarn (subgrid).
+     Der Begriffs-Hinweis, den die Seite unter manche Beschriftung setzt, rutscht unter das Feld, damit keine Lücke zwischen Beschriftung und Feld entsteht. */
+  #hz-box .raster { gap: 0 20px; align-items: start; }
+  #hz-box .raster > div { display: grid; grid-row: span 5; grid-template-rows: subgrid; justify-content: stretch; align-content: start; margin-bottom: 18px; }
+  #hz-box .raster > div > label { grid-row: 1; }
+  #hz-box .raster > div > input, #hz-box .raster > div > select { grid-row: 2; }
+  #hz-box .raster > div > .fehler { grid-row: 3; }
+  #hz-box .raster > div > small.kurz:has(~ input), #hz-box .raster > div > small.kurz:has(~ select) { grid-row: 4; margin-top: 6px; }
+  #hz-box .raster > div > input ~ small.kurz, #hz-box .raster > div > select ~ small.kurz { grid-row: 4; }
+  #hz-box .raster > div:has(> small.kurz ~ input) > input ~ small.kurz, #hz-box .raster > div:has(> small.kurz ~ select) > select ~ small.kurz { grid-row: 5; }
+  #hz-box .raster input[type="text"], #hz-box .raster select { height: 52px; box-sizing: border-box; }
   .pf-liste { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 14px; }
   .pf-punkt { border: 1px solid var(--linie); border-left: 8px solid var(--linie2); border-radius: 14px; padding: 14px 18px; background: var(--karte2); }
   .pf-punkt p { margin: 0 0 .6em; }
@@ -1205,9 +1218,10 @@ __PALETTE_CSS__
       <h4 style="margin:22px 0 8px">Steuer: Abschreibung und Ergebnis nach Steuern</h4>
       <div class="raster">
         <div><label for="r-baujahr">Baujahr (Fertigstellung)</label><input type="text" id="r-baujahr" inputmode="decimal" placeholder="z. B. 1965" aria-describedby="r-baujahr-f"><div class="fehler" id="r-baujahr-f"></div></div>
-        <div><label for="r-gebanteil">Gebäudeanteil am Kaufpreis in % (Annahme)</label><input type="text" id="r-gebanteil" inputmode="decimal" value="75" aria-describedby="r-gebanteil-f"><div class="fehler" id="r-gebanteil-f"></div></div>
+        <div><label for="r-gebanteil">Gebäudeanteil am Kaufpreis in % (Annahme)</label><input type="text" id="r-gebanteil" inputmode="decimal" value="" placeholder="leer = automatisch" aria-describedby="r-gebanteil-f r-gebanteil-quelle"><div class="fehler" id="r-gebanteil-f"></div></div>
         <div><label for="r-steuersatz">Ihr persönlicher Steuersatz in % (Annahme)</label><input type="text" id="r-steuersatz" inputmode="decimal" value="30" aria-describedby="r-steuersatz-f"><div class="fehler" id="r-steuersatz-f"></div></div>
       </div>
+      <p class="klein" id="r-gebanteil-quelle"></p>
       <dl class="ergebnisse" id="r-steuer-ergebnis"></dl>
       <p class="formel" id="r-steuer-formel"></p>
       <div class="hinweis"><p style="margin:0">Nur eine Rechnung zum Verstehen, keine Steuerberatung.</p>
@@ -2223,6 +2237,7 @@ __PALETTE_CSS__
         <div><label for="st-d-vk">Verkaufskosten in % vom Preis (Annahme)</label><input type="text" id="st-d-vk" inputmode="decimal" value="3" aria-describedby="st-d-vk-f"><div class="fehler" id="st-d-vk-f"></div></div>
       </div>
       <div class="u-haken"><div class="u-haken-zeile"><input type="checkbox" id="st-d-soli" checked><label for="st-d-soli">Solidaritätszuschlag 5,5 % auf die Steuer mitrechnen (Annahme)</label></div></div>
+      <p class="klein" id="st-d-geb-quelle"></p>
       <div class="satz leer" id="st-d-satz" aria-live="polite" style="margin-top:16px">
         <div class="lampe" aria-hidden="true">?</div>
         <div><strong id="st-d-satz-text"></strong><small id="st-d-satz-klein"></small></div>

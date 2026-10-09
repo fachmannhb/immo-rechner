@@ -593,6 +593,21 @@
       wie + ', Miete unverändert, vor Steuern. Eigene Einordnung, keine Kaufempfehlung.');
   }
 
+  var GEB_ANNAHME = 75; /* Gebäudeanteil in %, solange keine Kaufpreisaufteilung gerechnet ist (Annahme) */
+  var aufteilungAnteil = null; /* Gebäudeanteil in % aus Steuern sparen, Teil c; null = nicht gerechnet */
+  var gebNochmal = false;
+  function gebHinweis(quelle, anteil) {
+    /* Herkunft des Gebäudeanteils in Schritt 5 (Rechner) und im Verkaufsrechner (Steuern sparen, Teil d) sichtbar machen */
+    var a = anteil === null ? '' : fmt0.format(Math.round(anteil * 10) / 10);
+    var link = '<a href="#steuern" data-ziel="steuern" data-anker="st-c">Kaufpreisaufteilung rechnen</a>';
+    var t;
+    if (anteil === null) t = '';
+    else if (quelle === 'eigen') t = 'Gebäudeanteil ' + a + NB + '%: Ihre eigene Eingabe (sie hat Vorrang).';
+    else if (quelle === 'aufteilung') t = 'Gebäudeanteil ' + a + NB + '%: aus Ihrer Kaufpreisaufteilung (Steuern sparen, Teil c). Ein eigener Wert im Feld „Gebäudeanteil“ hat Vorrang.';
+    else t = '<span class="annahme">Annahme</span> Gebäudeanteil ' + a + NB + '%, genauer: ' + link + '.';
+    $('r-gebanteil-quelle').innerHTML = t;
+    $('st-d-geb-quelle').innerHTML = t ? 'Der Verkaufsrechner nimmt den Gebäudeanteil aus dem Rechner, Schritt 5. ' + t : '';
+  }
   function rechne() {
     var preis = wert('r-preis'), notar = wert('r-notar'), makler = wert('r-makler');
     var zusatz = wert('r-zusatz'), ek = wert('r-ek');
@@ -681,7 +696,12 @@
     /* Schritt 5: langfristig und Steuer (R.langfrist), Angebot A mit gleicher Rate bis zur Tilgung */
     var ms = wert('r-ms'), ks = wert('r-ks'), ws = wert('r-ws'), nJahre = wert('r-jahre');
     var baujahr = $('r-baujahr').value.trim() === '' ? null : wert('r-baujahr');
-    var gebAnteil = wert('r-gebanteil'), steuersatz = wert('r-steuersatz');
+    /* Gebäudeanteil: eigene Eingabe geht vor, sonst das Ergebnis der Kaufpreisaufteilung (Steuern sparen, Teil c), sonst die Annahme 75 % */
+    var gebEigen = $('r-gebanteil').value.trim() !== '';
+    var gebQuelle = gebEigen ? 'eigen' : (aufteilungAnteil !== null ? 'aufteilung' : 'annahme');
+    var gebAnteil = gebEigen ? wert('r-gebanteil') : (aufteilungAnteil !== null ? aufteilungAnteil : GEB_ANNAHME);
+    var steuersatz = wert('r-steuersatz');
+    gebHinweis(gebQuelle, gebAnteil);
     var ok5 = v && A && ms !== null && ks !== null && ws !== null && nJahre !== null && gebAnteil !== null && steuersatz !== null &&
       !($('r-baujahr').value.trim() !== '' && baujahr === null);
     var afa = R.afaSatz(baujahr);
@@ -724,6 +744,7 @@
     /* Grundlage für „Steuern sparen“ (Verkaufsrechner, Kaufpreisaufteilung): Eingaben von langfrist() ohne Steuersatz, Jahre und Wertsteigerung */
     stand.nebenkosten = nk ? nk.summe : null;
     stand.gebAnteil = gebAnteil;
+    stand.gebQuelle = gebQuelle;
     stand.ekEingesetzt = fin ? Math.min(ek, fin.gesamt) : 0;
     stand.lfBasis = ok5 ? {
       kaufpreis: preis, nebenkosten: nk.summe, ek: ek, darlehen: darlehen, zinsProzent: A.zins, plan: A.plan,
@@ -765,6 +786,16 @@
     rechneWert();
     rechneUmbau();
     rechneSteuer();
+    /* Hat die Kaufpreisaufteilung (Teil c) einen anderen Gebäudeanteil geliefert als Schritt 5 benutzt hat, einmal neu rechnen */
+    var neuAnteil = stand.steuerC ? stand.steuerC.gebaeudeanteil : null;
+    if (neuAnteil !== aufteilungAnteil) {
+      aufteilungAnteil = neuAnteil;
+      if (!gebNochmal) {
+        gebNochmal = true;
+        try { rechne(); } finally { gebNochmal = false; }
+        return;
+      }
+    }
     zeigeMerkliste();
   }
 
@@ -1148,7 +1179,10 @@
           '; Bodenwert ' + euro(boden) + ' (' + fmt0.format(cGr.v || 0) + NB + 'm² × ' + euro(cBrw.v || 0) + ' je m²' + (cGr.eigen || cBrw.eigen ? '' : ', aus „Was ist das Haus wert?“') + ')' +
           '; Gebäudewert ' + euro(geb) + ' (' + gebQ + ').';
         stSatz('st-c', '', '≈', 'Etwa ' + fmt0.format(Math.round(cRes.gebaeudeanteil)) + NB + '% des Preises liegen auf dem Gebäude: ' + euro(cRes.afaJahr) + ' Abschreibung im Jahr, etwa ' + euro(cRes.steuerJahr) + ' weniger Steuer.',
-          'Näherung nach dem Prinzip der BMF-Arbeitshilfe, nicht die Arbeitshilfe selbst.' + (stand.gebAnteil !== null && stand.gebAnteil !== undefined ? ' Im Rechner (Schritt 5) steht der Gebäudeanteil bei ' + fmt0.format(stand.gebAnteil) + NB + '% (Annahme).' : '') + ' Eigene Rechnung, mit Steuerberater prüfen.');
+          'Näherung nach dem Prinzip der BMF-Arbeitshilfe, nicht die Arbeitshilfe selbst.' + (stand.gebAnteil !== null && stand.gebAnteil !== undefined
+            ? (stand.gebQuelle === 'eigen' ? ' Im Rechner (Schritt 5) steht Ihr eigener Gebäudeanteil von ' + fmt0.format(stand.gebAnteil) + NB + '%; er hat Vorrang vor diesem Ergebnis.'
+              : ' Rechner (Schritt 5) und Verkaufsrechner übernehmen diesen Gebäudeanteil statt der Annahme von ' + GEB_ANNAHME + NB + '%.')
+            : '') + ' Eigene Rechnung, mit Steuerberater prüfen.');
         wertDl('st-c-ergebnis', [
           { t: 'Bodenwert', w: euro(boden) }, { t: 'Gebäudewert', w: euro(geb) },
           { t: 'Gebäudeanteil', w: prozent(cRes.gebaeudeanteil), haupt: true },
@@ -1325,7 +1359,11 @@
   function teilenWert(el) {
     if (el.type === 'checkbox') return el.checked ? 'true' : 'false';
     if (el.tagName === 'SELECT') return /^[0-9A-Za-zÄÖÜäöüß .,()-]{1,40}$/.test(el.value) ? el.value : null;
-    if (el.value.trim() === '') return null;
+    if (el.value.trim() === '') {
+      /* leerer Gebäudeanteil: den wirksamen Wert (Annahme oder Kaufpreisaufteilung) mitgeben, damit der Empfänger dieselben Zahlen sieht */
+      if (el.id === 'r-gebanteil' && typeof stand.gebAnteil === 'number' && isFinite(stand.gebAnteil)) return String(Number(stand.gebAnteil.toFixed(6)));
+      return null;
+    }
     var n = R.leseZahl(el.value);
     return n === null || !isFinite(n) ? null : String(Number(n.toFixed(6)));
   }
