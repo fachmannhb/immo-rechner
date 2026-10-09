@@ -5,6 +5,7 @@
 window.DATEN = window.DATEN || {};
 window.DATEN.recht = {
   abruf: '2026-10-07',
+  abrufLbo: '2026-10-09', /* zehn Landesbauordnungen nach recherche/06b_lbo_titel.md berichtigt */
   bund: [
     { k: 'BGB Kaufrecht', t: 'Bürgerliches Gesetzbuch, §§ 433 ff. „Kauf, Tausch“', u: 'https://www.gesetze-im-internet.de/bgb/', b: 'Kauf', w: 'Was Verkäufer und Käufer sich schulden und wann Mängel am Haus Rechte geben. Beim Grundstückskauf kommt der Notarvertrag dazu.' },
     { k: 'BGB Mietrecht', t: 'Bürgerliches Gesetzbuch, §§ 535 ff. „Mietvertrag, Pachtvertrag“', u: 'https://www.gesetze-im-internet.de/bgb/', b: 'Vermietung', w: 'Grundlage für Mietvertrag, Miete, Kaution, Mieterhöhung, Betriebskosten und Kündigung bei Wohnraum.' },
@@ -42,22 +43,22 @@ window.DATEN.recht = {
     { k: 'WoGG', t: 'Wohngeldgesetz', u: 'https://www.gesetze-im-internet.de/wogg/', b: 'Vermietung', w: 'Wenn Mieter Wohngeld beziehen (Mietbescheinigung).' }
   ],
   laender: [
-    { l: 'Baden-Württemberg', t: 'Landesbauordnung für Baden-Württemberg (LBO)', u: 'https://www.landesrecht-bw.de/jportal/?quelle=jlink&query=BauO+BW&psml=bsbawueprod.psml', g: false },
+    { l: 'Baden-Württemberg', t: 'Landesbauordnung für Baden-Württemberg (LBO) in der Fassung vom 16. März 2026', u: 'https://www.landesrecht-bw.de/perma?d=jlr-NNLBW00007BCC', g: true },
     { l: 'Bayern', t: 'Bayerische Bauordnung (BayBO)', u: 'https://www.gesetze-bayern.de/Content/Document/BayBO', g: true },
-    { l: 'Berlin', t: 'Bauordnung für Berlin (BauO Bln)', u: 'https://gesetze.berlin.de/bsbe/document/jlr-BauOBE2005rahmen', g: false },
+    { l: 'Berlin', t: 'Bauordnung für Berlin (BauO Bln) vom 29. September 2005, zuletzt geändert durch Gesetz vom 09.07.2026', u: 'https://gesetze.berlin.de/perma?d=jlr-NNLBE00004835', g: true },
     { l: 'Brandenburg', t: 'Brandenburgische Bauordnung (BbgBO)', u: 'https://bravors.brandenburg.de/gesetze/bbgbo_2016', g: true },
     { l: 'Bremen', t: 'Bremische Landesbauordnung vom 29. Mai 2024 (laut Portal Außerkrafttreten 31.12.2026, Neufassung beim Bauamt erfragen)', u: 'https://www.transparenz.bremen.de/metainformationen/bremische-landesbauordnung-vom-29-mai-2024-232736', g: true },
-    { l: 'Hamburg', t: 'Hamburgische Bauordnung (HBauO)', u: 'https://www.landesrecht-hamburg.de/bsha/document/jlr-BauOHA2025pP32', g: false },
-    { l: 'Hessen', t: 'Hessische Bauordnung (HBO)', u: 'https://www.rv.hessenrecht.hessen.de/bshe/document/jlr-NNLHE00005097NN00000000002', g: false },
-    { l: 'Mecklenburg-Vorpommern', t: 'Landesbauordnung Mecklenburg-Vorpommern (LBauO M-V), nur Portaleinstieg', u: 'https://www.landesrecht-mv.de/', g: false },
+    { l: 'Hamburg', t: 'Hamburgische Bauordnung (HBauO) vom 6. Januar 2025, zuletzt geändert durch Gesetz vom 9. September 2026', u: 'https://www.landesrecht-hamburg.de/bsha/document/jlr-BauOHA2025rahmen', g: true },
+    { l: 'Hessen', t: 'Hessische Bauordnung (HBO) vom 28. Mai 2018, zuletzt geändert durch Gesetz vom 9. Oktober 2025', u: 'https://www.rv.hessenrecht.hessen.de/perma?d=jlr-NNLHE00005097', g: true },
+    { l: 'Mecklenburg-Vorpommern', t: 'Landesbauordnung Mecklenburg-Vorpommern (LBauO M-V) in der Fassung der Bekanntmachung vom 15. Oktober 2015, zuletzt geändert durch Gesetz vom 8. Juli 2026', u: 'https://www.landesrecht-mv.de/bsmv/document/jlr-BauOMV2015rahmen', g: true },
     { l: 'Niedersachsen', t: 'Niedersächsische Bauordnung (NBauO), Fassung ab 01.07.2025', u: 'https://voris.wolterskluwer-online.de/browse/document/5496160f-0120-30fe-bbd6-9a24d113afc2', g: true },
     { l: 'Nordrhein-Westfalen', t: 'Bauordnung für das Land Nordrhein-Westfalen (Landesbauordnung 2018 - BauO NRW 2018), Fassung ab 01.09.2026', u: 'https://recht.nrw.de/lrgv/gesetz/01092026-landesbauordnung-2018-bauo-nrw-2018/', g: true },
-    { l: 'Rheinland-Pfalz', t: 'Landesbauordnung Rheinland-Pfalz (LBauO)', u: 'https://landesrecht.rlp.de/bsrp/document/jlr-BauORPrahmen', g: false },
-    { l: 'Saarland', t: 'Landesbauordnung (LBO) des Saarlandes', u: 'https://recht.saarland.de/bssl/document/jlr-NNLSL00009DF9NN00000000238', g: false },
+    { l: 'Rheinland-Pfalz', t: 'Landesbauordnung Rheinland-Pfalz (LBauO) vom 24. November 1998, zuletzt geändert durch Gesetz vom 19.11.2025', u: 'https://landesrecht.rlp.de/bsrp/document/jlr-BauORPrahmen', g: true },
+    { l: 'Saarland', t: 'Landesbauordnung (LBO) vom 18. Februar 2004, zuletzt geändert durch Gesetz vom 27. August 2025', u: 'https://recht.saarland.de/bssl/document/jlr-BauOSL2004rahmen', g: true },
     { l: 'Sachsen', t: 'Sächsische Bauordnung (SächsBO)', u: 'https://www.revosax.sachsen.de/vorschrift/1779-SaechsBO', g: true },
-    { l: 'Sachsen-Anhalt', t: 'Bauordnung des Landes Sachsen-Anhalt (BauO LSA)', u: 'https://www.landesrecht.sachsen-anhalt.de/bsst/document/jlr-NNLST000040E3NN00000000019', g: false },
-    { l: 'Schleswig-Holstein', t: 'Landesbauordnung für das Land Schleswig-Holstein (LBO)', u: 'https://www.gesetze-rechtsprechung.sh.juris.de/jportal/?quelle=jlink&query=BauO+SH&psml=bsshoprod.psml&max=true&aiz=true', g: false },
-    { l: 'Thüringen', t: 'Thüringer Bauordnung (ThürBO)', u: 'https://landesrecht.thueringen.de/jportal/?max=true&psml=bsthueprod.psml&quelle=jlink&query=BauO+TH', g: false }
+    { l: 'Sachsen-Anhalt', t: 'Bauordnung des Landes Sachsen-Anhalt (BauO LSA) in der Fassung der Bekanntmachung vom 10. September 2013, zuletzt geändert durch Gesetz vom 17. Juni 2026', u: 'https://www.landesrecht.sachsen-anhalt.de/bsst/document/jlr-BauOST2013rahmen', g: true },
+    { l: 'Schleswig-Holstein', t: 'Landesbauordnung für das Land Schleswig-Holstein (Landesbauordnung - LBO) in der Fassung der Bekanntmachung vom 5. Juli 2024', u: 'https://www.gesetze-rechtsprechung.sh.juris.de/perma?d=jlr-NNLSH00002BBD', g: true },
+    { l: 'Thüringen', t: 'Thüringer Bauordnung (ThürBO) vom 2. Juli 2024, zuletzt geändert durch Gesetz vom 6. Juli 2026', u: 'https://landesrecht.thueringen.de/bsth/document/jlr-BauOTH2024rahmen', g: true }
   ],
   regional: [
     { l: 'Bremen', t: 'Bremisches Wohnraumschutzgesetz vom 13. Juli 2021', u: 'https://www.transparenz.bremen.de/metainformationen/bremisches-wohnraumschutzgesetz-vom-13-juli-2021-296736', w: 'Zweckentfremdung von Wohnraum, Überbelegung, Mindestzustand; wichtig bei Umnutzung oder Monteurzimmern.' },

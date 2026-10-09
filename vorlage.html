@@ -738,7 +738,7 @@ __PALETTE_CSS__
     <p class="klein">Die Merkliste liegt nur in diesem Browser. „Als Datei sichern“ lädt eine Datei herunter; das ist die einzige echte Sicherung.</p>
     <div class="knopfreihe">
       <button type="button" class="knopf zweit" id="m-export">Als Datei sichern</button>
-      <label class="knopf zweit" for="m-import" style="margin:0">Datei laden</label>
+      <label class="knopf zweit" for="m-import" style="margin:0" tabindex="0" role="button" id="m-import-knopf">Datei laden</label>
       <input type="file" id="m-import" accept=".json,application/json" hidden>
     </div>
     <div id="m-import-wahl" class="hinweis" style="margin-top:12px" hidden>
@@ -1387,7 +1387,7 @@ __PALETTE_CSS__
   </div>
 
   <div class="karte">
-    <p class="klein">Grenzen: Die Zahlen stammen aus verschiedenen Jahren (Zensus 2022, INKAR 2022 bis 2024), jede Zahl nennt ihr Jahr. Ein Landkreis ist groß; innerhalb eines Kreises kann es sehr verschieden sein. Die Portalpreise sind Angebotswerte eines Maklerportals, keine amtlichen Preise. Mercedes-Benz und weitere Werke fehlen noch, weil ihre Konzernseiten den Abruf gesperrt haben. Die Ampel ist eine eigene Einordnung, keine Prognose und keine Kaufempfehlung.</p>
+    <p class="klein">Grenzen: Die Zahlen stammen aus verschiedenen Jahren (Zensus 2022, INKAR 2022 bis 2024), jede Zahl nennt ihr Jahr. Ein Landkreis ist groß; innerhalb eines Kreises kann es sehr verschieden sein. Die Portalpreise sind Angebotswerte eines Maklerportals, keine amtlichen Preise. Die Liste der großen Werke ist eine Auswahl; Werke ohne Beleg mit Standort, etwa von Siemens, fehlen noch. Beschäftigtenzahlen tragen ihr Jahr und können veraltet sein. Die Ampel ist eine eigene Einordnung, keine Prognose und keine Kaufempfehlung.</p>
     <p class="klein" id="k-quellen"></p>
   </div>
 </section>
@@ -1525,7 +1525,7 @@ __PALETTE_CSS__
     <div>
       <p class="etikett">Gesetze, Verordnungen, Bauordnungen</p>
       <h2>Gesetze und Hilfe</h2>
-      <p class="lead">Welche Regeln gelten, und wen du fragen kannst. Jeder Eintrag führt zum amtlichen, immer aktuellen Text (Titel abgelesen am 07.10.2026). „Wann wichtig“ ist eine eigene, vereinfachte Erklärung und keine Rechtsberatung. Bei Verträgen, Steuern oder Bauvorhaben Rechtsanwalt, Steuerberater oder Bauaufsicht fragen.</p>
+      <p class="lead">Welche Regeln gelten, und wen du fragen kannst. Jeder Eintrag führt zum amtlichen, immer aktuellen Text (Titel abgelesen am 07.10.2026, zehn Landesbauordnungen am 09.10.2026 neu). „Wann wichtig“ ist eine eigene, vereinfachte Erklärung und keine Rechtsberatung. Bei Verträgen, Steuern oder Bauvorhaben Rechtsanwalt, Steuerberater oder Bauaufsicht fragen.</p>
     </div>
   </header>
   <div class="karte">
@@ -1549,7 +1549,7 @@ __PALETTE_CSS__
       <div class="tabelle-kasten karten-kasten">
         <table class="karten" id="re-laender"><thead><tr><th scope="col" style="width:30%">Land</th><th scope="col">Bauordnung</th></tr></thead><tbody></tbody></table>
       </div>
-      <p class="klein" style="margin-top:8px">Mit „im Browser gegenlesen“ markiert: Das Landesportal zeigt den Titel nur mit JavaScript; Titel aus dem Suchindex übernommen.</p>
+      <p class="klein" style="margin-top:8px">Alle 16 Titel stammen von den amtlichen Seiten (Abruf 07.10. bzw. 09.10.2026). „Zuletzt geändert“ ist der Stand der Seite am Abrufdatum; vor dem Bauantrag die aktuelle Fassung dort lesen.</p>
     </div>
     <div class="karte">
       <h3>Bremen und Niedersachsen</h3>

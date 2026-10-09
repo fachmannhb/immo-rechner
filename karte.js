@@ -100,7 +100,7 @@
   function sterneVon(k) {
     var s = [];
     WERKE.filter(function (w) { return w.ags === k.ags; }).forEach(function (w) {
-      s.push({ art: 'werk', text: w.firma + ' ' + w.werk + (w.besch ? ', ' + w.besch + ' Beschäftigte' : ''), url: w.url });
+      s.push({ art: 'werk', text: w.firma + ' ' + w.werk + (w.besch ? ', ' + w.besch + ' Beschäftigte' : '') + (w.quelle ? ' (' + w.quelle + ')' : ''), url: w.url });
     });
     if (k.w.stud >= GRENZE_STUD) s.push({ art: 'hochschule', text: 'Hochschulort: ' + fmt0.format(k.w.stud) + ' Studierende (' + (W.felder.stud.jahr || '') + ')' });
     if (k.w.ein >= GRENZE_EIN) s.push({ art: 'pendler', text: 'Pendlerzentrum: ' + fmt0.format(k.w.ein) + ' Einpendler (' + (W.felder.ein.jahr || '') + ')' });
@@ -473,7 +473,7 @@
   rechnen();
   ebenenKnoepfe(); regler();
   $('k-quellen').innerHTML = 'Kartengrundlage: © <a href="https://www.bkg.bund.de" target="_blank" rel="noopener">BKG</a> (2026) <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener">dl-de/by-2-0</a>, Datenquellen: <a href="https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_vg_nuts.pdf" target="_blank" rel="noopener">datenquellen_vg_nuts.pdf</a>; verändert (vereinfacht, umgerechnet). ' +
-    'Kennzahlen: ' + esc(W.quellen.inkar) + '; ' + esc(W.quellen.zensus) + '. Portalpreise: ' + esc(W.quellen.portal) + '. Gemeinden: Statistisches Bundesamt (Destatis), Gemeindeverzeichnis, 2026. Werke: offizielle Konzernseiten (Abruf 08.10.2026).';
+    'Kennzahlen: ' + esc(W.quellen.inkar) + '; ' + esc(W.quellen.zensus) + '. Portalpreise: ' + esc(W.quellen.portal) + '. Gemeinden: Statistisches Bundesamt (Destatis), Gemeindeverzeichnis, 2026. Werke: offizielle Konzernseiten (Abruf 08.10.2026) und Wikipedia (Abruf 09.10.2026).';
 
   window.KARTE = {
     zeigt: function (an) { sichtbar = !!an; if (!sichtbar) return; if (!vb) einpassen(); zeichnen(); steckbrief(); tabelle(); streu(); },

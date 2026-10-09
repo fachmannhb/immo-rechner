@@ -8,6 +8,22 @@ Bereich „Grundriss und Einrichtung“ (seit 08.10.2026): Grundrissbild aus dem
 
 Merkliste „Anzeige einfügen“ (seit 08.10.2026): Text einer Portalanzeige (Strg+A, Strg+C) und Link einfügen, „Daten herauslesen“ füllt Kaufpreis, Wohnfläche, Zimmer, Grundstück, Baujahr, Miete, Wohnungen, Provision und Ort ins Formular; gespeichert wird erst nach Prüfung. Nur mit dem Link geht es nicht: Eine Webseite darf fremde Portalseiten nicht abrufen. Geprüft an nachgebauten Texten (ImmoScout-, Immowelt-, Kleinanzeigen-Aufbau) und an einer echten Kleinanzeigen-Anzeige.
 
+## Karte „Wo ist Wohnen gefragt?“
+
+Die Karte zeigt alle 400 Landkreise und kreisfreien Städte als Ampel („Gefragtes Gebiet nach deinen Regeln“, Ebenen Gesamt, Nachfrage, Arbeit, Studium, Miete, Einstieg, Miete/Boden; die Gewichte lassen sich verstellen) und die Bundesländer im Vergleich. Dazu gibt es Sterne für große Werke, Hochschulorte (ab 20.000 Studierenden) und Pendlerzentren (ab 100.000 Einpendlern), eine Suche nach Ort, Postleitzahl oder Landkreis, eine Tabelle mit Streudiagramm und eine 3D-Ansicht. Die Merkliste zeigt je Haus die Gebietszeile des passenden Kreises.
+
+Datenquellen und Lizenzen (Einzelheiten in `recherche/09_karte_daten.md`, `10_sterne_staedte.md`, `11_werke.md`):
+
+- Kreisgrenzen: © BKG (2026), Verwaltungsgebiete 1:2.500.000 (VG2500), Stand 31.12.2025, Datenlizenz Deutschland Namensnennung 2.0; verändert (vereinfacht, umgerechnet).
+- Kennzahlen (Einwohner, Bevölkerungsentwicklung, Beschäftigte, Pendler, Studierende, Bauland): INKAR des BBSR, Datenlizenz Deutschland Namensnennung 2.0. Leerstand und Nettokaltmiete: Zensus 2022 der Statistischen Ämter des Bundes und der Länder, ebenfalls dl-de/by-2.0. Nicht geklärt ist, ob die Drittdaten von IDN ImmoDaten innerhalb von INKAR (Angebotsmieten) weitergegeben werden dürfen; vor einer breiteren Veröffentlichung klären (Bericht 09).
+- Orte und Kreiszuordnung: Gemeindeverzeichnis des Statistischen Bundesamts, Gebietsstand 31.03.2026, Abruf 08.10.2026. Hanau ist dem Main-Kinzig-Kreis zugeordnet, weil Karte und Kennzahlen den Gebietsstand 2025 haben.
+- Portalpreise einzelner Städte: McMakler, Q1 2026 (Bericht 10).
+- Werke: Konzernseiten (Abruf 08.10.2026) und Wikipedia (Abruf 09.10.2026, Nutzerentscheidung, weil mehrere Konzernseiten den Abruf sperren). Jeder Stern nennt Quelle und Abrufdatum. Beschäftigtenzahlen stehen nur da, wo die Quelle eine Zahl zum Werk nennt, meist mit altem Stand.
+
+Stand der Daten: Kennzahlen 2022 bis 2024, Grenzen 31.12.2025, Werke 08.10. und 09.10.2026.
+
+Grenzen: Die Werkliste ist nicht vollständig (Siemens, weitere Bosch-Standorte und viele mittlere Werke fehlen; Ford Saarlouis ist bewusst nicht aufgenommen, weil die Fahrzeugproduktion im November 2025 endete). Wikipedia-Zahlen sind teils Jahre alt. Die Ampel ist eine eigene Einordnung nach offen genannten Schwellen, keine Kaufempfehlung. Kreise sind grob: ein Stadtteil kann anders liegen als sein Landkreis. Die Rohdaten (`recherche/karte_roh/`) liegen nur lokal und sind nicht im Repository.
+
 ## Starten
 
 Öffentlich im Netz: https://fachmannhb.github.io/immo-rechner/ (GitHub Pages, ohne Anmeldung).
@@ -51,6 +67,7 @@ Für den privaten Link: `python -I -X utf8 tmp/artifact_bauen.py <ziel.html>` un
     powershell -NoProfile -File tmp\pruef_seite.ps1 -Fotos
     powershell -NoProfile -File tmp\bedien_test.ps1
     powershell -NoProfile -File tmp\grundriss_test.ps1
+    powershell -NoProfile -File tmp\karte_test.ps1
     powershell -NoProfile -File tmp\grundriss_fotos.ps1
 
 Der Rechentest vergleicht die Formeln mit Referenzwerten (Präsentation Folie 4, 5, 7; Annuität; ImmoWertV; § 559 BGB). Das Prüfskript öffnet die Seite im Browser, setzt Beispieldaten ein, liest die Ergebnisse aus, testet Merkliste, Import und Speicher, misst den Überlauf in drei Breiten und beiden Designs (alle Schritte und Aufklapper offen) und macht Fotos nach `.playwright-cli/`. Der Bedientest prüft Kacheln, Zurück-Knopf, Sonne/Mond, Erklärungen, Rechner-Schritte, Angebote B/C und das Menü. Für Ansichten im Normalzustand: `tmp\fotos.ps1 -Bereiche rechner,merkliste -Breiten 1440,390` (in PowerShell mit `&` aufrufen, damit die Listen ankommen).

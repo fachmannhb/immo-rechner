@@ -1347,6 +1347,8 @@
     }
     return d;
   }
+  /* Das Label "Datei laden" ist per Tab erreichbar; Enter und Leertaste öffnen die Dateiauswahl (wie im Grundriss) */
+  $('m-import-knopf').addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); $('m-import').click(); } });
   $('m-import').addEventListener('change', function () {
     var datei = this.files && this.files[0];
     this.value = '';
@@ -1436,7 +1438,7 @@
       $('re-stellen').querySelector('tbody').innerHTML = RE.stellen.map(function (g) {
         return '<tr><td data-titel="Stelle"><a href="' + esc(g.u) + '" target="_blank" rel="noopener">' + esc(g.t) + '</a></td><td data-titel="Wofür">' + esc(g.w) + '</td></tr>';
       }).join('');
-      $('re-anzahl').textContent = (bund.length + laender.length + regional.length) + ' Einträge angezeigt. Stand der Titel und Links: ' + datumDe(RE.abruf) + '.';
+      $('re-anzahl').textContent = (bund.length + laender.length + regional.length) + ' Einträge angezeigt. Stand der Titel und Links: ' + datumDe(RE.abruf) + ', zehn Landesbauordnungen ' + datumDe(RE.abrufLbo) + '.';
     };
     $('re-suche').addEventListener('input', zeigeRecht);
     $('re-bereich').addEventListener('change', zeigeRecht);
