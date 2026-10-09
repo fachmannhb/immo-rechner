@@ -346,5 +346,55 @@
       (d.kaufpreis > 0 ? '<span><i class="linie" style="background:' + v('--text') + '"></i>Kaufpreis ' + euro(d.kaufpreis) + '</span>' : '');
   }
 
-  window.GRAFIK = { werte: werte, mittel: mittel, restschuld: restschuld, vermoegen: vermoegen, tilgung: tilgung, wasserfall: wasserfall, belegung: belegung, versteckeTip: versteckeTip };
+  /* ---------- Verkauf nach N Jahren: Gesamtergebnis je Jahr, Linie bei Ablauf der Zehn-Jahres-Frist (Block 4) ---------- */
+  function verkauf(el, legEl, d) {
+    var zeilen = d && d.zeilen;
+    if (!zeilen || !zeilen.length) { el.innerHTML = '<p class="klein">Rechner Schritte 1 bis 3 und Angebot A ausfüllen.</p>'; legEl.innerHTML = ''; return; }
+    var w = breite(el), h = 292, l = 64, r = 16, o = 30, u = 46;
+    var maxJ = zeilen.length, frist = d.frist;
+    var ys = zeilen.map(function (z) { return z.gesamt; }).concat([0]);
+    var maxY = Math.max.apply(null, ys), minY = Math.min.apply(null, ys);
+    if (maxY === minY) maxY = minY + 1;
+    var sx = function (j) { return l + (j - 1) / (maxJ - 1 || 1) * (w - l - r); };
+    var sy = function (y) { return o + (1 - (y - minY) / (maxY - minY)) * (h - o - u); };
+    var c1 = v('--c1'), c3 = v('--c3'), leise = v('--leise');
+    var s = '';
+    var xFrist = sx(frist - 0.5);
+    s += '<rect x="' + l + '" y="' + o + '" width="' + Math.max(0, xFrist - l) + '" height="' + (h - o - u) + '" fill="' + c3 + '" fill-opacity=".10"/>';
+    /* runde Achsenwerte (Vielfache der Schrittweite, nicht ab dem Minimum) */
+    var st = schritte(maxY - minY, 4), step = st.length > 1 ? st[1] - st[0] : 1;
+    for (var yt = Math.ceil(minY / step) * step; yt <= maxY + step * 0.001; yt += step) {
+      if (Math.abs(yt) < step * 1e-9) yt = 0; /* kein „-0“ an der Achse */
+      s += '<line class="gitter" x1="' + l + '" x2="' + (w - r) + '" y1="' + sy(yt) + '" y2="' + sy(yt) + '"/><text x="' + (l - 8) + '" y="' + (sy(yt) + 4) + '" text-anchor="end">' + kurz(yt) + '</text>';
+    }
+    [1, 5, 10, 15, 20, 25, 30].filter(function (j) { return j <= maxJ; }).forEach(function (j) { s += '<text x="' + sx(j) + '" y="' + (h - u + 18) + '" text-anchor="middle">' + j + '</text>'; });
+    s += '<text x="' + ((l + w - r) / 2) + '" y="' + (h - 6) + '" text-anchor="middle">Verkauf nach … Jahren</text>';
+    s += '<line class="achse" x1="' + l + '" x2="' + (w - r) + '" y1="' + sy(0) + '" y2="' + sy(0) + '"/>';
+    s += '<line x1="' + xFrist + '" x2="' + xFrist + '" y1="' + o + '" y2="' + (h - u) + '" stroke="' + c3 + '" stroke-width="2" stroke-dasharray="6 4"/>';
+    s += '<text x="' + (xFrist - 6) + '" y="' + (o - 10) + '" text-anchor="end">Steuerpflichtig</text><text x="' + (xFrist + 6) + '" y="' + (o - 10) + '" text-anchor="start">Frist abgelaufen</text>';
+    var pfad = zeilen.map(function (z, i) { return (i ? 'L' : 'M') + sx(z.jahr).toFixed(1) + ' ' + sy(z.gesamt).toFixed(1); }).join(' ');
+    s += '<path d="' + pfad + '" fill="none" stroke="' + c1 + '" stroke-width="2.5"/>';
+    if (d.plusAb) {
+      var pz = zeilen[d.plusAb - 1];
+      s += '<circle cx="' + sx(pz.jahr) + '" cy="' + sy(pz.gesamt) + '" r="5" fill="' + c1 + '" stroke="' + v('--karte') + '" stroke-width="2"/>';
+      s += '<text class="wertlabel" x="' + sx(pz.jahr) + '" y="' + (sy(pz.gesamt) - 10) + '" text-anchor="' + (sx(pz.jahr) < l + 60 ? 'start' : 'middle') + '">im Plus ab Jahr ' + d.plusAb + '</text>';
+    }
+    s += '<line id="verk-kreuz" x1="0" x2="0" y1="' + o + '" y2="' + (h - u) + '" stroke="' + leise + '" stroke-width="1" visibility="hidden"/>';
+    s += '<rect class="fang" x="' + l + '" y="' + o + '" width="' + (w - l - r) + '" height="' + (h - o - u) + '" fill="transparent"/>';
+    el.innerHTML = svg(w, h, s, 'Gesamtergebnis nach Verkauf in den Jahren 1 bis ' + maxJ + ', Linie bei Ablauf der Zehn-Jahres-Frist');
+    var fang = el.querySelector('.fang'), kreuz = el.querySelector('#verk-kreuz');
+    fang.addEventListener('mousemove', function (ev) {
+      var box = el.querySelector('svg').getBoundingClientRect();
+      var x = (ev.clientX - box.left) * (w / box.width);
+      var j = Math.max(1, Math.min(maxJ, Math.round((x - l) / (w - l - r) * (maxJ - 1)) + 1));
+      var z = zeilen[j - 1];
+      kreuz.setAttribute('x1', sx(j)); kreuz.setAttribute('x2', sx(j)); kreuz.setAttribute('visibility', 'visible');
+      zeigeTip(ev, '<b>Verkauf nach ' + j + ' Jahren</b><br>Preis: ' + euro(z.preis) + '<br>Gewinn nach § 23: ' + euro(z.gewinn) + '<br>Steuer: ' + euro(z.steuer) +
+        '<br>Gesamtergebnis: ' + euro(z.gesamt));
+    });
+    fang.addEventListener('mouseleave', function () { kreuz.setAttribute('visibility', 'hidden'); versteckeTip(); });
+    legEl.innerHTML = '<span><i class="linie" style="background:' + c1 + '"></i>Gesamtergebnis nach Verkauf (nach Steuern)</span><span><i class="linie" style="background:' + c3 + '"></i>Rosa Fläche: Verkauf innerhalb der Frist, Gewinn steuerpflichtig</span>';
+  }
+
+  window.GRAFIK = { verkauf: verkauf, werte: werte, mittel: mittel, restschuld: restschuld, vermoegen: vermoegen, tilgung: tilgung, wasserfall: wasserfall, belegung: belegung, versteckeTip: versteckeTip };
 })();

@@ -92,6 +92,14 @@ window.DATEN = window.DATEN || {};
     [128, 156, 184, 212].map(function (y, i) { return '<rect x="194" y="' + y + '" width="' + (i === 3 ? 80 : 132) + '" height="10" rx="5" fill="var(--i4)"/>'; }).join('') +
     '<circle cx="330" cy="258" r="44" fill="var(--i3)" stroke="var(--i2)" stroke-width="6"/><path d="M310 258l14 14 26-30" fill="none" stroke="var(--i2)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>';
 
+  /* Steuern sparen: Haus mit Münzen, die in ein Sparschwein fallen (Block 4) */
+  Z.steuern = GRUND + haus(170, 308, .72) +
+    '<ellipse cx="368" cy="244" rx="82" ry="62" fill="var(--i2)"/><circle cx="414" cy="228" r="8" fill="var(--i5)"/>' +
+    '<rect x="318" y="294" width="20" height="26" rx="6" fill="var(--i2)"/><rect x="394" y="294" width="20" height="26" rx="6" fill="var(--i2)"/>' +
+    '<polygon points="436,206 468,180 462,226" fill="var(--i2)"/>' +
+    '<rect x="338" y="196" width="60" height="9" rx="4.5" fill="var(--i5)"/>' +
+    EURO(368, 128, 24) + EURO(402, 82, 17) + '<path d="M368 160v30" stroke="var(--i1)" stroke-width="5" stroke-dasharray="4 8" stroke-linecap="round"/>';
+
   window.DATEN.bilder = {
     namen: Object.keys(Z),
     symbole: function () {

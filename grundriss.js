@@ -709,7 +709,7 @@
     var box = $('g-satz'), titel, klein, art = 'leer', zeichen = '?';
     if (!nRaeume) {
       titel = 'Noch kein Raum gezeichnet.';
-      klein = 'Fangen Sie mit Schritt 1 an: Grundrissbild laden oder das Beispielhaus ausprobieren, oder gleich in Schritt 2 auf dem Raster zeichnen.';
+      klein = 'Fangen Sie oben bei „So fangen Sie an“ an: Bild wählen oder das Beispielhaus laden, oder zeichnen Sie gleich in Schritt 2 auf dem Raster.';
     } else {
       titel = qm(s.wfl) + ' Wohnfläche' + (s.summe ? ', Einrichtung und Umbau etwa ' + euro(s.summe) : '') + '.';
       klein = (s.nfl ? 'Dazu ' + qm(s.nfl) + ' Nutzfläche' + (s.sep ? ', davon ' + qm(s.sep) + ' separat vermietbar' : '') + '. ' : '') +
@@ -744,7 +744,7 @@
         if (a.zeichnen === false && !a.jeBett) mengeZelle = '<input type="text" inputmode="decimal" id="g-m-' + a.id + '" value="' + (p.menge ? fmt0.format(p.menge) : '') + '" placeholder="0" aria-label="Menge ' + esc(a.name) + '">';
         else mengeZelle = a.einheit === 'm' ? fmt1.format(p.menge) + ' m' : fmt0.format(p.menge);
         var spanne = a.von != null ? euro(a.von) + ' bis ' + euro(a.bis) + (a.einheit === 'm' ? ' je m' : '') : 'keine geprüfte Spanne';
-        return '<tr><td data-titel="Teil">' + esc(a.name) + (a.jeBett ? ' <span class="klein">(je Schlafplatz)</span>' : '') + '</td><td class="z" data-titel="Menge">' + mengeZelle + '</td>' +
+        return '<tr><td data-titel="Teil">' + esc(a.name) + (a.jeBett ? ' <span class="klein">(je Schlafplatz)</span>' : '') + (p.preis == null ? ' <span class="annahme">Preis offen</span>' : '') + '</td><td class="z" data-titel="Menge">' + mengeZelle + '</td>' +
           '<td data-titel="€ je ' + (a.einheit === 'm' ? 'm' : 'Stück') + '"><input type="text" inputmode="decimal" id="g-p-' + a.id + '" value="' + (p.preis != null ? fmt0.format(p.preis) : '') + '" placeholder="Preis eintragen" aria-label="Preis je ' + (a.einheit === 'm' ? 'Meter' : 'Stück') + ' ' + esc(a.name) + '"></td>' +
           '<td class="z" data-titel="Summe" id="g-s-' + a.id + '">' + (p.preis != null ? euro(p.menge * p.preis) : '-') + '</td>' +
           '<td data-titel="Spanne und Quelle" class="klein">' + esc(spanne) + (a.quelle ? '<br>' + esc(a.quelle) : '') + '</td></tr>';

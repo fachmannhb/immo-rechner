@@ -560,6 +560,152 @@ __PALETTE_CSS__
   #m-tabelle th, #m-tabelle td { padding: 10px 7px; }
   .gerueste li { margin-bottom: 8px; }
   #impressum h3 { margin-top: 0; }
+  /* Welle 2: Wert, Umbau, Grundriss */
+  .wert dt { overflow-wrap: anywhere; hyphens: auto; }
+  details.mehr-einst { margin: 14px 0 0; border: 1px solid var(--linie); border-radius: 14px; padding: 4px 16px; background: var(--karte2); }
+  details.mehr-einst[open] { padding-bottom: 14px; }
+  details.mehr-einst > .raster, details.mehr-einst > .karten-liste { margin-top: 10px; }
+  .u-haken-zeile { display: flex; gap: 10px; align-items: flex-start; }
+  .u-haken-zeile label { margin: 0; color: var(--text); }
+  .u-haken small.kurz { margin: 6px 0 0 32px; }
+  #wert .schritt > .raster, #umbau .schritt > .raster { max-width: 760px; }
+  /* Tabellen als Karten auch auf dem Desktop (Bauteile, Förderprogramme) */
+  .karten-liste { margin-top: 12px; }
+  table.karten-immer, .karten-immer tbody { display: block; width: 100%; }
+  .karten-immer thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .karten-immer tbody { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+  .karten-immer tr { display: block; min-width: 0; border: 1px solid var(--linie); border-radius: 16px; padding: 14px 16px; background: var(--karte); }
+  .karten-immer tbody th { display: block; position: static; background: none; border: 0; padding: 0 0 8px; font: 700 18px/1.35 var(--sans); color: var(--text); overflow-wrap: anywhere; }
+  .karten-immer td { display: grid; grid-template-columns: minmax(0, 36%) minmax(0, 1fr); gap: 8px; border: 0; padding: 5px 0; text-align: left; overflow-wrap: anywhere; hyphens: auto; }
+  .karten-immer td.z { text-align: left; font-weight: 700; }
+  .karten-immer td::before { content: attr(data-titel); color: var(--leise); font: 16px/1.4 var(--sans); }
+  .karten-immer td input { min-width: 0; width: 100%; max-width: 12em; }
+  .karten-immer td > *, .karten-immer td a { min-width: 0; }
+  .karten-immer details.preis { grid-column: 2; }
+  .karten-immer details.preis > summary { padding: 0; min-height: 32px; font-weight: 600; }
+  .karten-immer details.preis[open] > input { margin-top: 6px; }
+  .karten-immer.foerder tbody { grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); }
+  .karten-immer.foerder td { display: block; padding: 6px 0; }
+  .karten-immer.foerder td::before { display: block; font-weight: 600; }
+  .karten-immer.foerder tbody th a { color: var(--akzent-text); }
+  .karten-immer td .annahme { margin-right: 4px; }
+  @media (max-width: 760px) {
+    .karten-immer td { grid-template-columns: minmax(0, 42%) minmax(0, 1fr); padding: 5px 0; }
+    .karten-immer.foerder td { display: block; }
+    .karten-immer tr { padding: 14px 14px; }
+  }
+  /* Grundriss: erste Handlung groß und oben, Knöpfe mit sicherem Kontrast auch im gesperrten Zustand */
+  .g-start-wahl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: var(--abstand-m); }
+  .g-start-feld { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+  .g-start-feld .knopf.gross { width: 100%; text-align: center; }
+  .g-start-feld p { margin: 0; }
+  #grundriss .knopf.zweit { border-color: var(--akzent-text); }
+  #grundriss .knopf.zweit[disabled] { opacity: 1; color: var(--leise); border-color: var(--leise); border-style: dashed; background: var(--karte2); }
+  /* Block 4: Ergebnis weiterleiten, Steuern sparen */
+  .teilen-zeile { margin: 12px 0 4px; }
+  .teilen-meldung { margin: 10px 0 0; padding: 10px 14px; border-radius: 12px; background: var(--info-fl); border-left: 5px solid var(--info); font-size: 16px; }
+  .teilen-meldung.fehler-meldung { background: var(--schlecht-fl); border-left-color: var(--schlecht); }
+  .teilen-meldung textarea { display: block; width: 100%; min-height: 8em; margin-top: 8px; font: 16px/1.4 var(--sans); }
+  .steuer-tipp { margin-top: 16px; }
+  .st-gruppe { margin: 0 0 var(--abstand-m); border: 1px solid var(--linie); border-radius: 18px; background: var(--karte); padding: 4px 20px; }
+  .st-gruppe[open] { padding-bottom: 18px; }
+  .st-gruppe > summary { font: 800 20px var(--display); padding: 14px 0; min-height: 44px; cursor: pointer; }
+  .st-gruppe > summary small { font: 400 16px var(--sans); color: var(--leise); margin-left: 8px; }
+  .st-karten { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+  .st-karte { margin: 0; min-width: 0; border: 1px solid var(--linie); border-radius: 16px; padding: 16px 18px; background: var(--karte2); }
+  .st-karte h4 { margin: 0 0 8px; font: 700 18px/1.35 var(--sans); }
+  .st-karte p { margin: 0 0 8px; }
+  .st-karte .st-verm { display: inline-block; font-weight: 700; padding: 0 10px; border-radius: 999px; background: var(--info-fl); color: var(--info); border: 1.5px solid var(--info); margin: 0 6px 6px 0; }
+  .st-karte .st-verm.nein { background: transparent; color: var(--text); border: 1.5px dashed var(--leise); }
+  .st-karte .st-hinweis-zeile { font-size: 16px; }
+  .st-karte .st-quellen { font-size: 16px; color: var(--leise); overflow-wrap: anywhere; }
+  .st-karte .st-pruefen { font-size: 16px; }
+  .st-karte a { overflow-wrap: anywhere; }
+  .st-satz-hilfe { margin: 6px 0 0; }
+
+  /* Block 5: Pflichten nach dem Kauf (Heizungs- und Energie-Check im Umbau) */
+  details.pflichten { padding: 0; }
+  details.pflichten > summary { display: flex; flex-direction: column; gap: 2px; padding: 16px 24px; min-height: 52px; list-style: none; cursor: pointer; }
+  details.pflichten > summary::-webkit-details-marker { display: none; }
+  details.pflichten .pf-titel { font: 800 20px/1.3 var(--display); color: var(--akzent-text); }
+  details.pflichten .pf-titel::after { content: " ▾"; }
+  details.pflichten[open] .pf-titel::after { content: " ▴"; }
+  details.pflichten .pf-unter { font: 400 16px var(--sans); color: var(--leise); }
+  #hz-box { padding: 0 24px 24px; }
+  .pf-liste { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 14px; }
+  .pf-punkt { border: 1px solid var(--linie); border-left: 8px solid var(--linie2); border-radius: 14px; padding: 14px 18px; background: var(--karte2); }
+  .pf-punkt p { margin: 0 0 .6em; }
+  .pf-punkt p:last-child { margin-bottom: 0; }
+  .pf-gilt, .pf-moeglich { border-left-color: var(--warn); }
+  .pf-pruefen { border-left-color: var(--info); border-left-style: dashed; }
+  .pf-frei { border-left-color: var(--gut); }
+  .pf-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 6px; }
+  .pf-kopf h4 { margin: 0; font: 800 18px/1.3 var(--display); }
+  .pf-chip { display: inline-flex; gap: 6px; font: 700 16px/1.4 var(--sans); padding: 2px 12px; border-radius: 999px; background: var(--karte); border: 1.5px solid var(--leise); }
+  .pf-stufen { margin: 0 0 .6em; padding-left: 22px; }
+  .pf-punkt a { overflow-wrap: anywhere; }
+
+  /* Block 5: Ganzseiten-Ansichten (Bank-Mappe, Besichtigung) */
+  html.overlay-offen { overflow: hidden; }
+  .overlay { position: fixed; inset: 0; z-index: 60; overflow: auto; background: var(--grund); padding: 0 16px 48px; overscroll-behavior: contain; }
+  .overlay-kopf { position: sticky; top: 0; z-index: 2; max-width: 900px; margin: 0 auto; padding: 12px 0 8px; background: var(--grund); border-bottom: 1px solid var(--linie); }
+  .overlay-kopf .teilen-zeile { margin: 8px 0 0; }
+  .overlay-kopf .klein:empty { display: none; }
+  .overlay-kopf p { margin: 6px 0 0; }
+  .blatt { max-width: 820px; margin: 18px auto 0; padding: 36px 44px; border: 1px solid #cfc8d6; border-radius: 6px; box-shadow: var(--schatten); color-scheme: light;
+    --text: #1b1b22; --leise: #4d4857; --karte: #ffffff; --karte2: #f4f1f7; --linie: #d9d3e0; --linie2: #8f879b; --akzent: #5b2f94; --akzent-text: #4a2480;
+    --gut-fl: #e3f2e8; --warn-fl: #fbf0d2; --schlecht-fl: #f8e1dc; --leer-fl: #efe8f7; --schatten: 0 1px 2px rgba(60, 40, 10, .05), 0 8px 24px rgba(60, 40, 10, .07); background: #ffffff; color: var(--text); }
+  .blatt h2 { font-size: clamp(24px, 5vw, 30px); margin: 0 0 4px; }
+  .mp-kopfzeile { color: var(--leise); margin: 0 0 18px; }
+  .mp-beispiel { border: 3px dashed var(--info); background: var(--info-fl); color: var(--text); padding: 10px 14px; border-radius: 10px; font-weight: 700; margin: 0 0 18px; }
+  .mp-fehler { border: 3px solid var(--schlecht); background: var(--schlecht-fl); padding: 12px 16px; border-radius: 10px; margin: 0 0 18px; }
+  .mp-teil { margin: 0 0 22px; }
+  .mp-teil h3 { font: 800 19px var(--display); margin: 0 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--akzent); }
+  .mp-tab { width: 100%; border-collapse: collapse; font-size: 16px; }
+  .mp-tab th, .mp-tab td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--linie); vertical-align: top; font-weight: 400; }
+  .mp-tab th { width: 52%; }
+  .mp-tab td { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .mp-tab .leise { font-weight: 400; color: var(--leise); }
+  .mp-ampel { display: flex; gap: 12px; align-items: flex-start; border: 3px solid var(--linie2); border-radius: 12px; padding: 12px 14px; margin-top: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .mp-ampel b { flex: none; min-width: 5.5em; }
+  .mp-ampel.gut { border-color: var(--gut); background: var(--gut-fl); } .mp-ampel.warn { border-color: var(--warn); background: var(--warn-fl); } .mp-ampel.schlecht { border-color: var(--schlecht); background: var(--schlecht-fl); }
+  .mp-annahmen { margin: 0; padding-left: 22px; font-size: 16px; }
+  .mp-annahmen li { margin-bottom: 4px; }
+  .mp-fuss { border-top: 1px solid var(--linie2); margin-top: 22px; padding-top: 10px; font-size: 16px; color: var(--leise); }
+  @media (max-width: 640px) { .blatt { padding: 20px 16px; } .mp-tab th { width: 50%; } }
+  @media print {
+    @page { margin: 14mm; }
+    html.overlay-offen { overflow: visible; }
+    body.mappe-offen { background: #ffffff !important; }
+    body.mappe-offen > *:not(#mappe-ov) { display: none !important; }
+    #mappe-ov { position: static; overflow: visible; padding: 0; background: #ffffff; }
+    #mappe-ov .overlay-kopf { display: none !important; }
+    #mappe-ov .blatt { max-width: none; margin: 0; padding: 0; border: 0; box-shadow: none; border-radius: 0; }
+    #mappe-ov .mp-teil, #mappe-ov .mp-ampel { break-inside: avoid; }
+    #mappe-ov a { color: inherit; text-decoration: none; }
+  }
+
+  /* Block 5: Besichtigung (handytauglich, große Flächen) */
+  .bes-seite { max-width: 900px; margin: 14px auto 0; }
+  .bes-seite h2 { margin: 6px 0 4px; }
+  .bes-gruppe { margin: 18px 0 0; padding: 14px 16px 16px; border: 1px solid var(--linie); border-radius: 16px; background: var(--karte); min-width: 0; }
+  .bes-gruppe legend { font: 800 20px var(--display); padding: 0 8px; }
+  .bes-punkt { padding: 12px 0; border-top: 1px solid var(--linie); }
+  .bes-punkt:first-of-type { border-top: 0; }
+  .bes-frage { font-weight: 600; margin: 0 0 8px; }
+  .bes-frage small.kurz { font-weight: 400; margin: 2px 0 0; }
+  .bes-wahl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .bes-wahl button { min-height: 48px; padding: 6px 4px; border: 2px solid var(--linie2); border-radius: 12px; background: var(--karte2); color: var(--text); font: 600 16px/1.2 var(--sans); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .bes-wahl button[aria-pressed="true"] { border-width: 4px; font-weight: 800; }
+  .bes-wahl button[data-w="ok"][aria-pressed="true"] { border-color: var(--gut); background: var(--gut-fl); }
+  .bes-wahl button[data-w="beob"][aria-pressed="true"] { border-color: var(--warn); background: var(--warn-fl); }
+  .bes-wahl button[data-w="mangel"][aria-pressed="true"] { border-color: var(--schlecht); background: var(--schlecht-fl); }
+  .bes-notiz { margin-top: 12px; }
+  .bes-notiz textarea { min-height: 90px; }
+  .bes-stand { font-size: 16px; padding: 8px 12px; border-radius: 10px; background: var(--karte2); border: 1px solid var(--linie); }
+  .bes-stand b { font-weight: 800; }
+  .bes-stand.mangel { border-color: var(--schlecht); border-width: 2px; }
+  @media (max-width: 640px) { .bes-wahl button { font-size: 16px; } .bes-gruppe { padding: 10px 10px 14px; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -603,6 +749,7 @@ __PALETTE_CSS__
           <button type="button" class="bereich-knopf" id="tab-grundriss" data-ziel="grundriss" style="--f:var(--f8)"><svg aria-hidden="true"><use href="#i-grundriss"/></svg>Grundriss und Einrichtung</button>
           <button type="button" class="bereich-knopf" id="tab-pruefliste" data-ziel="pruefliste" style="--f:var(--f5)"><svg aria-hidden="true"><use href="#i-weg"/></svg>Schritt für Schritt zum Kauf</button>
           <button type="button" class="bereich-knopf" id="tab-recht" data-ziel="recht" style="--f:var(--f6)"><svg aria-hidden="true"><use href="#i-paragraf"/></svg>Gesetze und Hilfe</button>
+          <button type="button" class="bereich-knopf optional" id="tab-steuern" data-ziel="steuern" style="--f:var(--f6)"><svg aria-hidden="true"><use href="#i-waage"/></svg>Steuern sparen</button>
           <button type="button" class="bereich-knopf optional" id="tab-monteur" data-ziel="monteur" style="--f:var(--f7)"><svg aria-hidden="true"><use href="#i-bett"/></svg>Extra: Monteurzimmer</button>
           <button type="button" class="bereich-knopf optional" id="tab-impressum" data-ziel="impressum" style="--f:var(--f7)"><svg aria-hidden="true"><use href="#i-paragraf"/></svg>Impressum und Datenschutz</button>
         </nav>
@@ -622,6 +769,11 @@ __PALETTE_CSS__
 </nav>
 
 <main id="inhalt">
+<div class="beispielband" id="teilen-band" role="status" hidden>
+  <span id="teilen-text"><b>Geteilte Zahlen – nicht Ihre eigenen.</b> Jemand hat Ihnen diese Rechnung geschickt. Ihre eigenen Eingaben sind gesichert.</span>
+  <span id="teilen-fehler" role="alert" hidden></span>
+  <button type="button" class="knopf mittel" data-aktion="teilen-zurueck" id="teilen-zurueck">Eigene Zahlen zurückholen</button>
+</div>
 <div class="beispielband" id="beispiel-band" role="status" hidden>
   <span id="beispiel-text"><b>Beispiel – nicht Ihre Zahlen.</b> Reihenhaus in Bremen, erfunden. Ihre eigenen Eingaben sind gesichert und kommen zurück.</span>
   <span id="beispiel-fehler" role="alert" hidden></span>
@@ -667,7 +819,7 @@ __PALETTE_CSS__
     <li><a class="start-kachel info" href="#wert" data-ziel="wert"><span class="nr">Schritt 5</span><span class="bild"><svg aria-hidden="true"><use href="#i-waage"/></svg></span><strong>Wert prüfen</strong><span class="text">Ist der Preis angemessen?</span></a></li>
     <li class="kachel-doppel"><a class="start-kachel" href="#umbau" data-ziel="umbau"><span class="nr">Schritt 6</span><span class="bild"><svg aria-hidden="true"><use href="#i-werkzeug"/></svg></span><strong>Umbau und Grundriss</strong><span class="text">Was kostet der Umbau?</span></a><a class="start-kachel unter" href="#grundriss" data-ziel="grundriss">Grundriss und Einrichtung →</a></li>
     <li><a class="start-kachel info" href="#pruefliste" data-ziel="pruefliste"><span class="nr">Schritt 7</span><span class="bild"><svg aria-hidden="true"><use href="#i-weg"/></svg></span><strong>Kaufablauf</strong><span class="text">Prüfliste bis zum Notartermin.</span></a></li>
-    <li><div class="neben"><h3>Außerdem</h3><a href="#recht" data-ziel="recht">Gesetze nachschlagen</a><a href="#monteur" data-ziel="monteur">Monteurzimmer (optional)</a><p>Nebenbereiche, nicht Teil der sieben Schritte.</p></div></li>
+    <li><div class="neben"><h3>Außerdem</h3><a href="#recht" data-ziel="recht">Gesetze nachschlagen</a><a href="#steuern" data-ziel="steuern">Steuern sparen</a><a href="#monteur" data-ziel="monteur">Monteurzimmer (optional)</a><p>Nebenbereiche, nicht Teil der sieben Schritte.</p></div></li>
   </ol>
 
   <div class="start-mehr">
@@ -679,6 +831,7 @@ __PALETTE_CSS__
           <tbody>
             <tr><td data-titel="Bereich">Grunderwerbsteuer</td><td data-titel="Geprüft am" data-datum="2026-10-07">07.10.2026</td><td data-titel="Hinweis">Bremen amtlich, übrige Länder aus Übersichten</td></tr>
             <tr><td data-titel="Bereich">Portal-Adressen</td><td data-titel="Geprüft am" data-datum="2026-10-07">07.10.2026</td><td data-titel="Hinweis">Prüfstand je Portal unter „Haus suchen“</td></tr>
+            <tr><td data-titel="Bereich">Steuern sparen</td><td data-titel="Geprüft am" data-datum="2026-10-09">09.10.2026</td><td data-titel="Hinweis">Gesetzestexte und BMF-Schreiben; Punkte mit „Vor Nutzung prüfen“ nicht amtlich belegt</td></tr>
             <tr><td data-titel="Bereich">Monteurzimmer-Preise Bremen</td><td data-titel="Geprüft am" data-datum="2026-09-27">27.09.2026</td><td data-titel="Hinweis">aus der Präsentation, Angebotspreise</td></tr>
           </tbody>
         </table>
@@ -1000,6 +1153,27 @@ __PALETTE_CSS__
 
     <div class="karte schritt" data-schritt="4" hidden>
       <h3>Schritt 4: Was, wenn es schlechter läuft?</h3>
+      <h4 style="margin:6px 0 8px">Wenn die Zinsbindung endet: der Anschlusskredit</h4>
+      <p class="klein">Nach der Festzeit bleibt eine Restschuld, und die Bank verlangt einen neuen Zins. Hier sehen Sie, wie sich die Rate bei 4, 5 und 6 % ändert. Diese Zinsen sind Annahmen: Niemand weiß heute, wie hoch der Zins dann ist. Die Zinsbindung stellen Sie in Schritt 2 ein.</p>
+      <div class="satz leer" id="r-an-satz" aria-live="polite" style="margin:0 0 16px">
+        <div class="lampe" aria-hidden="true">?</div>
+        <div><strong id="r-an-satz-text"></strong><small id="r-an-satz-klein"></small></div>
+      </div>
+      <div class="raster">
+        <div><label for="r-an-modus">Wie zahlen Sie danach zurück?</label>
+          <select id="r-an-modus"><option value="tilgung">Gleiche Tilgung wie bisher</option><option value="rest">Schuldenfrei zum selben Zeitpunkt wie geplant</option></select>
+          <small class="kurz">„Gleiche Tilgung“ heißt: derselbe Prozentsatz der Restschuld wird jedes Jahr getilgt. Die zweite Wahl hält das Ende der Schuld fest, die Rate steigt dann stärker.</small></div>
+        <div><label for="r-an-eigen">Eigener Anschlusszins in %</label><input type="text" id="r-an-eigen" inputmode="decimal" placeholder="z. B. 4,5" aria-describedby="r-an-eigen-f"><div class="fehler" id="r-an-eigen-f"></div></div>
+      </div>
+      <dl class="ergebnisse" id="r-an-ergebnis"></dl>
+      <div class="tabelle-kasten karten-kasten" id="r-an-kasten" style="margin-top:14px">
+        <table class="karten" id="r-an-tabelle">
+          <thead><tr><th scope="col">Anschlusszins</th><th scope="col" class="z">Neue Rate im Monat</th><th scope="col" class="z">Unterschied zur Rate heute</th><th scope="col" class="z">Bleibt im Monat</th><th scope="col" class="z">Schuldenfrei nach</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="formel" id="r-an-formel">Restschuld = Darlehen nach der Zinsbindung, Monat für Monat gerechnet. Gleiche Tilgung: neue Rate = Restschuld × (Anschlusszins + Tilgung) ÷ 12. Gleiche Restlaufzeit: Annuität über die verbleibenden Monate. Bleibt im Monat = Reinertrag (Miete nach Ausfall, Kosten, Rücklage; Miete unverändert) − neue Rate. Annahme: Die Miete bleibt gleich und es gibt keine Sondertilgung.</p>
+      <h4 style="margin:22px 0 8px">Noch schlechtere Zeiten: Zins, Miete und Leerstand zusammen</h4>
       <p class="klein">Die Regler spielen schlechtere Zeiten durch. Sie ändern nur diese Rechnung, nicht Ihre Eingaben in den Schritten davor.</p>
       <div class="raster">
         <div><label for="r-st-zins">Zins nach der Zinsbindung höher um <output id="r-st-zins-w">2</output> Prozentpunkte</label><input type="range" id="r-st-zins" min="0" max="5" step="0.25" value="2"></div>
@@ -1039,6 +1213,8 @@ __PALETTE_CSS__
       <div class="hinweis"><p style="margin:0">Nur eine Rechnung zum Verstehen, keine Steuerberatung.</p>
       <details class="mehr-dazu" style="margin:6px 0 0"><summary>Mehr dazu: Abschreibung und was nicht berücksichtigt ist</summary><p class="klein">Abschreibung nach § 7 Abs. 4 EStG (Wortlaut geprüft 08.10.2026 auf <a href="https://www.gesetze-im-internet.de/estg/__7.html" target="_blank" rel="noopener">gesetze-im-internet.de</a>): Baujahr ab 2023 3 %, 1925 bis 2022 2 %, vor 1925 2,5 % pro Jahr. Abgeschrieben wird nur das Gebäude, nicht der Boden. Wie das Finanzamt Boden und Gebäude aufteilt, kann von Ihrer Annahme abweichen. Nicht berücksichtigt: Sonderabschreibungen (Neubau, Denkmal), Renovierungskosten in den ersten drei Jahren, Möbel, Solidaritätszuschlag und Kirchensteuer. Vor dem Kauf und für die Steuererklärung (Anlage V) mit einem Steuerberater rechnen.</p></details></div>
 
+      <p class="hinweis steuer-tipp"><b>Steuer-Tipp:</b> Wie viel Abschreibung ist erlaubt, wie teilt man den Kaufpreis auf, und lohnt sich ein Verkauf nach 5, 10 oder 15 Jahren? <a href="#steuern" data-ziel="steuern" data-fokus="st-d-ws">→ Steuern sparen</a></p>
+
       <details class="rechenweg">
         <summary>Jahr für Jahr als Tabelle</summary>
         <div class="tabelle-kasten karten-kasten" style="margin-top:10px">
@@ -1071,6 +1247,8 @@ __PALETTE_CSS__
         <p class="klein ampel-regel"><b>Grün</b>, wenn nach der Rate Geld übrig bleibt; <b>gelb</b>, wenn Geld fehlt, die Miete aber die Zinsen deckt (der Rest ist Tilgung, also Vermögen); <b>rot</b>, wenn die Miete nicht einmal die Zinsen deckt. Zinsen = Monatsdurchschnitt im ersten Jahr, Angebot A. Eigene Einordnung, keine Kaufempfehlung.</p>
       </details>
     </div>
+    <div class="knopfreihe" style="margin:0 0 10px"><button type="button" class="knopf mittel" data-mappe="rechner">Bank-Mappe erstellen</button></div>
+    <div class="teilen-zeile"><button type="button" class="knopf zweit mittel teilen-knopf" data-teilen="rechner">Ergebnis weiterleiten</button></div>
   </aside>
   </div>
 </section>
@@ -1088,10 +1266,11 @@ __PALETTE_CSS__
   <div class="einstieg-platz" data-einstieg="wert"></div>
   <details class="mehr-dazu"><summary>Mehr dazu</summary><p class="untertitel">Wertermittlung nach ImmoWertV 2021</p><p>Grob schätzen, ob der Preis zur Miete und zum Grundstück passt. Gerechnet wird nach den Formeln der Immobilienwertermittlungsverordnung. Das Ergebnis ist eine eigene Schätzung, kein Gutachten. Für Bank, Gericht oder eine Kaufentscheidung im Zweifel einen öffentlich bestellten Sachverständigen fragen.</p></details>
 
-  <div class="satz" id="w-satz" aria-live="polite" style="margin-bottom:16px">
-    <div class="lampe" aria-hidden="true">≈</div>
+  <div class="satz leer" id="w-satz" aria-live="polite" style="margin-bottom:16px">
+    <div class="lampe" aria-hidden="true">?</div>
     <div><strong id="w-satz-text"></strong><small id="w-satz-klein"></small></div>
   </div>
+  <div class="teilen-zeile"><button type="button" class="knopf zweit mittel teilen-knopf" data-teilen="wert">Ergebnis weiterleiten</button></div>
 
   <dl class="kacheln" id="w-kacheln" aria-live="polite">
     <div class="kz"><dt>Bodenwert</dt><dd id="wk-boden">-</dd></div>
@@ -1101,78 +1280,105 @@ __PALETTE_CSS__
     <div class="kz"><dt>Kaufpreis</dt><dd id="wk-kauf">-</dd></div>
   </dl>
 
+  <ol class="schritte" id="w-schritte" aria-label="Schritte bei der Wertschätzung">
+    <li><button type="button" data-schritt="1" aria-current="step"><b>1</b>Grundstück</button></li>
+    <li><button type="button" data-schritt="2"><b>2</b>Gebäude</button></li>
+    <li><button type="button" data-schritt="3"><b>3</b>Miete und Zins</button></li>
+    <li><button type="button" data-schritt="4"><b>4</b>Vergleich und Sachwert</button></li>
+  </ol>
+
   <form id="w-form" novalidate>
-    <div class="karte">
-      <div class="kartenkopf"><h3>1. Grundstück und Gebäude</h3>
+    <div class="karte schritt" data-schritt="1">
+      <div class="kartenkopf"><h3>1. Das Grundstück</h3>
         <div class="knopfreihe" style="margin:0"><button type="button" class="knopf zweit" id="w-aus-rechner">Werte aus dem Rechner übernehmen</button></div></div>
       <div class="raster">
         <div><label for="w-grund">Grundstücksfläche in m²</label><input type="text" id="w-grund" inputmode="decimal" value="" placeholder="z. B. 450" aria-describedby="w-grund-f"><div class="fehler" id="w-grund-f"></div></div>
         <div><label for="w-brw">Bodenrichtwert in € pro m²</label><input type="text" id="w-brw" inputmode="decimal" value="" placeholder="aus BORIS ablesen" aria-describedby="w-brw-f"><div class="fehler" id="w-brw-f"></div></div>
+      </div>
+      <p class="klein" id="w-boris">Den Bodenrichtwert können Sie kostenlos nachschlagen: <a href="https://www.bodenrichtwerte-deutschland.de" target="_blank" rel="noopener">BORIS-D (bundesweit)</a>, für Bremen und Niedersachsen <a href="https://immobilienmarkt.niedersachsen.de/" target="_blank" rel="noopener">BORIS Niedersachsen/Bremen</a> (Stichtag 01.01.2026, Links geprüft 07.10.2026).</p>
+      <div class="schritt-fuss"><button type="button" class="knopf" data-geh="2">Weiter zu Schritt 2: Gebäude →</button></div>
+    </div>
+
+    <div class="karte schritt" data-schritt="2" hidden>
+      <h3>2. Das Gebäude</h3>
+      <div class="raster">
         <div><label for="w-baujahr">Baujahr</label><input type="text" id="w-baujahr" inputmode="decimal" value="" placeholder="z. B. 1965" aria-describedby="w-baujahr-f"><div class="fehler" id="w-baujahr-f"></div></div>
-        <div><label for="w-stichjahr">Jahr der Bewertung</label><input type="text" id="w-stichjahr" inputmode="decimal" value="2026" aria-describedby="w-stichjahr-f"><div class="fehler" id="w-stichjahr-f"></div></div>
-        <div><label for="w-gnd">Gesamtnutzungsdauer in Jahren</label><input type="text" id="w-gnd" inputmode="decimal" value="80" aria-describedby="w-gnd-f"><div class="fehler" id="w-gnd-f"></div></div>
-        <div><label for="w-rnd">Restnutzungsdauer selbst festlegen (optional)</label><input type="text" id="w-rnd" inputmode="decimal" value="" placeholder="leer = berechnet" aria-describedby="w-rnd-f"><div class="fehler" id="w-rnd-f"></div></div>
         <div><label for="w-wfl">Wohnfläche in m²</label><input type="text" id="w-wfl" inputmode="decimal" value="" aria-describedby="w-wfl-f"><div class="fehler" id="w-wfl-f"></div></div>
         <div><label for="w-we">Anzahl Wohnungen</label><input type="text" id="w-we" inputmode="decimal" value="" placeholder="z. B. 4" aria-describedby="w-we-f"><div class="fehler" id="w-we-f"></div></div>
       </div>
-      <p class="klein" id="w-boris">Bodenrichtwert kostenlos nachschlagen: <a href="https://www.bodenrichtwerte-deutschland.de" target="_blank" rel="noopener">BORIS-D (bundesweit)</a>, für Bremen und Niedersachsen <a href="https://immobilienmarkt.niedersachsen.de/" target="_blank" rel="noopener">BORIS Niedersachsen/Bremen</a> (Stichtag 01.01.2026, Links geprüft 07.10.2026). Gesamtnutzungsdauer 80 Jahre für Mehrfamilienhäuser laut Anlage 1 ImmoWertV.</p>
+      <details class="mehr-einst"><summary>Mehr Einstellungen: Bewertungsjahr, Nutzungsdauer</summary>
+        <div class="raster">
+          <div><label for="w-stichjahr">Jahr der Bewertung</label><input type="text" id="w-stichjahr" inputmode="decimal" value="2026" aria-describedby="w-stichjahr-f"><div class="fehler" id="w-stichjahr-f"></div></div>
+          <div><label for="w-gnd">Gesamtnutzungsdauer in Jahren</label><input type="text" id="w-gnd" inputmode="decimal" value="80" aria-describedby="w-gnd-f"><div class="fehler" id="w-gnd-f"></div></div>
+          <div><label for="w-rnd">Restnutzungsdauer selbst festlegen (optional)</label><input type="text" id="w-rnd" inputmode="decimal" value="" placeholder="leer = berechnet" aria-describedby="w-rnd-f"><div class="fehler" id="w-rnd-f"></div></div>
+        </div>
+        <p class="formel">Gesamtnutzungsdauer 80 Jahre für Mehrfamilienhäuser laut Anlage 1 ImmoWertV. Die Restnutzungsdauer ergibt sich aus Baujahr, Bewertungsjahr und Gesamtnutzungsdauer; Modernisierungen können sie nach Anlage 2 ImmoWertV verlängern.</p>
+      </details>
       <dl class="ergebnisse" id="w-grund-ergebnis"></dl>
       <p class="hinweis" id="w-rnd-hinweis" hidden></p>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="1">← Zurück</button><button type="button" class="knopf" data-geh="3">Weiter zu Schritt 3: Miete und Zins →</button></div>
     </div>
 
-    <div class="karte">
-      <h3>2. Ertragswertverfahren (§§ 27 bis 34 ImmoWertV)</h3>
+    <div class="karte schritt" data-schritt="3" hidden>
+      <h3>3. Miete und Zins</h3>
       <div class="raster">
         <div><label for="w-miete">Marktübliche Kaltmiete pro Monat in €</label><input type="text" id="w-miete" inputmode="decimal" value="" aria-describedby="w-miete-f"><div class="fehler" id="w-miete-f"></div></div>
-        <div><label for="w-verw">Verwaltungskosten in € je Wohnung und Jahr</label><input type="text" id="w-verw" inputmode="decimal" value="298" aria-describedby="w-verw-f"><div class="fehler" id="w-verw-f"></div></div>
-        <div><label for="w-inst">Instandhaltung in € je m² und Jahr</label><input type="text" id="w-inst" inputmode="decimal" value="11,70" aria-describedby="w-inst-f"><div class="fehler" id="w-inst-f"></div></div>
-        <div><label for="w-ausfall">Mietausfallwagnis in %</label><input type="text" id="w-ausfall" inputmode="decimal" value="2" aria-describedby="w-ausfall-f"><div class="fehler" id="w-ausfall-f"></div></div>
-        <div><label for="w-betrieb">Nicht umgelegte Betriebskosten in € pro Jahr</label><input type="text" id="w-betrieb" inputmode="decimal" value="0" aria-describedby="w-betrieb-f"><div class="fehler" id="w-betrieb-f"></div></div>
-        <div><label for="w-lz">Liegenschaftszinssatz in %</label><input type="text" id="w-lz" inputmode="decimal" value="4" aria-describedby="w-lz-f"><div class="fehler" id="w-lz-f"></div></div>
+        <div><label for="w-lz">Liegenschaftszinssatz in %</label><input type="text" id="w-lz" inputmode="decimal" value="4" aria-describedby="w-lz-f w-lz-hinweis"><div class="fehler" id="w-lz-f"></div></div>
       </div>
-      <p class="klein">Bewirtschaftungskosten: Modellwerte der Anlage 3 ImmoWertV, Stand 2021 (298 € Verwaltung je Wohnung, 11,70 € Instandhaltung je m², 2 % Mietausfallwagnis). Sie werden jährlich mit dem Verbraucherpreisindex fortgeschrieben; die fortgeschriebenen Werte stehen im Marktbericht des Gutachterausschusses. <strong>Liegenschaftszins 4 % ist eine Annahme</strong>: Den Wert für Mehrfamilienhäuser veröffentlicht der örtliche Gutachterausschuss, für Bremen im <a href="https://www.gutachterausschuss.bremen.de/marktbericht-1469" target="_blank" rel="noopener">Grundstücksmarktbericht</a>.</p>
+      <p class="klein" id="w-lz-hinweis"><span class="annahme">Annahme</span> <span id="w-lz-wert">4</span> % – den Bremer Wert enthält der Grundstücksmarktbericht 2026, Abschnitt 8.1 (wird nachgetragen). Bis dahin ist der Wert ein Platzhalter; schon ein halber Prozentpunkt verschiebt den Wert deutlich. Den Wert für andere Orte nennt der örtliche <a href="https://www.gutachterausschuss.bremen.de/marktbericht-1469" target="_blank" rel="noopener">Gutachterausschuss</a> (Bremen: Grundstücksmarktbericht).</p>
+      <details class="mehr-einst"><summary>Mehr Einstellungen: Kosten des Vermieters</summary>
+        <div class="raster">
+          <div><label for="w-verw">Verwaltungskosten in € je Wohnung und Jahr</label><input type="text" id="w-verw" inputmode="decimal" value="298" aria-describedby="w-verw-f"><div class="fehler" id="w-verw-f"></div></div>
+          <div><label for="w-inst">Instandhaltung in € je m² und Jahr</label><input type="text" id="w-inst" inputmode="decimal" value="11,70" aria-describedby="w-inst-f"><div class="fehler" id="w-inst-f"></div></div>
+          <div><label for="w-ausfall">Mietausfallwagnis in %</label><input type="text" id="w-ausfall" inputmode="decimal" value="2" aria-describedby="w-ausfall-f"><div class="fehler" id="w-ausfall-f"></div></div>
+          <div><label for="w-betrieb">Nicht umgelegte Betriebskosten in € pro Jahr</label><input type="text" id="w-betrieb" inputmode="decimal" value="0" aria-describedby="w-betrieb-f"><div class="fehler" id="w-betrieb-f"></div></div>
+        </div>
+        <p class="formel">Bewirtschaftungskosten: Modellwerte der Anlage 3 ImmoWertV, Stand 2021 (298 € Verwaltung je Wohnung, 11,70 € Instandhaltung je m², 2 % Mietausfallwagnis). Sie werden jährlich mit dem Verbraucherpreisindex fortgeschrieben; die fortgeschriebenen Werte stehen im Marktbericht des Gutachterausschusses.</p>
+      </details>
       <dl class="ergebnisse" id="w-ertrag-ergebnis"></dl>
-      <p class="formel">Reinertrag = Jahresrohertrag − Bewirtschaftungskosten (§ 31). Bodenwertverzinsung = Bodenwert × Liegenschaftszins. Ertragswert = (Reinertrag − Bodenwertverzinsung) × Kapitalisierungsfaktor + Bodenwert (§ 28). Vereinfacht: Reinertrag × Kapitalisierungsfaktor + Bodenwert × Abzinsungsfaktor (§ 29). Kapitalisierungsfaktor = (qⁿ − 1) ÷ (qⁿ × (q − 1)), Abzinsungsfaktor = 1 ÷ qⁿ, q = 1 + Liegenschaftszins, n = Restnutzungsdauer (§ 34). Beide Verfahren ergeben bei gleichen Eingaben denselben Wert.</p>
+      <p class="formel">Ertragswertverfahren (§§ 27 bis 34 ImmoWertV): Reinertrag = Jahresrohertrag − Bewirtschaftungskosten (§ 31). Bodenwertverzinsung = Bodenwert × Liegenschaftszins. Ertragswert = (Reinertrag − Bodenwertverzinsung) × Kapitalisierungsfaktor + Bodenwert (§ 28). Vereinfacht: Reinertrag × Kapitalisierungsfaktor + Bodenwert × Abzinsungsfaktor (§ 29). Kapitalisierungsfaktor = (qⁿ − 1) ÷ (qⁿ × (q − 1)), Abzinsungsfaktor = 1 ÷ qⁿ, q = 1 + Liegenschaftszins, n = Restnutzungsdauer (§ 34). Beide Verfahren ergeben bei gleichen Eingaben denselben Wert.</p>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="2">← Zurück</button><button type="button" class="knopf" data-geh="4">Weiter zu Schritt 4: Vergleich und Sachwert →</button></div>
     </div>
 
-    <details class="karte">
-      <summary>Für Fortgeschrittene: Sachwertverfahren (§§ 35 bis 39 ImmoWertV)</summary>
-      <div class="raster">
-        <div><label for="w-bgf">Brutto-Grundfläche in m²</label><input type="text" id="w-bgf" inputmode="decimal" value="" placeholder="aus Bauunterlagen" aria-describedby="w-bgf-f"><div class="fehler" id="w-bgf-f"></div></div>
-        <div><label for="w-art">Gebäudeart (Anlage 4)</label><select id="w-art">
-          <option value="4.1">4.1 Mehrfamilienhaus bis 6 Wohnungen</option>
-          <option value="4.2">4.2 Mehrfamilienhaus 7 bis 20 Wohnungen</option>
-          <option value="4.3">4.3 Mehrfamilienhaus über 20 Wohnungen</option>
-          <option value="5.1">5.1 Wohnhaus mit Mischnutzung</option>
-        </select></div>
-        <div><label for="w-stufe">Standardstufe</label><select id="w-stufe">
-          <option value="3">3 (mittel)</option><option value="4">4 (gehoben)</option><option value="5">5 (stark gehoben)</option>
-        </select></div>
-        <div><label for="w-korr-wg">Korrektur Wohnungsgröße</label><select id="w-korr-wg">
-          <option value="1.10">ca. 35 m² je Wohnung (1,10)</option><option value="1" selected>ca. 50 m² je Wohnung (1,00)</option><option value="0.85">ca. 135 m² je Wohnung (0,85)</option>
-        </select></div>
-        <div><label for="w-korr-gr">Korrektur Grundriss</label><select id="w-korr-gr">
-          <option value="1.05">Einspänner (1,05)</option><option value="1" selected>Zweispänner (1,00)</option><option value="0.97">Dreispänner (0,97)</option><option value="0.95">Vierspänner (0,95)</option>
-        </select></div>
-        <div><label for="w-bpi">Baupreisindex (2010 = 100)</label><input type="text" id="w-bpi" inputmode="decimal" value="189,1" aria-describedby="w-bpi-f"><div class="fehler" id="w-bpi-f"></div></div>
-        <div><label for="w-rf">Regionalfaktor</label><input type="text" id="w-rf" inputmode="decimal" value="1" aria-describedby="w-rf-f"><div class="fehler" id="w-rf-f"></div></div>
-        <div><label for="w-aussen">Außenanlagen in % des Gebäudewerts</label><input type="text" id="w-aussen" inputmode="decimal" value="0" aria-describedby="w-aussen-f"><div class="fehler" id="w-aussen-f"></div></div>
-        <div><label for="w-swf">Sachwertfaktor (Marktanpassung)</label><input type="text" id="w-swf" inputmode="decimal" value="1" aria-describedby="w-swf-f"><div class="fehler" id="w-swf-f"></div></div>
-        <div><label for="w-besonders">Besondere Merkmale in € (z. B. − Instandhaltungsstau)</label><input type="text" id="w-besonders" inputmode="decimal" value="0" aria-describedby="w-besonders-f"><div class="fehler" id="w-besonders-f"></div></div>
-      </div>
-      <p class="klein">Normalherstellungskosten NHK 2010 aus Anlage 4 ImmoWertV (inkl. 19 % Baunebenkosten bei Gebäudeart 4.1 bis 4.3), geprüft 07.10.2026. Baupreisindex 189,1 für Wohngebäude, Bewertungsjahr 2026, laut BMF-Schreiben vom 14.01.2026 (gilt dort für die steuerliche Bewertung, hier als Näherung). Regional- und Sachwertfaktor 1,0 sind Annahmen; die örtlichen Werte nennt der Gutachterausschuss.</p>
-      <dl class="ergebnisse" id="w-sach-ergebnis"></dl>
-      <p class="formel">Herstellungskosten = NHK × Korrekturfaktoren × Baupreisindex ÷ 100 × Brutto-Grundfläche × Regionalfaktor (§ 36). Alterswertminderungsfaktor = Restnutzungsdauer ÷ Gesamtnutzungsdauer (§ 38). Vorläufiger Sachwert = Gebäudewert + Außenanlagen + Bodenwert; marktangepasst × Sachwertfaktor (§§ 35, 39); dann besondere Merkmale.</p>
-    </details>
-
-    <div class="karte">
-      <h3>3. Vergleichswert (vereinfacht)</h3>
+    <div class="karte schritt" data-schritt="4" hidden>
+      <h3>4. Vergleich und Sachwert (freiwillig)</h3>
+      <p class="klein">Der Ertragswert aus Schritt 3 reicht für eine erste Antwort. Mit einem Vergleichspreis oder dem Sachwert prüfen Sie ihn gegen.</p>
       <div class="raster">
         <div><label for="w-vgl">Vergleichspreis in € pro m² Wohnfläche</label><input type="text" id="w-vgl" inputmode="decimal" value="" placeholder="z. B. aus Marktbericht" aria-describedby="w-vgl-f"><div class="fehler" id="w-vgl-f"></div></div>
       </div>
       <div class="knopfreihe"><button type="button" class="knopf zweit" id="w-vgl-merk">Durchschnitt €/m² aus der Merkliste</button></div>
       <p class="klein" id="w-vgl-hinweis">Ein echtes Vergleichswertverfahren nutzt Kaufpreise vergleichbarer Objekte aus der Kaufpreissammlung des Gutachterausschusses. Angebotspreise aus Portalen sind keine Kaufpreise und liegen oft darüber.</p>
       <dl class="ergebnisse" id="w-vgl-ergebnis"></dl>
+
+      <details class="mehr-einst"><summary>Mehr Einstellungen: Sachwert für Fortgeschrittene</summary>
+        <div class="raster">
+          <div><label for="w-bgf">Brutto-Grundfläche in m²</label><input type="text" id="w-bgf" inputmode="decimal" value="" placeholder="aus Bauunterlagen" aria-describedby="w-bgf-f"><div class="fehler" id="w-bgf-f"></div></div>
+          <div><label for="w-art">Gebäudeart</label><select id="w-art">
+            <option value="4.1">Mehrfamilienhaus bis 6 Wohnungen</option>
+            <option value="4.2">Mehrfamilienhaus 7 bis 20 Wohnungen</option>
+            <option value="4.3">Mehrfamilienhaus über 20 Wohnungen</option>
+            <option value="5.1">Wohnhaus mit Mischnutzung</option>
+          </select></div>
+          <div><label for="w-stufe">Standardstufe</label><select id="w-stufe">
+            <option value="3">3 (mittel)</option><option value="4">4 (gehoben)</option><option value="5">5 (stark gehoben)</option>
+          </select></div>
+          <div><label for="w-korr-wg">Korrektur Wohnungsgröße</label><select id="w-korr-wg">
+            <option value="1.10">ca. 35 m² je Wohnung (1,10)</option><option value="1" selected>ca. 50 m² je Wohnung (1,00)</option><option value="0.85">ca. 135 m² je Wohnung (0,85)</option>
+          </select></div>
+          <div><label for="w-korr-gr">Korrektur Grundriss</label><select id="w-korr-gr">
+            <option value="1.05">Einspänner (1,05)</option><option value="1" selected>Zweispänner (1,00)</option><option value="0.97">Dreispänner (0,97)</option><option value="0.95">Vierspänner (0,95)</option>
+          </select></div>
+          <div><label for="w-bpi">Baupreisindex (2010 = 100)</label><input type="text" id="w-bpi" inputmode="decimal" value="189,1" aria-describedby="w-bpi-f"><div class="fehler" id="w-bpi-f"></div></div>
+          <div><label for="w-rf">Regionalfaktor</label><input type="text" id="w-rf" inputmode="decimal" value="1" aria-describedby="w-rf-f"><div class="fehler" id="w-rf-f"></div></div>
+          <div><label for="w-aussen">Außenanlagen in % des Gebäudewerts</label><input type="text" id="w-aussen" inputmode="decimal" value="0" aria-describedby="w-aussen-f"><div class="fehler" id="w-aussen-f"></div></div>
+          <div><label for="w-swf">Sachwertfaktor (Marktanpassung)</label><input type="text" id="w-swf" inputmode="decimal" value="1" aria-describedby="w-swf-f"><div class="fehler" id="w-swf-f"></div></div>
+          <div><label for="w-besonders">Besondere Merkmale in € (z. B. − Instandhaltungsstau)</label><input type="text" id="w-besonders" inputmode="decimal" value="0" aria-describedby="w-besonders-f"><div class="fehler" id="w-besonders-f"></div></div>
+        </div>
+        <p class="klein"><span class="annahme">Annahme</span> Regionalfaktor 1,0 und Sachwertfaktor 1,0 sind Platzhalter; die örtlichen Werte nennt der Gutachterausschuss. Baupreisindex 189,1 gilt für Wohngebäude im Bewertungsjahr 2026 (BMF-Schreiben vom 14.01.2026, dort für die steuerliche Bewertung, hier als Näherung).</p>
+        <dl class="ergebnisse" id="w-sach-ergebnis"></dl>
+        <p class="formel">Sachwertverfahren (§§ 35 bis 39 ImmoWertV): Normalherstellungskosten NHK 2010 aus Anlage 4 ImmoWertV (inkl. 19 % Baunebenkosten bei Gebäudeart 4.1 bis 4.3), geprüft 07.10.2026. Herstellungskosten = NHK × Korrekturfaktoren × Baupreisindex ÷ 100 × Brutto-Grundfläche × Regionalfaktor (§ 36). Alterswertminderungsfaktor = Restnutzungsdauer ÷ Gesamtnutzungsdauer (§ 38). Vorläufiger Sachwert = Gebäudewert + Außenanlagen + Bodenwert; marktangepasst × Sachwertfaktor (§§ 35, 39); dann besondere Merkmale.</p>
+      </details>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="3">← Zurück</button></div>
     </div>
 
     <div class="karte">
@@ -1197,6 +1403,13 @@ __PALETTE_CSS__
   <div class="einstieg-platz" data-einstieg="umbau"></div>
   <details class="mehr-dazu"><summary>Mehr dazu</summary><p class="untertitel">Umbau, Sanierung, Ausbau</p><p>Was kosten Bad, Dach oder Heizung, wie viel Förderung gibt es, und wie viel Miete bringt es zurück? Die Preise stammen aus Ratgeberseiten und sind nur eine Größenordnung. Ersetzen Sie sie durch echte Angebote.</p></details>
 
+  <div class="satz leer" id="u-satz" aria-live="polite" style="margin-bottom:16px">
+    <div class="lampe" aria-hidden="true">?</div>
+    <div><strong id="u-satz-text"></strong><small id="u-satz-klein"></small></div>
+  </div>
+  <div class="teilen-zeile"><button type="button" class="knopf zweit mittel teilen-knopf" data-teilen="umbau">Ergebnis weiterleiten</button></div>
+  <p class="hinweis steuer-tipp" id="u-steuer-tipp"><b>Steuer-Tipp:</b> <span id="u-steuer-text">Renovieren Sie in den ersten drei Jahren nach dem Kauf, zählt die 15-Prozent-Grenze.</span> <a href="#steuern" data-ziel="steuern" data-fokus="st-a-j1">→ Steuern sparen</a></p>
+
   <dl class="kacheln" id="u-kacheln" aria-live="polite">
     <div class="kz haupt"><dt>Gesamtkosten</dt><dd id="uk-gesamt">-</dd></div>
     <div class="kz"><dt>Nach Förderung</dt><dd id="uk-netto">-</dd></div>
@@ -1204,59 +1417,113 @@ __PALETTE_CSS__
     <div class="kz"><dt>Wertzuwachs</dt><dd id="uk-wert">-</dd></div>
   </dl>
 
+  <details class="karte pflichten" id="hz-karte">
+    <summary><span class="pf-titel">Pflichten nach dem Kauf: Heizung und Energie</span><span class="pf-unter">Fünf Fragen, dann sehen Sie, was auf Sie zukommen kann</span></summary>
+    <div id="hz-box" role="group" aria-label="Fragen zu Heizung und Dämmung">
+      <div class="raster">
+        <div><label for="hz-baujahr">Baujahr des Hauses</label><input type="text" id="hz-baujahr" inputmode="numeric" placeholder="leer = wie im Rechner" aria-describedby="hz-baujahr-f"><div class="fehler" id="hz-baujahr-f"></div></div>
+        <div><label for="hz-art">Womit wird geheizt?</label><select id="hz-art"><option value="">Bitte wählen</option><option value="gas">Gas oder Flüssiggas</option><option value="oel">Öl</option><option value="waermepumpe">Wärmepumpe</option><option value="fernwaerme">Fernwärme</option><option value="sonstige">Etwas anderes (zum Beispiel Holz oder Strom)</option></select></div>
+        <div><label for="hz-einbau">Einbaujahr der Heizung</label><input type="text" id="hz-einbau" inputmode="numeric" placeholder="z. B. 2012" aria-describedby="hz-einbau-f"><div class="fehler" id="hz-einbau-f"></div><small class="kurz">Steht am Typenschild des Kessels. Planen Sie einen Tausch, tragen Sie das Jahr ein, in dem die neue Heizung eingebaut wird.</small></div>
+        <div><label for="hz-decke">Ist die oberste Geschossdecke gedämmt?</label><select id="hz-decke"><option value="weiss">Weiß ich nicht</option><option value="ja">Ja</option><option value="nein">Nein</option></select></div>
+        <div><label for="hz-rohre">Sind die Heizungs- und Warmwasserrohre im Keller gedämmt?</label><select id="hz-rohre"><option value="weiss">Weiß ich nicht</option><option value="ja">Ja</option><option value="nein">Nein</option></select><small class="kurz">Gemeint sind Rohre, die durch ungeheizte Räume laufen.</small></div>
+      </div>
+      <div class="satz leer" id="hz-satz" aria-live="polite" style="margin:18px 0 0"><div class="lampe" aria-hidden="true">?</div><div><strong id="hz-satz-text"></strong><small id="hz-satz-klein"></small></div></div>
+      <ul class="pf-liste" id="hz-liste"></ul>
+      <p class="klein" id="hz-fuss"></p>
+    </div>
+  </details>
+
+  <ol class="schritte" id="u-schritte" aria-label="Schritte beim Umbau">
+    <li><button type="button" data-schritt="1" aria-current="step"><b>1</b>Bauteile</button></li>
+    <li><button type="button" data-schritt="2"><b>2</b>Kosten und Förderung</button></li>
+    <li><button type="button" data-schritt="3"><b>3</b>Mehrmiete und Wert</button></li>
+    <li><button type="button" data-schritt="4"><b>4</b>Förderprogramme</button></li>
+    <li><button type="button" data-schritt="5"><b>5</b>Bauablauf</button></li>
+  </ol>
+
   <form id="u-form" novalidate>
-    <div class="karte">
-      <h3>1. Kosten je Bauteil</h3>
-      <p class="klein">Menge eintragen, Preis je Einheit bei Bedarf anpassen. Vorgabe ist ein Wert innerhalb der recherchierten Spanne (Abruf 07.10.2026).</p>
-      <div class="tabelle-kasten karten-kasten">
-        <table class="karten" id="u-tabelle">
-          <thead><tr><th scope="col" style="width:30%">Bauteil</th><th scope="col" style="width:14%">Menge</th><th scope="col" style="width:16%">€ je Einheit</th><th scope="col" class="z" style="width:14%">Summe</th><th scope="col">Spanne und Quelle</th></tr></thead>
+    <div class="karte schritt" data-schritt="1">
+      <h3>1. Was wird gemacht?</h3>
+      <p class="klein">Tragen Sie die Menge ein. Der Preis je Einheit ist ein Richtwert innerhalb der recherchierten Spanne (Abruf 07.10.2026); „Preis ändern“ erlaubt Ihren eigenen. Weitere Bauteile finden Sie darunter.</p>
+      <div class="karten-liste">
+        <table class="karten karten-immer" id="u-tabelle">
+          <thead><tr><th scope="col">Bauteil</th><th scope="col">Menge</th><th scope="col">Preis je Einheit</th><th scope="col">Summe</th><th scope="col">Spanne und Quelle</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
-      <div class="raster" style="margin-top:14px">
-        <div><label for="u-planung">Planung in % der Baukosten</label><input type="text" id="u-planung" inputmode="decimal" value="13" aria-describedby="u-planung-f"><div class="fehler" id="u-planung-f"></div></div>
-        <div><label for="u-baustelle">Baustelle und Entsorgung in %</label><input type="text" id="u-baustelle" inputmode="decimal" value="7" aria-describedby="u-baustelle-f"><div class="fehler" id="u-baustelle-f"></div></div>
-        <div><label for="u-puffer">Puffer für Unvorhergesehenes in %</label><input type="text" id="u-puffer" inputmode="decimal" value="15" aria-describedby="u-puffer-f"><div class="fehler" id="u-puffer-f"></div></div>
-        <div><label for="u-foerder">Erwartete Förderung (Zuschüsse) in €</label><input type="text" id="u-foerder" inputmode="decimal" value="0" aria-describedby="u-foerder-f"><div class="fehler" id="u-foerder-f"></div></div>
-      </div>
-      <p class="klein" id="u-zuschlag-quelle"></p>
-      <dl class="ergebnisse" id="u-kosten-ergebnis"></dl>
-      <p class="formel">Gesamtkosten = Summe der Bauteile × (1 + Planung + Baustelle + Puffer). Nach Förderung = Gesamtkosten − erwartete Zuschüsse. Kredite (z. B. KfW 261) senken die Kosten nicht, sie verteilen sie.</p>
+      <details class="mehr-einst" id="u-mehr-bauteile"><summary>Mehr Einstellungen: weitere Bauteile</summary>
+        <div class="karten-liste">
+          <table class="karten karten-immer" id="u-tabelle-mehr">
+            <thead><tr><th scope="col">Bauteil</th><th scope="col">Menge</th><th scope="col">Preis je Einheit</th><th scope="col">Summe</th><th scope="col">Spanne und Quelle</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+      <div class="schritt-fuss"><button type="button" class="knopf" data-geh="2">Weiter zu Schritt 2: Kosten und Förderung →</button></div>
     </div>
 
-    <div class="karte">
-      <h3>2. Mieterhöhung und Wertsteigerung</h3>
+    <div class="karte schritt" data-schritt="2" hidden>
+      <h3>2. Kosten und Förderung</h3>
+      <div class="raster">
+        <div><label for="u-foerder">Erwartete Förderung (Zuschüsse) in €</label><input type="text" id="u-foerder" inputmode="decimal" value="0" aria-describedby="u-foerder-f"><div class="fehler" id="u-foerder-f"></div></div>
+      </div>
+      <p class="klein">Zuschüsse senken die Kosten. Kredite (zum Beispiel KfW 261) senken sie nicht, sie verteilen sie nur. Was es gibt, sehen Sie in Schritt 4.</p>
+      <details class="mehr-einst"><summary>Mehr Einstellungen: Planung, Baustelle, Puffer</summary>
+        <div class="raster">
+          <div><label for="u-planung">Planung in % der Baukosten</label><input type="text" id="u-planung" inputmode="decimal" value="13" aria-describedby="u-planung-f"><div class="fehler" id="u-planung-f"></div></div>
+          <div><label for="u-baustelle">Baustelle und Entsorgung in %</label><input type="text" id="u-baustelle" inputmode="decimal" value="7" aria-describedby="u-baustelle-f"><div class="fehler" id="u-baustelle-f"></div></div>
+          <div><label for="u-puffer">Puffer für Unvorhergesehenes in %</label><input type="text" id="u-puffer" inputmode="decimal" value="15" aria-describedby="u-puffer-f"><div class="fehler" id="u-puffer-f"></div></div>
+        </div>
+        <p class="klein" id="u-zuschlag-quelle"></p>
+      </details>
+      <dl class="ergebnisse" id="u-kosten-ergebnis"></dl>
+      <p class="formel">Gesamtkosten = Summe der Bauteile × (1 + Planung + Baustelle + Puffer). Nach Förderung = Gesamtkosten − erwartete Zuschüsse. Kredite (z. B. KfW 261) senken die Kosten nicht, sie verteilen sie.</p>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="1">← Zurück</button><button type="button" class="knopf" data-geh="3">Weiter zu Schritt 3: Mehrmiete und Wert →</button></div>
+    </div>
+
+    <div class="karte schritt" data-schritt="3" hidden>
+      <h3>3. Mehrmiete und Wertzuwachs</h3>
       <div class="raster">
         <div><label for="u-anteil">Anteil Modernisierung an den Kosten in %</label><input type="text" id="u-anteil" inputmode="decimal" value="70" aria-describedby="u-anteil-f"><div class="fehler" id="u-anteil-f"></div></div>
         <div><label for="u-wfl">Wohnfläche in m²</label><input type="text" id="u-wfl" inputmode="decimal" value="" placeholder="wie im Rechner" aria-describedby="u-wfl-f"><div class="fehler" id="u-wfl-f"></div></div>
         <div><label for="u-miete-alt">Kaltmiete heute pro Monat in €</label><input type="text" id="u-miete-alt" inputmode="decimal" value="" placeholder="wie im Rechner" aria-describedby="u-miete-alt-f"><div class="fehler" id="u-miete-alt-f"></div></div>
-        <div><label for="u-rnd-neu">Restnutzungsdauer nach Umbau in Jahren (optional)</label><input type="text" id="u-rnd-neu" inputmode="decimal" value="" placeholder="leer = wie vorher" aria-describedby="u-rnd-neu-f"><div class="fehler" id="u-rnd-neu-f"></div></div>
-        <div style="display:flex;flex-direction:row;justify-content:flex-start;gap:10px;align-items:flex-start;padding-top:26px"><input type="checkbox" id="u-heizung"><label for="u-heizung" style="margin:0;color:var(--text)">Nur Heizungstausch (Kappung 0,50 € je m²)</label></div>
       </div>
-      <p class="klein">Bei bestehenden Mietverträgen darf die Jahresmiete nach Modernisierung um 8 % der Modernisierungskosten steigen; Kosten, die ohnehin für Erhaltung angefallen wären, zählen nicht mit. Die Monatsmiete darf in sechs Jahren um höchstens 3 € je m² steigen, bei weniger als 7 € je m² Ausgangsmiete um höchstens 2 €, bei Heizungstausch um höchstens 0,50 € (§ 559 BGB, Wortlaut geprüft 07.10.2026 auf <a href="https://www.gesetze-im-internet.de/bgb/__559.html" target="_blank" rel="noopener">gesetze-im-internet.de</a>). Härtefälle (§ 559 Abs. 4) und Ankündigungsfristen (§ 555c) beachten; vor einer Mieterhöhung Rechtsanwalt oder Mieterverein des Vermieters fragen.</p>
+      <p class="klein">Modernisierung heißt: Das Haus wird besser (zum Beispiel Dämmung, neues Bad). Reine Reparaturen zählen nicht. Bleibt eine Wohnung vermietet, darf die Miete danach in Grenzen steigen.</p>
+      <details class="mehr-einst"><summary>Mehr Einstellungen: Restnutzungsdauer, Heizungstausch</summary>
+        <div class="raster">
+          <div><label for="u-rnd-neu">Restnutzungsdauer nach Umbau in Jahren (optional)</label><input type="text" id="u-rnd-neu" inputmode="decimal" value="" placeholder="leer = wie vorher" aria-describedby="u-rnd-neu-f"><div class="fehler" id="u-rnd-neu-f"></div></div>
+          <div class="u-haken"><div class="u-haken-zeile"><input type="checkbox" id="u-heizung"><label for="u-heizung">Nur Heizungstausch (Kappung 0,50 € je m²)</label></div>
+            <small class="kurz">Kappung heißt: Obergrenze. Bei einem reinen Heizungstausch darf die Miete höchstens um diesen Betrag je m² steigen.</small></div>
+        </div>
+      </details>
+      <details class="mehr-dazu"><summary>Mehr dazu: Was das Gesetz erlaubt (§ 559 BGB)</summary>
+        <p class="klein">Bei bestehenden Mietverträgen darf die Jahresmiete nach Modernisierung um 8 % der Modernisierungskosten steigen; Kosten, die ohnehin für Erhaltung angefallen wären, zählen nicht mit. Die Monatsmiete darf in sechs Jahren um höchstens 3 € je m² steigen, bei weniger als 7 € je m² Ausgangsmiete um höchstens 2 €, bei Heizungstausch um höchstens 0,50 € (§ 559 BGB, Wortlaut geprüft 07.10.2026 auf <a href="https://www.gesetze-im-internet.de/bgb/__559.html" target="_blank" rel="noopener">gesetze-im-internet.de</a>). Härtefälle (§ 559 Abs. 4) und Ankündigungsfristen (§ 555c) beachten; vor einer Mieterhöhung Rechtsanwalt oder Mieterverein des Vermieters fragen.</p>
+      </details>
       <dl class="ergebnisse" id="u-wert-ergebnis"></dl>
       <figure class="diagramm" id="ch-umbau"></figure>
       <div class="legende" id="ch-umbau-legende"></div>
       <p class="formel">Mehrmiete = Kosten × Anteil Modernisierung × 8 % ÷ 12, höchstens Kappungsbetrag × Wohnfläche. Ertragswert vorher und nachher mit den Annahmen aus „Was ist das Haus wert?“ (Bodenwert, Liegenschaftszins, Bewirtschaftungskosten). Wertzuwachs = Ertragswert nachher − vorher. Rendite des Umbaus = Mehrmiete × 12 ÷ Kosten nach Förderung.</p>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="2">← Zurück</button><button type="button" class="knopf" data-geh="4">Weiter zu Schritt 4: Förderprogramme →</button></div>
+    </div>
+
+    <div class="karte schritt" data-schritt="4" hidden>
+      <h3>4. Förderprogramme (Stand 09.10.2026)</h3>
+      <p class="klein">Förderbedingungen ändern sich oft; seit 21.07.2026 gelten neue Regeln der Bundesförderung für effiziente Gebäude (BEG). Vor jeder Beauftragung bei KfW, BAFA oder Bremer Aufbau-Bank und mit einem Energieeffizienz-Experten prüfen. Fast alle Programme verlangen den Antrag vor Beginn der Arbeiten. Was „vor Nutzung prüfen“ trägt, ist nicht amtlich bestätigt.</p>
+      <div class="karten-liste">
+        <table class="karten karten-immer foerder" id="u-foerder-tabelle">
+          <thead><tr><th scope="col">Programm</th><th scope="col">Höhe</th><th scope="col">Für Vermieter</th><th scope="col">Antrag</th><th scope="col">Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="3">← Zurück</button><button type="button" class="knopf" data-geh="5">Weiter zu Schritt 5: Bauablauf →</button></div>
+    </div>
+
+    <div class="karte schritt" data-schritt="5" hidden>
+      <h3>5. Bauablauf und Genehmigung</h3>
+      <ol class="weg" id="u-ablauf"></ol>
+      <div class="schritt-fuss"><button type="button" class="knopf zweit" data-geh="4">← Zurück</button></div>
     </div>
   </form>
-
-  <div class="karte">
-    <h3>3. Förderprogramme (Stand 07.10.2026)</h3>
-    <p class="klein">Förderbedingungen ändern sich oft; seit 21.07.2026 gelten neue Regeln der Bundesförderung für effiziente Gebäude. Vor jeder Beauftragung bei KfW, BAFA oder Bremer Aufbau-Bank und mit einem Energieeffizienz-Experten prüfen. Fast alle Programme verlangen den Antrag vor Beginn der Arbeiten.</p>
-    <div class="tabelle-kasten karten-kasten">
-      <table class="karten" id="u-foerder-tabelle">
-        <thead><tr><th scope="col" style="width:24%">Programm</th><th scope="col">Höhe</th><th scope="col" style="width:14%">Für Vermieter</th><th scope="col" style="width:16%">Antrag</th><th scope="col" style="width:16%">Status</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="karte">
-    <h3>4. Bauablauf und Genehmigung</h3>
-    <ol class="weg" id="u-ablauf"></ol>
-  </div>
 </section>
 
 <!-- GRUNDRISS -->
@@ -1269,13 +1536,34 @@ __PALETTE_CSS__
     </div>
     <svg class="il" data-bild="grundriss" aria-hidden="true" focusable="false"></svg>
   </header>
+  <div class="karte g-start" id="g-start">
+    <h3>So fangen Sie an</h3>
+    <div class="g-start-wahl">
+      <div class="g-start-feld">
+        <button type="button" class="knopf gross" id="g-beispiel">Beispielhaus laden</button>
+        <p class="klein">Ein erfundenes kleines Haus mit 6 Zimmern auf zwei Etagen, Keller und Garage, schon eingerichtet. Zum Ausprobieren.</p>
+      </div>
+      <div class="g-start-feld">
+        <input type="file" id="g-bild-datei" accept="image/png,image/jpeg,image/webp" hidden>
+        <label class="knopf gross" for="g-bild-datei" tabindex="0" role="button" id="g-bild-knopf">Bild wählen</label>
+        <p class="klein">Ein Bild oder Foto des Grundrisses aus dem Exposé (JPG oder PNG). Ohne Bild zeichnen Sie auf dem Raster, ein Kästchen ist 1 m. Das Bild bleibt auf Ihrem Gerät.</p>
+        <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf zweit" id="g-bild-weg">Bild entfernen</button></div>
+      </div>
+    </div>
+    <div class="g-frage" id="g-beispiel-frage" hidden>
+      <p style="margin:0 0 10px">Ihr jetziger Plan wird durch das Beispielhaus ersetzt. Vorher als Datei sichern?</p>
+      <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-beispiel-sichern">Sichern und Beispiel laden</button><button type="button" class="knopf zweit" id="g-beispiel-ohne">Ohne Sichern ersetzen</button><button type="button" class="knopf zweit" id="g-beispiel-nein">Abbrechen</button></div>
+    </div>
+  </div>
+
   <div class="einstieg-platz" data-einstieg="grundriss"></div>
   <details class="mehr-dazu"><summary>Mehr dazu</summary><p class="untertitel">Wohnfläche, Möbel, Umbau</p><p>Laden Sie den Grundriss aus dem Exposé, zeichnen Sie die Räume nach und stellen Sie Möbel hinein. Sie sehen sofort die Wohnfläche und was die Einrichtung kostet. Das Bild bleibt auf Ihrem Gerät, es wird nirgends hochgeladen.</p></details>
 
-  <div class="satz" id="g-satz" aria-live="polite">
+  <div class="satz leer" id="g-satz" aria-live="polite">
     <div class="lampe" aria-hidden="true">?</div>
     <div><strong id="g-satz-text"></strong><small id="g-satz-klein"></small></div>
   </div>
+  <div class="teilen-zeile"><button type="button" class="knopf zweit mittel teilen-knopf" data-teilen="grundriss">Ergebnis weiterleiten</button></div>
   <dl class="kacheln" id="g-kacheln">
     <div class="kz haupt"><dt>Wohnfläche</dt><dd id="g-wfl">-</dd></div>
     <div class="kz"><dt>Nutzfläche (Keller, Garage)</dt><dd id="g-nfl">-</dd></div>
@@ -1313,18 +1601,10 @@ __PALETTE_CSS__
 
       <div class="g-seite">
         <div class="g-panel" data-gpanel="1">
-          <h4>Erst einmal ausprobieren?</h4>
-          <p>Das Beispielhaus ist ein erfundenes kleines Haus mit 6 Zimmern auf zwei Etagen, Keller und Garage, schon eingerichtet.</p>
-          <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-beispiel">Beispielhaus laden</button></div>
-          <div class="g-frage" id="g-beispiel-frage" hidden>
-            <p style="margin:0 0 10px">Ihr jetziger Plan wird durch das Beispielhaus ersetzt. Vorher als Datei sichern?</p>
-            <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-beispiel-sichern">Sichern und Beispiel laden</button><button type="button" class="knopf zweit" id="g-beispiel-ohne">Ohne Sichern ersetzen</button><button type="button" class="knopf zweit" id="g-beispiel-nein">Abbrechen</button></div>
-          </div>
-          <h4 style="margin-top:18px">1. Grundriss laden</h4>
-          <p>Ein Bild oder Foto des Grundrisses aus dem Exposé wählen (JPG oder PNG). Ohne Bild können Sie auf dem Raster zeichnen, ein Kästchen ist 1 m.</p>
-          <input type="file" id="g-bild-datei" accept="image/png,image/jpeg,image/webp" hidden>
-          <div class="knopfreihe"><label class="knopf" for="g-bild-datei" tabindex="0" role="button" id="g-bild-knopf">Bild wählen</label><button type="button" class="knopf zweit" id="g-bild-weg">Bild entfernen</button></div>
+          <h4>1. Bild und Maßstab</h4>
+          <p>Bild oder Beispielhaus wählen Sie oben bei „So fangen Sie an“. Hier legen Sie den Maßstab fest und benennen die Etage.</p>
           <h4 style="margin-top:16px">Maßstab festlegen</h4>
+          <small class="kurz" id="g-mass-kurz">Maßstab heißt: Sie sagen der Seite, wie lang eine Strecke im Bild in echt ist. Danach stimmen alle Flächen.</small>
           <p>Klicken Sie auf den Anfang und das Ende einer Wand, deren Länge Sie kennen (steht oft im Grundriss), und geben Sie die Länge ein.</p>
           <div class="knopfreihe"><button type="button" class="knopf" id="g-mass-start">Strecke anklicken</button></div>
           <div id="g-mass-frage" hidden style="margin-top:12px">
@@ -1543,6 +1823,7 @@ __PALETTE_CSS__
   <div class="einstieg-platz" data-einstieg="pruefliste"></div>
   <details class="mehr-dazu"><summary>Mehr dazu</summary><p class="untertitel">Ablauf zum Abhaken</p><p>Zehn Etappen von der Planung bis zur Vermietung. Haken Sie ab, was erledigt ist; der Stand bleibt in diesem Browser gespeichert. Die Liste ist eine Gedächtnisstütze und ersetzt nicht den Rat von Notar, Bank, Steuerberater und Rechtsanwalt.</p></details>
   <div class="knopfreihe" style="margin:0 0 16px"><button type="button" class="knopf zweit" id="p-zuruecksetzen">Alle Haken entfernen</button><span class="klein" id="p-fortschritt" style="align-self:center"></span></div>
+  <p class="hinweis steuer-tipp"><b>Steuer-Tipp vor dem Kaufvertrag:</b> Fragen Sie den Steuerberater nach der Aufteilung des Kaufpreises in Boden und Gebäude (sie bestimmt die Abschreibung) und prüfen Sie, ob das Haus in einem Sanierungsgebiet liegt oder ein Baudenkmal ist (dann gelten besondere Regeln, und die Abstimmung muss vor dem Umbau erfolgen). <a href="#steuern" data-ziel="steuern" data-fokus="st-c-grund">→ Steuern sparen</a></p>
   <div class="zwei">
     <div class="karte">
       <h3>1. Planung</h3>
@@ -1735,6 +2016,7 @@ __PALETTE_CSS__
       </div>
       <p class="klein">Offen aus der Präsentation: Ob in den 4.500 € Fixkosten schon eine Kreditrate steckt, ist nicht geklärt. Hier gelten sie als Kosten ohne Kredit; die Rate kommt aus Angebot A im Rechner: <strong id="mz-rate-anzeige"></strong>.</p>
       <dl class="ergebnisse" id="mz-ergebnis"></dl>
+      <div class="teilen-zeile"><button type="button" class="knopf zweit mittel teilen-knopf" data-teilen="monteur">Ergebnis weiterleiten</button></div>
       <h3>Ergebnis je nach Belegung</h3>
       <figure class="diagramm" id="ch-belegung"></figure>
       <div class="legende" id="ch-belegung-legende"></div>
@@ -1807,6 +2089,183 @@ __PALETTE_CSS__
   </div>
 </section>
 
+<!-- STEUERN SPAREN (Block 4, 09.10.2026): Nebenbereich, nicht in der Leiste. Keine Steuerberatung (R078). -->
+<section id="steuern" aria-label="Steuern sparen" hidden>
+  <header class="bereich-kopf" style="--f:var(--f6)">
+    <div class="kopf-text">
+      <p class="schritt-nr"></p>
+      <h2>Steuern sparen</h2>
+      <p class="lead" data-kurz></p>
+    </div>
+    <svg class="il" data-bild="steuern" aria-hidden="true" focusable="false"></svg>
+  </header>
+  <div class="einstieg-platz" data-einstieg="steuern"></div>
+  <p class="hinweis" id="st-hinweis"><b>Das ersetzt keine Steuerberatung.</b> Hier steht, was das Gesetz erlaubt, mit Quelle und Abrufdatum (alles Abruf 09.10.2026, Bericht recherche/14_steuern_sparen.md). Es ist keine Empfehlung. Ob etwas für Ihren Fall gilt, klären Sie mit einem Steuerberater, bevor Sie handeln. <span class="annahme">Vor Nutzung prüfen</span> markiert Punkte, die nicht aus einer amtlichen Quelle belegt sind. <span class="annahme">Vor Nutzung prüfen</span> gilt auch für alle Aussagen zu Abschreibung, § 7b und zur Zehn-Jahres-Frist: Ein Referentenentwurf zum Jahressteuergesetz 2026 (19.05.2026) wurde nicht auf Änderungen dort untersucht.</p>
+
+  <h3 class="frage">Tipps und Fallen</h3>
+  <div id="st-tipps"></div>
+
+  <h3 class="frage">Vier Rechner</h3>
+  <form id="st-form" novalidate>
+    <div class="karte" id="st-grund">
+      <h3>Ihre Grundannahmen für alle vier Rechner</h3>
+      <div class="raster">
+        <div><label for="st-satz">Ihr persönlicher Steuersatz in % (Annahme)</label><input type="text" id="st-satz" inputmode="decimal" value="30" aria-describedby="st-satz-f"><div class="fehler" id="st-satz-f"></div></div>
+        <div><label for="st-baujahr">Baujahr (Fertigstellung) des Hauses</label><input type="text" id="st-baujahr" inputmode="decimal" value="" placeholder="leer = Baujahr aus dem Rechner" aria-describedby="st-baujahr-f"><div class="fehler" id="st-baujahr-f"></div></div>
+      </div>
+      <p class="klein" id="st-baujahr-hinweis"></p>
+      <details class="mehr-dazu"><summary>Mehr dazu: Welchen Steuersatz nehme ich?</summary>
+        <p class="klein">Das ist der Satz auf den letzten zusätzlich verdienten Euro (Grenzsteuersatz), nicht der Durchschnitt. Nach dem Einkommensteuertarif ab dem Veranlagungszeitraum 2026 bleiben bis 12.348 € zu versteuerndem Einkommen steuerfrei (Grundfreibetrag); ab 69.879 € gilt der Grenzsteuersatz von 42 %. Dazwischen steigt der Satz. Quelle: § 32a Abs. 1 EStG, gesetze-im-internet.de, Abruf 09.10.2026 (<a href="https://www.gesetze-im-internet.de/estg/__32a.html" target="_blank" rel="noopener">Wortlaut</a>). Ihren Wert finden Sie im Steuerbescheid oder beim Steuerberater. Der Wert hier ist eine Annahme.</p>
+      </details>
+    </div>
+
+    <!-- a) 15-%-Prüfer -->
+    <div class="karte" id="st-a">
+      <h3>a) 15-Prozent-Prüfer: Wird die Renovierung nur über die Abschreibung absetzbar?</h3>
+      <p class="klein">Gilt für Renovierungen in den ersten drei Jahren nach dem Kauf (§ 6 Abs. 1 Nr. 1a EStG).</p>
+      <div class="raster">
+        <div><label for="st-a-ak">Anschaffungskosten des Gebäudes in €</label><input type="text" id="st-a-ak" inputmode="decimal" value="" placeholder="leer = aus Teil c oder Rechner" aria-describedby="st-a-ak-f"><div class="fehler" id="st-a-ak-f"></div></div>
+        <div><label for="st-a-j1">Renovierung netto im Jahr 1 in €</label><input type="text" id="st-a-j1" inputmode="decimal" value="" aria-describedby="st-a-j1-f"><div class="fehler" id="st-a-j1-f"></div></div>
+        <div><label for="st-a-j2">Renovierung netto im Jahr 2 in €</label><input type="text" id="st-a-j2" inputmode="decimal" value="" aria-describedby="st-a-j2-f"><div class="fehler" id="st-a-j2-f"></div></div>
+        <div><label for="st-a-j3">Renovierung netto im Jahr 3 in €</label><input type="text" id="st-a-j3" inputmode="decimal" value="" aria-describedby="st-a-j3-f"><div class="fehler" id="st-a-j3-f"></div></div>
+      </div>
+      <p class="klein" id="st-a-quelle"></p>
+      <div class="knopfreihe"><button type="button" class="knopf zweit mittel" id="st-a-umbau" hidden>Umbaukosten aus „Umbauen und renovieren“ als Jahr 1 einsetzen</button></div>
+      <div class="satz leer" id="st-a-satz" aria-live="polite" style="margin-top:16px">
+        <div class="lampe" aria-hidden="true">?</div>
+        <div><strong id="st-a-satz-text"></strong><small id="st-a-satz-klein"></small></div>
+      </div>
+      <dl class="ergebnisse" id="st-a-ergebnis"></dl>
+      <div class="teilen-zeile"><button type="button" class="knopf zweit mittel teilen-knopf" data-teilen="st-a">Ergebnis weiterleiten</button></div>
+      <details class="mehr-dazu"><summary>Mehr dazu: Annahmen und Quellen</summary>
+        <ul class="annahmen" id="st-a-annahmen">
+          <li><span>Grenze: 15 % der Anschaffungskosten des Gebäudes ohne Umsatzsteuer, innerhalb von drei Jahren nach der Anschaffung; genau 15 % sind noch unschädlich. Quelle: § 6 Abs. 1 Nr. 1a EStG, gesetze-im-internet.de, Abruf 09.10.2026</span><span class="annahme">Gesetz</span></li>
+          <li><span>Nicht mitgezählt: Erweiterungen und jährlich übliche Erhaltungsarbeiten (ziehen Sie sie von den Beträgen ab). Kosten nach § 7h/§ 7i zählen mit (BMF-Schreiben vom 26.01.2026, Rn. 66, Abruf 09.10.2026)</span><span class="annahme">Gesetz</span></li>
+          <li><span id="st-a-afa-text">Abschreibungssatz: 2 %</span><span class="annahme">Gesetz</span></li>
+          <li><span>Steuerwirkung im ersten Jahr nur mit dem Betrag des Jahres 1 gerechnet, die Abschreibung ganzjährig (Näherung). Ihr Steuersatz oben ist eine Annahme.</span><span class="annahme">Annahme</span></li>
+          <li><span>Wenn Sie nichts eintragen, nimmt die Seite die Anschaffungskosten aus Teil c, sonst Gebäudeanteil aus dem Rechner (Schritt 5, Annahme) mal Kaufpreis plus Nebenkosten.</span><span class="annahme">Annahme</span></li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- b) § 7h / § 7i -->
+    <div class="karte" id="st-b">
+      <h3>b) Sanierungsgebiet oder Baudenkmal: Wie viel bringt die erhöhte Abschreibung?</h3>
+      <p class="hinweis"><b>Wichtig:</b> Die Bescheinigung der Gemeinde (Sanierungsgebiet) beziehungsweise die Abstimmung mit der Denkmalbehörde muss <b>vor dem Baubeginn</b> erfolgen; eine fehlende Abstimmung lässt sich nicht nachträglich ersetzen. In Bremen: bei Denkmalen das Landesamt für Denkmalpflege (Merkblatt Stand 2020), bei Sanierungsgebieten die Stadtgemeinde Bremen. <span class="annahme">Vor Nutzung prüfen</span> Die Liste der förmlichen Bremer Sanierungsgebiete ist nicht aus einer aktuellen amtlichen Quelle belegt.</p>
+      <div class="raster">
+        <div><label for="st-b-typ">Wo liegt das Haus?</label><select id="st-b-typ"><option value="7h">Sanierungsgebiet (§ 7h)</option><option value="7i">Baudenkmal (§ 7i)</option></select></div>
+        <div><label for="st-b-kosten">Begünstigte Kosten in €</label><input type="text" id="st-b-kosten" inputmode="decimal" value="" placeholder="z. B. 100.000" aria-describedby="st-b-kosten-f"><div class="fehler" id="st-b-kosten-f"></div></div>
+      </div>
+      <div class="satz leer" id="st-b-satz" aria-live="polite" style="margin-top:16px">
+        <div class="lampe" aria-hidden="true">?</div>
+        <div><strong id="st-b-satz-text"></strong><small id="st-b-satz-klein"></small></div>
+      </div>
+      <dl class="ergebnisse" id="st-b-ergebnis"></dl>
+      <div class="teilen-zeile"><button type="button" class="knopf zweit mittel teilen-knopf" data-teilen="st-b">Ergebnis weiterleiten</button></div>
+      <details class="rechenweg">
+        <summary>Jahr für Jahr als Tabelle</summary>
+        <div class="tabelle-kasten karten-kasten" style="margin-top:10px">
+          <table class="karten" id="st-b-tabelle">
+            <thead><tr><th scope="col">Jahr</th><th scope="col" class="z">Satz bis zu</th><th scope="col" class="z">Erhöhte Absetzung</th><th scope="col" class="z">Normale Abschreibung</th><th scope="col" class="z">Steuer gespart (erhöht)</th><th scope="col" class="z">Steuer gespart (normal)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+      <details class="mehr-dazu"><summary>Mehr dazu: Annahmen und Quellen</summary>
+        <ul class="annahmen">
+          <li><span>Sätze: im Jahr der Herstellung und den folgenden sieben Jahren jeweils bis zu 9 %, in den folgenden vier Jahren jeweils bis zu 7 % der Kosten (zusammen bis zu 100 % in 12 Jahren). Quelle: § 7h Abs. 1 Satz 1 und § 7i Abs. 1 EStG, gesetze-im-internet.de, Abruf 09.10.2026</span><span class="annahme">Gesetz</span></li>
+          <li><span>Nur Modernisierungs- und Instandsetzungskosten, die in der Bescheinigung stehen; Zuschüsse aus Sanierungs- oder öffentlichen Mitteln und Kosten für neue Gebäude sind ausgenommen; bei Anschaffung zählen nur Maßnahmen nach dem Erwerbsvertrag.</span><span class="annahme">Gesetz</span></li>
+          <li><span>Vergleich: normale Abschreibung auf dieselben Kosten mit dem Satz aus Ihrem Baujahr. Das Gesamtbild: Die normale Abschreibung setzt den Rest später ab. Der Vorteil der erhöhten Absetzung ist vor allem früher, nicht größer. Das ist eine Rechenfolge, keine Gesetzesaussage.</span><span class="annahme">Näherung</span></li>
+          <li><span>Die Kosten zählen auch in die 15-%-Grenze aus Teil a (BMF-Schreiben 26.01.2026, Rn. 66).</span><span class="annahme">Gesetz</span></li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- c) Kaufpreisaufteilung -->
+    <div class="karte" id="st-c">
+      <h3>c) Kaufpreis aufteilen: Wie viel vom Preis liegt auf dem Gebäude?</h3>
+      <p class="klein">Nur das Gebäude wird abgeschrieben, der Boden nie. Leere Felder holen sich die Zahlen aus „Kann ich mir das leisten?“ und „Was ist das Haus wert?“.</p>
+      <div class="raster">
+        <div><label for="st-c-kp">Kaufpreis plus Nebenkosten in €</label><input type="text" id="st-c-kp" inputmode="decimal" value="" placeholder="leer = aus dem Rechner" aria-describedby="st-c-kp-f"><div class="fehler" id="st-c-kp-f"></div></div>
+        <div><label for="st-c-grund">Grundstücksfläche in m²</label><input type="text" id="st-c-grund" inputmode="decimal" value="" placeholder="leer = aus „Was ist das Haus wert?“" aria-describedby="st-c-grund-f"><div class="fehler" id="st-c-grund-f"></div></div>
+        <div><label for="st-c-brw">Bodenrichtwert in € pro m²</label><input type="text" id="st-c-brw" inputmode="decimal" value="" placeholder="leer = aus „Was ist das Haus wert?“" aria-describedby="st-c-brw-f"><div class="fehler" id="st-c-brw-f"></div></div>
+        <div><label for="st-c-bgf">Brutto-Grundfläche in m² für den Gebäudewert</label><input type="text" id="st-c-bgf" inputmode="decimal" value="" placeholder="leer = aus „Was ist das Haus wert?“" aria-describedby="st-c-bgf-f"><div class="fehler" id="st-c-bgf-f"></div></div>
+      </div>
+      <details class="mehr-einst"><summary>Mehr Einstellungen: Gebäudewert selbst eintragen</summary>
+        <div class="raster">
+          <div><label for="st-c-geb">Gebäudewert in € (überschreibt die Schätzung aus der Brutto-Grundfläche)</label><input type="text" id="st-c-geb" inputmode="decimal" value="" placeholder="leer = Sachwert-Schätzung" aria-describedby="st-c-geb-f"><div class="fehler" id="st-c-geb-f"></div></div>
+        </div>
+      </details>
+      <p class="klein" id="st-c-quelle"></p>
+      <div class="satz leer" id="st-c-satz" aria-live="polite" style="margin-top:16px">
+        <div class="lampe" aria-hidden="true">?</div>
+        <div><strong id="st-c-satz-text"></strong><small id="st-c-satz-klein"></small></div>
+      </div>
+      <dl class="ergebnisse" id="st-c-ergebnis"></dl>
+      <div class="teilen-zeile"><button type="button" class="knopf zweit mittel teilen-knopf" data-teilen="st-c">Ergebnis weiterleiten</button></div>
+      <p class="hinweis"><b>Näherung nach dem Prinzip der BMF-Arbeitshilfe (Stand laut Bericht: März 2026), nicht die Arbeitshilfe selbst.</b> Die Finanzverwaltung stellt eine eigene Arbeitshilfe bereit, mit der sie Kaufpreisaufteilungen prüft: <a href="https://www.bundesfinanzministerium.de/Datenportal/Daten/frei-nutzbare-produkte/Anwendungen/Kaufpreisaufteilung-Grundstuecke/Kaufpreisaufteilung-Grundstuecke.html" target="_blank" rel="noopener">BMF-Datenportal</a>, Abruf 09.10.2026. Sie teilt nach dem Verhältnis der Werte von Boden und Gebäude auf (BFH-Urteil vom 10.10.2000, IX R 86/97). Hier wird das vereinfacht nachgebildet; die Arbeitshilfe selbst kann zu einem anderen Anteil kommen.</p>
+      <details class="mehr-dazu"><summary>Mehr dazu: Annahmen und Quellen</summary>
+        <ul class="annahmen">
+          <li><span>Bodenwert = Grundstücksfläche × Bodenrichtwert. Gebäudewert = Sachwert-Rechnung aus „Was ist das Haus wert?“ ohne Boden (Gebäude plus Außenanlagen). Verhältnis der beiden Werte = Aufteilung.</span><span class="annahme">Näherung</span></li>
+          <li><span>Die Kaufnebenkosten werden im gleichen Verhältnis auf Gebäude und Boden verteilt (allgemeine Praxis, in der Quelle nicht wörtlich belegt).</span><span class="annahme">Vor Nutzung prüfen</span></li>
+          <li><span>Abschreibungssatz nach dem Baujahr (§ 7 Abs. 4 EStG, Abruf 09.10.2026); Steuersatz ist Ihre Annahme oben.</span><span class="annahme">Gesetz</span></li>
+          <li><span>Ob eine Aufteilung im Kaufvertrag das Finanzamt bindet, ist nur aus Zusammenfassungen belegt.</span><span class="annahme">Vor Nutzung prüfen</span></li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- d) Verkaufsrechner -->
+    <div class="karte" id="st-d">
+      <h3>d) Verkauf nach 1 bis 30 Jahren: Wann liegt es im Plus?</h3>
+      <p class="klein">Baut auf Ihren Zahlen aus „Kann ich mir das leisten?“ (Kaufpreis, Kredit, Miete, Schritt 5) auf. Jede Zeile heißt: Verkauf kurz nach dem N. Jahrestag des Kaufvertrags. Maßgeblich sind die Daten der notariellen Verträge, taggenau.</p>
+      <div class="raster">
+        <div><label for="st-d-ws">Wertsteigerung des Hauses pro Jahr in % (Annahme)</label><input type="text" id="st-d-ws" inputmode="decimal" value="1,5" aria-describedby="st-d-ws-f"><div class="fehler" id="st-d-ws-f"></div></div>
+        <div><label for="st-d-vk">Verkaufskosten in % vom Preis (Annahme)</label><input type="text" id="st-d-vk" inputmode="decimal" value="3" aria-describedby="st-d-vk-f"><div class="fehler" id="st-d-vk-f"></div></div>
+      </div>
+      <div class="u-haken"><div class="u-haken-zeile"><input type="checkbox" id="st-d-soli" checked><label for="st-d-soli">Solidaritätszuschlag 5,5 % auf die Steuer mitrechnen (Annahme)</label></div></div>
+      <div class="satz leer" id="st-d-satz" aria-live="polite" style="margin-top:16px">
+        <div class="lampe" aria-hidden="true">?</div>
+        <div><strong id="st-d-satz-text"></strong><small id="st-d-satz-klein"></small></div>
+      </div>
+      <dl class="ergebnisse" id="st-d-ergebnis"></dl>
+      <div class="teilen-zeile"><button type="button" class="knopf zweit mittel teilen-knopf" data-teilen="st-d">Ergebnis weiterleiten</button></div>
+      <h4 style="margin:22px 0 8px">Gesamtergebnis nach Verkauf, Jahr für Jahr</h4>
+      <figure class="diagramm" id="ch-verkauf"></figure>
+      <div class="legende" id="ch-verkauf-legende"></div>
+      <div class="hinweis" id="st-d-warnungen">
+        <p style="margin:0 0 6px"><b>Nicht gerechnet beziehungsweise zu beachten:</b></p>
+        <ul class="klein" style="margin:0 0 0 1.2em;padding:0">
+          <li><b>Vorfälligkeitsentschädigung:</b> Verkaufen Sie innerhalb der Zinsbindung, verlangt die Bank oft eine Entschädigung. Sie ist hier nicht gerechnet. Bei lastenfreier Veräußerung ist sie nach den Einkommensteuer-Hinweisen als Veräußerungskosten zu berücksichtigen (H 23, Abruf 09.10.2026).</li>
+          <li><b>Gewerblicher Grundstückshandel:</b> Wer mehr als drei Objekte in fünf Jahren verkauft, gilt nach dem BMF-Schreiben vom 26.03.2004 (Tz. 5, Abruf 09.10.2026) in der Regel als gewerblich; dann gilt die Zehn-Jahres-Frist nicht.</li>
+          <li><b>Selbstnutzung:</b> Wer das Haus ausschließlich selbst bewohnt oder im Verkaufsjahr und den zwei Jahren davor, ist von der Steuer ausgenommen. Hier rechnen wir ein vermietetes Haus.</li>
+          <li><b>Freigrenze:</b> Die 1.000 € gelten für Ihren ganzen Jahresgewinn aus privaten Veräußerungsgeschäften; hier steht nur dieses Haus.</li>
+          <li><b>Verlust:</b> Ein Verlust löst keine Steuer aus, ist aber nur mit Gewinnen aus privaten Veräußerungsgeschäften verrechenbar (§ 23 Abs. 3 Sätze 7 und 8 EStG).</li>
+          <li>Ohne Kirchensteuer. Die Kreditrate bleibt wie im Rechner (Angebot A) bis zur Tilgung; Zinsänderungen nach der Zinsbindung sind nicht eingerechnet.</li>
+        </ul>
+      </div>
+      <details class="rechenweg">
+        <summary>Jahr für Jahr als Tabelle</summary>
+        <div class="tabelle-kasten karten-kasten" style="margin-top:10px">
+          <table class="karten" id="st-d-tabelle">
+            <thead><tr><th scope="col">Jahr</th><th scope="col" class="z">Verkaufspreis</th><th scope="col" class="z">Gewinn nach § 23</th><th scope="col" class="z">Steuer</th><th scope="col" class="z">Restschuld</th><th scope="col" class="z">Erlös nach Schuld und Steuer</th><th scope="col" class="z">Gesamtergebnis</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+      <details class="mehr-dazu"><summary>Mehr dazu: Rechenweg, Annahmen und Quellen</summary>
+        <p class="formel">Verkaufspreis = Kaufpreis × (1 + Wertsteigerung)^N. Gewinn nach § 23 = Verkaufspreis − Verkaufskosten − (Kaufpreis + Nebenkosten − Summe der bisherigen Abschreibung). Steuer = Gewinn × Steuersatz (× 1,055 mit Soli), nur wenn der Verkauf innerhalb der Frist liegt (N kleiner als 10) und der Gewinn mindestens 1.000 € beträgt. Erlös = Verkaufspreis − Verkaufskosten − Restschuld − Steuer. Gesamtergebnis = Erlös + Summe der Überschüsse nach Steuern bis dahin − eingesetztes Eigenkapital.</p>
+        <ul class="annahmen">
+          <li><span>Frist: Gewinne aus Grundstücken sind steuerpflichtig, wenn zwischen Kauf und Verkauf nicht mehr als zehn Jahre liegen. Quelle: § 23 Abs. 1 Satz 1 Nr. 1 EStG, gesetze-im-internet.de, Abruf 09.10.2026</span><span class="annahme">Gesetz</span></li>
+          <li><span>Gewinn mindert die Anschaffungskosten um die Abschreibung: § 23 Abs. 3 Satz 1 und 4 EStG (Abruf 09.10.2026). Freigrenze: „weniger als 1 000 Euro“ steuerfrei, § 23 Abs. 3 Satz 5 EStG (Abruf 09.10.2026).</span><span class="annahme">Gesetz</span></li>
+          <li><span>Steuersatz Ihre Annahme (oben); Solidaritätszuschlag 5,5 % (§ 4 SolZG, Abruf 09.10.2026), die Freigrenze und Milderungszone des Zuschlags sind nicht gerechnet.</span><span class="annahme">Annahme</span></li>
+          <li><span>Wertsteigerung und Verkaufskosten sind Ihre Annahmen. Die Steuerersparnis aus der Vermietung und die Restschuld kommen aus dem Rechner, Schritt 5 (mit Ihrem Steuersatz oben).</span><span class="annahme">Annahme</span></li>
+          <li><span>Eingesetztes Eigenkapital = Eigenkapital aus dem Rechner. Zusatzkosten (zum Beispiel Renovierung) zählen weder zu den Anschaffungskosten noch zum Verkaufserlös.</span><span class="annahme">Annahme</span></li>
+        </ul>
+      </details>
+    </div>
+  </form>
+</section>
+
 <!-- IMPRESSUM UND DATENSCHUTZ (nur Gerüst, kein fertiger Rechtstext; Projektregel R006) -->
 <section id="impressum" aria-label="Impressum und Datenschutz" hidden>
   <header class="bereich-kopf" style="--f:var(--f7)">
@@ -1837,6 +2296,7 @@ __PALETTE_CSS__
     <h4>Was die Seite tut (Tatsachen)</h4>
     <ul class="gerueste">
       <li>Ihre Eingaben, die Merkliste, Haken in der Prüfliste und der Grundrissplan werden nur im Speicher Ihres Browsers abgelegt (localStorage). Sie werden nicht an einen Server dieser Seite geschickt.</li>
+      <li>Der Knopf „Ergebnis weiterleiten“ tut nur auf Ihren Klick etwas: Er baut aus den Zahlen der Rechner einen Text und einen Link, in dem hinter dem Zeichen „#“ nur Zahlen und Auswahlwerte stehen (keine Namen, Adressen oder Notizen aus der Merkliste). Den Teil hinter „#“ sendet der Browser nicht an den Server. Wohin Sie den Text schicken, entscheiden Sie.</li>
       <li>Die Seite setzt keine Cookies und enthält keine Zählung der Besucher.</li>
       <li>Schriften, Kartendaten und das 3D-Programm sind in der Seite eingebettet. Es werden keine Schriften oder Programme von fremden Servern nachgeladen.</li>
       <li>Links zu Portalen, Gesetzen und Behörden öffnen in einem neuen Fenster. Dort gelten die Regeln der jeweiligen Betreiber.</li>
@@ -1856,6 +2316,39 @@ __PALETTE_CSS__
 <footer class="fuss"><a href="#impressum" data-ziel="impressum">Impressum</a> · <a href="#datenschutz" data-ziel="impressum" data-anker="datenschutz">Datenschutz</a> · Keine Anlageberatung</footer>
 <div id="tip" role="tooltip" hidden></div>
 
+<!-- BANK-MAPPE (Block 5): druckfreundliche Ansicht, innen immer hell -->
+<div class="overlay" id="mappe-ov" role="dialog" aria-modal="true" aria-labelledby="mp-titel" hidden>
+  <div class="overlay-kopf">
+    <div class="knopfreihe" style="margin-top:0">
+      <button type="button" class="knopf zweit mittel" data-overlay-zu>← Zurück</button>
+      <button type="button" class="knopf mittel" id="mp-drucken">Drucken / als PDF speichern</button>
+    </div>
+    <div class="teilen-zeile"><button type="button" class="knopf zweit mittel teilen-knopf" data-teilen="mappe">Ergebnis weiterleiten</button></div>
+    <p class="klein" id="mp-meldung" role="status"></p>
+  </div>
+  <article class="blatt" id="mappe">
+    <h2 id="mp-titel" tabindex="-1">Bank-Mappe</h2>
+    <div id="mp-inhalt"></div>
+    <dl id="mp-teilen" hidden></dl>
+  </article>
+</div>
+
+<!-- BESICHTIGUNG (Block 5): Checkliste je Haus der Merkliste -->
+<div class="overlay" id="bes-ov" role="dialog" aria-modal="true" aria-labelledby="bes-titel" hidden>
+  <div class="overlay-kopf">
+    <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf mittel" data-overlay-zu id="bes-fertig">Fertig</button></div>
+    <p class="klein" id="bes-meldung" role="status"></p>
+  </div>
+  <div class="bes-seite">
+    <h2 id="bes-titel" tabindex="-1">Besichtigung</h2>
+    <p class="klein" id="bes-haus"></p>
+    <div class="satz leer" id="bes-satz" aria-live="polite"><div class="lampe" aria-hidden="true">?</div><div><strong id="bes-satz-text"></strong><small id="bes-satz-klein"></small></div></div>
+    <p class="klein">Tippen Sie je Punkt auf „ok“, „beobachten“ oder „Mangel“. Ein zweiter Tipp auf dieselbe Wahl nimmt sie zurück. Alles wird sofort in diesem Browser gespeichert.</p>
+    <div id="bes-gruppen"></div>
+    <p class="klein" id="bes-hinweis"></p>
+  </div>
+</div>
+
 <script>__THREE_JS__</script>
 <script src="daten/grest.js"></script>
 <script src="daten/portale.js"></script>
@@ -1867,6 +2360,9 @@ __PALETTE_CSS__
 <script src="daten/beispielhaus.js"></script>
 <script src="daten/musterhaus.js"></script>
 <script src="daten/einstieg.js"></script>
+<script src="daten/steuern.js"></script>
+<script src="daten/pflichten.js"></script>
+<script src="daten/besichtigung.js"></script>
 <script src="daten/bilder.js"></script>
 <script src="daten/karte_geo.js"></script>
 <script src="daten/karte_werte.js"></script>

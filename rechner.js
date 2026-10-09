@@ -78,6 +78,62 @@
     };
   }
 
+  /* Anschlussfinanzierung (Block 5): neue Rate, wenn die Zinsbindung endet.
+     modus 'tilgung': gleiche anfängliche Tilgung wie bisher, bezogen auf die Restschuld:
+       Rate = Restschuld × (Anschlusszins + Tilgung) ÷ 100 ÷ 12 (dieselbe Formel wie kredit()).
+     modus 'rest': Schuld soll zum selben Zeitpunkt weg sein wie vorher geplant (restMonate):
+       Rate = Restschuld × i ÷ (1 − (1 + i)^−n), i = Anschlusszins ÷ 100 ÷ 12, n = restMonate; bei Zins 0 % Restschuld ÷ n.
+     Liefert { rate, laufzeitMonate, abbezahlt } oder { fehler: 'text' }, wenn sich nichts rechnen lässt.
+     Der Überschuss danach ist Sache des Aufrufers: Reinertrag pro Monat − neue Rate. */
+  function anschluss(o) {
+    var rest = zahl(o.restschuld), z = zahl(o.zinsProzent), i = z / 100 / 12;
+    if (!(rest > 0.005)) return { abbezahlt: true, rate: 0, laufzeitMonate: 0 };
+    if (o.modus === 'rest') {
+      var n = Math.round(zahl(o.restMonate));
+      if (!(n > 0)) return { fehler: 'Die Restlaufzeit lässt sich nicht berechnen, weil der Kredit bei diesem Tilgungssatz nie ganz getilgt wird. Wählen Sie „Gleiche Tilgung wie bisher“.' };
+      var rate = i === 0 ? rest / n : rest * i / (1 - Math.pow(1 + i, -n));
+      return { abbezahlt: false, rate: rate, laufzeitMonate: n };
+    }
+    var k = kredit(rest, z, zahl(o.tilgungProzent), 0);
+    if (!(z + zahl(o.tilgungProzent) > 0)) return { fehler: 'Bei Zins und Tilgung von 0 % gibt es keine Rate.' };
+    return { abbezahlt: false, rate: rest * (z + zahl(o.tilgungProzent)) / 100 / 12, laufzeitMonate: k.laufzeitMonate };
+  }
+
+  /* Heizungs- und Energie-Check (Block 5). Reine Regeln nach recherche/15_vermieter_regeln.md Abschnitt A
+     (Gebäudemodernisierungsgesetz GModG, früher GEG, Abruf 09.10.2026). Texte stehen in daten/pflichten.js.
+     o: baujahr (Zahl oder leer), art ('gas' | 'oel' | 'waermepumpe' | 'fernwaerme' | 'sonstige' | ''),
+        einbau (Einbau- oder geplantes Einbaujahr der Heizung, Zahl oder leer),
+        decke ('ja' | 'nein' | 'weiss'), rohre ('ja' | 'nein' | 'weiss').
+     Liefert eine Liste { id, status }. status: 'gilt' (die Regel trifft zu), 'moeglich' (kann zutreffen, Ausnahmen prüfen),
+     'pruefen' (hängt von Angaben ab, die fehlen oder die der Bericht als unsicher führt), 'frei' (nach dieser Angabe nichts zu tun),
+     'info' (immer wichtig). Bei 'heizung' mit status 'gilt' steht in stufen die Bio-Treppe. */
+  var BIO_STUFEN = [
+    { ab: '01.01.2029', prozent: 10 }, { ab: '01.01.2030', prozent: 15 },
+    { ab: '01.01.2035', prozent: 30 }, { ab: '01.01.2040', prozent: 60 }
+  ];
+  function heizungsCheck(o) {
+    var art = o.art || '', fossil = art === 'gas' || art === 'oel';
+    var ein = o.einbau === '' || o.einbau === null || o.einbau === undefined ? null : Number(o.einbau);
+    if (ein !== null && !isFinite(ein)) ein = null;
+    var bj = o.baujahr === '' || o.baujahr === null || o.baujahr === undefined ? null : Number(o.baujahr);
+    if (bj !== null && !isFinite(bj)) bj = null;
+    var liste = [];
+    var h = { id: 'heizung', status: 'info' };
+    if (!art) h.status = 'pruefen', h.grund = 'art';
+    else if (!fossil) h.status = 'frei', h.grund = 'andere-art';
+    else if (ein === null) h.status = 'pruefen', h.grund = 'einbau-fehlt';
+    else if (ein >= 2027) { h.status = 'gilt'; h.stufen = BIO_STUFEN; }
+    else if (ein === 2026) h.status = 'pruefen', h.grund = 'einbau-2026';
+    else h.status = 'frei', h.grund = 'vor-2026';
+    liste.push(h);
+    liste.push({ id: 'decke', status: o.decke === 'ja' ? 'frei' : o.decke === 'nein' ? 'moeglich' : 'pruefen' });
+    liste.push({ id: 'rohre', status: o.rohre === 'ja' ? 'frei' : o.rohre === 'nein' ? 'moeglich' : 'pruefen' });
+    /* Bauantrag vor 01.11.1977 lässt sich aus dem Baujahr nur vermuten (Baujahr bis 1977 als Anhalt) */
+    liste.push({ id: 'ausweis', status: 'info', bedarfsausweisMoeglich: bj !== null && bj <= 1977 });
+    liste.push({ id: 'waermeplan', status: 'info' });
+    return liste;
+  }
+
   /* Normale Vermietung: Renditen und monatlicher Cashflow vor Steuern. */
   function vermietung(o) {
     var kalt = zahl(o.kaltmieteMonat);
@@ -158,6 +214,106 @@
       /* Schuldendienstdeckung: Reinertrag ÷ (Zinsen + Tilgung); über 1 deckt die Miete die Rate */
       dscr: (j1.zinsen + j1.tilgung) > 0 ? (j1.miete - j1.kosten - j1.ruecklage) / (j1.zinsen + j1.tilgung) : null
     };
+  }
+
+  /* ---------- Steuern sparen (Block 4, 09.10.2026; Quellen: recherche/14_steuern_sparen.md, Abruf 09.10.2026) ----------
+     Alles eigene Näherungen zum Verstehen, keine Steuerberatung. */
+
+  /* § 6 Abs. 1 Nr. 1a EStG: Instandsetzung/Modernisierung innerhalb von drei Jahren nach der Anschaffung, netto über 15 % der
+     Anschaffungskosten des Gebäudes = anschaffungsnahe Herstellungskosten (nur über die AfA absetzbar). Genau 15 % ist noch unschädlich.
+     o: gebaeudeAK, j1, j2, j3 (netto), steuersatz (%), afaSatz (%).
+     Erstes Jahr: Betrag des Jahres 1 sofort absetzbar (Steuerersparnis = Betrag × Steuersatz) oder nur als AfA (Betrag × AfA-Satz × Steuersatz). */
+  function anschaffungsnaheKosten(o) {
+    var ak = zahl(o.gebaeudeAK), j1 = zahl(o.j1), j2 = zahl(o.j2), j3 = zahl(o.j3);
+    var summe = j1 + j2 + j3, satz = zahl(o.steuersatz) / 100, afa = zahl(o.afaSatz) / 100;
+    var grenze = ak * 15 / 100;
+    var ueber = summe * 100 - ak * 15 > 1e-6; /* Ganzzahlvergleich statt 0,15 × ak: wegen Gleitkomma */
+    var sofort1 = j1 * satz, afa1 = j1 * afa * satz;
+    return {
+      grenze: grenze, summe: summe, ueber: ueber, abstand: grenze - summe,
+      erstesJahrSofort: sofort1, erstesJahrAfa: afa1, erstesJahrUnterschied: sofort1 - afa1,
+      /* Wirkung der ganzen Summe: sofort abziehbar oder nur als AfA (Jahresbetrag) */
+      gesamtSofort: summe * satz, afaJahr: summe * afa, afaJahrSteuer: summe * afa * satz
+    };
+  }
+
+  /* §§ 7h, 7i EStG: im Jahr der Herstellung und den folgenden sieben Jahren (zusammen 8 Jahre) bis zu 9 %, in den folgenden
+     vier Jahren bis zu 7 % der begünstigten Kosten (8 × 9 + 4 × 7 = 100 %). Vergleich: normale AfA (normalSatz) auf dieselben Kosten.
+     o: kosten, steuersatz (%), normalSatz (%). */
+  function erhoehteAfa(o) {
+    var k = zahl(o.kosten), s = zahl(o.steuersatz) / 100, ns = zahl(o.normalSatz) || 2;
+    var jahre = [], kum = 0, kumN = 0, restN = k;
+    for (var j = 1; j <= 12; j++) {
+      var satz = j <= 8 ? 9 : 7;
+      var afa = k * satz / 100;
+      var normal = Math.min(k * ns / 100, restN); restN -= normal;
+      kum += afa * s; kumN += normal * s;
+      jahre.push({ jahr: j, satz: satz, afa: afa, normal: normal, steuer: afa * s, steuerNormal: normal * s, kum: kum, kumNormal: kumN });
+    }
+    var summe = jahre.reduce(function (a, x) { return a + x.afa; }, 0);
+    var summeN = jahre.reduce(function (a, x) { return a + x.normal; }, 0);
+    return { jahre: jahre, summeAfa: summe, summeNormal: summeN, ersparnis: kum, ersparnisNormal: kumN, differenz: kum - kumN, restNachZwoelf: k - summeN };
+  }
+
+  /* Gebäudewert nach dem Sachwertverfahren ohne Boden: Gebäude plus Außenanlagen (der Boden steckt in sachwert() schon drin).
+     o wie bei sachwert(); bodenwert, Sachwertfaktor und besondere Merkmale bleiben außen vor. */
+  function gebaeudewertSachwert(o) {
+    var x = {}, k;
+    for (k in o) if (Object.prototype.hasOwnProperty.call(o, k)) x[k] = o[k];
+    x.bodenwert = 0; x.sachwertfaktor = 1; x.besondere = 0;
+    var s = sachwert(x);
+    return s.gebaeude + s.aussenanlagen;
+  }
+
+  /* Kaufpreisaufteilung nach dem Prinzip der BMF-Arbeitshilfe (Verhältnis der Werte von Boden und Gebäude), vereinfachend:
+     Bodenwert und Gebäudewert aus eigenen Schätzungen, Nebenkosten im gleichen Verhältnis. Nicht die Arbeitshilfe selbst.
+     o: kaufpreis, nebenkosten, bodenwert, gebaeudewert, afaSatz (%), steuersatz (%). */
+  function kaufpreisAufteilung(o) {
+    var bw = zahl(o.bodenwert), gw = zahl(o.gebaeudewert), summe = bw + gw;
+    var anteil = summe > 0 ? gw / summe : 0;
+    var gesamt = zahl(o.kaufpreis) + zahl(o.nebenkosten);
+    var gebaeudeAK = gesamt * anteil;
+    var afaJahr = gebaeudeAK * zahl(o.afaSatz) / 100;
+    return {
+      gebaeudeanteil: anteil * 100, bodenanteil: (summe > 0 ? 100 - anteil * 100 : 0),
+      gesamt: gesamt, gebaeudeAK: gebaeudeAK, bodenAK: gesamt - gebaeudeAK,
+      afaJahr: afaJahr, steuerJahr: afaJahr * zahl(o.steuersatz) / 100
+    };
+  }
+
+  /* Verkauf nach N Jahren (§ 23 EStG). Zeile N = Verkauf kurz nach dem N. Jahrestag des Kaufvertrags; maßgeblich sind die Daten der
+     notariellen Verträge, taggenau. Innerhalb der Frist ("nicht mehr als zehn Jahre") steuerpflichtig, also N < 10; ab N = 10 steuerfrei.
+     Gewinn = Verkaufspreis − Verkaufskosten − (Anschaffungskosten inkl. Nebenkosten − Summe der AfA) (§ 23 Abs. 3 Satz 1 und 4).
+     Gewinne unter 1.000 € im Jahr bleiben steuerfrei (Freigrenze, § 23 Abs. 3 Satz 5): 999 € frei, 1.000 € voll steuerpflichtig.
+     Ein Verlust löst keine Steuer aus (nur mit Gewinnen aus privaten Veräußerungsgeschäften verrechenbar, Satz 7).
+     o: jahre (Ergebnis von langfrist().jahre mit afa, rest, nachSteuer), kaufpreis, nebenkosten, ek (eingesetztes Eigenkapital),
+        wertsteigerung (% pro Jahr), verkaufskostenProzent, steuersatz (%), soli (true: + 5,5 % der Steuer), frist (Standard 10). */
+  function verkauf(o) {
+    var jahre = o.jahre || [], frist = o.frist === undefined ? 10 : zahl(o.frist);
+    var anschaffung = zahl(o.kaufpreis) + zahl(o.nebenkosten), ws = zahl(o.wertsteigerung) / 100;
+    var faktorSteuer = zahl(o.steuersatz) / 100 * (o.soli ? 1.055 : 1);
+    var sumAfa = 0, kumCf = 0, zeilen = [];
+    for (var i = 0; i < jahre.length; i++) {
+      var j = jahre[i], n = i + 1;
+      sumAfa += zahl(j.afa); kumCf += zahl(j.nachSteuer);
+      var preis = zahl(o.kaufpreis) * Math.pow(1 + ws, n);
+      var vk = preis * zahl(o.verkaufskostenProzent) / 100;
+      var ak = anschaffung - sumAfa;
+      var gewinn = preis - vk - ak;
+      var inFrist = n < frist;
+      var freigrenze = gewinn < 1000;
+      var steuer = (inFrist && !freigrenze) ? gewinn * faktorSteuer : 0;
+      var rest = zahl(j.rest);
+      var netto = preis - vk - rest - steuer;
+      zeilen.push({ jahr: n, preis: preis, verkaufskosten: vk, afaSumme: sumAfa, anschaffungsrest: ak, gewinn: gewinn, inFrist: inFrist,
+        freigrenze: freigrenze, steuer: steuer, rest: rest, netto: netto, kumCashflow: kumCf, gesamt: netto + kumCf - zahl(o.ek) });
+    }
+    /* "im Plus ab Jahr X": erstes Jahr, ab dem das Gesamtergebnis in allen folgenden Jahren über 0 liegt */
+    var plusAb = null;
+    for (var k = zeilen.length - 1; k >= 0; k--) {
+      if (zeilen[k].gesamt > 0) plusAb = zeilen[k].jahr; else break;
+    }
+    return { zeilen: zeilen, plusAb: plusAb, frist: frist };
   }
 
   /* Monteurzimmer: Umsatz = Betten × Preis × Belegung × Tage.
@@ -448,6 +604,11 @@
     anzeigeLesen: anzeigeLesen,
     afaSatz: afaSatz,
     langfrist: langfrist,
+    anschaffungsnaheKosten: anschaffungsnaheKosten,
+    erhoehteAfa: erhoehteAfa,
+    gebaeudewertSachwert: gebaeudewertSachwert,
+    kaufpreisAufteilung: kaufpreisAufteilung,
+    verkauf: verkauf,
     polygonFlaeche: polygonFlaeche,
     punktImPolygon: punktImPolygon,
     wohnflaecheRaum: wohnflaecheRaum,
@@ -462,6 +623,8 @@
     kaufnebenkosten: kaufnebenkosten,
     finanzierung: finanzierung,
     kredit: kredit,
+    anschluss: anschluss,
+    heizungsCheck: heizungsCheck,
     vermietung: vermietung,
     monteur: monteur,
     anmieten: anmieten

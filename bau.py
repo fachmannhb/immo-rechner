@@ -53,7 +53,9 @@ def block(werte):
     return ' '.join(f'--{k}: {v};' for k, v in werte.items())
 palette_css = (f'  :root {{ {block(pal["hell"])} }}\n'
                f'  @media (prefers-color-scheme: dark) {{ :root:not([data-theme="light"]) {{ {block(pal["dunkel"])} }} }}\n'
-               f'  :root[data-theme="dark"] {{ {block(pal["dunkel"])} }}')
+               f'  :root[data-theme="dark"] {{ {block(pal["dunkel"])} }}\n'
+               f'  /* Bank-Mappe: immer die helle Palette, auch im Dunkelmodus (druckfest) */\n'
+               f'  .blatt {{ {block(pal["hell"])} }}')
 text = einmal(text, '__PALETTE_CSS__', palette_css)
 text = einmal(text, '<script>__THREE_JS__</script>',
               '<script>/* three.js r160, MIT-Lizenz */\n' + skript_sicher('three.min.js', lesen(BASIS / 'libs' / 'three.min.js')) + '\n</script>')

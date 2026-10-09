@@ -57,7 +57,7 @@ window.DATEN.einstieg = {
       kurz: 'Zeichnen Sie den Grundriss nach und richten Sie ihn ein.',
       wofuer: 'Sie sehen die Wohnfläche nach Wohnflächenverordnung und was die Einrichtung kostet. Das ist kein Bauplan und kein Aufmaß.',
       brauche: 'Ein Bild des Grundrisses aus dem Exposé, oder zeichnen Sie einfach auf dem Raster.',
-      anfang: { text: 'Beispielhaus ausprobieren ↓', fokus: 'g-beispiel' }
+      anfang: { text: 'Zum Beispielhaus ↑', fokus: 'g-beispiel' }
     },
     pruefliste: {
       kurz: 'Haken Sie den Weg vom Geldrahmen bis zur Vermietung ab.',
@@ -76,6 +76,13 @@ window.DATEN.einstieg = {
       wofuer: 'Eine mögliche Nutzung nach dem Kauf: Sie sehen Umsatz, Ergebnis und die Belegung, ab der es sich trägt. Die Werte sind Planungswerte, keine Zusagen.',
       brauche: 'Zahl der Betten, Preis pro Person und Nacht und die geschätzte Belegung.',
       anfang: { text: 'Betten eintragen ↓', fokus: 'mz-betten' }
+    },
+    steuern: {
+      kurz: 'Sehen Sie, was das Gesetz bei Kauf, Umbau, Vermietung und Verkauf erlaubt.',
+      wofuer: 'Tipps und Fallen in einfacher Sprache und vier kleine Rechner: 15-Prozent-Grenze, Sanierungsgebiet und Denkmal, Kaufpreisaufteilung und Verkauf nach 1 bis 30 Jahren. Das ersetzt keine Steuerberatung.',
+      brauche: 'Nichts für die Tipps. Die Rechner nutzen Ihre Zahlen aus dem Rechner und aus „Was ist das Haus wert?“, sofern vorhanden.',
+      anfang: { text: 'Verkauf nach 10 Jahren rechnen ↓', fokus: 'st-d-ws' },
+      beispiel: true
     }
   },
   /* Kurzzeilen für Bereiche ohne Einstiegskasten */
