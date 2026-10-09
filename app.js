@@ -58,6 +58,8 @@
   }
   function wert(id) { return pruefeFeld(id, false); }
   function wertDl(ziel, eintraege) {
+    /* Ergebnisse erst nach Eingabe: mehrere Kacheln nur mit „-“ bleiben verborgen */
+    $(ziel).hidden = eintraege.length > 1 && eintraege.every(function (e) { return e.w === '-'; });
     $(ziel).innerHTML = eintraege.map(function (e) {
       return '<div class="wert' + (e.haupt ? ' haupt' : '') + '"><dt>' + esc(e.t) + '</dt><dd class="' + (e.k || '') + '">' + esc(e.w) + '</dd></div>';
     }).join('');
@@ -98,6 +100,74 @@
   themaKnopfZeigen();
   window.addEventListener('themagewechselt', function () { themaKnopfZeigen(); zeichneGrafiken(); });
 
+  /* ---------- Bilder, Seitenköpfe und Einstieg (daten/bilder.js, daten/einstieg.js; Welle 1) ---------- */
+  var E = D.einstieg || { weg: [], bereiche: {}, kurzOhne: {} };
+  (function () {
+    if (D.bilder) {
+      var vorrat = document.createElement('div');
+      vorrat.innerHTML = '<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>' + D.bilder.symbole() + '</defs></svg>';
+      document.body.insertBefore(vorrat.firstChild, document.body.firstChild);
+      document.querySelectorAll('svg[data-bild]').forEach(function (s) {
+        var n = s.getAttribute('data-bild');
+        if (D.bilder.namen.indexOf(n) < 0) { s.remove(); return; }
+        s.setAttribute('viewBox', '0 0 520 380');
+        s.innerHTML = '<use href="#il-' + n + '"/>';
+      });
+    }
+    var nr = {};
+    E.weg.forEach(function (w, i) { w.ziele.forEach(function (z) { nr[z] = i + 1; }); });
+    Object.keys(E.bereiche).forEach(function (id) {
+      var b = E.bereiche[id], sec = $(id);
+      if (!sec) return;
+      var lead = sec.querySelector('[data-kurz]');
+      if (lead) lead.textContent = b.kurz;
+      var sn = sec.querySelector('.schritt-nr');
+      if (sn) sn.textContent = nr[id] ? 'Schritt ' + nr[id] + ' von ' + E.weg.length : 'Nebenbereich, nicht Teil der sieben Schritte';
+      var platz = sec.querySelector('[data-einstieg]');
+      if (!platz) return;
+      var knopf = b.anfang.aktion
+        ? '<button type="button" class="knopf mittel" data-aktion="' + esc(b.anfang.aktion) + '">' + esc(b.anfang.text) + '</button>'
+        : '<button type="button" class="knopf mittel" data-anfang="' + esc(id) + '">' + esc(b.anfang.text) + '</button>';
+      if (b.beispiel) knopf += '<button type="button" class="knopf zweit mittel" data-aktion="beispiel" id="rechner-beispiel">Beispiel ansehen</button>';
+      platz.outerHTML = '<dl class="einstieg" id="einstieg-' + id + '">' +
+        '<div><dt>Wofür?</dt><dd>' + esc(b.wofuer) + '</dd></div>' +
+        '<div><dt>Was brauche ich?</dt><dd>' + esc(b.brauche) + '</dd></div>' +
+        '<div><dt>Hier anfangen</dt><dd><div class="knopfreihe">' + knopf + '</div></dd></div></dl>';
+    });
+    Object.keys(E.kurzOhne || {}).forEach(function (id) {
+      var sec = $(id), lead = sec && sec.querySelector('[data-kurz]');
+      if (lead) lead.textContent = E.kurzOhne[id];
+    });
+  })();
+  /* Knopf „Hier anfangen“: springt zum ersten Feld des Bereichs */
+  function fokusAuf(id, auswahl) {
+    var el = auswahl ? document.querySelector(auswahl) : $(id);
+    if (!el) return;
+    if (id === 'r-preis') zeigeSchritt(1, false);
+    var d = el.closest('details');
+    if (d) d.open = true;
+    el.focus();
+  }
+
+  /* Leiste „Schritt für Schritt zum Kauf“: nur in den sieben Schritt-Bereichen; „erledigt“ = die Schritte davor */
+  function leisteZeigen(ziel) {
+    var nav = $('weg'), idx = -1, n = E.weg.length;
+    E.weg.forEach(function (w, i) { if (w.ziele.indexOf(ziel) >= 0) idx = i; });
+    nav.hidden = idx < 0;
+    if (idx < 0) return;
+    $('weg-liste').innerHTML = E.weg.map(function (w, i) {
+      var klasse = i < idx ? 'fertig' : i === idx ? 'jetzt' : '';
+      return '<li class="' + klasse + '"><a href="#' + w.ziele[0] + '" data-ziel="' + w.ziele[0] + '"' + (i === idx ? ' aria-current="step"' : '') + '>' +
+        '<span class="pkt" aria-hidden="true">' + (i < idx ? '✓' : (i + 1)) + '</span><span class="nm">' + (i < idx ? '<span class="sprung">Erledigt: </span>' : '') + esc(w.name) + '</span></a></li>';
+    }).join('');
+    var weiter = E.weg[idx + 1], a = $('weg-weiter'), c = $('weg-kompakt');
+    var zielNaechst = weiter ? weiter.ziele[0] : 'uebersicht';
+    a.hidden = !weiter;
+    a.setAttribute('data-ziel', zielNaechst); a.setAttribute('href', '#' + zielNaechst);
+    c.setAttribute('data-ziel', zielNaechst); c.setAttribute('href', '#' + zielNaechst);
+    c.firstElementChild.textContent = 'Schritt ' + (idx + 1) + ' von ' + n + (weiter ? ' · Weiter →' : ' · Zur Startseite →');
+  }
+
   /* ---------- Bereiche: Startseite mit Kacheln, Menü „Alle Bereiche“, Zurück-Knopf ---------- */
   var tabs = Array.prototype.slice.call(document.querySelectorAll('.bereich-knopf'));
   function zeigeReiter(tab, fokus, ohneVerlauf) {
@@ -108,6 +178,7 @@
       $(t.getAttribute('data-ziel')).hidden = !aktiv;
     });
     $('kopf-ort').textContent = ziel === 'uebersicht' ? '' : tab.textContent.trim();
+    leisteZeigen(ziel);
     $('menue').open = false;
     document.querySelectorAll('.unternav [data-ziel]').forEach(function (b) {
       b.setAttribute('aria-current', b.getAttribute('data-ziel') === ziel ? 'true' : 'false');
@@ -133,8 +204,22 @@
     t.addEventListener('click', function () { zeigeReiter(t, true); });
   });
   document.addEventListener('click', function (ev) {
+    var akt = ev.target.closest('[data-aktion]');
+    if (akt) { ev.preventDefault(); aktion(akt.getAttribute('data-aktion')); return; }
+    var an = ev.target.closest('[data-anfang]');
+    if (an) {
+      ev.preventDefault();
+      var eb = E.bereiche[an.getAttribute('data-anfang')];
+      if (eb) fokusAuf(eb.anfang.fokus, eb.anfang.fokusSel);
+      return;
+    }
     var b = ev.target.closest('[data-ziel]');
-    if (b && !b.classList.contains('bereich-knopf')) { ev.preventDefault(); zeigeBereich(b.getAttribute('data-ziel'), true); }
+    if (b && !b.classList.contains('bereich-knopf')) {
+      ev.preventDefault();
+      zeigeBereich(b.getAttribute('data-ziel'), true);
+      if (b.getAttribute('data-fokus')) fokusAuf(b.getAttribute('data-fokus'));
+      if (b.getAttribute('data-anker') && $(b.getAttribute('data-anker'))) $(b.getAttribute('data-anker')).scrollIntoView({ block: 'start' });
+    }
     if (!ev.target.closest('#menue')) $('menue').open = false;
   });
   document.addEventListener('keydown', function (ev) {
@@ -142,7 +227,7 @@
   });
   $('zur-start').addEventListener('click', function () { zeigeBereich('uebersicht', true); });
   function vonAdresse() {
-    var t = $('tab-' + location.hash.slice(1));
+    var t = $('tab-' + (location.hash.slice(1) === 'datenschutz' ? 'impressum' : location.hash.slice(1)));
     zeigeReiter(t && t.classList.contains('bereich-knopf') ? t : $('tab-uebersicht'), false, true);
   }
   window.addEventListener('popstate', vonAdresse);
@@ -211,6 +296,12 @@
       k.setAttribute('aria-expanded', 'false'); k.setAttribute('aria-controls', 'erklaerung');
       k.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); oeffnen(k, treffer.b); });
       el.appendChild(k);
+      /* Halbsatz in Alltagssprache, immer sichtbar: unter der Beschriftung, bei Kacheln und Tabellenköpfen darin */
+      if (treffer.b.kurz) {
+        var kurz = document.createElement('small');
+        kurz.className = 'kurz'; kurz.textContent = treffer.b.kurz;
+        if (el.tagName === 'LABEL') el.insertAdjacentElement('afterend', kurz); else el.appendChild(kurz);
+      }
     });
     document.addEventListener('click', function (ev) { if (offen && !box.contains(ev.target)) schliessen(); });
     document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && offen) { var k = offen; schliessen(); k.focus(); } });
@@ -340,13 +431,18 @@
   /* Ergebnis als Satz mit Ampel. Eigene Einordnung nach offenen Schwellen, keine Empfehlung (R078):
      grün = Cashflow ab 0; gelb = Cashflow negativ, aber der Reinertrag deckt die Zinsen (der Rest ist Tilgung);
      rot = der Reinertrag deckt nicht einmal die Zinsen. Zinsen = Monatsdurchschnitt im ersten Jahr, Angebot A. */
-  function ergebnisSatz(fin, A, v) {
+  function ergebnisSatz(fin, A, v, mieteDa) {
     var art = 'leer', zeichen = '?', titel, text, klein;
+    var wartetAufMiete = !!fin && !mieteDa;
     if (!fin) {
-      titel = 'Trag einen Kaufpreis ein.';
+      titel = 'Tragen Sie einen Kaufpreis ein.';
       klein = 'Dann steht hier in einem Satz, ob die Miete die Rate trägt.';
+    } else if (wartetAufMiete) {
+      /* Nutzerentscheidung 09.10.2026: ohne eingetragene Miete kein Ergebnis, keine Ampelfarbe */
+      titel = 'Tragen Sie noch die erwartete Kaltmiete ein (Schritt 3), dann sehen Sie, ob sich das Haus trägt.';
+      klein = 'Die Kredit-Zahlen unten gelten schon jetzt.';
     } else if (!A || !v) {
-      titel = 'Trag Kredit und Miete ein, dann kommt hier das Ergebnis.';
+      titel = 'Tragen Sie Kredit und Miete ein, dann kommt hier das Ergebnis.';
       klein = 'Es fehlen Angaben zu Angebot A oder zur Miete.';
     } else {
       var cf = v.cashflowMonat;
@@ -357,18 +453,27 @@
         klein = 'Nach Zinsen, Tilgung, Rücklage und Mietausfall, vor Steuern.';
       } else if (v.reinertragMonat >= zinsen) {
         art = 'warn'; zeichen = '!';
-        titel = 'Du legst etwa ' + euro(-cf) + ' im Monat drauf.';
-        klein = 'Die Miete deckt aber die Zinsen. Was du drauflegst, fließt in die Tilgung, also in dein eigenes Vermögen.';
+        titel = 'Sie legen etwa ' + euro(-cf) + ' im Monat drauf.';
+        klein = 'Die Miete deckt aber die Zinsen. Was Sie drauflegen, fließt in die Tilgung, also in Ihr eigenes Vermögen.';
       } else {
         art = 'schlecht'; zeichen = '✕';
-        titel = 'Die Miete reicht nicht einmal für die Zinsen. Dir fehlen ' + euro(-cf) + ' im Monat.';
+        titel = 'Die Miete reicht nicht einmal für die Zinsen. Ihnen fehlen ' + euro(-cf) + ' im Monat.';
         klein = 'Mehr eigenes Geld, ein niedrigerer Preis oder mehr Miete würden helfen.';
       }
-      klein += ' Eigene Einordnung, keine Kaufempfehlung.';
+      klein +=' Eigene Einordnung, keine Kaufempfehlung.';
     }
     var name = { gut: 'Ampel grün: ', warn: 'Ampel gelb: ', schlecht: 'Ampel rot: ', leer: '' }[art];
+    var hat = !!(fin && A && v);
     $('ue-kacheln').hidden = !fin;
-    [['r-satz', ''], ['ue-satz', fin && A && v ? 'Dein Rechenbeispiel: ' : '']].forEach(function (p) {
+    /* ohne Miete nur Kredit und Rate zeigen, keine Zahlen zum Ergebnis */
+    ['k-cashflow', 'k-rendite', 'ue-cashflow', 'ue-rendite'].forEach(function (id) { $(id).parentNode.hidden = !v; });
+    ['r-zur-miete', 'ue-zur-miete'].forEach(function (id) { $(id).hidden = !wartetAufMiete; });
+    /* Startseite: Ergebniszeile zeigen, sobald es Kredit-Zahlen oder ein Ergebnis gibt. Im Beispiel heißt es Rechenbeispiel ohne „Ihr“. */
+    $('ue-ergebnis').hidden = !fin;
+    $('r-satz-etikett').textContent = { gut: 'Trägt sich', warn: 'Trägt sich noch nicht', schlecht: 'Trägt sich nicht', leer: 'Noch offen' }[art];
+    ['r-zeilen', 'r-annahmen-titel', 'r-annahmen'].forEach(function (id) { $(id).hidden = !hat; });
+    $('r-kennzahlen-box').hidden = !fin;
+    [['r-satz', ''], ['ue-satz', hat ? (beispielAktiv() ? 'Rechenbeispiel: ' : 'Ihr Rechenbeispiel: ') : '']].forEach(function (p) {
       var box = $(p[0]);
       if (!box) return;
       box.className = 'satz ' + art;
@@ -377,6 +482,32 @@
       text.innerHTML = '<span class="sprung">' + esc(name) + '</span>' + esc(p[1] + titel);
       $(p[0] + '-klein').textContent = klein;
     });
+  }
+
+  /* Ergebniskarte im Rechner: Zeilen von der Miete bis „Übrig im Monat“ und eine Liste der Annahmen (je Zeile eine) */
+  function ergebnisListen(fin, A, v, w) {
+    var zl = $('r-zeilen'), al = $('r-annahmen');
+    if (!(fin && A && v)) { zl.innerHTML = ''; al.innerHTML = ''; return; }
+    function zeile(t, wert, klasse) { return '<div class="' + (klasse || '') + '"><dt>' + esc(t) + '</dt><dd>' + esc(wert) + '</dd></div>'; }
+    function minus(n) { return '− ' + euro(n); }
+    zl.innerHTML =
+      zeile('Miete im Monat', euro(w.miete)) +
+      zeile('Mietausfall und Leerstand (' + prozent(w.ausfall) + ')', minus(w.miete * w.ausfall / 100)) +
+      zeile('Nicht umlagefähige Kosten', minus(w.nul)) +
+      zeile('Rücklage für Reparaturen', minus(w.rueck * w.flaeche / 12)) +
+      zeile('Rate an die Bank (Kredit ' + euro(fin.darlehen) + ')', minus(A.rate)) +
+      zeile('Übrig im Monat', euro(v.cashflowMonat), 'summe');
+    var punkte = [
+      ['Zinssatz Angebot A: ' + prozent(A.zins) + ' pro Jahr', 'Annahme'],
+      ['Tilgung: ' + prozent(A.tilgung) + ' pro Jahr', 'Annahme'],
+      ['Notar und Grundbuch: ' + prozent(w.notar), 'Annahme'],
+      ['Mietausfall und Leerstand: ' + prozent(w.ausfall), 'Annahme'],
+      ['Nicht umlagefähig: ' + euro(w.nul) + ' im Monat', 'Annahme'],
+      ['Rücklage: ' + euro(w.rueck) + ' je m² im Jahr', 'Annahme']
+    ];
+    /* unveränderten Startwert der Wohnfläche ehrlich als Startwert kennzeichnen (R005); die Miete hat keinen Startwert mehr */
+    if ($('r-flaeche').value === $('r-flaeche').defaultValue) punkte.unshift(['Wohnfläche: ' + fmt0.format(w.flaeche) + NB + 'm² (bitte durch Ihre Fläche ersetzen)', 'Startwert']);
+    al.innerHTML = punkte.map(function (x) { return '<li><span>' + esc(x[0]) + '</span><span class="annahme">' + x[1] + '</span></li>'; }).join('');
   }
 
   function rechne() {
@@ -427,6 +558,8 @@
     }
 
     var flaeche = wert('r-flaeche'), miete = wert('r-miete'), nul = wert('r-nul'), rueck = wert('r-rueck'), ausfall = wert('r-ausfall');
+    /* leeres Mietfeld heißt „noch nicht eingetragen“ (leseZahl liefert dafür 0): kein Ergebnis, kein Startwert */
+    if ($('r-miete').value.trim() === '') miete = null;
     var ok3 = fin && miete !== null && nul !== null && rueck !== null && ausfall !== null && flaeche !== null;
     var v = ok3 ? R.vermietung({
       kaufpreis: preis, gesamtkosten: fin.gesamt, kaltmieteMonat: miete, mietausfallProzent: ausfall,
@@ -491,7 +624,7 @@
       { t: 'Bleibt im Monat nach Steuern', w: j1 ? euro(j1.nachSteuer / 12) : '-', k: j1 ? vorzeichenKlasse(j1.nachSteuer) : '', haupt: true }
     ]);
     $('r-steuer-formel').textContent = 'AfA = (Kaufpreis + Kaufnebenkosten) × Gebäudeanteil × AfA-Satz' + (baujahr === null ? ' (ohne Baujahr mit 2 % gerechnet)' : '') +
-      '. Einkünfte = Miete − Mietausfall − nicht umlagefähige Kosten − Zinsen − AfA. Die Rücklage zählt erst, wenn das Geld für Reparaturen ausgegeben wird. Steuer = Einkünfte × dein Steuersatz; sind die Einkünfte negativ, sinkt deine Steuer auf anderes Einkommen. Nach Steuern = vor Steuern − Steuer.';
+      '. Einkünfte = Miete − Mietausfall − nicht umlagefähige Kosten − Zinsen − AfA. Die Rücklage zählt erst, wenn das Geld für Reparaturen ausgegeben wird. Steuer = Einkünfte × Ihr Steuersatz; sind die Einkünfte negativ, sinkt Ihre Steuer auf anderes Einkommen. Nach Steuern = vor Steuern − Steuer.';
     $('r-langfrist-tabelle').querySelector('tbody').innerHTML = lf ? lf.jahre.map(function (j) {
       return '<tr><td data-titel="Jahr">' + j.jahr + '</td><td class="z" data-titel="Miete">' + euro(j.miete) + '</td><td class="z ' + vorzeichenKlasse(j.vorSteuer) + '" data-titel="Bleibt vor Steuern">' + euro(j.vorSteuer) + '</td>' +
         '<td class="z" data-titel="Steuer">' + euro(j.steuer) + '</td><td class="z ' + vorzeichenKlasse(j.nachSteuer) + '" data-titel="Bleibt nach Steuern">' + euro(j.nachSteuer) + '</td>' +
@@ -499,7 +632,7 @@
     }).join('') : '<tr><td colspan="8">Schritte 1 bis 3 und Angebot A vollständig ausfüllen.</td></tr>';
     $('ch-vermoegen-text').textContent = lfEnde
       ? 'Nach ' + lfEnde.jahr + ' Jahren: Hauswert ' + euro(lfEnde.wert) + ', Restschuld ' + euro(lfEnde.rest) + ', Vermögen im Haus ' + euro(lfEnde.vermoegen) +
-        '. Zusammengezählt blieben in dieser Zeit ' + euro(lfEnde.kumNachSteuer) + ' nach Steuern übrig' + (lfEnde.kumNachSteuer < 0 ? ' (das heißt: so viel musst du insgesamt zuschießen)' : '') + '. Annahmen, keine Vorhersage; Zinsänderung nach der Zinsbindung siehe Schritt 4.'
+        '. Zusammengezählt blieben in dieser Zeit ' + euro(lfEnde.kumNachSteuer) + ' nach Steuern übrig' + (lfEnde.kumNachSteuer < 0 ? ' (das heißt: so viel müssen Sie insgesamt zuschießen)' : '') + '. Annahmen, keine Vorhersage; Zinsänderung nach der Zinsbindung siehe Schritt 4.'
       : '';
 
     stand = { preis: preis, notar: notar, ek: ek, A: A, nul: nul, rueck: rueck, ausfall: ausfall };
@@ -509,7 +642,8 @@
     kachel(['k-rate', 'ue-rate'], A ? euro(A.rate) : '-');
     kachel(['k-cashflow', 'ue-cashflow'], v && A ? euro(v.cashflowMonat) : '-', v && A ? vorzeichenKlasse(v.cashflowMonat) : '');
     kachel(['k-rendite', 'ue-rendite'], v ? prozent(v.bruttorendite) : '-');
-    ergebnisSatz(fin, A, v);
+    ergebnisSatz(fin, A, v, miete !== null);
+    ergebnisListen(fin, A, v, { miete: miete, ausfall: ausfall, nul: nul, rueck: rueck, flaeche: flaeche, notar: notar });
 
     /* Daten für die Diagramme merken, gezeichnet wird in zeichneGrafiken() */
     grafikDaten = {
@@ -660,7 +794,7 @@
     ]);
     var rh = $('w-rnd-hinweis');
     rh.hidden = !(rnd !== null && rnd < 20 && !(rndEigen > 0));
-    rh.textContent = 'Die berechnete Restnutzungsdauer ist kurz (' + (rnd === null ? 0 : fmt0.format(rnd)) + ' Jahre). Wurde das Gebäude modernisiert (Dach, Fenster, Leitungen, Heizung, Bäder, Dämmung), verlängert sie sich nach Anlage 2 ImmoWertV. Trag dann die Restnutzungsdauer selbst ein, am besten nach Rücksprache mit einem Sachverständigen.';
+    rh.textContent = 'Die berechnete Restnutzungsdauer ist kurz (' + (rnd === null ? 0 : fmt0.format(rnd)) + ' Jahre). Wurde das Gebäude modernisiert (Dach, Fenster, Leitungen, Heizung, Bäder, Dämmung), verlängert sie sich nach Anlage 2 ImmoWertV. Tragen Sie dann die Restnutzungsdauer selbst ein, am besten nach Rücksprache mit einem Sachverständigen.';
 
     stand.wertBasis = rnd !== null ? { we: f['w-we'], verw: f['w-verw'], inst: f['w-inst'], ausfall: f['w-ausfall'], betrieb: f['w-betrieb'],
       bodenwert: bodenwert, lz: f['w-lz'], rnd: rnd } : null;
@@ -719,9 +853,9 @@
       $('w-satz-text').textContent = 'Nach dieser Schätzung ist das Haus etwa ' + euro(ew.allgemein) + ' wert.';
       $('w-satz-klein').textContent = kauf
         ? 'Der Kaufpreis liegt ' + fmt1.format(Math.abs((kauf / ew.allgemein - 1) * 100)) + NB + '% ' + (kauf >= ew.allgemein ? 'darüber' : 'darunter') + '. Ertragswert mit den Annahmen unten; schon ein halber Prozentpunkt beim Liegenschaftszins verschiebt den Wert deutlich.'
-        : 'Ertragswert mit den Annahmen unten. Trag im Rechner einen Kaufpreis ein, dann steht hier der Vergleich.';
+        : 'Ertragswert mit den Annahmen unten. Tragen Sie im Rechner einen Kaufpreis ein, dann steht hier der Vergleich.';
     } else {
-      $('w-satz-text').textContent = 'Trag Grundstück, Bodenrichtwert, Baujahr, Wohnungen und Miete ein.';
+      $('w-satz-text').textContent = 'Tragen Sie Grundstück, Bodenrichtwert, Baujahr, Wohnungen und Miete ein.';
       $('w-satz-klein').textContent = 'Dann steht hier eine Schätzung, was das Haus wert ist. Der Knopf „Werte aus dem Rechner übernehmen“ füllt schon einiges aus.';
     }
     zeichneWertGrafik();
@@ -786,6 +920,14 @@
   window.addEventListener('resize', function () {
     clearTimeout(groesseTimer);
     groesseTimer = setTimeout(zeichneGrafiken, 150);
+  });
+  ['r-zur-miete', 'ue-zur-miete'].forEach(function (id) {
+    $(id).addEventListener('click', function () {
+      if ($('rechner').hidden) zeigeReiter($('tab-rechner'), true);
+      zeigeSchritt(3, false);
+      $('r-miete').scrollIntoView({ block: 'center', behavior: ruhig ? 'auto' : 'smooth' });
+      $('r-miete').focus({ preventScroll: true });
+    });
   });
   $('ue-zum-rechner').addEventListener('click', function (ev) {
     ev.preventDefault();
@@ -1004,8 +1146,8 @@
     }).join('');
     sel.value = liste.some(function (ob) { return ob.id === alt; }) ? alt : '';
     $('r-objekt-hinweis').textContent = liste.length
-      ? 'Setzt Kaufpreis, Bundesland, Makler, Wohnfläche und Kaltmiete des Objekts ein. Danach kannst du jeden Wert ändern.'
-      : 'Noch keine Objekte in der Merkliste. Trag den Kaufpreis unten selbst ein oder lege zuerst ein Objekt in der Merkliste an.';
+      ? 'Setzt Kaufpreis, Bundesland, Makler, Wohnfläche und Kaltmiete des Objekts ein. Danach können Sie jeden Wert ändern.'
+      : 'Noch keine Objekte in der Merkliste. Tragen Sie den Kaufpreis unten selbst ein oder legen Sie zuerst ein Objekt in der Merkliste an.';
     sel.disabled = !liste.length;
   }
   $('r-objekt').addEventListener('change', function (ev) {
@@ -1038,7 +1180,7 @@
       '<span class="ampel-punkt ' + (g.ampel || 'leer') + '" aria-hidden="true"></span>Gebiet ' + esc(name) + ': ' + esc(g.name) + (g.sicher ? '' : ' (vermutlich, bitte prüfen)') +
       g.sterne.map(function (s) { return ' <span class="k-st ' + s.art + '" aria-hidden="true">★</span>' + esc(STERN_KURZ[s.art](s)); }).join('') +
       ' <button type="button" class="k-zeige" data-karte="' + esc(g.ags) + '">auf der Karte</button>' +
-      '<div class="klein">Eigene Einordnung nach deinen Kartenregeln (Ebene ' + esc(g.ebene) + '), keine Kaufempfehlung.</div></div>';
+      '<div class="klein">Eigene Einordnung nach Ihren Kartenregeln (Ebene ' + esc(g.ebene) + '), keine Kaufempfehlung.</div></div>';
   }
   function zeigeMerkKarten() {
     var daten = liste.map(function (ob) { return { ob: ob, z: kennzahlen(ob) }; });
@@ -1073,18 +1215,19 @@
     $('m-karten').innerHTML = daten.map(function (d, i) {
       var ob = d.ob, z = d.z, w = alle[i];
       var art = w.brutto !== null ? ampelArt(w.brutto) : null;
-      var cfArt = null, satz = 'Trag eine Miete ein, dann siehst du, ob es sich trägt.';
+      var cfArt = null, satz = 'Tragen Sie eine Miete ein, dann sehen Sie, ob es sich trägt.';
       if (w.cf !== null) {
         /* ohne Tilgung ist der Plan leer: dann Zinsen wie im Rechner aus Darlehen und Sollzins */
         var zinsen = z.k.plan.length ? z.k.plan[0].zinsen / 12 : z.fin.darlehen * stand.A.zins / 1200;
         if (w.cf >= 0) { cfArt = 'gut'; satz = 'Die Miete trägt die Rate. Es bleiben ' + euro(w.cf) + ' im Monat.'; }
-        else if (z.v.reinertragMonat >= zinsen) { cfArt = 'warn'; satz = 'Du legst etwa ' + euro(-w.cf) + ' im Monat drauf. Die Miete deckt aber die Zinsen.'; }
+        else if (z.v.reinertragMonat >= zinsen) { cfArt = 'warn'; satz = 'Sie legen etwa ' + euro(-w.cf) + ' im Monat drauf. Die Miete deckt aber die Zinsen.'; }
         else { cfArt = 'schlecht'; satz = 'Die Miete reicht nicht einmal für die Zinsen. Es fehlen ' + euro(-w.cf) + ' im Monat.'; }
       }
       var schwelle = art === 'gruen' ? 'ab ' + fmt1.format(gruenAb) + NB + '%' : art === 'gelb' ? 'ab ' + fmt1.format(gelbAb) + NB + '%' : 'unter ' + fmt1.format(gelbAb) + NB + '%';
       var titel = ob.link ? '<a href="' + esc(ob.link) + '" target="_blank" rel="noopener">' + esc(ob.titel) + '</a>' : esc(ob.titel);
       var ort = ob.ort && ob.land && ob.ort.toLowerCase() === ob.land.toLowerCase() ? [ob.ort] : [ob.ort, ob.land];
       return '<article class="merk-karte"' + (cfArt ? ' style="--ampelfarbe:' + bandFarbe[cfArt] + '"' : '') + '>' +
+        (istBeispiel(ob) ? '<div><span class="annahme">Beispiel, erfunden</span></div>' : '') +
         '<h3>' + titel + '</h3>' +
         '<div class="ort">' + esc(ort.filter(Boolean).join(', ') || 'Ort fehlt') +
           (ob.flaeche ? ', ' + fmt0.format(ob.flaeche) + NB + 'm²' : '') + '</div>' +
@@ -1143,7 +1286,7 @@
     var tb = $('m-tabelle').querySelector('tbody');
     $('m-leer').hidden = liste.length > 0;
     $('m-tabelle-box').hidden = liste.length === 0;
-    $('m-band-regel').hidden = liste.length === 0;
+    $('m-band-regel-box').hidden = liste.length === 0;
     objektAuswahlFuellen();
     zeigeMerkKarten();
     tb.innerHTML = liste.map(function (ob) {
@@ -1330,9 +1473,10 @@
     return a.download;
   }
   $('m-export').addEventListener('click', function () {
-    if (!liste.length) { $('m-datei-meldung').textContent = 'Die Merkliste ist leer, es gibt nichts zu sichern.'; return; }
-    var name = dateiSichern(liste);
-    $('m-datei-meldung').textContent = 'Datei „' + name + '“ wird heruntergeladen (' + objekte(liste.length) + '). Sie liegt im Download-Ordner des Browsers.';
+    var echte = liste.filter(function (o) { return !istBeispiel(o); });
+    if (!echte.length) { $('m-datei-meldung').textContent = 'Die Merkliste ist leer (das Beispiel zählt nicht), es gibt nichts zu sichern.'; return; }
+    var name = dateiSichern(echte);
+    $('m-datei-meldung').textContent = 'Datei „' + name + '“ wird heruntergeladen (' + objekte(echte.length) + '). Sie liegt im Download-Ordner des Browsers.';
   });
 
   var importBereit = null;
@@ -1379,7 +1523,7 @@
   });
   $('m-import-ersetzen').addEventListener('click', function () {
     if (!importBereit) return;
-    var sicherung = liste.length ? dateiSichern(liste, '_vor_import') : null;
+    var sicherung = liste.filter(function (o) { return !istBeispiel(o); }).length ? dateiSichern(liste.filter(function (o) { return !istBeispiel(o); }), '_vor_import') : null;
     liste = importBereit.slice();
     listeSpeichern(); zeigeMerkliste();
     $('m-import-wahl').hidden = true;
@@ -1457,8 +1601,73 @@
     $('mz-preise-quelle').textContent = 'Quelle: ' + mb.quelle + ', Abruf ' + datumDe(mb.abruf) + '. Angebotspreise, keine erzielbaren Preise.';
   }
 
+  /* ---------- Beispiel ansehen (daten/musterhaus.js) ----------
+     Erfundenes Reihenhaus füllt Rechner und Merkliste. Vorher werden die eigenen Werte dieser Felder und die Merkliste
+     in „immo-beispiel-sicherung“ gesichert (R020). Solange die Sicherung existiert, zeigt die Seite das blaue Band,
+     auch nach dem Neuladen. „Beispiel leeren“ stellt die Felder wieder her und entfernt nur den Beispiel-Eintrag. */
+  var BSP = 'immo-beispiel-sicherung';
+  function istBeispiel(o) { return !!(o && (o.beispiel || o.id === 'beispiel-musterhaus')); }
+  function beispielAktiv() { return speicherLesen(BSP) !== null; }
+  function beispielBandZeigen() {
+    var an = beispielAktiv();
+    $('beispiel-band').hidden = !an && $('beispiel-fehler').hidden;
+    $('beispiel-text').hidden = !an;
+    $('beispiel-leeren').hidden = !an;
+    document.querySelectorAll('[data-aktion="beispiel"]').forEach(function (b) { b.hidden = an; });
+  }
+  function beispielFehler(text) {
+    $('beispiel-fehler').textContent = text;
+    $('beispiel-fehler').hidden = false;
+    $('beispiel-band').hidden = false;
+    $('beispiel-text').hidden = true;
+    $('beispiel-leeren').hidden = true;
+  }
+  function beispielLaden() {
+    var M = D.musterhaus;
+    $('beispiel-fehler').hidden = true;
+    if (!M) { beispielFehler('Das Beispiel fehlt in dieser Fassung der Seite.'); return false; }
+    if (!beispielAktiv()) {
+      var felder = {};
+      Object.keys(M.rechner).forEach(function (id) { felder[id] = $(id).value; });
+      if (!speicherSchreiben(BSP, { felder: felder, merkliste: speicherLesen(MERK), zeit: new Date().toISOString() })) {
+        beispielFehler('Das Beispiel wurde nicht geladen: Der Browser lässt kein Speichern zu (zum Beispiel im privaten Fenster), Ihre eigenen Eingaben wären nicht gesichert.');
+        return false;
+      }
+    }
+    Object.keys(M.rechner).forEach(function (id) { $(id).value = M.rechner[id]; });
+    $('r-objekt').value = '';
+    liste = liste.filter(function (o) { return !istBeispiel(o); });
+    var ob = JSON.parse(JSON.stringify(M.objekt));
+    ob.geaendert = new Date().toISOString().slice(0, 10);
+    liste.push(ob);
+    listeSpeichern();
+    rechne(); eingabenMerken(); zeigeMerkliste(); beispielBandZeigen();
+    return true;
+  }
+  function beispielLeeren() {
+    var s = speicherLesen(BSP);
+    if (!s) return;
+    Object.keys(s.felder || {}).forEach(function (id) { var el = $(id); if (el) el.value = s.felder[id]; });
+    liste = liste.filter(function (o) { return !istBeispiel(o); });
+    listeSpeichern();
+    try { localStorage.removeItem(BSP); } catch (e) { beispielFehler('Das Beispiel konnte nicht ganz entfernt werden: ' + e.message); }
+    rechne(); eingabenMerken(); zeigeMerkliste(); beispielBandZeigen();
+  }
+  function aktion(name) {
+    if (name === 'beispiel') {
+      if (beispielLaden()) { zeigeBereich('rechner', true); zeigeSchritt(1, false); }
+    } else if (name === 'beispiel-leeren') {
+      beispielLeeren();
+    } else if (name === 'erstes-haus') {
+      if ($('merkliste').hidden) zeigeBereich('merkliste', true);
+      $('m-neu').open = true;
+      $('m-titel').focus();
+    }
+  }
+
   /* ---------- Start ---------- */
   vonAdresse();
   rechne();
   sucheZeigen();
+  beispielBandZeigen();
 })();

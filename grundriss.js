@@ -95,9 +95,9 @@
         ohne.etagen.forEach(function (et) { et.bild = null; });
         try {
           localStorage.setItem(SCHLUESSEL, JSON.stringify(ohne));
-          meldung('Der Plan ist gespeichert, das Grundrissbild aber nicht: es ist zu groß für den Speicher dieses Browsers. Sichere den Plan als Datei („Plan sichern“ unten), dann bleibt auch das Bild erhalten.', 'speicher');
+          meldung('Der Plan ist gespeichert, das Grundrissbild aber nicht: es ist zu groß für den Speicher dieses Browsers. Sichern Sie den Plan als Datei („Plan sichern“ unten), dann bleibt auch das Bild erhalten.', 'speicher');
         } catch (e2) {
-          meldung('Der Plan konnte in diesem Browser nicht gespeichert werden (Speicher voll oder gesperrt, z. B. im privaten Fenster). Sichere ihn als Datei, sonst ist er nach dem Schließen weg.', 'speicher');
+          meldung('Der Plan konnte in diesem Browser nicht gespeichert werden (Speicher voll oder gesperrt, z. B. im privaten Fenster). Sichern Sie ihn als Datei, sonst ist er nach dem Schließen weg.', 'speicher');
         }
       }
     }, 300);
@@ -360,7 +360,7 @@
     etage().raeume.push(r);
     gewaehlt = { typ: 'raum', id: r.id };
     geaendert(); auswahlZeigen();
-    meldung('Raum angelegt (' + qm(flaeche(r)) + '). Rechts kannst du ihm einen Namen und eine Art geben.');
+    meldung('Raum angelegt (' + qm(flaeche(r)) + '). Rechts können Sie ihm einen Namen und eine Art geben.');
   }
   function eckenFertig() {
     if (entwurf.length < 3) { tipp('Mindestens drei Ecken setzen, dann schließen.'); return; }
@@ -403,8 +403,8 @@
     var t = text;
     if (!t) {
       if (modus === 'rechteck') t = 'Drücken und ziehen, um einen rechteckigen Raum zu zeichnen.';
-      else if (modus === 'ecken') t = entwurf.length ? entwurf.length + ' Ecken gesetzt. Auf den ersten Punkt klicken oder Enter drückt den Raum zu.' : 'Klicke die erste Ecke des Raums an.';
-      else if (modus === 'massstab') t = massPunkte.length ? 'Jetzt das Ende der Strecke anklicken.' : 'Klicke den Anfang einer Strecke an, deren Länge du kennst.';
+      else if (modus === 'ecken') t = entwurf.length ? entwurf.length + ' Ecken gesetzt. Auf den ersten Punkt klicken oder Enter drückt den Raum zu.' : 'Klicken Sie die erste Ecke des Raums an.';
+      else if (modus === 'massstab') t = massPunkte.length ? 'Jetzt das Ende der Strecke anklicken.' : 'Klicken Sie den Anfang einer Strecke an, deren Länge Sie kennen.';
       else t = '';
     }
     $('g-tipp').textContent = t;
@@ -459,7 +459,7 @@
     $('g-bild-weg').disabled = !e.bild;
     $('g-mass-start').disabled = !e.bild;
     $('g-mass-stand').textContent = !e.bild ? 'Ohne Bild ist der Maßstab fest: ein Kästchen = 1 m.' :
-      e.massstab ? 'Maßstab festgelegt. Du kannst ihn jederzeit neu festlegen; gezeichnete Räume wandern mit.' :
+      e.massstab ? 'Maßstab festgelegt. Sie können ihn jederzeit neu festlegen; gezeichnete Räume wandern mit.' :
         'Noch kein Maßstab: Das Bild ist vorläufig 15 m breit angenommen. Flächen stimmen erst nach dem Festlegen.';
   }
   $('g-etage-neu').addEventListener('click', function () {
@@ -467,7 +467,7 @@
     var frei = namen.filter(function (n) { return !plan.etagen.some(function (e) { return e.name === n; }); })[0] || ('Etage ' + (plan.etagen.length + 1));
     plan.etagen.push(neueEtage(frei)); plan.aktiv = plan.etagen.length - 1; gewaehlt = null; vb = null;
     speichern(); allesZeigen(); schrittZeigen(1);
-    meldung('Etage „' + frei + '“ angelegt. Lade ihr Grundrissbild oder zeichne direkt.');
+    meldung('Etage „' + frei + '“ angelegt. Laden Sie ihr Grundrissbild oder zeichnen Sie direkt.');
   });
   $('g-etage-name').addEventListener('input', function () {
     etage().name = this.value.trim().slice(0, 40) || 'Etage'; speichern();
@@ -488,7 +488,7 @@
     if (plan.etagen.length < 2) return;
     if ((e.raeume.length || e.teile.length || e.bild) && etageWegBestaetigt !== knopf) {
       etageWegBestaetigt = knopf; knopf.textContent = frageText;
-      meldung('„' + e.name + '“ enthält ' + e.raeume.length + ' Räume und ' + e.teile.length + ' Teile. Zum Löschen noch einmal klicken; vorher kannst du unten den Plan als Datei sichern.');
+      meldung('„' + e.name + '“ enthält ' + e.raeume.length + ' Räume und ' + e.teile.length + ' Teile. Zum Löschen noch einmal klicken; vorher können Sie unten den Plan als Datei sichern.');
       return;
     }
     plan.etagen.splice(plan.aktiv, 1); plan.aktiv = Math.max(0, plan.aktiv - 1);
@@ -525,7 +525,7 @@
       e.bild = c.toDataURL('image/jpeg', 0.85); e.bildB = c.width; e.bildH = c.height;
       e.mpp = 15 / c.width; e.massstab = false; massPunkte = [];
       vb = null; speichern(); allesZeigen();
-      meldung('Bild geladen. Lege jetzt den Maßstab fest: „Strecke anklicken“ und eine bekannte Wandlänge eingeben.' + (hatteRaeume ? ' Achtung: Die schon gezeichneten Räume dieser Etage werden beim Maßstab mit vergrößert oder verkleinert.' : ''));
+      meldung('Bild geladen. Legen Sie jetzt den Maßstab fest: „Strecke anklicken“ und eine bekannte Wandlänge eingeben.' + (hatteRaeume ? ' Achtung: Die schon gezeichneten Räume dieser Etage werden beim Maßstab mit vergrößert oder verkleinert.' : ''));
       $('g-mass-start').focus();
     };
     img.onerror = function () { URL.revokeObjectURL(url); meldung('Das Bild „' + datei.name + '“ konnte nicht gelesen werden (Datei beschädigt oder Format unbekannt).'); };
@@ -709,7 +709,7 @@
     var box = $('g-satz'), titel, klein, art = 'leer', zeichen = '?';
     if (!nRaeume) {
       titel = 'Noch kein Raum gezeichnet.';
-      klein = 'Fang mit Schritt 1 an: Grundrissbild laden oder das Beispielhaus ausprobieren, oder gleich in Schritt 2 auf dem Raster zeichnen.';
+      klein = 'Fangen Sie mit Schritt 1 an: Grundrissbild laden oder das Beispielhaus ausprobieren, oder gleich in Schritt 2 auf dem Raster zeichnen.';
     } else {
       titel = qm(s.wfl) + ' Wohnfläche' + (s.summe ? ', Einrichtung und Umbau etwa ' + euro(s.summe) : '') + '.';
       klein = (s.nfl ? 'Dazu ' + qm(s.nfl) + ' Nutzfläche' + (s.sep ? ', davon ' + qm(s.sep) + ' separat vermietbar' : '') + '. ' : '') +
@@ -792,7 +792,7 @@
   }
   $('g-uebernehmen').addEventListener('click', function () {
     var s = summen();
-    if (!s.raeume.length && !s.summe) { $('g-uebernahme-meldung').textContent = 'Es gibt noch nichts zu übernehmen: zeichne zuerst Räume oder stelle Möbel in den Plan.'; return; }
+    if (!s.raeume.length && !s.summe) { $('g-uebernahme-meldung').textContent = 'Es gibt noch nichts zu übernehmen: zeichnen Sie zuerst Räume oder stellen Sie Möbel in den Plan.'; return; }
     var alt = R.leseZahl($('r-zusatz').value) || 0, altF = R.leseZahl($('r-flaeche').value) || 0;
     if (alt > 0 || (altF > 0 && s.raeume.length && Math.abs(altF - s.wfl) > 0.05)) {
       $('g-frage-text').textContent = 'Im Rechner steht schon etwas: ' + (altF ? 'Wohnfläche ' + qm(altF) + ', ' : '') + 'zusätzliche Kosten ' + euro(alt) + '. ' +

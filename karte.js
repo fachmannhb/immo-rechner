@@ -27,7 +27,7 @@
 
   /* Kennzahlen je Ebene: [Feld, hoch ist gut?] – Rang 0–100 über alle Kreise */
   var EBENEN = [
-    { id: 'gesamt', name: 'Gesamt', text: 'Mischung aller Ebenen mit deinen Gewichten.' },
+    { id: 'gesamt', name: 'Gesamt', text: 'Mischung aller Ebenen mit Ihren Gewichten.' },
     { id: 'nachfrage', name: 'Nachfrage', teile: [['e5', true], ['p45', true], ['leer', false]], text: 'Wächst die Bevölkerung (letzte 5 Jahre und Prognose bis 2045), und stehen wenige Wohnungen leer?' },
     { id: 'arbeit', name: 'Arbeit', teile: [['besch', true], ['saldo', true]], text: 'Viele Arbeitsplätze und mehr Menschen, die zur Arbeit herkommen als wegfahren.' },
     { id: 'studium', name: 'Studium', teile: [['studq', true]], text: 'Viele Studierende im Verhältnis zur Einwohnerzahl.' },
@@ -227,7 +227,7 @@
       window.KARTE_HAEUSER().forEach(function (h, j) {
         var k = KREISE[NACH_AGS[h.ags]]; if (!k) return;
         var c = el('circle', { cx: k.cx + 10 * s + (j % 3) * 3 * s, cy: k.cy - 10 * s, r: 5 * s, class: 'k-haus ' + (h.art || 'leer'), 'data-ags': k.ags }, gS);
-        el('title', {}, c).textContent = 'Dein Haus: ' + h.titel;
+        el('title', {}, c).textContent = 'Ihr Haus: ' + h.titel;
       });
     }
     svg.setAttribute('class', laenderModus ? 'grob' : '');
@@ -296,11 +296,11 @@
   }
   function steckbrief() {
     var box = $('k-steckbrief');
-    if (gewaehlt == null) { box.innerHTML = '<p>Klicke auf ein Gebiet, um seine Zahlen zu sehen. Oder such oben nach einem Ort.</p>'; return; }
+    if (gewaehlt == null) { box.innerHTML = '<p>Klicken Sie auf ein Gebiet, um seine Zahlen zu sehen. Oder suchen Sie oben nach einem Ort.</p>'; return; }
     var i = NACH_AGS[gewaehlt], k = KREISE[i], st = sterneVon(k);
     var a = ampel[i], h = '<h4>' + esc(anzeigeName(k)) + '</h4><p class="klein" style="margin-top:-4px">' + esc(k.land) + '</p>';
     h += '<p class="k-ampel-satz ' + (a || 'leer') + '">' + (a ? { gut: 'Gefragtes Gebiet', warn: 'Mittleres Gebiet', schlecht: 'Schwächeres Gebiet' }[a] : 'Keine Daten') +
-      ' nach deinen Regeln (Ebene ' + esc(EBENE[E.ebene].name) + ': ' + (wert[i] != null ? fmt0.format(wert[i]) : '-') + ' von 100)</p>';
+      ' nach Ihren Regeln (Ebene ' + esc(EBENE[E.ebene].name) + ': ' + (wert[i] != null ? fmt0.format(wert[i]) : '-') + ' von 100)</p>';
     h += st.length ? '<ul class="k-sterne">' + st.map(function (x) { return '<li><span class="k-st ' + x.art + '" aria-hidden="true">★</span> ' + esc(x.text) + (x.url ? ' <a href="' + esc(x.url) + '" target="_blank" rel="noopener">Quelle</a>' : '') + '</li>'; }).join('') + '</ul>' : '';
     h += '<table class="k-eb"><tbody>' + EBENEN.map(function (e) { return '<tr><th scope="row">' + esc(e.name) + '</th><td>' + balken(k.eb[e.id]) + '</td></tr>'; }).join('') + '</tbody></table>';
     var felder = ['ew', 'e5', 'p45', 'leer', 'miete', 'bau', 'besch', 'ein', 'aus', 'stud'];
@@ -312,7 +312,7 @@
         (rend ? ' Grobe Bruttorendite mit Zensus-Miete: ' + fmt1.format(rend) + ' %. Achtung: Bestandsmiete 2022 gegen Angebotspreis 2026, darum eher zu niedrig.' : '') + '</p>';
     }
     var haeuser = window.KARTE_HAEUSER ? window.KARTE_HAEUSER().filter(function (x) { return x.ags === k.ags; }) : [];
-    if (haeuser.length) h += '<p class="klein"><b>Deine Häuser hier:</b> ' + haeuser.map(function (x) { return esc(x.titel) + (x.brutto != null ? ' (' + fmt1.format(x.brutto) + ' % brutto)' : ''); }).join(', ') + '</p>';
+    if (haeuser.length) h += '<p class="klein"><b>Ihre Häuser hier:</b> ' + haeuser.map(function (x) { return esc(x.titel) + (x.brutto != null ? ' (' + fmt1.format(x.brutto) + ' % brutto)' : ''); }).join(', ') + '</p>';
     h += '<div class="knopfreihe"><button type="button" class="knopf" id="k-suchen">Haus hier suchen</button></div>';
     box.innerHTML = h;
     $('k-suchen').addEventListener('click', function () {

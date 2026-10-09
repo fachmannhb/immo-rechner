@@ -1,12 +1,17 @@
 {
-  "_hinweis": "Einzige Stelle für Diagramm- und Statusfarben (Regel R024). bau.py erzeugt daraus die CSS-Variablen für hell und dunkel. c1 bis c3 sind die Diagrammfarben in fester Reihenfolge (Violett, Himmelblau, Himbeere; Nutzerwunsch 08.10.2026: kein Grün, kein Orange, außer Ampel 'gut'); nach jeder Änderung mit dem dataviz-Prüfskript (validate_palette.js --pairs all) gegen die Kartenfläche prüfen. Geprüft 08.10.2026: hell gegen #ffffff, dunkel gegen #241f2e, alle Prüfungen bestanden. Vorher (07.10.2026): Petrol #008b7f, Gold #b07d16, Blau #4a6fd1.",
+  "_hinweis": "Einzige Stelle für Diagramm- und Statusfarben (Regel R024). bau.py erzeugt daraus die CSS-Variablen für hell und dunkel. c1 bis c3 sind die Diagrammfarben in fester Reihenfolge (Violett, Himmelblau, Himbeere; Nutzerwunsch 08.10.2026: kein Grün, kein Orange, außer Ampel 'gut'); nach jeder Änderung mit dem dataviz-Prüfskript (validate_palette.js --pairs all) gegen die Kartenfläche prüfen. Geprüft 08.10.2026: hell gegen #ffffff, dunkel gegen #241f2e, alle Prüfungen bestanden. Vorher (07.10.2026): Petrol #008b7f, Gold #b07d16, Blau #4a6fd1. Welle 1 (09.10.2026): info/info-fl/info-fl2 = Blau fuer Information (Hinweise, Erklaerungen, (?), Beispielband, Annahme-Schild); viol-fl/viol-fl2 = Violett-Flaechen. Bedeutung: Violett = Handlung, Blau = Information, Gruen/Gelb/Rot nur fuer Ergebnisse.",
   "hell": {
     "c1": "#6332a8",
     "c2": "#1f9bd1",
     "c3": "#d0567f",
     "gut": "#1f7542",
     "warn": "#8a6400",
-    "schlecht": "#b23b2b"
+    "schlecht": "#b23b2b",
+    "info": "#2f5fb3",
+    "info-fl": "#e4edfa",
+    "info-fl2": "#d3e2f7",
+    "viol-fl": "#eee6f9",
+    "viol-fl2": "#e6dbf5"
   },
   "dunkel": {
     "c1": "#8a5cd6",
@@ -14,6 +19,11 @@
     "c3": "#d9628f",
     "gut": "#5cc48a",
     "warn": "#e0b84a",
-    "schlecht": "#ef8a7a"
+    "schlecht": "#ef8a7a",
+    "info": "#7aa8f0",
+    "info-fl": "#212c44",
+    "info-fl2": "#2a3a5c",
+    "viol-fl": "#2f2740",
+    "viol-fl2": "#3b2f55"
   }
 }
