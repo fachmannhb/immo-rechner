@@ -378,6 +378,9 @@
   zahlFeld('r-baujahr', 1500, 2100); zahlFeld('r-gebanteil', 0, 100, '%'); zahlFeld('r-steuersatz', 0, 60, '%');
   zahlFeld('mz-betten', 0, 1000); zahlFeld('mz-preis', 0, 1000); zahlFeld('mz-beleg', 0, 100, '%');
   zahlFeld('mz-fix', 0, 10000000); zahlFeld('mz-var', 0, 1000); zahlFeld('mz-abgabe', 0, 100, '%');
+  zahlFeld('mz-w-gewinn', 0, 10000000); zahlFeld('mz-w-preis', 0, 1000); zahlFeld('mz-w-beleg', 0, 100, '%');
+  zahlFeld('mz-w-var', 0, 1000); zahlFeld('mz-w-abgabe', 0, 100, '%'); zahlFeld('mz-w-fix', 0, 100000);
+  zahlFeld('mz-w-kosten', 1, 10000000); zahlFeld('mz-w-ek', 0, 1000000000); zahlFeld('mz-w-bpz', 1, 100); zahlFeld('mz-w-m2', 0, 1000);
   zahlFeld('am-miete', 0, 10000000); zahlFeld('am-sonst', 0, 10000000); zahlFeld('am-kaution', 0, 10000000);
   zahlFeld('am-einr', 0, 10000000); zahlFeld('am-betten', 0, 1000);
   zahlFeld('s-preis', 0, 100000000);
@@ -1588,7 +1591,60 @@
     window.scrollTo(0, 0);
   });
 
+  /* Was will ich verdienen? Gewünschten Monatsgewinn nach Kreditrate in Betten, Zimmer und Budget umrechnen. */
+  var WUNSCH_IDS = ['gewinn', 'preis', 'beleg', 'var', 'abgabe', 'fix', 'kosten', 'ek', 'bpz', 'm2'];
+  function rechneWunsch() {
+    var f = {}, ok = true;
+    WUNSCH_IDS.forEach(function (k) { f[k] = wert('mz-w-' + k); if (f[k] === null) ok = false; });
+    /* Zins und Tilgung von Angebot A direkt aus den Feldern, damit es auch ohne Kaufpreis im Rechner geht */
+    var zA = wert('r-zins-a'), tA = wert('r-tilg-a');
+    var hatA = zA !== null && tA !== null && ($('r-zins-a').value.trim() !== '' || $('r-tilg-a').value.trim() !== '');
+    $('mz-w-zins').textContent = hatA
+      ? 'Zins ' + fmt2.format(zA) + NB + '% + Tilgung ' + fmt2.format(tA) + NB + '% aus Angebot A im Rechner (Annahme, dort änderbar)'
+      : 'Angebot A im Rechner (Schritt 2) ausfüllen';
+    var meldung = '', erg = null;
+    if (!ok) {
+      meldung = 'Mindestens ein Eingabefeld ist leer oder ungültig. Bitte die markierten Felder korrigieren (deutsche Schreibweise, z. B. 4.500 oder 2,50).';
+    } else if (f.gewinn <= 0) {
+      meldung = 'Bei einem Wunschgewinn von 0 € sind keine Betten nötig. Bitte einen Betrag über 0 € eingeben.';
+    } else {
+      var d = 30 * (f.beleg / 100) * (f.preis * (1 - f.abgabe / 100) - f.var) - f.fix;
+      var q = hatA ? (zA + tA) / 1200 : null;
+      var N = null;
+      if (d <= 0) {
+        meldung = 'Mit diesen Annahmen bringt ein Bett nach Kosten nichts ein (' + euro(d, true) + ' im Monat, noch vor der Kreditrate); Preis oder Belegung erhöhen oder Kosten senken.';
+      } else {
+        var n1 = f.gewinn / d;
+        if (n1 * f.kosten <= f.ek) N = n1;
+        else if (q === null) meldung = 'Für die Kreditrate fehlen Zins und Tilgung. Bitte im Rechner (Schritt 2) Angebot A ausfüllen oder mehr Eigenkapital einsetzen.';
+        else if (d - f.kosten * q <= 0) meldung = 'Mit diesen Annahmen verdient ein Bett nach Kosten und Kreditrate nichts (' + euro(d - f.kosten * q, true) + ' im Monat nach Rate); Preis, Belegung oder Eigenkapital erhöhen.';
+        else N = (f.gewinn - f.ek * q) / (d - f.kosten * q);
+      }
+      if (N !== null) {
+        var betten = Math.ceil(N - 1e-9), zimmer = Math.ceil(betten / f.bpz - 1e-9);
+        var budget = betten * f.kosten, kredit = Math.max(0, budget - f.ek), rateM = q === null ? 0 : kredit * q;
+        var umsatz = betten * 30 * (f.beleg / 100) * f.preis;
+        var gewinn = betten * d - rateM;
+        erg = { betten: betten, zimmer: zimmer, flaeche: betten * f.m2, budget: budget, kredit: kredit, rate: rateM, umsatz: umsatz, gewinn: gewinn, jeBett: gewinn / betten };
+      }
+    }
+    $('mz-w-meldung').textContent = meldung;
+    $('mz-w-meldung').hidden = !meldung;
+    wertDl('mz-w-ergebnis', [
+      { t: 'Betten', w: erg ? fmt0.format(erg.betten) : '-', haupt: true },
+      { t: 'Zimmer', w: erg ? fmt0.format(erg.zimmer) : '-', haupt: true },
+      { t: 'Wohnfläche ca.', w: erg ? fmt0.format(erg.flaeche) + NB + 'm²' : '-' },
+      { t: 'Gesamtbudget', w: erg ? euro(erg.budget) : '-', haupt: true },
+      { t: 'davon Kredit', w: erg ? euro(erg.kredit) : '-' },
+      { t: 'Monatsrate', w: erg ? euro(erg.rate) : '-' },
+      { t: 'Umsatz pro Monat', w: erg ? euro(erg.umsatz) : '-' },
+      { t: 'Gewinn pro Monat tatsächlich (nach Rate)', w: erg ? euro(erg.gewinn) : '-', k: erg ? vorzeichenKlasse(erg.gewinn) : '', haupt: true },
+      { t: 'Gewinn je Bett nach Rate', w: erg ? euro(erg.jeBett, true) : '-' }
+    ]);
+  }
+
   function rechneMonteur() {
+    rechneWunsch();
     var rate = stand.A ? stand.A.rate : 0;
     $('mz-rate-anzeige').textContent = stand.A ? euro(rate) + ' pro Monat' : 'Angebot A im Rechner ausfüllen';
     var b = wert('mz-betten'), p = wert('mz-preis'), bel = wert('mz-beleg'), fix = wert('mz-fix'), vr = wert('mz-var'), ab = wert('mz-abgabe');

@@ -2018,6 +2018,35 @@ __PALETTE_CSS__
   <p class="hinweis">Startwerte aus der Präsentation vom September 2026 (25 Betten, 16 € pro Person und Nacht, 4.500 € Fixkosten, 2,50 € variable Kosten je belegter Bett-Nacht). Planungswerte, keine Zusagen.</p>
 
   <form id="mz-form" novalidate>
+    <div class="karte" id="mz-wunsch">
+      <h3>Was will ich verdienen?</h3>
+      <p class="klein">Sie nennen den Gewinn, den Sie im Monat haben wollen. Die Rechnung zeigt, wie viele Betten dafür nötig sind und was sie kosten.</p>
+      <div class="raster" style="max-width:640px;grid-template-columns:1fr">
+        <div><label for="mz-w-gewinn" style="font-size:20px;font-weight:700">Gewinn pro Monat, den ich haben will (nach Kreditrate, vor Steuern) in €</label><input type="text" id="mz-w-gewinn" inputmode="decimal" value="3.000" style="font-size:24px;min-height:60px" aria-describedby="mz-w-gewinn-f"><div class="fehler" id="mz-w-gewinn-f"></div></div>
+      </div>
+      <div class="raster" style="max-width:640px;margin-top:12px">
+        <div><label for="mz-w-preis">Preis pro Person und Nacht in €</label><input type="text" id="mz-w-preis" inputmode="decimal" value="15" aria-describedby="mz-w-preis-f"><div class="fehler" id="mz-w-preis-f"></div></div>
+        <div><label for="mz-w-bpz">Betten pro Zimmer (z. B. 1 oder 2)</label><input type="text" id="mz-w-bpz" inputmode="decimal" value="2" aria-describedby="mz-w-bpz-f"><div class="fehler" id="mz-w-bpz-f"></div></div>
+      </div>
+      <details class="mehr-einst" id="mz-w-annahmen"><summary>Annahmen ändern</summary>
+        <p class="klein" style="margin:10px 0 0">Alle Werte unten sind Annahmen, keine Zusagen. Belegung und Kosten je Bett stammen aus der Präsentation vom September 2026.</p>
+        <div class="raster">
+          <div><label for="mz-w-beleg">Belegung in % (Annahme)</label><input type="text" id="mz-w-beleg" inputmode="decimal" value="75" aria-describedby="mz-w-beleg-f"><div class="fehler" id="mz-w-beleg-f"></div></div>
+          <div><label for="mz-w-var">Variable Kosten je belegter Bett-Nacht in € (Annahme)</label><input type="text" id="mz-w-var" inputmode="decimal" value="2,50" aria-describedby="mz-w-var-f"><div class="fehler" id="mz-w-var-f"></div></div>
+          <div><label for="mz-w-abgabe">Abgaben auf den Umsatz in % (Annahme)</label><input type="text" id="mz-w-abgabe" inputmode="decimal" value="0" aria-describedby="mz-w-abgabe-f"><div class="fehler" id="mz-w-abgabe-f"></div></div>
+          <div><label for="mz-w-fix">Fixkosten je Bett und Monat in € (Annahme)</label><input type="text" id="mz-w-fix" inputmode="decimal" value="180" aria-describedby="mz-w-fix-f"><div class="fehler" id="mz-w-fix-f"></div><small class="kurz">Herleitung: 4.500 € ÷ 25 Betten, Präsentation Sept. 2026</small></div>
+          <div><label for="mz-w-kosten">Gesamtkosten je Bett für Kauf, Nebenkosten, Umbau, Einrichtung in € (Annahme)</label><input type="text" id="mz-w-kosten" inputmode="decimal" value="20.000" aria-describedby="mz-w-kosten-f"><div class="fehler" id="mz-w-kosten-f"></div><small class="kurz">Herleitung: 500.000 € ÷ 25 Betten, Präsentation Sept. 2026</small></div>
+          <div><label for="mz-w-ek">Eigenkapital in € (Annahme)</label><input type="text" id="mz-w-ek" inputmode="decimal" value="0" aria-describedby="mz-w-ek-f"><div class="fehler" id="mz-w-ek-f"></div></div>
+          <div><label for="mz-w-m2">Wohnfläche je Bett inkl. Küche, Bad, Flur in m² (Annahme)</label><input type="text" id="mz-w-m2" inputmode="decimal" value="12" aria-describedby="mz-w-m2-f"><div class="fehler" id="mz-w-m2-f"></div><small class="kurz">Annahme ohne Beleg, bitte prüfen</small></div>
+        </div>
+        <p class="klein" style="margin-top:12px">Zins und Tilgung: <strong id="mz-w-zins"></strong></p>
+      </details>
+      <div class="fehler" id="mz-w-meldung" role="status" aria-live="polite" style="margin-top:14px"></div>
+      <dl class="ergebnisse" id="mz-w-ergebnis"></dl>
+      <p class="formel">Beitrag je Bett im Monat (vor Kredit) = 30 Tage × Belegung × (Preis × (1 − Abgabe) − variable Kosten) − Fixkosten je Bett. Rate je Euro Kredit = (Zins + Tilgung) ÷ 12. Kredit = Betten × Kosten je Bett − Eigenkapital. Gewinn = Betten × Beitrag je Bett − Kredit × Rate je Euro. Aufgelöst nach der Bettenzahl und aufgerundet; Zimmer = Betten ÷ Betten pro Zimmer, aufgerundet. Angezeigt wird die Rechnung mit den gerundeten Betten.</p>
+      <p class="klein">Planungsrechnung, keine Empfehlung. Fixkosten und Kosten je Bett sind Durchschnittswerte; bei sehr vielen oder sehr wenigen Betten weichen sie ab. Steuern sind nicht abgezogen. Ab einer bestimmten Größe gelten strengere Bau- und Brandschutzregeln, siehe „Vor einer Monteurzimmer-Nutzung klären“ unten.</p>
+    </div>
+
     <div class="karte">
       <h3>Erfolgsrechnung (gekauftes Objekt)</h3>
       <div class="raster">
