@@ -482,7 +482,8 @@
       var tr = ob.kreis && NACH_AGS[ob.kreis] != null ? { ags: ob.kreis, sicher: true } : kreisVonOrt(ob.ort, ob.land);
       if (!tr) return null;
       var i = NACH_AGS[tr.ags], k = KREISE[i];
-      return { ags: k.ags, name: anzeigeName(k), sicher: tr.sicher, ampel: ampel[i], wert: wert[i], ebene: EBENE[E.ebene].name, sterne: sterneVon(k) };
+      return { ags: k.ags, name: anzeigeName(k), sicher: tr.sicher, ampel: ampel[i], wert: wert[i], ebene: EBENE[E.ebene].name, sterne: sterneVon(k),
+        miete: k.w.miete != null && k.w.miete > 0 ? k.w.miete : null /* Zensus 2022, Nettokaltmiete €/m², Bestandsmieten */ };
     },
     kreisListe: function () { return KREISE.map(function (k) { return { ags: k.ags, name: anzeigeName(k), land: k.land }; }).sort(function (a, b) { return a.name.localeCompare(b.name, 'de'); }); },
     waehle: function (ags) { waehle(ags, true); }

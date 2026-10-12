@@ -516,6 +516,10 @@ __PALETTE_CSS__
   #k-streu .k-quadrant { fill: var(--gut-fl); }
   #k-streu .k-qtext { fill: var(--leise); font-size: 12px; }
   .merk-gebiet { font-size: 16px; }
+  .merk-verlauf { font-size: 16px; padding: 6px 10px; border-radius: 10px; background: var(--karte2); border: 1px solid var(--linie); }
+  .merk-miete { font-size: 16px; }
+  #w-boris-liste { margin: 0 0 .6em; padding-left: 1.2em; max-width: 80ch; }
+  #w-boris-liste li { margin-bottom: 4px; }
   .merk-gebiet .k-st { margin-left: 2px; }
   .merk-top { display: inline-block; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--gut-fl); color: var(--text); border: 2px solid var(--gut); }
   @media (max-width: 1000px) {
@@ -970,6 +974,21 @@ __PALETTE_CSS__
   </details>
   <div class="meldung" id="m-meldung" role="status" aria-live="polite" style="margin-bottom:14px"></div>
 
+  <details class="karte ruhig" id="m-filter-box" open>
+    <summary>Filtern und sortieren</summary>
+    <div class="g-panel" style="margin-top:10px">
+      <p class="klein" style="margin-top:0">Ausgeblendete Häuser bleiben auf der Liste, sie werden nur nicht angezeigt. „Rendite“ meint die Bruttorendite, die Ampel ist die Rendite-Ampel (eigene Einordnung, keine Kaufempfehlung). Häuser ohne Miete haben keine Rendite und werden bei einem Filter auf Rendite, Überschuss oder Ampel ausgeblendet.</p>
+      <div class="raster">
+        <div><label for="m-f-rendite">Mindest-Bruttorendite in %</label><input type="text" id="m-f-rendite" inputmode="decimal" placeholder="z. B. 5" aria-describedby="m-f-rendite-f"><div class="fehler" id="m-f-rendite-f"></div></div>
+        <div><label for="m-f-ampel">Ampelfarbe (Rendite-Ampel)</label><select id="m-f-ampel"><option value="">alle</option><option value="gruen">grün</option><option value="gelb">gelb</option><option value="rot">rot</option></select></div>
+        <div><label for="m-f-gebiet">Gebiet</label><select id="m-f-gebiet"><option value="">alle Gebiete</option></select></div>
+        <div><label for="m-f-sort">Sortierung</label><select id="m-f-sort"><option value="">wie eingetragen</option><option value="rendite">Rendite (höchste zuerst)</option><option value="cf">Überschuss im Monat (höchster zuerst)</option><option value="preis">Preis (niedrigster zuerst)</option><option value="datum">Datum (neueste zuerst)</option></select></div>
+      </div>
+      <div class="g-check" style="margin-top:14px"><input type="checkbox" id="m-f-plus"><label for="m-f-plus">Nur positiver Überschuss (nach der Rate bleibt Geld übrig, Kredit wie Angebot A)</label></div>
+      <div class="knopfreihe"><button type="button" class="knopf zweit" id="m-f-zurueck">Filter zurücksetzen</button></div>
+    </div>
+  </details>
+  <p class="klein" id="m-f-anzahl" role="status" aria-live="polite" style="margin:10px 0 12px"></p>
   <div class="g-check" style="margin:0 0 12px"><input type="checkbox" id="m-top-zuerst"><label for="m-top-zuerst">Häuser mit „★ Gefragtes Gebiet und gute Rendite“ zuerst zeigen</label></div>
   <div class="merk-karten" id="m-karten"></div>
   <details class="mehr-dazu" id="m-band-regel-box"><summary>Wie die Farben der Karten zu lesen sind (eigene Einordnung, keine Kaufempfehlung)</summary>
@@ -1074,6 +1093,15 @@ __PALETTE_CSS__
         <div><label for="r-land">Bundesland</label><select id="r-land"></select></div>
         <div><label for="r-ek">Eigenes Geld in €</label><input type="text" id="r-ek" inputmode="decimal" value="0" aria-describedby="r-ek-f"><div class="fehler" id="r-ek-f"></div></div>
       </div>
+      <details class="mehr" id="r-garage-box">
+        <summary>Zusatz: Garage oder Stellplatz (wenn mitgekauft)</summary>
+        <div class="raster">
+          <div><label for="r-garage-preis">Kaufpreis der Garage in €</label><input type="text" id="r-garage-preis" inputmode="decimal" value="" placeholder="leer = keine Garage" aria-describedby="r-garage-preis-f"><div class="fehler" id="r-garage-preis-f"></div></div>
+          <div><label for="r-garage-miete">Monatsmiete der Garage in €</label><input type="text" id="r-garage-miete" inputmode="decimal" value="" placeholder="leer = nicht vermietet" aria-describedby="r-garage-miete-f"><div class="fehler" id="r-garage-miete-f"></div></div>
+        </div>
+        <p class="klein" id="r-garage-hinweis" style="margin-top:10px">Der Garagenpreis zählt zum Kaufpreis (Grunderwerbsteuer, Notar und Makler werden darauf mitgerechnet) und zu den Gesamtkosten, die Garagenmiete zur Kaltmiete. Beide Felder leer: Die Rechnung ist genau wie ohne Garage. Preis je m² und Miete je m² beziehen sich weiter nur auf das Haus.</p>
+        <p class="klein" id="r-garage-status" role="status" aria-live="polite" style="margin-top:6px"></p>
+      </details>
       <details class="mehr">
         <summary>Mehr Einstellungen: Notar, Makler, Renovierung</summary>
         <div class="raster">
@@ -1148,10 +1176,13 @@ __PALETTE_CSS__
         <div><label for="r-flaeche">Wohnfläche in m²</label><input type="text" id="r-flaeche" inputmode="decimal" value="250" aria-describedby="r-flaeche-f"><div class="fehler" id="r-flaeche-f"></div></div>
         <div><label for="r-miete">Kaltmiete pro Monat in €</label><input type="text" id="r-miete" inputmode="decimal" value="" placeholder="z. B. 2.000" aria-describedby="r-miete-f"><div class="fehler" id="r-miete-f"></div></div>
       </div>
+      <p class="klein" id="r-miet-vgl" style="margin-top:10px"></p>
       <details class="mehr">
         <summary>Mehr Einstellungen: Kosten, Rücklage, Leerstand</summary>
         <div class="raster">
-          <div><label for="r-nul">Nicht umlagefähige Kosten pro Monat in €</label><input type="text" id="r-nul" inputmode="decimal" value="150" aria-describedby="r-nul-f"><div class="fehler" id="r-nul-f"></div></div>
+          <div><label for="r-nul">Nicht umlagefähige Kosten pro Monat in €</label><input type="text" id="r-nul" inputmode="decimal" value="150" aria-describedby="r-nul-f r-nul-faust"><div class="fehler" id="r-nul-f"></div>
+            <div class="knopfreihe" style="margin-top:8px"><button type="button" class="knopf zweit" id="r-nul-faust-knopf">Faustregel: 20 % der Kaltmiete einsetzen</button></div>
+            <div class="klein" id="r-nul-faust" role="status" aria-live="polite" style="margin-top:6px"><span class="annahme">Annahme</span> Faustregel ohne Beleg: 20 % der Kaltmiete für Kosten, die der Mieter nicht trägt. Setzt den Wert in dieses Feld; Sie können ihn danach ändern.</div></div>
           <div><label for="r-rueck">Instandhaltungsrücklage in € pro m² und Jahr</label><input type="text" id="r-rueck" inputmode="decimal" value="12" aria-describedby="r-rueck-f"><div class="fehler" id="r-rueck-f"></div></div>
           <div><label for="r-ausfall">Mietausfall und Leerstand in %</label><input type="text" id="r-ausfall" inputmode="decimal" value="3" aria-describedby="r-ausfall-f"><div class="fehler" id="r-ausfall-f"></div></div>
         </div>
@@ -1202,7 +1233,7 @@ __PALETTE_CSS__
       <h3>Schritt 5: Langfristig und Steuer</h3>
       <p class="klein">Was bringt das Haus über die Jahre, wann ist es abbezahlt, und was bleibt nach Steuern? Gerechnet mit Angebot A und den Zahlen aus den Schritten 1 bis 3. Die Steigerungen sind Annahmen, keine Vorhersage. Ändern Sie sie, um zu sehen, wie stark das Ergebnis davon abhängt.</p>
       <dl class="ergebnisse" id="r-kennzahlen"></dl>
-      <details class="mehr-dazu"><summary>Mehr dazu: So lesen Sie die Kennzahlen</summary><p class="klein"><b>Kaufpreisfaktor</b> = wie viele Jahresmieten das Haus kostet. <b>Eigenkapitalrendite</b> = was Ihr eigenes Geld im ersten Jahr bringt (was nach Kosten und Zinsen übrig bleibt, plus die Tilgung, denn die gehört Ihnen). <b>Schuldendienstdeckung</b> = Miete nach Kosten geteilt durch Zinsen und Tilgung; über 1 heißt, die Miete trägt die Rate. <b>Vermögen im Haus</b> = was das Haus dann wert ist, minus was Sie der Bank noch schulden.</p></details>
+      <details class="mehr-dazu"><summary>Mehr dazu: So lesen Sie die Kennzahlen</summary><p class="klein"><b>Kaufpreisfaktor</b> = wie viele Jahresmieten das Haus kostet. <b>Eigenkapitalrendite</b> = was Ihr eigenes Geld im ersten Jahr bringt (was nach Kosten und Zinsen übrig bleibt, plus die Tilgung, denn die gehört Ihnen). <b>Schuldendienstdeckung</b> = Miete nach Kosten geteilt durch Zinsen und Tilgung; über 1 heißt, die Miete trägt die Rate. <b>Eigenkapitalquote</b> = Eigenkapital ÷ Gesamtkosten (Kaufpreis, auch mit Garage, plus Kaufnebenkosten plus Renovierung); reine Rechnung, keine Bewertung. <b>Vermögen im Haus</b> = was das Haus dann wert ist, minus was Sie der Bank noch schulden.</p></details>
 
       <h4 style="margin:22px 0 8px">Annahmen für die Zukunft</h4>
       <div class="raster">
@@ -1309,7 +1340,25 @@ __PALETTE_CSS__
         <div><label for="w-grund">Grundstücksfläche in m²</label><input type="text" id="w-grund" inputmode="decimal" value="" placeholder="z. B. 450" aria-describedby="w-grund-f"><div class="fehler" id="w-grund-f"></div></div>
         <div><label for="w-brw">Bodenrichtwert in € pro m²</label><input type="text" id="w-brw" inputmode="decimal" value="" placeholder="aus BORIS ablesen" aria-describedby="w-brw-f"><div class="fehler" id="w-brw-f"></div></div>
       </div>
-      <p class="klein" id="w-boris">Den Bodenrichtwert können Sie kostenlos nachschlagen: <a href="https://www.bodenrichtwerte-deutschland.de" target="_blank" rel="noopener">BORIS-D (bundesweit)</a>, für Bremen und Niedersachsen <a href="https://immobilienmarkt.niedersachsen.de/" target="_blank" rel="noopener">BORIS Niedersachsen/Bremen</a> (Stichtag 01.01.2026, Links geprüft 07.10.2026).</p>
+      <details class="mehr-dazu" id="w-boris"><summary>Bodenrichtwert nachschlagen: amtliche Portale der Länder (kostenlos)</summary>
+        <p class="klein">Den Bodenrichtwert (€ pro m² Boden) finden Sie kostenlos im Portal Ihres Bundeslandes. Alle Links wurden am 12.10.2026 aufgerufen; die Seiten gehören den Ländern, nicht dieser Seite. Beachten Sie das Stichtagsdatum im Portal. Bei Einträgen mit „prüfen vor Nutzung“ ließ sich der genaue Einstieg nicht bestätigen.</p>
+        <ul class="klein" id="w-boris-liste">
+          <li><a href="https://www.bodenrichtwerte-boris.de" target="_blank" rel="noopener">BORIS-D (bundesweit)</a>: Gemeinschaftsprojekt mehrerer Länder, ausdrücklich nur ergänzend zu den Länderportalen (prüfen vor Nutzung: Betreiber und Umfang der Länder auf der Seite nicht eindeutig genannt).</li>
+          <li>Baden-Württemberg: <a href="https://www.gutachterausschuesse-bw.de/borisbw/" target="_blank" rel="noopener">BORIS-BW</a></li>
+          <li>Bayern: <a href="https://www.boris-bayern.de" target="_blank" rel="noopener">BORIS-Bayern</a></li>
+          <li>Berlin: <a href="https://fbinter.stadt-berlin.de/boris/" target="_blank" rel="noopener">BORIS Berlin</a></li>
+          <li>Brandenburg: <a href="https://boris.brandenburg.de/" target="_blank" rel="noopener">BORIS Land Brandenburg</a></li>
+          <li>Bremen und Niedersachsen: <a href="https://immobilienmarkt.niedersachsen.de/" target="_blank" rel="noopener">Immobilienmarkt.NI (BORIS Niedersachsen/Bremen)</a></li>
+          <li>Hessen: <a href="https://hvbg.hessen.de/boris-hessen" target="_blank" rel="noopener">BORIS Hessen (HVBG)</a></li>
+          <li>Mecklenburg-Vorpommern: <a href="https://www.geoportal-mv.de/" target="_blank" rel="noopener">GeoPortal.MV</a>, Themenkarte „Bodenrichtwerte“ (prüfen vor Nutzung: eigener BORIS-Einstieg nicht bestätigt)</li>
+          <li>Nordrhein-Westfalen: <a href="https://www.boris.nrw.de" target="_blank" rel="noopener">BORIS.NRW</a></li>
+          <li>Rheinland-Pfalz: <a href="https://www.gutachterausschuesse.rlp.de" target="_blank" rel="noopener">Oberer Gutachterausschuss Rheinland-Pfalz</a> (verlinkt dort BORIS RLP)</li>
+          <li>Saarland: <a href="https://geoportal.saarland.de/article/Bodenrichtwerte" target="_blank" rel="noopener">BORIS Saarland</a></li>
+          <li>Sachsen: <a href="https://www.boris.sachsen.de" target="_blank" rel="noopener">Bodenrichtwerte Sachsen (GeoSN)</a></li>
+          <li>Sachsen-Anhalt: <a href="https://www.lvermgeo.sachsen-anhalt.de/de/gdp-geodatendienst-bodenrichtwerte-geoinfo.html" target="_blank" rel="noopener">Informationen zu den Bodenrichtwerten (LVermGeo)</a></li>
+        </ul>
+        <p class="klein"><span class="annahme">Weggelassen</span> Hamburg, Schleswig-Holstein und Thüringen: Am 12.10.2026 war kein amtlicher Link abrufbar oder sicher bestätigt (Fehler 404, Zertifikats- oder Verbindungsfehler, Abfrageschutz). Suchen Sie dort „Bodenrichtwerte“ plus Ihr Bundesland oder probieren Sie BORIS-D oben (ob es diese Länder enthält, ist nicht geprüft). Die Seite bodenrichtwerte-deutschland.de gehört einem privaten Immobilienportal (Immobilien Scout GmbH, laut dessen Impressum, Abruf 12.10.2026) und ist keine amtliche Auskunft; sie ist deshalb nicht verlinkt.</p>
+      </details>
       <div class="schritt-fuss"><button type="button" class="knopf" data-geh="2">Weiter zu Schritt 2: Gebäude →</button></div>
     </div>
 

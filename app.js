@@ -28,6 +28,11 @@
     return j + NB + 'Jahre' + (r ? ' ' + r + NB + 'Monate' : '');
   }
   function datumDe(iso) { var t = iso.split('-'); return t[2] + '.' + t[1] + '.' + t[0]; }
+  /* Heutiges Datum nach der Uhr des Geräts (JJJJ-MM-TT), nicht nach UTC: toISOString liefert zwischen 0 und 2 Uhr (Sommerzeit) noch den Vortag */
+  function heuteLokal() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
   function esc(s) {
     return String(s === undefined || s === null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -368,6 +373,7 @@
   /* ---------- Regeln für Zahlenfelder ---------- */
   zahlFeld('r-preis', 0, 100000000); zahlFeld('r-notar', 0, 10, '%'); zahlFeld('r-makler', 0, 15, '%');
   zahlFeld('r-zusatz', 0, 100000000); zahlFeld('r-ek', 0, 100000000);
+  zahlFeld('r-garage-preis', 0, 100000000); zahlFeld('r-garage-miete', 0, 10000000); zahlFeld('m-f-rendite', 0, 100, '%');
   ['a', 'b', 'c'].forEach(function (x) {
     zahlFeld('r-zins-' + x, 0, 20, '%'); zahlFeld('r-tilg-' + x, 0, 20, '%'); zahlFeld('r-bind-' + x, 0, 40, 'Jahre');
   });
@@ -520,7 +526,7 @@
       ['Tilgung: ' + prozent(A.tilgung) + ' pro Jahr', 'Annahme'],
       ['Notar und Grundbuch: ' + prozent(w.notar), 'Annahme'],
       ['Mietausfall und Leerstand: ' + prozent(w.ausfall), 'Annahme'],
-      ['Nicht umlagefähig: ' + euro(w.nul) + ' im Monat', 'Annahme'],
+      ['Nicht umlagefähig: ' + euro(w.nul) + ' im Monat' + (w.miete > 0 && Math.abs(w.nul - 0.2 * w.miete) < 0.5 ? ' (Faustregel 20 % der Kaltmiete, ohne Beleg)' : ''), 'Annahme'],
       ['Rücklage: ' + euro(w.rueck) + ' je m² im Jahr', 'Annahme']
     ];
     /* unveränderten Startwert der Wohnfläche ehrlich als Startwert kennzeichnen (R005); die Miete hat keinen Startwert mehr */
@@ -611,11 +617,38 @@
     $('r-gebanteil-quelle').innerHTML = t;
     $('st-d-geb-quelle').innerHTML = t ? 'Der Verkaufsrechner nimmt den Gebäudeanteil aus dem Rechner, Schritt 5. ' + t : '';
   }
+  /* Miete im Vergleich zum Kreisschnitt (Zensus 2022, Bestandsmieten, Nettokaltmiete je m², aus den Kartendaten).
+     Nur eine Zeile Text, die Rechnung bleibt unverändert. g = Ergebnis von KARTE.gebietFuer. */
+  var MIET_HINWEIS = 'Bestandsmieten (Zensus 2022) liegen meist unter den Angebotsmieten bei Neuvermietung. Der Kreisschnitt ist grob, ein Ort oder Stadtteil kann deutlich abweichen. Eigene Rechnung, keine Bewertung.';
+  var MIET_HINWEIS_KURZ = 'Bestandsmieten liegen meist unter den Angebotsmieten bei Neuvermietung; grober Vergleich, keine Bewertung.';
+  function mietVergleichText(mieteMonat, flaeche, g) {
+    if (!(mieteMonat > 0) || !(flaeche > 0) || !g || !g.miete) return '';
+    var m2 = mieteMonat / flaeche, abw = (m2 / g.miete - 1) * 100, r = Math.round(Math.abs(abw));
+    var wo = r === 0 ? 'liegt etwa auf dem Kreisschnitt' : 'liegt ' + r + NB + '% ' + (abw > 0 ? 'über' : 'unter') + ' dem Kreisschnitt';
+    return 'Ihre Miete ' + wo + ' (Zensus 2022, Bestandsmieten, Nettokaltmiete je m²): ' + euro(m2, true) + ' je m² gegen ' + euro(g.miete, true) + ' je m² im Gebiet ' + g.name +
+      (g.sicher ? '' : ' (vermutlich, bitte prüfen)') + ' (Kreismiete: Zensus 2022, Stichtag 15.05.2022, Abruf 08.10.2026).';
+  }
+  function rechnerMietVergleich(mieteHaus, flaeche) {
+    var p = $('r-miet-vgl'), t = '';
+    var ob = (liste || []).filter(function (x) { return x.id === $('r-objekt').value; })[0];
+    var g = ob && window.KARTE ? window.KARTE.gebietFuer(ob) : null;
+    if (!(mieteHaus > 0)) t = '';
+    else if (!ob) t = 'Vergleich mit dem Kreisschnitt: Wählen Sie in Schritt 1 ein Haus aus der Merkliste (mit Ort), dann steht hier, wie Ihre Miete zum Kreisschnitt liegt (Zensus 2022, Bestandsmieten, Nettokaltmiete je m²).';
+    else if (!g) t = 'Vergleich mit dem Kreisschnitt nicht möglich: Der Ort des gewählten Hauses ist keinem Landkreis zugeordnet (in der Merkliste unter „Ändern“ den Landkreis wählen).';
+    else if (!g.miete) t = 'Vergleich mit dem Kreisschnitt nicht möglich: Für ' + g.name + ' liegt kein Mietwert aus dem Zensus 2022 vor.';
+    else if (!(flaeche > 0) || $('r-flaeche').value === $('r-flaeche').defaultValue) t = 'Vergleich mit dem Kreisschnitt: Bitte die Wohnfläche des Hauses eintragen (der Startwert zählt nicht), dann sehen Sie hier den Vergleich der Miete je m².';
+    else t = mietVergleichText(mieteHaus, flaeche, g) + ' ' + MIET_HINWEIS;
+    p.textContent = t;
+    p.hidden = !t;
+  }
   function rechne() {
-    var preis = wert('r-preis'), notar = wert('r-notar'), makler = wert('r-makler');
+    var preisHaus = wert('r-preis'), notar = wert('r-notar'), makler = wert('r-makler');
     var zusatz = wert('r-zusatz'), ek = wert('r-ek');
+    /* Garage/Stellplatz (leer = 0 = Rechnung wie ohne Garage): Preis zählt zum Kaufpreis (Nebenkosten-Basis, Gesamtkosten), Miete zur Kaltmiete */
+    var garPreis = wert('r-garage-preis'), garMiete = wert('r-garage-miete');
+    var preis = (preisHaus !== null && garPreis !== null) ? preisHaus + garPreis : preisHaus;
     var land = satzVon($('r-land').value);
-    var ok1 = preis !== null && preis > 0 && notar !== null && makler !== null && zusatz !== null && ek !== null && land;
+    var ok1 = preis !== null && preisHaus > 0 && garPreis !== null && garMiete !== null && notar !== null && makler !== null && zusatz !== null && ek !== null && land;
     var nk = ok1 ? R.kaufnebenkosten(preis, land.satz, notar, makler) : null;
     var fin = ok1 ? R.finanzierung(preis, nk.summe, zusatz, ek) : null;
     wertDl('r-nk-ergebnis', [
@@ -625,10 +658,15 @@
       { t: 'Kaufnebenkosten gesamt', w: nk ? euro(nk.summe) : '-' },
       { t: 'Gesamtkosten', w: fin ? euro(fin.gesamt) : '-' },
       { t: 'Darlehen (Finanzierungsbedarf)', w: fin ? euro(fin.darlehen) : '-', haupt: true },
-      { t: 'Finanzierungsquote zum Kaufpreis', w: fin ? prozent(fin.quote) : '-', haupt: true }
+      { t: 'Finanzierungsquote zum Kaufpreis', w: fin ? prozent(fin.quote) : '-', haupt: true },
+      { t: 'Eigenkapital­quote', w: fin && fin.gesamt > 0 ? prozent(ek / fin.gesamt * 100) : '-', haupt: true }
     ]);
+    var garStatus = '';
+    if (garMiete !== null && garMiete > 0 && $('r-miete').value.trim() === '') garStatus = 'Die Garagenmiete wird erst gerechnet, wenn die Kaltmiete des Hauses eingetragen ist (Schritt 3).';
+    else if (garPreis !== null && garPreis > 0 && preisHaus !== null) garStatus = 'Gerechnet mit Kaufpreis ' + euro(preis) + ' (Haus ' + euro(preisHaus) + ' plus Garage ' + euro(garPreis) + ').';
+    $('r-garage-status').textContent = garStatus;
     $('r-nk-formel').textContent = land
-      ? 'Grunderwerbsteuer = Kaufpreis × ' + fmt1.format(land.satz) + ' % (' + land.land + '). Gesamtkosten = Kaufpreis + Nebenkosten + Renovierung. Darlehen = Gesamtkosten − Eigenkapital. Quote = Darlehen ÷ Kaufpreis; über 100 % heißt, die Bank finanziert auch Nebenkosten mit.'
+      ? 'Grunderwerbsteuer = Kaufpreis × ' + fmt1.format(land.satz) + ' % (' + land.land + '). Gesamtkosten = Kaufpreis (mit Garage, falls eingetragen) + Nebenkosten + Renovierung. Darlehen =Gesamtkosten − Eigenkapital. Quote = Darlehen ÷ Kaufpreis; über 100 % heißt, die Bank finanziert auch Nebenkosten mit. Eigenkapitalquote = Eigenkapital ÷ Gesamtkosten (reine Rechnung, keine Bewertung).'
       : '';
     if (land) {
       var q = land.amtlich ? D.grest.quelleAmtlich : D.grest.quelleSonst;
@@ -658,9 +696,12 @@
       planBody.innerHTML = '<tr><td colspan="4">' + (A ? 'Keine Tilgung: Die Rate deckt nur die Zinsen, die Schuld bleibt stehen.' : 'Angebot A vollständig ausfüllen.') + '</td></tr>';
     }
 
-    var flaeche = wert('r-flaeche'), miete = wert('r-miete'), nul = wert('r-nul'), rueck = wert('r-rueck'), ausfall = wert('r-ausfall');
+    var flaeche = wert('r-flaeche'), mieteHaus = wert('r-miete'), nul = wert('r-nul'), rueck = wert('r-rueck'), ausfall = wert('r-ausfall');
     /* leeres Mietfeld heißt „noch nicht eingetragen“ (leseZahl liefert dafür 0): kein Ergebnis, kein Startwert */
-    if ($('r-miete').value.trim() === '') miete = null;
+    if ($('r-miete').value.trim() === '') mieteHaus = null;
+    /* Kaltmiete für alle Rechnungen = Haus + Garage (Garage leer = 0) */
+    var miete = (mieteHaus !== null && garMiete !== null) ? mieteHaus + garMiete : null;
+    rechnerMietVergleich(mieteHaus, flaeche);
     var ok3 = fin && miete !== null && nul !== null && rueck !== null && ausfall !== null && flaeche !== null;
     var v = ok3 ? R.vermietung({
       kaufpreis: preis, gesamtkosten: fin.gesamt, kaltmieteMonat: miete, mietausfallProzent: ausfall,
@@ -670,7 +711,7 @@
       { t: 'Bruttomietrendite', w: v ? prozent(v.bruttorendite) : '-' },
       { t: 'Kaufpreisfaktor', w: v ? faktor(v.kaufpreisfaktor) : '-' },
       { t: 'Nettomietrendite', w: v ? prozent(v.nettorendite) : '-' },
-      { t: 'Kaltmiete pro m²', w: (ok3 && flaeche > 0) ? euro(miete / flaeche, true) : '-' },
+      { t: 'Kaltmiete pro m²', w: (ok3 && flaeche > 0) ? euro(mieteHaus / flaeche, true) : '-' },
       { t: 'Reinertrag pro Monat', w: v ? euro(v.reinertragMonat) : '-' },
       { t: 'Rate Angebot A', w: A ? euro(A.rate) : '-' },
       { t: 'Cashflow pro Monat vor Steuern', w: v ? euro(v.cashflowMonat) : '-', k: v ? vorzeichenKlasse(v.cashflowMonat) : '', haupt: true }
@@ -716,10 +757,11 @@
     }) : null;
     var lfEnde = lf ? lf.jahre[lf.jahre.length - 1] : null;
     wertDl('r-kennzahlen', [
-      { t: 'Preis je m² Wohnfläche', w: (fin && flaeche > 0) ? euro(preis / flaeche) : '-' },
+      { t: 'Preis je m² Wohnfläche', w: (fin && flaeche > 0) ? euro(preisHaus / flaeche) : '-' },
       { t: 'Kaufpreisfaktor (Preis ÷ Jahresmiete)', w: v ? faktor(v.kaufpreisfaktor) : '-' },
       { t: 'Eigenkapitalrendite im 1. Jahr', w: lf ? (lf.ekRendite === null ? 'ohne eigenes Geld nicht berechenbar' : prozent(lf.ekRendite)) : '-' },
       { t: 'Schuldendienstdeckung', w: lf && lf.dscr !== null ? fmt2.format(lf.dscr) : '-' },
+      { t: 'Eigenkapital­quote', w: fin && fin.gesamt > 0 ? prozent(ek / fin.gesamt * 100) : '-' },
       { t: 'Schuldenfrei nach (Angebot A)', w: A ? monateText(A.laufzeitMonate) : '-' },
       { t: 'Vermögen im Haus nach ' + (lf ? lf.jahre.length : '…') + ' Jahren', w: lfEnde ? euro(lfEnde.vermoegen) : '-', haupt: true }
     ]);
@@ -802,8 +844,33 @@
     zeigeMerkliste();
   }
 
+  /* Schnellwahl „Faustregel 20 % der Kaltmiete“ für die nicht umlagefähigen Kosten: setzt nur den Wert ins Feld (Annahme, ohne Beleg) */
+  (function () {
+    var meld = $('r-nul-faust'), standardText = meld.innerHTML, gesetzt = null;
+    var fmtFaust = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 2 });
+    $('r-nul-faust-knopf').addEventListener('click', function () {
+      var m = $('r-miete').value.trim() === '' ? null : wert('r-miete'), g = wert('r-garage-miete');
+      if (m === null || !(m > 0) || g === null) {
+        meld.innerHTML = '';
+        meld.textContent = 'Nicht gesetzt: Bitte zuerst die Kaltmiete eintragen (Feld darüber, Schritt 3), dann rechnet die Faustregel 20 % davon aus.';
+        $('r-miete').focus();
+        return;
+      }
+      var kaltmiete = m + g, wertNul = Math.round(kaltmiete * 0.2 * 100) / 100;
+      gesetzt = fmtFaust.format(wertNul);
+      $('r-nul').value = gesetzt;
+      $('r-nul').removeAttribute('aria-invalid');
+      $('r-nul-f').textContent = '';
+      meld.innerHTML = '<span class="annahme">Annahme</span> Faustregel ohne Beleg: 20 % von ' + esc(euro(kaltmiete)) + ' Kaltmiete = ' + esc(euro(wertNul, true)) + ' im Monat eingesetzt. Prüfen Sie, ob das zu Ihrem Haus passt.';
+      $('r-nul').dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    $('r-nul').addEventListener('input', function () {
+      if (gesetzt !== null && $('r-nul').value !== gesetzt) { gesetzt = null; meld.innerHTML = standardText; }
+    });
+  })();
+
   /* ---------- Umbau ---------- */
-  var SAN = D.sanierung || { bauteile: [], foerderung: [], ablauf: [], zuschlaege: {} };
+  var SAN =D.sanierung || { bauteile: [], foerderung: [], ablauf: [], zuschlaege: {} };
   (function () {
     /* Bauteile als Karten: Menge sichtbar, Preis hinter „Preis ändern“; vier häufige Bauteile zuerst, die übrigen unter „Mehr Einstellungen“ */
     function bauteilZeile(b) {
@@ -1319,7 +1386,7 @@
   var STFORM = '#st-form input, #st-form select, #r-form input, #r-form select, #w-form input, #w-form select'; /* die Steuer-Rechner bauen auf Rechner und Wert auf */
   var TEILEN = {
     rechner: { bereich: 'rechner', titel: 'Rechner: Trägt sich das Haus?', formSel: '#r-form input, #r-form select', ohne: ['r-objekt'], satz: 'r-satz',
-      eingaben: ['r-preis', 'r-land', 'r-ek', 'r-zins-a', 'r-tilg-a', 'r-flaeche', 'r-miete'],
+      eingaben: ['r-preis', 'r-garage-preis', 'r-land', 'r-ek', 'r-zins-a', 'r-tilg-a', 'r-flaeche', 'r-miete', 'r-garage-miete'],
       ergebnis: [['Kredit', 'k-darlehen'], ['Rate im Monat', 'k-rate'], ['Bleibt im Monat', 'k-cashflow'], ['Bruttorendite', 'k-rendite']] },
     wert: { bereich: 'wert', titel: 'Wert: Was ist das Haus wert?', formSel: '#w-form input, #w-form select', satz: 'w-satz',
       eingaben: ['w-grund', 'w-brw', 'w-baujahr', 'w-wfl', 'w-we', 'w-miete', 'w-lz'],
@@ -1803,6 +1870,7 @@
   var MERK = 'immo-merkliste';
   var VERSION = 1;
   var liste = (speicherLesen(MERK) || {}).objekte || [];
+  liste.forEach(verlaufPflegen); /* Datenmigration: alte Einträge bekommen den ersten Preisverlauf-Eintrag, alles andere bleibt unverändert */
   var bearbeiteId = null;
   var geloescht = null;
 
@@ -1891,13 +1959,64 @@
       ' <button type="button" class="k-zeige" data-karte="' + esc(g.ags) + '">auf der Karte</button>' +
       '<div class="klein">Eigene Einordnung nach Ihren Kartenregeln (Ebene ' + esc(g.ebene) + '), keine Kaufempfehlung.</div></div>';
   }
-  function zeigeMerkKarten() {
-    var daten = liste.map(function (ob) { return { ob: ob, z: kennzahlen(ob) }; });
+  /* Filter und Sortierung über der Liste: Einträge bleiben unverändert in `liste`, gefilterte werden nur nicht gezeigt.
+     Die gezeigte Reihenfolge gilt für die Karten und die Tabelle (merkSichtbar). */
+  var merkSichtbar = []; /* Objekte in gezeigter Reihenfolge */
+  function merkFilterAktiv() {
+    return $('m-f-rendite').value.trim() !== '' || $('m-f-plus').checked || $('m-f-ampel').value !== '' || $('m-f-gebiet').value !== '' || $('m-f-sort').value !== '';
+  }
+  function merkAnsicht() {
+    var daten = liste.map(function (ob, i) { return { ob: ob, z: kennzahlen(ob), pos: i }; });
     daten.forEach(function (d) {
       d.g = window.KARTE ? window.KARTE.gebietFuer(d.ob) : null;
+      d.brutto = d.ob.miete ? d.z.v.bruttorendite : null;
+      d.art = d.brutto !== null ? ampelArt(d.brutto) : null;
+      d.cf = d.ob.miete && d.z.k ? d.z.v.cashflowMonat : null;
       d.top = !!(d.g && d.g.ampel === 'gut' && d.ob.miete && d.z.v && ampelArt(d.z.v.bruttorendite) === 'gruen');
     });
-    if ($('m-top-zuerst').checked) daten.sort(function (a, b) { return (b.top ? 1 : 0) - (a.top ? 1 : 0); });
+    /* Gebiet-Auswahl aus den Gebieten der Liste neu füllen (nur wenn sich etwas geändert hat) */
+    var gebiete = {};
+    daten.forEach(function (d) { if (d.g) gebiete[d.g.ags] = d.g.name; });
+    var optionen = '<option value="">alle Gebiete</option>' + Object.keys(gebiete).sort(function (a, b) { return gebiete[a].localeCompare(gebiete[b], 'de'); })
+      .map(function (a) { return '<option value="' + esc(a) + '">' + esc(gebiete[a]) + '</option>'; }).join('');
+    var sel = $('m-f-gebiet'), gewaehlt = sel.value;
+    if (sel.getAttribute('data-opt') !== optionen) { sel.innerHTML = optionen; sel.setAttribute('data-opt', optionen); }
+    sel.value = gebiete[gewaehlt] !== undefined ? gewaehlt : '';
+    /* Filter */
+    var rText = $('m-f-rendite').value.trim(), rMin = rText === '' ? null : pruefeFeld('m-f-rendite', true);
+    if (rText === '') { $('m-f-rendite').removeAttribute('aria-invalid'); $('m-f-rendite-f').textContent = ''; }
+    var nur = $('m-f-plus').checked, ampelF = $('m-f-ampel').value, ags = sel.value;
+    var sicht = daten.filter(function (d) {
+      if (rMin !== null && !(d.brutto !== null && d.brutto + 1e-9 >= rMin)) return false;
+      if (nur && !(d.cf !== null && d.cf > 0)) return false;
+      if (ampelF && d.art !== ampelF) return false;
+      if (ags && !(d.g && d.g.ags === ags)) return false;
+      return true;
+    });
+    /* Sortierung; fehlende Werte ans Ende, sonst bleibt die eingetragene Reihenfolge */
+    var art = $('m-f-sort').value, top = $('m-top-zuerst').checked;
+    function schluessel(d) { return art === 'rendite' ? d.brutto : art === 'cf' ? d.cf : art === 'preis' ? d.ob.preis : art === 'datum' ? (d.ob.geaendert || null) : null; }
+    sicht.sort(function (a, b) {
+      if (top && a.top !== b.top) return (b.top ? 1 : 0) - (a.top ? 1 : 0);
+      if (art) {
+        var x = schluessel(a), y = schluessel(b);
+        if (x === null && y !== null) return 1;
+        if (y === null && x !== null) return -1;
+        if (x !== null && y !== null && x !== y) {
+          var absteigend = art !== 'preis';
+          return (x < y ? -1 : 1) * (absteigend ? -1 : 1);
+        }
+      }
+      return a.pos - b.pos;
+    });
+    merkSichtbar = sicht.map(function (d) { return d.ob; });
+    var anz = $('m-f-anzahl'), fehlerText = rMin === null && rText !== '' ? ' Die Mindest-Rendite ist keine gültige Zahl und wird nicht angewendet.' : '';
+    anz.textContent = sicht.length + ' von ' + liste.length + (liste.length === 1 ? ' Eintrag' : ' Einträgen') +
+      (sicht.length < liste.length ? ' (' + (liste.length - sicht.length) + ' ausgeblendet, nicht gelöscht)' : '') + '.' + fehlerText;
+    return sicht;
+  }
+  function zeigeMerkKarten() {
+    var daten = merkAnsicht();
     function werte(d) {
       var ob = d.ob, z = d.z, mitCf = ob.miete && z.k;
       return {
@@ -1942,7 +2061,9 @@
           (ob.flaeche ? ', ' + fmt0.format(ob.flaeche) + NB + 'm²' : '') + '</div>' +
         '<div class="satzchen">' + (cfArt ? '<span class="sprung">' + { gut: 'Ampel grün: ', warn: 'Ampel gelb: ', schlecht: 'Ampel rot: ' }[cfArt] + '</span>' : '') + esc(satz) + '</div>' +
         (art ? '<div class="klein"><span class="ampel ' + art + '">Rendite-Ampel ' + art.replace('ue', 'ü') + '</span> (Bruttorendite ' + schwelle + ')</div>' : '') +
+        preisVerlaufHtml(ob) +
         gebietHtml(d.g, d.top) +
+        mietVergleichHtml(ob, d.g) +
         '<dl>' +
           zeile('Kaufpreis', euro(ob.preis), 'preis', w) +
           (w.qm !== null ? zeile('Preis pro m²', euro(w.qm), 'qm', w) : '') +
@@ -1961,6 +2082,37 @@
           '<button type="button" class="knopf zweit" data-loeschen="' + esc(ob.id) + '">Löschen<span class="sprung"> ' + esc(ob.titel) + '</span></button>' +
         '</div></article>';
     }).join('');
+    if (!daten.length && liste.length) {
+      $('m-karten').innerHTML = '<div class="hinweis" style="grid-column:1/-1"><p style="margin:0">Kein Eintrag passt zu den Filtern. Ihre ' + objekte(liste.length) + ' sind nicht gelöscht, nur ausgeblendet. Mit „Filter zurücksetzen“ sehen Sie wieder alle.</p></div>';
+    }
+  }
+
+  /* Preisverlauf: ob.verlauf = [{ preis, datum }, …], älteste zuerst; der letzte Eintrag ist der jetzige Preis. Datum nach lokaler Uhr (heuteLokal).
+     Ältere Einträge ohne Verlauf bekommen beim Laden einen ersten Eintrag mit dem jetzigen Preis (Datum der letzten Änderung, sonst heute), nichts geht verloren. */
+  function istDatum(s) { return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s); }
+  function verlaufPflegen(ob) {
+    var v = Array.isArray(ob.verlauf) ? ob.verlauf.filter(function (e) { return e && typeof e.preis === 'number' && isFinite(e.preis) && istDatum(e.datum); }) : [];
+    if (!v.length) v = [{ preis: ob.preis, datum: istDatum(ob.geaendert) ? ob.geaendert : heuteLokal() }];
+    else if (v[v.length - 1].preis !== ob.preis) v.push({ preis: ob.preis, datum: heuteLokal() });
+    ob.verlauf = v;
+    return ob;
+  }
+  function preisVerlaufHtml(ob) {
+    var v = Array.isArray(ob.verlauf) ? ob.verlauf : [];
+    if (v.length < 2) return '';
+    var l = v[v.length - 1], p = v[v.length - 2];
+    var h = '<div class="merk-verlauf"><b>Preis ' + (l.preis < p.preis ? 'gesenkt' : 'erhöht') + ':</b> ' + fmt0.format(p.preis) + ' → ' + euro(l.preis) + ' am ' + esc(datumDe(l.datum)) + '</div>';
+    if (v.length > 2) {
+      h += '<details class="mehr-dazu" style="margin:0"><summary>Ganzer Preisverlauf (' + v.length + ' Preise)</summary><ul class="klein" style="margin:0 0 6px">' +
+        v.map(function (e, i) { return '<li>' + (i === 0 ? 'erfasst am ' : 'ab ') + esc(datumDe(e.datum)) + ': ' + euro(e.preis) + '</li>'; }).join('') + '</ul></details>';
+    }
+    return h;
+  }
+  function mietVergleichHtml(ob, g) {
+    if (!(ob.miete > 0) || !g) return '';
+    if (!(ob.flaeche > 0)) return '<div class="klein merk-miete">Miete im Vergleich zum Kreisschnitt: Bitte die Wohnfläche eintragen („Ändern“), dann wird die Miete je m² verglichen.</div>';
+    if (!g.miete) return '<div class="klein merk-miete">Miete im Vergleich: Für dieses Gebiet liegt kein Mietwert aus dem Zensus 2022 vor.</div>';
+    return '<div class="klein merk-miete">' + esc(mietVergleichText(ob.miete, ob.flaeche, g)) + ' ' + esc(MIET_HINWEIS_KURZ) + '</div>';
   }
 
   /* Häuser für die Karte (Punkte, Steckbrief) und neu zeichnen, wenn sich Kartenregeln ändern */
@@ -1973,7 +2125,7 @@
     }).filter(Boolean);
   };
   window.KARTE_GEAENDERT = function () { if (liste.length) zeigeMerkKarten(); };
-  $('m-top-zuerst').addEventListener('change', zeigeMerkKarten);
+  $('m-top-zuerst').addEventListener('change', zeigeMerkliste);
   $('m-karten').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-karte]');
     if (!b || !window.KARTE) return;
@@ -1999,9 +2151,11 @@
     $('m-leer').hidden = liste.length > 0;
     $('m-tabelle-box').hidden = liste.length === 0;
     $('m-band-regel-box').hidden = liste.length === 0;
+    $('m-filter-box').hidden = liste.length === 0;
+    $('m-f-anzahl').hidden = liste.length === 0;
     objektAuswahlFuellen();
     zeigeMerkKarten();
-    tb.innerHTML = liste.map(function (ob) {
+    tb.innerHTML = merkSichtbar.map(function (ob) {
       var z = kennzahlen(ob);
       var qm = ob.flaeche > 0 ? euro(ob.preis / ob.flaeche) : '-';
       var titel = ob.link ? '<a href="' + esc(ob.link) + '" target="_blank" rel="noopener">' + esc(ob.titel) + '</a>' : esc(ob.titel);
@@ -2115,13 +2269,25 @@
       preis: nums['m-preis'], flaeche: nums['m-flaeche'], zimmer: nums['m-zimmer'], miete: nums['m-miete'],
       makler: nums['m-makler'], betten: nums['m-betten'], we: nums['m-we'], baujahr: nums['m-baujahr'], grund: nums['m-grund'], brw: nums['m-brw'],
       link: link, notiz: $('m-notiz').value.trim(),
-      geaendert: new Date().toISOString().slice(0, 10)
+      geaendert: heuteLokal()
     };
     if ($('m-kreis').value) ob.kreis = $('m-kreis').value; /* von Hand gewählter Landkreis, sonst aus dem Ort */
-    /* Felder, die das Formular nicht kennt, beim Ändern behalten (Besichtigung, Beispiel-Kennzeichen) */
+    /* Felder, die das Formular nicht kennt, beim Ändern behalten (Besichtigung, Beispiel-Kennzeichen, Preisverlauf) */
     var vorher = bearbeiteId ? liste.filter(function (x) { return x.id === bearbeiteId; })[0] : null;
     if (vorher && vorher.besichtigung) ob.besichtigung = vorher.besichtigung;
     if (vorher && vorher.beispiel) ob.beispiel = true;
+    /* Preisverlauf: bei geändertem Kaufpreis wird der neue Preis mit dem heutigen (lokalen) Datum angehängt, der alte bleibt stehen */
+    var preisText = '';
+    if (vorher) {
+      verlaufPflegen(vorher);
+      ob.verlauf = vorher.verlauf.slice();
+      if (vorher.preis !== ob.preis) {
+        ob.verlauf.push({ preis: ob.preis, datum: heuteLokal() });
+        preisText = ' Preis ' + (ob.preis < vorher.preis ? 'gesenkt' : 'erhöht') + ': ' + fmt0.format(vorher.preis) + ' → ' + euro(ob.preis) + ' am ' + datumDe(heuteLokal()) + '.';
+      }
+    } else {
+      ob.verlauf = [{ preis: ob.preis, datum: heuteLokal() }];
+    }
     var war = bearbeiteId;
     if (war) liste = liste.map(function (x) { return x.id === war ? ob : x; });
     else liste.push(ob);
@@ -2129,7 +2295,11 @@
     $('m-neu').open = false;
     formularLeeren();
     zeigeMerkliste();
-    if (gespeichert) $('m-meldung').textContent = (war ? 'Geändert: ' : 'Gespeichert: ') + ob.titel + '.';
+    if (gespeichert) {
+      var versteckt = merkSichtbar.indexOf(ob) < 0 && merkFilterAktiv();
+      $('m-meldung').textContent = (war ? 'Geändert: ' : 'Gespeichert: ') + ob.titel + '.' + preisText +
+        (versteckt ? ' Achtung: Der Eintrag ist wegen der Filter gerade ausgeblendet („Filter zurücksetzen“ zeigt ihn wieder).' : '');
+    }
   });
   $('m-abbrechen').addEventListener('click', function () { formularLeeren(); $('m-meldung').textContent = 'Bearbeiten abgebrochen.'; });
 
@@ -2173,6 +2343,14 @@
   $('m-tabelle').addEventListener('click', merkKlick);
   $('m-karten').addEventListener('click', merkKlick);
   ['m-gruen', 'm-gelb'].forEach(function (id) { $(id).addEventListener('input', zeigeMerkliste); });
+  /* Filter und Sortierung: Zustand liegt in den Feldern; nichts davon ändert oder löscht Einträge */
+  ['m-f-rendite', 'm-f-plus', 'm-f-ampel', 'm-f-gebiet', 'm-f-sort'].forEach(function (id) {
+    $(id).addEventListener('input', zeigeMerkliste); $(id).addEventListener('change', zeigeMerkliste);
+  });
+  $('m-f-zurueck').addEventListener('click', function () {
+    $('m-f-rendite').value = ''; $('m-f-plus').checked = false; $('m-f-ampel').value = ''; $('m-f-gebiet').value = ''; $('m-f-sort').value = '';
+    zeigeMerkliste();
+  });
 
   /* Export und Import */
   function dateiSichern(objekte, namenszusatz) {
@@ -2232,6 +2410,7 @@
     liste.forEach(function (x) { vorhanden[x.id] = true; });
     var neu = importBereit.filter(function (x) { return !vorhanden[x.id]; });
     liste = liste.concat(neu);
+    liste.forEach(verlaufPflegen);
     listeSpeichern(); zeigeMerkliste();
     $('m-import-wahl').hidden = true;
     $('m-datei-meldung').textContent = objekte(neu.length) + ' hinzugefügt' + (importBereit.length - neu.length ? ', ' + (importBereit.length - neu.length) + ' waren schon vorhanden' : '') + '.';
@@ -2241,6 +2420,7 @@
     if (!importBereit) return;
     var sicherung = liste.filter(function (o) { return !istBeispiel(o); }).length ? dateiSichern(liste.filter(function (o) { return !istBeispiel(o); }), '_vor_import') : null;
     liste = importBereit.slice();
+    liste.forEach(verlaufPflegen);
     listeSpeichern(); zeigeMerkliste();
     $('m-import-wahl').hidden = true;
     $('m-datei-meldung').textContent = 'Liste ersetzt (' + objekte(liste.length) + ').' + (sicherung ? ' Die alte Liste wurde vorher als „' + sicherung + '“ heruntergeladen.' : '');
@@ -2616,7 +2796,7 @@
   /* Alle Eingaben des Beispiels: Rechner, Wert und Umbau. Beim Umbau werden alle Mengen und Preise gesetzt (leer bzw. Startpreis),
      damit sich keine eigenen Mengen ins Beispiel mischen. */
   function beispielFelder(M) {
-    var f = {};
+    var f = { 'r-garage-preis': '', 'r-garage-miete': '' }; /* Garage gehört nicht zum Beispiel: leer, damit sich eigene Werte nicht mischen */
     Object.keys(M.rechner).forEach(function (id) { f[id] = M.rechner[id]; });
     Object.keys(M.wert || {}).forEach(function (id) { f[id] = M.wert[id]; });
     Object.keys(M.steuer || {}).forEach(function (id) { f[id] = M.steuer[id]; });
@@ -2660,7 +2840,8 @@
     $('r-objekt').value = '';
     liste = liste.filter(function (o) { return !istBeispiel(o); });
     var ob = JSON.parse(JSON.stringify(M.objekt));
-    ob.geaendert = new Date().toISOString().slice(0, 10);
+    ob.geaendert = heuteLokal();
+    verlaufPflegen(ob);
     liste.push(ob);
     listeSpeichern();
     rechne(); eingabenMerken(); zeigeMerkliste(); beispielBandZeigen();
