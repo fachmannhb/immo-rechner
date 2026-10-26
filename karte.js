@@ -1,12 +1,12 @@
 /* Bereich „Wo ist Wohnen gefragt?“: Deutschlandkarte (Länder, Landkreise), Ebenen mit Ampel, Sterne,
    Steckbrief, Tabelle, Streudiagramm; dazu KARTE.gebietFuer(objekt) für die Merkliste.
-   Daten: daten/karte_geo.js (BKG), karte_werte.js (INKAR, Zensus, Portal), karte_werke.js, karte_orte.js (Destatis).
+   Daten: daten/karte_geo.js (BKG), karte_werte.js (INKAR, Zensus), preise_amtlich.js (Destatis, Regionaldatenbank), karte_werke.js, karte_orte.js (Destatis).
    Rechnen mit RECHNER.rang/gesamtwert/ampelVon. Ampel = eigene Einordnung nach offenen Regeln, keine Empfehlung. */
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
   var D = window.DATEN || {}, R = window.RECHNER;
-  var GEO = D.karte, W = D.kartewerte, WERKE = (D.kartewerke && D.kartewerke.werke) || [], ORTE = D.orte || [];
+  var GEO = D.karte, W = D.kartewerte, WERKE = (D.kartewerke && D.kartewerke.werke) || [], ORTE = D.orte || [], PREISE = D.preise || null;
   if (!GEO || !W || !R) return;
   var NS = 'http://www.w3.org/2000/svg';
   var fmt0 = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
@@ -50,7 +50,7 @@
   }
 
   /* ---------- Einstellungen (im Browser gemerkt) ---------- */
-  var STANDARD = { ebene: 'gesamt', gewichte: { nachfrage: 3, arbeit: 2, studium: 1, miete: 1, einstieg: 0, mieteboden: 1 }, gruen: 66, gelb: 33, sterne: { werk: true, hochschule: true, pendler: true, haeuser: true, portal: true } };
+  var STANDARD = { ebene: 'gesamt', gewichte: { nachfrage: 3, arbeit: 2, studium: 1, miete: 1, einstieg: 0, mieteboden: 1 }, gruen: 66, gelb: 33, sterne: { werk: true, hochschule: true, pendler: true, haeuser: true, preise: true } };
   var E = (function () {
     try {
       var g = JSON.parse(localStorage.getItem(SCHLUESSEL) || 'null');
@@ -216,11 +216,11 @@
         titel.textContent = anzeigeName(k) + ': ' + st.filter(function (q) { return q.art === art; }).map(function (q) { return q.text; }).join('; ');
       });
     });
-    if (E.sterne.portal) {
-      (W.portal || []).forEach(function (pt) {
-        var k = KREISE[NACH_AGS[pt.ags]]; if (!k) return;
-        var r = el('rect', { x: k.cx - 4 * s, y: k.cy + 9 * s, width: 8 * s, height: 8 * s, class: 'k-portal', transform: 'rotate(45 ' + k.cx + ' ' + (k.cy + 13 * s) + ')', 'data-ags': k.ags }, gS);
-        el('title', {}, r).textContent = pt.stadt + ': Wohnung ' + fmt0.format(pt.wohnung) + ' €/m² (Portalwert McMakler, Q1 2026)';
+    if (E.sterne.preise && PREISE) {
+      Object.keys(PREISE.staedte).forEach(function (ags) {
+        var pt = PREISE.staedte[ags], k = KREISE[NACH_AGS[ags]]; if (!k) return;
+        var r = el('rect', { x: k.cx - 4 * s, y: k.cy + 9 * s, width: 8 * s, height: 8 * s, class: 'k-preis' + (pt.bau.wert == null ? ' leer' : ''), transform: 'rotate(45 ' + k.cx + ' ' + (k.cy + 13 * s) + ')', 'data-ags': k.ags }, gS);
+        el('title', {}, r).textContent = pt.name + ': ' + (pt.bau.wert != null ? 'Bauland ' + fmt0.format(pt.bau.wert) + ' €/m² (' + pt.bau.art + ', ' + pt.bau.jahr + ', ' + PREISE.quellen.stadt.kurz + ')' : 'Kein amtlicher Wert');
       });
     }
     if (E.sterne.haeuser && window.KARTE_HAEUSER) {
@@ -280,7 +280,54 @@
       var b = 130, bw = svg.clientWidth || 600, bh = svg.clientHeight || 700;
       vb = { x: k.cx - b / 2, y: k.cy - b * bh / bw / 2, w: b, h: b * bh / bw };
     }
-    zeichnen(); steckbrief(); tabelleMarkieren();
+    zeichnen(); steckbrief(); tabelleMarkieren(); baulandBalken();
+  }
+
+  /* ---------- Amtliche Preise (Destatis, Regionaldatenbank; Lizenz dl-de/by-2-0) ---------- */
+  /* Jede Zahl trägt Jahr, Abgrenzung, Quelle und Lizenz direkt dabei (R073) und data-Attribute für die Prüfung.
+     Eigentumswohnung und Haus: kein frei verwendbarer amtlicher Wert, nur der Link des Landes. */
+  function preisZeile(titel, b) {
+    var q = PREISE.quellen[b.quelle];
+    var zusatz = [];
+    if (b.faelle != null) zusatz.push(fmt0.format(b.faelle) + ' Kauffälle');
+    var kopf = '<dt>' + esc(titel) + ' <span class="klein">(' + esc(b.art) + ', ' + b.jahr + ')</span>' +
+      '<span class="k-quelle">Quelle: ' + esc(q.kurz) + ', ' + esc(q.lizenz) + ', Abruf ' + esc(q.abruf) + (zusatz.length ? ', ' + zusatz.join(', ') : '') + '</span>' +
+      (b.hinweis ? '<span class="k-quelle">' + esc(b.hinweis) + '</span>' : '') + '</dt>';
+    if (b.wert == null) return kopf + '<dd data-preis="kein">Kein amtlicher Wert</dd>';
+    return kopf + '<dd data-preis="bau" data-jahr="' + b.jahr + '" data-quelle="' + esc(q.kurz) + '" data-lizenz="' + esc(q.lizenz) + '">' + fmt0.format(b.wert) + ' €/m²' +
+      (b.wenig ? '<span class="annahme k-wenig">Wenige Fälle: unsicher</span>' : '') + '</dd>';
+  }
+  function preisBlock(k) {
+    if (!PREISE) return '';
+    var lc = k.ags.slice(0, 2), land = PREISE.laender[lc], st = PREISE.staedte[k.ags];
+    if (!land) return '';
+    var h = '<div class="k-preise" id="k-preise"><h5>Amtliche Preise</h5>' +
+      '<p class="klein">Die Zahl „Kaufwert Bauland“ oben ist ein Kreiswert aus 2022. Die Zahlen hier sind neuer (2025) und anders abgegrenzt. Vergleichen Sie nur Zahlen mit derselben Beschreibung in Klammern.</p><dl class="k-zahlen">';
+    h += preisZeile('Bauland in ' + land.name, land.bau);
+    if (st) h += preisZeile('Bauland in ' + st.name, st.bau);
+    h += '<dt>Eigentumswohnung und Haus <span class="klein">(€/m²)</span></dt><dd data-preis="kein">Kein amtlicher Wert</dd></dl>';
+    h += '<p class="klein">' + esc(PREISE.keinWert) + ' <a href="' + esc(land.ga) + '" target="_blank" rel="noopener">' + esc(land.gaText) + ' (externe Seite)</a>' +
+      (land.bericht ? ' · <a href="' + esc(land.bericht) + '" target="_blank" rel="noopener">Marktbericht ' + esc(land.name) + ' (externe Seite)</a>' : '') +
+      (land.gaStatus.indexOf('prüfen') === 0 ? ' <span class="annahme">Vor Nutzung prüfen</span> ' + esc(land.gaStatus) + '.' : '') + '</p>';
+    h += '<p class="klein"><a href="' + esc(PREISE.portalLink.url) + '" target="_blank" rel="noopener">' + esc(PREISE.portalLink.text) + '</a>: Das sind Angebotspreise eines Maklerportals, keine Kaufpreise und nicht von dieser Seite.</p></div>';
+    return h;
+  }
+  /* Balkendiagramm „Bauland je Bundesland“: gewöhnliche HTML-Liste mit Balken (lesbar auch für Vorleseprogramme) */
+  function baulandBalken() {
+    var box = $('k-bauland'); if (!box || !PREISE) return;
+    var sel = gewaehlt ? gewaehlt.slice(0, 2) : null, q = PREISE.quellen.land;
+    var codes = Object.keys(PREISE.laender).filter(function (c) { return PREISE.laender[c].bau.wert != null; })
+      .sort(function (a, b) { return PREISE.laender[b].bau.wert - PREISE.laender[a].bau.wert; });
+    var max = codes.length ? PREISE.laender[codes[0]].bau.wert : 1;
+    box.innerHTML = '<ol class="k-bl" aria-label="Bauland in Euro je Quadratmeter, 16 Bundesländer, absteigend sortiert">' + codes.map(function (c) {
+      var l = PREISE.laender[c], an = c === sel;
+      return '<li class="k-bl-zeile' + (an ? ' gewaehlt' : '') + '"' + (an ? ' aria-current="true"' : '') + ' data-land="' + c + '">' +
+        '<span class="k-bl-name">' + esc(l.name) + (an ? ' <span class="k-bl-marke">gewählt</span>' : '') + '</span>' +
+        '<span class="k-bl-balken" aria-hidden="true"><span style="width:' + Math.max(1.5, l.bau.wert / max * 100).toFixed(1) + '%"></span></span>' +
+        '<span class="k-bl-wert" data-preis="bau" data-jahr="' + l.bau.jahr + '" data-quelle="' + esc(q.kurz) + '" data-lizenz="' + esc(q.lizenz) + '">' + fmt0.format(l.bau.wert) + ' €/m²' + (l.bau.wenig ? ' <abbr title="Wenige Kauffälle (' + l.bau.faelle + '): der Mittelwert ist unsicher">*</abbr>' : '') + '</span></li>';
+    }).join('') + '</ol>';
+    $('k-bauland-quelle').innerHTML = 'Quelle: ' + esc(q.text) + ' Lizenz: <a href="' + esc(q.lizenzUrl) + '" target="_blank" rel="noopener">' + esc(q.lizenz) + '</a> (Datenlizenz Deutschland, Namensnennung). ' +
+      '* Weniger als 100 Kauffälle: der Mittelwert ist unsicher. Das Bundesland wird markiert, wenn Sie oben auf der Karte ein Gebiet wählen.';
   }
 
   /* ---------- Steckbrief ---------- */
@@ -305,12 +352,7 @@
     h += '<table class="k-eb"><tbody>' + EBENEN.map(function (e) { return '<tr><th scope="row">' + esc(e.name) + '</th><td>' + balken(k.eb[e.id]) + '</td></tr>'; }).join('') + '</tbody></table>';
     var felder = ['ew', 'e5', 'p45', 'leer', 'miete', 'bau', 'besch', 'ein', 'aus', 'stud'];
     h += '<dl class="k-zahlen">' + felder.map(function (f) { return '<dt>' + esc(W.felder[f].name) + ' <span class="klein">(' + esc(W.felder[f].jahr) + ')</span></dt><dd>' + zahlText(f, k.w[f]) + '</dd>'; }).join('') + '</dl>';
-    var pt = (W.portal || []).filter(function (p) { return p.ags === k.ags; })[0];
-    if (pt) {
-      var rend = k.w.miete ? k.w.miete * 12 / pt.wohnung * 100 : null;
-      h += '<p class="klein"><b>' + esc(pt.stadt) + ', Portalwert:</b> Wohnung ' + fmt0.format(pt.wohnung) + ' €/m², Haus ' + fmt0.format(pt.haus) + ' €/m² (McMakler, 1. Quartal 2026).' +
-        (rend ? ' Grobe Bruttorendite mit Zensus-Miete: ' + fmt1.format(rend) + ' %. Achtung: Bestandsmiete 2022 gegen Angebotspreis 2026, darum eher zu niedrig.' : '') + '</p>';
-    }
+    h += preisBlock(k);
     var haeuser = window.KARTE_HAEUSER ? window.KARTE_HAEUSER().filter(function (x) { return x.ags === k.ags; }) : [];
     if (haeuser.length) h += '<p class="klein"><b>Ihre Häuser hier:</b> ' + haeuser.map(function (x) { return esc(x.titel) + (x.brutto != null ? ' (' + fmt1.format(x.brutto) + ' % brutto)' : ''); }).join(', ') + '</p>';
     h += '<div class="knopfreihe"><button type="button" class="knopf" id="k-suchen">Haus hier suchen</button></div>';
@@ -464,19 +506,19 @@
   window.addEventListener('themagewechselt', function () { if (drei) window.KARTE3D.zeige(KREISE, wert, ampel); });
 
   function allesNeu() {
-    rechnen(); zeichnen(); steckbrief(); tabelle(); streu();
+    rechnen(); zeichnen(); steckbrief(); tabelle(); streu(); baulandBalken();
     if (drei) window.KARTE3D.zeige(KREISE, wert, ampel);
     if (window.KARTE_GEAENDERT) window.KARTE_GEAENDERT();
   }
   if ('ResizeObserver' in window) new ResizeObserver(function () { if (sichtbar) { var alt = vb; einpassen(); if (alt) { vb.x = alt.x; vb.y = alt.y; vb.w = alt.w; vb.h = alt.w * (svg.clientHeight || 1) / (svg.clientWidth || 1); } zeichnen(); streu(); } }).observe($('k-buehne'));
 
   rechnen();
-  ebenenKnoepfe(); regler();
+  ebenenKnoepfe(); regler(); baulandBalken();
   $('k-quellen').innerHTML = 'Kartengrundlage: © <a href="https://www.bkg.bund.de" target="_blank" rel="noopener">BKG</a> (2026) <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener">dl-de/by-2-0</a>, Datenquellen: <a href="https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_vg_nuts.pdf" target="_blank" rel="noopener">datenquellen_vg_nuts.pdf</a>; verändert (vereinfacht, umgerechnet). ' +
-    'Kennzahlen: ' + esc(W.quellen.inkar) + '; ' + esc(W.quellen.zensus) + '. Portalpreise: ' + esc(W.quellen.portal) + '. Gemeinden: Statistisches Bundesamt (Destatis), Gemeindeverzeichnis, 2026. Werke: offizielle Konzernseiten (Abruf 08.10.2026) und Wikipedia (Abruf 09.10.2026).';
+    'Kennzahlen: ' + esc(W.quellen.inkar) + '; ' + esc(W.quellen.zensus) + '.' + (PREISE ? ' Amtliche Baulandpreise: ' + esc(PREISE.quellen.land.text) + ' ' + esc(PREISE.quellen.stadt.text) + ' Lizenz beider: <a href="' + esc(PREISE.quellen.land.lizenzUrl) + '" target="_blank" rel="noopener">dl-de/by-2-0</a> (Datenlizenz Deutschland, Namensnennung).' : '') + ' Gemeinden: Statistisches Bundesamt (Destatis), Gemeindeverzeichnis, 2026. Werke: offizielle Konzernseiten (Abruf 08.10.2026) und Wikipedia (Abruf 09.10.2026).';
 
   window.KARTE = {
-    zeigt: function (an) { sichtbar = !!an; if (!sichtbar) return; if (!vb) einpassen(); zeichnen(); steckbrief(); tabelle(); streu(); },
+    zeigt: function (an) { sichtbar = !!an; if (!sichtbar) return; if (!vb) einpassen(); zeichnen(); steckbrief(); tabelle(); streu(); baulandBalken(); },
     /* Für die Merkliste: Kreis, Ampel, Sterne zu einem Objekt (ort, land) */
     gebietFuer: function (ob) {
       var tr = ob.kreis && NACH_AGS[ob.kreis] != null ? { ags: ob.kreis, sicher: true } : kreisVonOrt(ob.ort, ob.land);

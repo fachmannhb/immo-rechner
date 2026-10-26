@@ -2,6 +2,7 @@
 # Aufruf im Ordner werkzeuge:  python -I -X utf8 bau.py
 # Bettet ein: Schriften (fonts/*.woff2 als data:), Three.js (libs/three.min.js) und alle <script src="..."> aus diesem Ordner.
 # index.html nie direkt bearbeiten, nur vorlage.html und die .js-Dateien.
+# Neue Skripte (z. B. grundriss_geo.js, sprache.js, daten/texte.js) werden eingebettet, sobald sie in vorlage.html als <script src="..."> stehen.
 import base64
 import re
 from pathlib import Path

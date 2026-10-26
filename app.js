@@ -198,6 +198,7 @@
       if (kopf) { kopf.setAttribute('tabindex', '-1'); kopf.focus({ preventScroll: true }); }
     }
     if (window.GRAFIK) window.GRAFIK.versteckeTip();
+    if (window.TXT) window.TXT.bereich(ziel);
     if (window.GRUNDRISS) window.GRUNDRISS.zeigt(ziel === 'grundriss');
     if (window.KARTE) window.KARTE.zeigt(ziel === 'karte');
     zeichneGrafiken(); /* Breite ist erst messbar, wenn der Bereich sichtbar ist */

@@ -421,26 +421,88 @@ __PALETTE_CSS__
   #g-plan { display: block; width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; cursor: default; }
   #g-plan.zeichnen { cursor: crosshair; }
   #g-plan.schieben { cursor: grab; }
-  #g-plan .raster-linie { stroke: var(--linie2); stroke-width: 1; vector-effect: non-scaling-stroke; }
-  #g-plan .raster-linie.meter { stroke: var(--linie); }
-  #g-plan .raum { stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; fill-opacity: .28; cursor: pointer; }
-  #g-plan .raum.gewaehlt { stroke: var(--f8); stroke-width: 4; fill-opacity: .4; }
-  #g-plan .raum-text { fill: var(--text); font-family: var(--sans); font-weight: 700; text-anchor: middle; pointer-events: none; paint-order: stroke; stroke: var(--karte2); stroke-linejoin: round; }
-  #g-plan .raum-text tspan.leise { font-weight: 400; }
-  #g-plan .teil rect { stroke: var(--text); stroke-width: 1.5; vector-effect: non-scaling-stroke; cursor: move; }
-  #g-plan .teil.wohnung rect.koerper { fill: color-mix(in srgb, var(--f2) 45%, var(--karte)); }
-  #g-plan .teil.monteur rect.koerper { fill: color-mix(in srgb, var(--f5) 45%, var(--karte)); }
-  #g-plan .teil.umbau rect.koerper { fill: color-mix(in srgb, var(--f3) 40%, var(--karte)); }
-  #g-plan .teil.wandweg rect.koerper { fill: var(--schlecht-flaeche); stroke: var(--schlecht); stroke-dasharray: 6 4; }
-  #g-plan .teil .kissen { fill: var(--karte); pointer-events: none; }
-  #g-plan .teil.gewaehlt rect.koerper { stroke: var(--f8); stroke-width: 4; }
-  #g-plan .teil text { fill: var(--text); font-family: var(--sans); font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
-  #g-plan :focus { outline: none; }
-  #g-plan :focus-visible > .raum, #g-plan .teil:focus-visible rect.koerper { stroke: var(--akzent); stroke-width: 5; }
-  #g-plan .griff { fill: var(--karte); stroke: var(--f8); stroke-width: 3; vector-effect: non-scaling-stroke; cursor: move; }
-  #g-plan .hilfslinie { stroke: var(--f8); stroke-width: 3; vector-effect: non-scaling-stroke; fill: none; stroke-dasharray: 8 5; }
-  #g-plan .hilfsflaeche { fill: var(--f8); fill-opacity: .15; stroke: var(--f8); stroke-width: 3; vector-effect: non-scaling-stroke; }
-  #g-plan .hilfspunkt { fill: var(--f8); }
+  .planzeichnung .raster-linie { stroke: var(--linie2); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .planzeichnung .raster-linie.meter { stroke: var(--linie); }
+  .planzeichnung .raum { stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; fill-opacity: .28; cursor: pointer; }
+  .planzeichnung .raum.gewaehlt { stroke: var(--f8); stroke-width: 4; fill-opacity: .4; }
+  .planzeichnung .raum-text { fill: var(--text); font-family: var(--sans); font-weight: 700; text-anchor: middle; pointer-events: none; paint-order: stroke; stroke: var(--karte2); stroke-linejoin: round; }
+  .planzeichnung .raum-text tspan.leise { font-weight: 400; }
+  .planzeichnung .teil rect { stroke: var(--text); stroke-width: 1.5; vector-effect: non-scaling-stroke; cursor: move; }
+  .planzeichnung .teil.wohnung rect.koerper { fill: color-mix(in srgb, var(--f2) 45%, var(--karte)); }
+  .planzeichnung .teil.monteur rect.koerper { fill: color-mix(in srgb, var(--f5) 45%, var(--karte)); }
+  .planzeichnung .teil.umbau rect.koerper { fill: color-mix(in srgb, var(--f3) 40%, var(--karte)); }
+  .planzeichnung .teil.wandweg rect.koerper { fill: var(--schlecht-flaeche); stroke: var(--schlecht); stroke-dasharray: 6 4; }
+  .planzeichnung .teil .kissen { fill: var(--karte); pointer-events: none; }
+  .planzeichnung .teil.gewaehlt rect.koerper { stroke: var(--f8); stroke-width: 4; }
+  .planzeichnung .teil text { fill: var(--text); font-family: var(--sans); font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  .planzeichnung :focus { outline: none; }
+  .planzeichnung :focus-visible > .raum, .planzeichnung .teil:focus-visible rect.koerper { stroke: var(--akzent); stroke-width: 5; }
+  .planzeichnung .griff { fill: var(--karte); stroke: var(--f8); stroke-width: 3; vector-effect: non-scaling-stroke; cursor: move; }
+  .planzeichnung .hilfslinie { stroke: var(--f8); stroke-width: 3; vector-effect: non-scaling-stroke; fill: none; stroke-dasharray: 8 5; }
+  .planzeichnung .hilfsflaeche { fill: var(--f8); fill-opacity: .15; stroke: var(--f8); stroke-width: 3; vector-effect: non-scaling-stroke; }
+  .planzeichnung .hilfspunkt { fill: var(--f8); }
+  /* Welle A: Wände aus den Räumen, Maßlinien, Fenster und Türen an der Wand */
+  .planzeichnung .waende, .planzeichnung .masse { pointer-events: none; }
+  .planzeichnung .wand { fill: color-mix(in srgb, var(--text) 80%, var(--karte2)); stroke: none; pointer-events: none; }
+  .planzeichnung .wand.innen { fill: color-mix(in srgb, var(--text) 62%, var(--karte2)); }
+  .planzeichnung .masslinie { stroke: var(--leise); stroke-width: 1.3; vector-effect: non-scaling-stroke; fill: none; }
+  .planzeichnung .masszahl { fill: var(--text); font-family: var(--sans); font-weight: 600; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: var(--karte2); stroke-linejoin: round; }
+  .planzeichnung .teil.fenster rect.koerper { fill: color-mix(in srgb, var(--c2) 55%, var(--karte)); }
+  .planzeichnung .teil .glas { stroke: var(--text); stroke-width: 1.5; vector-effect: non-scaling-stroke; pointer-events: none; }
+  .planzeichnung .griff.breite { fill: var(--akzent); stroke: var(--karte); cursor: ew-resize; }
+  .planzeichnung .teil.eingerastet rect.koerper { animation: einrasten 1.2s ease-out 1; }
+  @keyframes einrasten { 0% { stroke: var(--akzent); stroke-width: 12px; } 100% { stroke-width: 1.5px; } }
+  .chip.mit-symbol { display: inline-flex; align-items: center; gap: 6px; }
+  .chip.mit-symbol svg.sym { width: 1.25em; height: 1.25em; }
+  .knopf svg.sym, .g-panel h4 svg.sym { width: 1.2em; height: 1.2em; vertical-align: -0.2em; }
+  .g-wanddicke { margin-top: 14px; }
+  .g-wanddicke h4 { margin-bottom: 8px; }
+  .g-wd-zeile { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+  .g-wand-skizze { flex: none; width: 132px; height: 76px; background: var(--karte); border: 1px solid var(--linie); border-radius: 8px; color: var(--text); }
+  .g-wand-skizze .ws-raum { fill: color-mix(in srgb, var(--f2) 22%, var(--karte)); }
+  .g-wand-skizze .ws-aussen { fill: color-mix(in srgb, var(--text) 80%, var(--karte2)); }
+  .g-wand-skizze .ws-innen { fill: color-mix(in srgb, var(--text) 62%, var(--karte2)); }
+  .g-wand-skizze .ws-pfeil { fill: none; stroke: var(--text); stroke-width: 2; stroke-linecap: round; }
+  .g-wand-skizze .ws-text { fill: var(--text); font: 600 13px var(--sans); text-anchor: middle; }
+  .g-wd-zeile .g-mini { flex: 1 1 220px; min-width: 0; }
+  .g-wanddicke .klein { margin: 8px 0 0; }
+  .g-hinweis { position: absolute; left: 84px; right: 10px; bottom: 58px; z-index: 3; display: flex; gap: 10px; align-items: center; background: var(--info-fl2); color: var(--text); border: 2px solid var(--info); border-radius: 14px; padding: 8px 12px; font-size: 16px; }
+  .g-hinweis svg.anim { width: 64px; height: 30px; flex: none; color: var(--info); }
+  .g-hinweis .pfeil { animation: pfeilhin 1.6s ease-in-out infinite alternate; }
+  @keyframes pfeilhin { from { transform: translateX(-12px); } to { transform: translateX(12px); } }
+  .g-hinweis span { flex: 1 1 auto; min-width: 0; }
+  @media (max-width: 640px) {
+    .g-hinweis { left: 10px; bottom: 84px; flex-wrap: wrap; gap: 6px 10px; padding: 8px 10px; }
+    .g-hinweis svg.anim { width: 48px; height: 24px; }
+    .g-hinweis span { flex: 1 1 100%; order: 3; font-size: 15px; }
+    .g-hinweis .chip { margin-left: auto; min-height: 36px; padding: 4px 12px; }
+  }
+  .g-wand-hinweis { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 0; font-size: 16px; }
+  .g-wand-hinweis p { margin: 0; }
+  .hilfe-knopf { flex: none; width: 44px; height: 44px; border-radius: 999px; border: 2px solid var(--info); background: var(--info-fl); color: var(--info); font: 800 20px var(--display); cursor: pointer; }
+  .hilfe-knopf[aria-expanded="true"] { background: var(--info); color: var(--karte); }
+  .g-sk { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; align-items: start; }
+  .g-sk .skizze { color: var(--text); background: var(--karte); border-radius: 8px; border: 1px solid var(--linie); margin-top: 24px; }
+  .g-wand-ok, .g-wand-weg { padding: 8px 10px; border-radius: 10px; border: 2px solid; margin: 0 0 10px; }
+  .g-wand-ok { background: var(--gut-fl); border-color: var(--gut); }
+  .g-wand-weg { background: var(--warn-fl); border-color: var(--warn); }
+  .sprachwahl { flex: 0 0 auto; width: auto; min-width: 4.6em; height: 44px; border-radius: 999px; border: 1px solid var(--linie); background: var(--karte); color: var(--text); font: 700 16px var(--sans); padding: 0 10px; cursor: pointer; }
+  .sprach-hinweis { margin: 0; padding: 8px 20px; text-align: center; background: var(--info-fl); color: var(--text); border-bottom: 2px solid var(--info); font-size: 16px; }
+  .g-druck { display: none; }
+  .g-nord { position: absolute; left: 10px; bottom: 10px; z-index: 2; width: 64px; height: 64px; border-radius: 50%; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .g-nord:active { cursor: grabbing; }
+  .g-nord svg { display: block; }
+  .g-nord .nord-kreis { fill: var(--karte); stroke: var(--text); stroke-width: 2; }
+  .g-nord .nord-pfeil { fill: var(--schlecht); stroke: var(--text); stroke-width: 1.2; stroke-linejoin: round; }
+  .g-nord .nord-n { fill: var(--text); font: 800 16px var(--display); text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: var(--karte); stroke-width: 3px; }
+  .g-nord .nord-mitte { fill: var(--text); }
+  .g-nord .nord-bogen { fill: none; stroke: var(--akzent); stroke-width: 3; stroke-linecap: round; }
+  .g-nord .nord-spitze { fill: var(--akzent); stroke: var(--akzent); stroke-width: 1; stroke-linejoin: round; }
+  .g-nord:hover .nord-bogen, .g-nord:focus-visible .nord-bogen { stroke-width: 4; }
+  .g-nord-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 0; }
+  .g-nord-zeile svg.sym { width: 1.4em; height: 1.4em; color: var(--text); }
+  .g-nord-zeile label { margin: 0; }
+  .g-nord-feld { width: 5.5em; }
   .raum.art-voll { fill: var(--f2); } .raum.art-balkon { fill: var(--f4); } .raum.art-wintergarten { fill: var(--f1); } .raum.art-zubehoer { fill: var(--f7); }
   .g-tipp { position: absolute; left: 10px; right: 10px; top: 10px; pointer-events: none; display: flex; justify-content: center; }
   .g-tipp span { background: color-mix(in srgb, var(--karte) 92%, transparent); border: 1px solid var(--linie2); border-radius: 12px; padding: 6px 12px; font-size: 16px; max-width: 100%; }
@@ -486,7 +548,32 @@ __PALETTE_CSS__
   .k-stern.werk, .k-st.werk { fill: var(--c3); color: var(--c3); }
   .k-stern.hochschule, .k-st.hochschule { fill: var(--c1); color: var(--c1); }
   .k-stern.pendler, .k-st.pendler { fill: var(--c2); color: var(--c2); }
-  #k-karte .k-portal { fill: var(--text); fill-opacity: .85; stroke: var(--karte); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  #k-karte .k-preis { fill: var(--text); fill-opacity: .85; stroke: var(--karte); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  #k-karte .k-preis.leer { fill: var(--karte); fill-opacity: 1; stroke: var(--text); stroke-width: 1.5; }
+  .k-preise { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--linie); }
+  .k-preise h5 { margin: 0 0 4px; font: 700 1.05rem var(--display); }
+  .k-preise .k-zahlen { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .k-preise .k-zahlen dt { margin-top: 10px; }
+  .k-preise .k-zahlen dd { text-align: left; font-size: 1.2rem; font-weight: 800; margin: 2px 0 0; }
+  .k-preise .k-zahlen dd[data-preis=kein] { font-size: 1rem; }
+  .k-preise dt .k-quelle { display: block; font-size: 15px; line-height: 1.3; margin-top: 2px; }
+  .k-preise dd .k-wenig { display: inline-block; margin-left: 8px; font-size: 15px; font-weight: 600; vertical-align: 2px; }
+  .k-preise .annahme { white-space: normal; }
+  /* Balkendiagramm Bauland je Bundesland (HTML-Liste, Farben aus der Palette) */
+  .k-bl { list-style: none; margin: 8px 0 6px; padding: 0; display: grid; gap: 6px; }
+  .k-bl-zeile { display: grid; grid-template-columns: minmax(9em, 13em) minmax(0, 1fr) 7.5em; gap: 4px 12px; align-items: center; font-size: 16px; padding: 2px 6px; border-radius: 8px; }
+  .k-bl-name { min-width: 0; overflow-wrap: anywhere; }
+  .k-bl-balken { display: block; height: 18px; border-radius: 5px; background: var(--linie); overflow: hidden; }
+  .k-bl-balken > span { display: block; height: 100%; background: var(--c1); border-radius: 5px; }
+  .k-bl-wert { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .k-bl-zeile.gewaehlt { background: var(--akzent-flaeche); outline: 2px solid var(--c3); }
+  .k-bl-zeile.gewaehlt .k-bl-balken > span { background: var(--c3); }
+  .k-bl-zeile.gewaehlt .k-bl-name, .k-bl-zeile.gewaehlt .k-bl-wert { font-weight: 800; }
+  .k-bl-marke { display: inline-block; padding: 0 8px; border-radius: 999px; background: var(--karte); color: var(--text); border: 2px solid var(--c3); font-size: 15px; font-weight: 700; margin-left: 4px; }
+  @media (max-width: 640px) {
+    .k-bl-zeile { grid-template-columns: minmax(0, 1fr) auto; }
+    .k-bl-balken { grid-column: 1 / -1; grid-row: 2; }
+  }
   #k-karte .k-haus { stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; }
   #k-karte .k-haus.gut { fill: var(--gut); } #k-karte .k-haus.warn { fill: var(--warn); } #k-karte .k-haus.schlecht { fill: var(--schlecht); } #k-karte .k-haus.leer { fill: var(--karte); }
   .ampel-punkt { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
@@ -723,6 +810,26 @@ __PALETTE_CSS__
   .bes-stand b { font-weight: 800; }
   .bes-stand.mangel { border-color: var(--schlecht); border-width: 2px; }
   @media (max-width: 640px) { .bes-wahl button { font-size: 16px; } .bes-gruppe { padding: 10px 10px 14px; } }
+  /* Plan drucken: nur #g-druck, immer helle Farben (auch im Dunkelmodus); getrennt von der Bank-Mappe (body.mappe-offen) */
+  @media print {
+    body.plan-druck { background: #ffffff !important; }
+    body.plan-druck > *:not(#g-druck) { display: none !important; }
+    body.plan-druck #g-druck { display: block !important; color-scheme: light; color: #241d2e; background: #ffffff;
+      --grund: #ffffff; --karte: #ffffff; --karte2: #ffffff; --linie: #e8dfd1; --linie2: #d3c6b3; --text: #241d2e; --leise: #5c5666; --akzent-text: #5b2f94;
+      --f1: #6b3fa0; --f2: #2f5fb3; --f3: #b0346b; --f4: #1f6f9e; --f5: #8e2f8a; --f6: #4f6170; --f7: #6b6470; --f8: #4a4fb5; --c2: #1f9bd1;
+      font: 12pt/1.4 var(--sans); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    #g-druck .g-druck-kopf { display: flex; justify-content: space-between; align-items: flex-start; gap: 8pt; }
+    #g-druck .g-druck-rose { flex: none; width: 24mm; height: 24mm; }
+    #g-druck h1 { font-size: 18pt; margin: 0 0 4pt; }
+    #g-druck .g-druck-meta { margin: 0 0 8pt; }
+    #g-druck .g-druck-plan { margin: 0 0 8pt; }
+    #g-druck .planzeichnung { display: block; border: 1px solid #bbbbbb; background: #ffffff; }
+    #g-druck .g-druck-klein { font-size: 9.5pt; color: #5c5666; margin: 4pt 0; }
+    #g-druck .g-druck-tab { width: 100%; border-collapse: collapse; font-size: 11pt; margin-top: 8pt; break-inside: avoid; }
+    #g-druck .g-druck-tab th, #g-druck .g-druck-tab td { border-bottom: 1px solid #cccccc; padding: 3pt 6pt; text-align: left; }
+    #g-druck .g-druck-tab .z { text-align: right; }
+    #g-druck .g-druck-tab .summe th, #g-druck .g-druck-tab .summe td { font-weight: 800; border-top: 2px solid #241d2e; }
+  }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -742,6 +849,14 @@ __PALETTE_CSS__
   <symbol id="i-menue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
   <symbol id="i-sonne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
   <symbol id="i-mond" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+  <symbol id="i-fenster" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M12 3v18M4 12h16"/></symbol>
+  <symbol id="i-tuer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M3 21h18"/><circle cx="15" cy="12.5" r=".9" fill="currentColor"/></symbol>
+  <symbol id="i-wand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v14H3zM3 12h18M9 5v7M15 12v7"/></symbol>
+  <symbol id="i-dreh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v5h-5"/></symbol>
+  <symbol id="i-weg-teil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-kompass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 5l3 7h-6z"/></symbol>
+  <symbol id="i-mass"viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 8v8M21 8v8M7 9l-4 3 4 3M17 9l4 3-4 3"/></symbol>
+  <symbol id="i-druck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></symbol>
 </svg>
 
 <a class="sprung" href="#inhalt">Zum Inhalt springen</a>
@@ -771,6 +886,11 @@ __PALETTE_CSS__
           <button type="button" class="bereich-knopf optional" id="tab-impressum" data-ziel="impressum" style="--f:var(--f7)"><svg aria-hidden="true"><use href="#i-paragraf"/></svg>Impressum und Datenschutz</button>
         </nav>
       </details>
+      <select id="sprache-wahl" class="sprachwahl" aria-label="Sprache / Language / Язык" title="Sprache / Language / Язык">
+        <option value="de" lang="de">DE</option>
+        <option value="en" lang="en">EN</option>
+        <option value="ru" lang="ru">RU</option>
+      </select>
       <button type="button" class="themaknopf" id="thema-knopf" aria-label="Dunkles Design einschalten">
         <svg id="thema-sonne" aria-hidden="true"><use href="#i-sonne"/></svg>
         <svg id="thema-mond" aria-hidden="true" hidden><use href="#i-mond"/></svg>
@@ -785,6 +905,7 @@ __PALETTE_CSS__
   <a class="leiste-kompakt" id="weg-kompakt" href="#" data-ziel="rechner"><span>Schritt 1 von 7 · Weiter →</span></a>
 </nav>
 
+<p class="sprach-hinweis" id="sprach-hinweis" role="status" hidden></p>
 <main id="inhalt">
 <div class="beispielband" id="teilen-band" role="status" hidden>
   <span id="teilen-text"><b>Geteilte Zahlen – nicht Ihre eigenen.</b> Jemand hat Ihnen diese Rechnung geschickt. Ihre eigenen Eingaben sind gesichert.</span>
@@ -1644,17 +1765,27 @@ __PALETTE_CSS__
   <div class="karte">
     <div class="g-leiste">
       <div class="g-gruppe" role="group" aria-label="Etagen"><span>Etage:</span><span id="g-etagen" class="g-gruppe"></span><button type="button" class="chip klein" id="g-etage-neu" aria-label="Etage hinzufügen">+</button></div>
-      <div class="g-gruppe" role="group" aria-label="Ansicht"><span>Ansicht:</span><button type="button" class="chip" id="g-ansicht-plan" aria-pressed="true">Von oben</button><button type="button" class="chip" id="g-ansicht-3d" aria-pressed="false">3D</button></div>
+      <div class="g-gruppe" role="group" aria-label="Ansicht"><span>Ansicht:</span><button type="button" class="chip" id="g-ansicht-plan" aria-pressed="true">Von oben</button><button type="button" class="chip" id="g-ansicht-3d" aria-pressed="false">3D</button>
+        <button type="button" class="chip mit-symbol" id="g-masse" aria-pressed="true"><svg class="sym" aria-hidden="true"><use href="#i-mass"/></svg><span data-t="masse">Maße zeigen</span></button>
+        <button type="button" class="chip mit-symbol" id="g-drucken"><svg class="sym" aria-hidden="true"><use href="#i-druck"/></svg><span data-t="drucken">Plan drucken</span></button></div>
     </div>
     <div class="g-flaeche">
       <div class="g-buehne" id="g-buehne">
-        <svg id="g-plan" role="application" aria-label="Grundriss. Räume und Möbel anklicken oder mit Tab auswählen; Pfeiltasten verschieben, R dreht, Entf löscht."></svg>
+        <svg id="g-plan" class="planzeichnung" role="application" aria-label="Grundriss. Räume und Möbel anklicken oder mit Tab auswählen; Pfeiltasten verschieben, R dreht, Entf löscht."></svg>
         <figure class="szene g-szene" id="g-szene" aria-label="Dreidimensionale Ansicht des Grundrisses, mit der Maus drehbar" hidden>
           <canvas id="g-3d"></canvas>
           <div class="ersatz" id="g-3d-ersatz" hidden>3D-Ansicht nicht verfügbar (WebGL ist in diesem Browser aus). Der Plan von oben funktioniert trotzdem.</div>
           <figcaption class="szenen-text"><span>ziehen zum Drehen</span><span id="g-3d-etikett"></span></figcaption>
         </figure>
         <div class="g-tipp" aria-live="polite"><span id="g-tipp"></span></div>
+        <div class="g-nord" id="g-nord" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="359" aria-valuenow="0" aria-label="Norden" data-t-aria="nordName" title="Windrose ziehen" data-t-title="nordZiehen">
+          <svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true" focusable="false"><circle cx="32" cy="32" r="24" class="nord-kreis"/><g class="nord-dreh"><path d="M41.9 4.8A29 29 0 0 1 59.3 22.1" class="nord-bogen"/><path d="M62.5 20.9 61 26.8 56 23.3Z" class="nord-spitze"/><path d="M22.1 59.2A29 29 0 0 1 4.7 41.9" class="nord-bogen"/><path d="M1.5 43.1 3 37.2 8 40.7Z" class="nord-spitze"/></g><g id="g-nord-pfeil"><path d="M32 12 38 34 32 30 26 34Z" class="nord-pfeil"/><text id="g-nord-n" x="32" y="17" class="nord-n">N</text></g><circle cx="32" cy="32" r="3" class="nord-mitte"/></svg>
+        </div>
+        <div class="g-hinweis" id="g-hinweis" role="status" hidden>
+          <svg class="anim" viewBox="0 0 64 30" aria-hidden="true" focusable="false"><path d="M4 26h56" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><g class="pfeil"><rect x="20" y="4" width="24" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="3"/><path d="M32 4v16" stroke="currentColor" stroke-width="2"/></g></svg>
+          <span id="g-hinweis-text"></span>
+          <button type="button" class="chip" id="g-hinweis-zu" data-t="verstanden">Verstanden</button>
+        </div>
         <div class="g-zoom" id="g-zoom">
           <button type="button" class="chip klein" id="g-zoom-aus" aria-label="Verkleinern">−</button>
           <button type="button" class="chip klein" id="g-zoom-ein" aria-label="Vergrößern">+</button>
@@ -1679,7 +1810,26 @@ __PALETTE_CSS__
           <p class="klein" id="g-mass-stand"></p>
           <div class="g-mini" style="margin-top:12px">
             <div><label for="g-etage-name">Name der Etage</label><input type="text" id="g-etage-name"></div>
-            <div><label for="g-wandhoehe">Raumhöhe in m (für 3D)</label><input type="text" id="g-wandhoehe" inputmode="decimal" aria-describedby="g-wandhoehe-f"><div class="fehler" id="g-wandhoehe-f"></div></div>
+            <div><label for="g-wandhoehe">Raumhöhe dieser Etage in m (für 3D)</label><input type="text" id="g-wandhoehe" inputmode="decimal" aria-describedby="g-wandhoehe-f"><div class="fehler" id="g-wandhoehe-f"></div></div>
+          </div>
+          <div class="g-wanddicke" id="g-wanddicke">
+            <h4 data-t="wandDickeTitel">Wanddicke dieser Etage</h4>
+            <div class="g-wd-zeile">
+              <svg class="g-wand-skizze" viewBox="0 0 132 76" role="img" aria-label="Skizze von oben: dicke Außenwand und dünne Innenwand, jeweils mit Maßpfeil" data-t-aria="wandSkizzeAria" focusable="false">
+                <rect x="30" y="14" width="72" height="46" class="ws-raum"/>
+                <rect x="6" y="14" width="24" height="46" class="ws-aussen"/>
+                <rect x="96" y="14" width="12" height="46" class="ws-innen"/>
+                <path d="M6 8H30M6 5V11M30 5V11" class="ws-pfeil"/>
+                <path d="M96 8H108M96 5V11M108 5V11" class="ws-pfeil"/>
+                <text x="18" y="73" class="ws-text" data-t="wandSkizzeAussen">außen</text>
+                <text x="102" y="73" class="ws-text" data-t="wandSkizzeInnen">innen</text>
+              </svg>
+              <div class="g-mini">
+                <div><label for="g-aussenwand" data-t="wandAussenLabel">Außenwand in cm</label><input type="text" id="g-aussenwand" inputmode="decimal" aria-describedby="g-aussenwand-f g-wd-kurz"><div class="fehler" id="g-aussenwand-f"></div></div>
+                <div><label for="g-innenwand" data-t="wandInnenLabel">Innenwand in cm</label><input type="text" id="g-innenwand" inputmode="decimal" aria-describedby="g-innenwand-f g-wd-kurz"><div class="fehler" id="g-innenwand-f"></div></div>
+              </div>
+            </div>
+            <p class="klein" id="g-wd-kurz" data-t="wandFeldKurz">Dicke der Wand in cm. Der gezeichnete Raum behält sein Maß, die Außenwand kommt nach außen dazu.</p>
           </div>
           <div class="knopfreihe"><button type="button" class="knopf zweit" id="g-etage-weg">Diese Etage löschen</button></div>
         </div>
@@ -1720,6 +1870,20 @@ __PALETTE_CSS__
         <div class="g-panel g-auswahl" id="g-auswahl" aria-live="polite"></div>
       </div>
     </div>
+    <div class="g-wand-hinweis" id="g-wand-hinweis">
+      <span class="annahme" data-t="annahme">Annahme</span>
+      <p id="g-wand-hinweis-text"></p>
+      <button type="button" class="hilfe-knopf" id="g-wand-hilfe" aria-expanded="false" aria-controls="g-wand-hilfe-text" data-t-aria="hilfeKnopf" aria-label="Mehr erklären">?</button>
+    </div>
+    <p class="klein" id="g-wand-hilfe-text" data-t="wandHilfe" hidden></p>
+    <div class="g-nord-zeile">
+      <svg class="sym" aria-hidden="true"><use href="#i-kompass"/></svg>
+      <label for="g-nord-grad" data-t="nordFeld">Norden zeigt auf dem Plan nach (Grad)</label>
+      <input type="text" id="g-nord-grad" class="g-nord-feld" inputmode="numeric" aria-describedby="g-nord-grad-f" value="0">
+      <button type="button" class="hilfe-knopf" id="g-nord-hilfe" aria-expanded="false" aria-controls="g-nord-hilfe-text" data-t-aria="hilfeKnopf" aria-label="Mehr erklären">?</button>
+    </div>
+    <div class="fehler" id="g-nord-grad-f"></div>
+    <p class="klein" id="g-nord-hilfe-text" data-t="nordHilfe" hidden></p>
     <div class="meldung" id="g-meldung" role="status" aria-live="polite"></div>
   </div>
 
@@ -1778,7 +1942,7 @@ __PALETTE_CSS__
       <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-neu-sichern">Sichern und neu beginnen</button><button type="button" class="knopf zweit" id="g-neu-ohne">Ohne Sichern löschen</button><button type="button" class="knopf zweit" id="g-neu-nein">Abbrechen</button></div>
     </div>
     <div class="meldung" id="g-datei-meldung" role="status" aria-live="polite"></div>
-    <p class="klein">Grenzen: kein Bauplan. Wände sind die Ränder der Räume, ohne Wandstärke; Dachschrägen werden nur als Anteil der Fläche gerechnet, nicht in 3D gezeigt. Die Wohnfläche ist eine Näherung zum Prüfen der Exposé-Angabe, kein Aufmaß. Alle Preise sind Richtwerte.</p>
+    <p class="klein">Grenzen: kein Bauplan. Wände werden aus den Räumen berechnet (Wandstärken sind Annahmen: außen 30 cm, innen 11,5 cm) und nicht in die Wohnfläche eingerechnet; Dachschrägen werden nur als Anteil der Fläche gerechnet, nicht in 3D gezeigt. Die Wohnfläche ist eine Näherung zum Prüfen der Exposé-Angabe, kein Aufmaß. Alle Preise sind Richtwerte.</p>
   </div>
 </section>
 
@@ -1828,8 +1992,15 @@ __PALETTE_CSS__
     <div class="k-legende">
       <span><i class="ampel-punkt gut"></i>gefragt</span><span><i class="ampel-punkt warn"></i>mittel</span><span><i class="ampel-punkt schlecht"></i>schwächer</span><span><i class="ampel-punkt leer"></i>keine Daten</span>
       <span><b class="k-st werk">★</b>Großes Werk</span><span><b class="k-st hochschule">★</b>Hochschulort (ab 20.000 Studierenden)</span><span><b class="k-st pendler">★</b>Pendlerzentrum (ab 100.000 Einpendlern)</span>
-      <span><i class="k-raute"></i>Großstadt mit Portalpreis</span><span><i class="k-haus-punkt"></i>Ihr Haus aus der Merkliste</span>
+      <span><i class="k-raute"></i>Landeshauptstadt mit amtlichem Baulandpreis</span><span><i class="k-haus-punkt"></i>Ihr Haus aus der Merkliste</span>
     </div>
+  </div>
+
+  <div class="karte" id="k-bl-karte">
+    <h3>Bauland je Bundesland</h3>
+    <p class="klein">Was kostet ein Quadratmeter Bauland für ein Wohnhaus? Der Balken zeigt den amtlichen Durchschnitt des Landes im Jahr 2025. Je länger der Balken, desto teurer. Wählen Sie oben auf der Karte ein Gebiet, dann wird sein Bundesland markiert.</p>
+    <div id="k-bauland" aria-live="polite"></div>
+    <p class="klein" id="k-bauland-quelle"></p>
   </div>
 
   <div class="karte">
@@ -1845,7 +2016,7 @@ __PALETTE_CSS__
       <span class="g-check"><input type="checkbox" id="k-s-werk"><label for="k-s-werk">Große Werke</label></span>
       <span class="g-check"><input type="checkbox" id="k-s-hochschule"><label for="k-s-hochschule">Hochschulorte</label></span>
       <span class="g-check"><input type="checkbox" id="k-s-pendler"><label for="k-s-pendler">Pendlerzentren</label></span>
-      <span class="g-check"><input type="checkbox" id="k-s-portal"><label for="k-s-portal">Portalpreise</label></span>
+      <span class="g-check"><input type="checkbox" id="k-s-preise"><label for="k-s-preise">Amtliche Baulandpreise der Landeshauptstädte</label></span>
       <span class="g-check"><input type="checkbox" id="k-s-haeuser"><label for="k-s-haeuser">Meine Häuser</label></span>
     </div>
   </div>
@@ -1868,7 +2039,7 @@ __PALETTE_CSS__
   </div>
 
   <div class="karte">
-    <p class="klein">Grenzen: Die Zahlen stammen aus verschiedenen Jahren (Zensus 2022, INKAR 2022 bis 2024), jede Zahl nennt ihr Jahr. Ein Landkreis ist groß; innerhalb eines Kreises kann es sehr verschieden sein. Die Portalpreise sind Angebotswerte eines Maklerportals, keine amtlichen Preise. Die Liste der großen Werke ist eine Auswahl; Werke ohne Beleg mit Standort, etwa von Siemens, fehlen noch. Beschäftigtenzahlen tragen ihr Jahr und können veraltet sein. Die Ampel ist eine eigene Einordnung, keine Prognose und keine Kaufempfehlung.</p>
+    <p class="klein">Grenzen: Die Zahlen stammen aus verschiedenen Jahren (Zensus 2022, INKAR 2022 bis 2024), jede Zahl nennt ihr Jahr. Ein Landkreis ist groß; innerhalb eines Kreises kann es sehr verschieden sein. Die Preise je Bundesland und Landeshauptstadt sind amtliche Kaufwerte für Bauland aus der Statistik (Jahr 2025), keine Preise für Häuser oder Wohnungen; die Abgrenzungen unterscheiden sich, jede Zahl nennt ihre. Die Liste der großen Werke ist eine Auswahl; Werke ohne Beleg mit Standort, etwa von Siemens, fehlen noch. Beschäftigtenzahlen tragen ihr Jahr und können veraltet sein. Die Ampel ist eine eigene Einordnung, keine Prognose und keine Kaufempfehlung.</p>
     <p class="klein" id="k-quellen"></p>
   </div>
 </section>
@@ -2459,8 +2630,13 @@ __PALETTE_CSS__
 <script src="daten/bilder.js"></script>
 <script src="daten/karte_geo.js"></script>
 <script src="daten/karte_werte.js"></script>
+<script src="daten/preise_amtlich.js"></script>
 <script src="daten/karte_werke.js"></script>
 <script src="daten/karte_orte.js"></script>
+<div class="g-druck" id="g-druck" aria-hidden="true"></div>
+<script src="daten/texte.js"></script>
+<script src="sprache.js"></script>
+<script src="grundriss_geo.js"></script>
 <script src="rechner.js"></script>
 <script src="grafik.js"></script>
 <script src="haus3d.js"></script>

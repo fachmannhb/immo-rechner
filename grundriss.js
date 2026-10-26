@@ -8,6 +8,10 @@
   var svg = $('g-plan');
   if (!svg || !window.RECHNER) return;
   var R = window.RECHNER;
+  var GEO = window.GRUNDRISS_GEO;
+  if (!GEO) return;
+  /* Texte der neuen Funktionen in drei Sprachen (daten/texte.js, sprache.js); ohne sie bleibt der Schlüssel sichtbar */
+  function tr(k, v) { return window.TXT ? window.TXT.t(k, v) : k; }
   var KAT = (window.DATEN && window.DATEN.moebel) || { artikel: [] };
   var ART = {};
   KAT.artikel.forEach(function (a) { ART[a.id] = a; });
@@ -30,9 +34,19 @@
   ];
 
   /* ---------- Zustand ---------- */
-  function neueEtage(name) { return { name: name, bild: null, bildB: 0, bildH: 0, mpp: 0.01, massstab: false, raeume: [], teile: [] }; }
-  function leererPlan() { return { app: 'immo-grundriss', version: 1, aktiv: 0, wandhoehe: 2.5, preise: {}, mengen: {}, etagen: [neueEtage('Erdgeschoss')] }; }
+  /* Datenmodell Version 2 (Version 1 lädt mit Standardwerten):
+     Etage: hoehe (lichte Raumhöhe, Standard = alte plan.wandhoehe), aussenwand 0,30, innenwand 0,115, decke 0,25.
+     Fenster/Tür: hoehe, bruestung (Fenster 0,9, Tür 0), bindung {raum, kante, t} oder null, bindungGrund.
+     Plan: dach {form, neigung, first, ueberstand}. plan.wandhoehe bleibt als Standardhöhe neuer Etagen erhalten. */
+  function neueEtage(name, hoehe) {
+    return { name: name, bild: null, bildB: 0, bildH: 0, mpp: 0.01, massstab: false, hoehe: hoehe || 2.5, aussenwand: 0.30, innenwand: 0.115, decke: 0.25, raeume: [], teile: [] };
+  }
+  function neuesDach() { return { form: 'sattel', neigung: 35, first: 'x', ueberstand: 0.3 }; }
+  function leererPlan() { return { app: 'immo-grundriss', version: 2, aktiv: 0, wandhoehe: 2.5, nord: 0, dach: neuesDach(), preise: {}, mengen: {}, etagen: [neueEtage('Erdgeschoss', 2.5)] }; }
+  function istTuerFenster(t) { var a = ART[t.art]; return !!a && (a.form === 'tuer' || a.form === 'fenster'); }
   var plan = laden() || leererPlan();
+  var massAn = true;        /* Maßlinien zeigen */
+  var markiert = null;      /* Teil, das gerade eingerastet ist (kurze Hervorhebung) */
   var gewaehlt = null;      /* { typ:'raum'|'teil', id } */
   var modus = 'auswahl';    /* auswahl | rechteck | ecken | massstab */
   var entwurf = [];         /* Punkte beim Zeichnen Ecke für Ecke */
@@ -46,17 +60,75 @@
 
   function etage() { return plan.etagen[plan.aktiv] || plan.etagen[0]; }
 
+  /* ---------- Fenster und Türen an der Wand ---------- */
+  var SNAP = 0.4;   /* so nah (Meter) rastet ein Fenster oder eine Tür an einer Raumkante ein */
+  function raumIn(e, id) { return e.raeume.filter(function (r) { return r.id === id; })[0]; }
+  function loseBindung(t, grund) { t.bindung = null; t.bindungGrund = grund || ''; }
+  /* Gebundene Teile folgen ihrer Raumkante (Ecke verschoben, Maßstab, Raum bewegt). Fehlt der Raum oder die
+     Kante, bleibt das Teil frei stehen und merkt sich den Grund (wird in Seitenfeld und Statuszeile gezeigt). */
+  function nachfuehren(e) {
+    var wl = null;
+    e.teile.forEach(function (t) {
+      if (!t.bindung || !istTuerFenster(t)) return;
+      var raum = raumIn(e, t.bindung.raum);
+      if (!raum) { loseBindung(t, 'geloescht|'); return; }
+      if (!GEO.kanten(raum)[t.bindung.kante]) { loseBindung(t, 'kante|' + raum.name); return; }
+      wl = wl || GEO.waende(e);
+      var p = GEO.bindungPos(e, t.bindung, t.w, t.dreh, wl);
+      if (!p) { loseBindung(t, 'kante|' + raum.name); return; }
+      t.x = p.x; t.y = p.y; t.dreh = p.dreh; if (p.dicke) t.d = p.dicke;
+    });
+  }
+  function nachfuehrenAlle() { plan.etagen.forEach(nachfuehren); }
+  /* Teil an die nächste Raumkante setzen (wunsch = gewünschte Mitte). true = eingerastet. */
+  function anWand(t, wunsch, maxD) {
+    var e = etage(), vorher = t.bindung ? t.dreh : null;
+    var k = GEO.naechsteKante(e, wunsch, maxD == null ? SNAP : maxD, t.bindung);
+    if (!k) { if (t.bindung) t.d = ART[t.art].tiefe / 100; loseBindung(t, ''); t.x = wunsch[0]; t.y = wunsch[1]; return false; }
+    t.bindung = { raum: k.raum, kante: k.kante, t: k.laenge ? k.s / k.laenge : 0.5 };
+    t.bindungGrund = '';
+    var p = GEO.bindungPos(e, t.bindung, t.w, vorher, GEO.waende(e));
+    if (!p) { loseBindung(t, ''); t.x = wunsch[0]; t.y = wunsch[1]; return false; }
+    t.x = p.x; t.y = p.y; t.dreh = p.dreh; if (p.dicke) t.d = p.dicke;
+    return true;
+  }
+  function freieTeile() {
+    var r = [];
+    plan.etagen.forEach(function (e) { e.teile.forEach(function (t) { if (t.bindungGrund) r.push({ t: t, etage: e }); }); });
+    return r;
+  }
+  function grundText(g) {
+    var p = String(g).split('|');
+    return p[0] === 'geloescht' ? tr(p[1] ? 'grundGeloeschtName' : 'grundGeloescht', { name: p[1] || '' }) : tr('grundKante', { name: p[1] || '' });
+  }
+  function teilName(t) { return tr(ART[t.art].form === 'fenster' ? 'wortFenster' : 'wortTuer'); }
+
   /* ---------- Speichern ---------- */
   function pruefePlan(p) {
     if (!p || typeof p !== 'object' || p.app !== 'immo-grundriss' || !Array.isArray(p.etagen) || !p.etagen.length) return null;
     var zahlOk = function (x, d) { x = Number(x); return isFinite(x) ? x : d; };
     var neu = leererPlan();
-    neu.wandhoehe = Math.min(6, Math.max(1.8, zahlOk(p.wandhoehe, 2.5)));
+    var klemme = function (x, lo, hi) { return Math.min(hi, Math.max(lo, x)); };
+    neu.version = 2;
+    /* Himmelsrichtung: Winkel in Grad, in den Norden auf dem Plan zeigt (0 = nach oben, im Uhrzeigersinn); v1-Pläne: 0 */
+    neu.nord = Math.round(((zahlOk(p.nord, 0) % 360) + 360) % 360) % 360;
+    neu.wandhoehe = klemme(zahlOk(p.wandhoehe, 2.5), 1.8, 6);
+    var d0 = p.dach && typeof p.dach === 'object' ? p.dach : {};
+    neu.dach = {
+      form: ['sattel', 'walm', 'pult', 'flach'].indexOf(d0.form) >= 0 ? d0.form : 'sattel',
+      neigung: klemme(zahlOk(d0.neigung, 35), 0, 80),
+      first: d0.first === 'y' ? 'y' : 'x',
+      ueberstand: klemme(zahlOk(d0.ueberstand, 0.3), 0, 2)
+    };
     neu.preise = {}; neu.mengen = {};
     Object.keys(p.preise || {}).forEach(function (k) { var v = Number(p.preise[k]); if (isFinite(v) && v >= 0) neu.preise[k] = v; });
     Object.keys(p.mengen || {}).forEach(function (k) { var v = Number(p.mengen[k]); if (isFinite(v) && v >= 0) neu.mengen[k] = v; });
     neu.etagen = p.etagen.slice(0, 12).map(function (e, i) {
-      var n = neueEtage(String(e.name || ('Etage ' + (i + 1))).slice(0, 40));
+      var n = neueEtage(String(e.name || ('Etage ' + (i + 1))).slice(0, 40), neu.wandhoehe);
+      n.hoehe = klemme(zahlOk(e.hoehe, neu.wandhoehe), 1.8, 6);
+      n.aussenwand = klemme(zahlOk(e.aussenwand, 0.30), 0.05, 0.8);   /* gleiche Grenzen wie die Felder (5 bis 80 cm) */
+      n.innenwand = klemme(zahlOk(e.innenwand, 0.115), 0.05, 0.8);
+      n.decke = klemme(zahlOk(e.decke, 0.25), 0.05, 1);
       if (typeof e.bild === 'string' && /^data:image\/(png|jpeg|webp);base64,/.test(e.bild)) {
         n.bild = e.bild; n.bildB = zahlOk(e.bildB, 0); n.bildH = zahlOk(e.bildH, 0);
       }
@@ -71,7 +143,18 @@
         };
       });
       n.teile = (e.teile || []).filter(function (t) { return t && ART[t.art]; }).map(function (t) {
-        return { id: String(t.id || neueId('t')), art: t.art, x: zahlOk(t.x, 0), y: zahlOk(t.y, 0), w: Math.max(0.05, zahlOk(t.w, 1)), d: Math.max(0.02, zahlOk(t.d, 1)), dreh: [0, 90, 180, 270].indexOf(Number(t.dreh)) >= 0 ? Number(t.dreh) : 0 };
+        /* Drehwinkel: seit Version 2 beliebig (Fenster an schrägen Wänden), sonst 0/90/180/270 wie vorher */
+        var dr = ((zahlOk(t.dreh, 0) % 360) + 360) % 360;
+        var o = { id: String(t.id || neueId('t')), art: t.art, x: zahlOk(t.x, 0), y: zahlOk(t.y, 0), w: Math.max(0.05, zahlOk(t.w, 1)), d: Math.max(0.02, zahlOk(t.d, 1)), dreh: Math.round(dr * 100) / 100 };
+        if (istTuerFenster(t)) {
+          var a = ART[t.art], bd = t.bindung;
+          o.hoehe = klemme(zahlOk(t.hoehe, a.hoehe / 100), 0.3, 4);
+          o.bruestung = klemme(zahlOk(t.bruestung, a.form === 'fenster' ? 0.9 : 0), 0, 3);
+          o.bindung = bd && typeof bd === 'object' && typeof bd.raum === 'string' && bd.raum && isFinite(Number(bd.kante)) && Number(bd.kante) >= 0
+            ? { raum: bd.raum.slice(0, 60), kante: Math.floor(Number(bd.kante)), t: klemme(zahlOk(bd.t, 0.5), 0, 1) } : null;
+          o.bindungGrund = typeof t.bindungGrund === 'string' ? t.bindungGrund.slice(0, 90) : '';
+        }
+        return o;
       });
       return n;
     });
@@ -106,7 +189,8 @@
   function meldung(text, art) { $('g-meldung').textContent = text; meldungArt = text ? (art || '') : ''; }
 
   /* ---------- Ansicht ---------- */
-  function px2m() { var b = svg.clientWidth || 800; return vb ? vb.w / b : 0.02; }
+  var skalaUeber = 0;   /* nur beim Druckvorbereiten: Meter je Punkt, damit Beschriftungen auf Papier lesbar bleiben */
+  function px2m() { if (skalaUeber) return skalaUeber; var b = svg.clientWidth || 800; return vb ? vb.w / b : 0.02; }
   function grenzen() {
     var e = etage(), x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
     function nimm(x, y) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
@@ -116,12 +200,30 @@
     if (!isFinite(x0)) { x0 = 0; y0 = 0; x1 = 14; y1 = 10; }
     return { x0: x0, y0: y0, x1: x1, y1: y1 };
   }
-  function einpassen() {
-    var g = grenzen(), rand = 1;
-    var w = Math.max(4, g.x1 - g.x0) + 2 * rand, h = Math.max(4, g.y1 - g.y0) + 2 * rand;
-    var bw = svg.clientWidth || 800, bh = svg.clientHeight || 500;
-    if (w / h < bw / bh) w = h * bw / bh; else h = w * bh / bw;
-    vb = { x: (g.x0 + g.x1) / 2 - w / 2, y: (g.y0 + g.y1) / 2 - h / 2, w: w, h: h };
+  /* Ausschnitt so wählen, dass alles zu sehen ist. Am Bildschirm bleibt ein Rand in Bildschirmpunkten frei: für die
+     Maßlinien rund um den Plan und unten für die Zoom-Knöpfe und die Windrose (sie liegen über dem Plan und würden sonst
+     die untere Maßlinie verdecken). Für den Druck (druck = true) gilt der feste Rand von 1 m, dort gibt es keine Knöpfe. */
+  function einpassen(druck) {
+    var g = grenzen(), bw = svg.clientWidth || 800, bh = svg.clientHeight || 500;
+    if (druck) {
+      var rand = 1, w = Math.max(4, g.x1 - g.x0) + 2 * rand, h = Math.max(4, g.y1 - g.y0) + 2 * rand;
+      if (w / h < bw / bh) w = h * bw / bh; else h = w * bh / bw;
+      vb = { x: (g.x0 + g.x1) / 2 - w / 2, y: (g.y0 + g.y1) / 2 - h / 2, w: w, h: h };
+      return;
+    }
+    var wand = (etage().aussenwand || 0.3), gw = Math.max(4, g.x1 - g.x0) + 2 * wand, gh = Math.max(4, g.y1 - g.y0) + 2 * wand;
+    var pl = 56, pr = 56, po = 52, pu = 56, br = $('g-buehne') ? $('g-buehne').getBoundingClientRect() : null;
+    [$('g-zoom'), $('g-nord')].forEach(function (b) {
+      if (!b || !br) return;
+      var r = b.getBoundingClientRect();
+      if (r.width && r.height && r.top > br.top) pu = Math.max(pu, br.bottom - r.top + 12);
+    });
+    if (bw - pl - pr < 80) { pl = pr = Math.max(10, (bw - 80) / 2); }
+    if (bh - po - pu < 80) { po = 10; pu = Math.max(10, Math.min(pu, bh - 90)); }
+    var k = Math.min((bw - pl - pr) / gw, (bh - po - pu) / gh);       /* Bildschirmpunkte je Meter */
+    var w2 = bw / k, h2 = bh / k, cx = (g.x0 + g.x1) / 2, cy = (g.y0 + g.y1) / 2;
+    var yMitte = po + (bh - po - pu) / 2;                              /* Bildhöhe, auf der die Planmitte liegen soll */
+    vb = { x: cx - w2 / 2, y: cy - yMitte / k, w: w2, h: h2 };
   }
   function zoomen(f, cx, cy) {
     if (!vb) einpassen();
@@ -162,6 +264,7 @@
     if (!vb) einpassen();
     var fokusId = document.activeElement && svg.contains(document.activeElement) ? document.activeElement.getAttribute('data-id') : null;
     var e = etage(), s = px2m();
+    nachfuehren(e);
     svg.setAttribute('viewBox', vb.x + ' ' + vb.y + ' ' + vb.w + ' ' + vb.h);
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     if (e.bild) el('image', { href: e.bild, x: 0, y: 0, width: e.bildB * e.mpp, height: e.bildH * e.mpp, preserveAspectRatio: 'none', opacity: 0.85 }, svg);
@@ -174,10 +277,20 @@
       var g = el('g', { 'data-raum': r.id, 'data-id': r.id, tabindex: 0, role: 'button', 'aria-label': 'Raum ' + r.name + ', ' + qm(flaeche(r)) }, svg);
       el('polygon', { points: r.punkte.map(function (p) { return p[0] + ',' + p[1]; }).join(' '), class: 'raum art-' + r.art + (gewaehlt && gewaehlt.id === r.id ? ' gewaehlt' : '') }, g);
     });
+    /* Wände aus den Räumen abgeleitet (nicht gespeichert); Klicks gehen durch auf die Räume */
+    var wl = GEO.waende(e);
+    if (wl.length) {
+      var wg = el('g', { class: 'waende', 'aria-hidden': 'true' }, svg);
+      wl.forEach(function (w) {
+        var vl = GEO.eckenVerlaengerung(e, w), q = GEO.wandVieleck(w, vl);
+        el('polygon', { points: q.map(function (p) { return p[0] + ',' + p[1]; }).join(' '), class: 'wand ' + w.typ, 'data-wand': w.typ }, wg);
+      });
+    }
     e.teile.forEach(function (t) {
-      var a = ART[t.art];
-      var g = el('g', { 'data-teil': t.id, 'data-id': t.id, tabindex: 0, role: 'button', 'aria-label': a.name + (t.dreh ? ', gedreht ' + t.dreh + ' Grad' : ''), transform: 'translate(' + t.x + ' ' + t.y + ') rotate(' + t.dreh + ')', class: 'teil ' + (a.form === 'wandweg' ? 'wandweg' : a.gruppe) + (gewaehlt && gewaehlt.id === t.id ? ' gewaehlt' : '') }, svg);
+      var a = ART[t.art], tf = istTuerFenster(t);
+      var g = el('g', { 'data-teil': t.id, 'data-id': t.id, tabindex: 0, role: 'button', 'aria-label': a.name + (t.dreh && !tf ? ', gedreht ' + t.dreh + ' Grad' : '') + (tf && t.bindung ? ', ' + tr('anWand') : ''), transform: 'translate(' + t.x + ' ' + t.y + ') rotate(' + t.dreh + ')', class: 'teil ' + (a.form === 'wandweg' ? 'wandweg' : a.form === 'fenster' ? 'fenster' : a.gruppe) + (gewaehlt && gewaehlt.id === t.id ? ' gewaehlt' : '') + (markiert === t.id ? ' eingerastet' : '') }, svg);
       el('rect', { x: -t.w / 2, y: -t.d / 2, width: t.w, height: t.d, class: 'koerper', rx: Math.min(t.w, t.d) * 0.06 }, g);
+      if (a.form === 'fenster') el('line', { x1: -t.w / 2, y1: 0, x2: t.w / 2, y2: 0, class: 'glas' }, g);
       if (a.form === 'bett') {
         var k = Math.min(0.5, t.w * 0.4), n = t.w > 1.2 ? 2 : 1;
         for (var i = 0; i < n; i++) el('rect', { x: -t.w / 2 + 0.08 + i * (t.w - 0.16) / n, y: -t.d / 2 + 0.08, width: (t.w - 0.16) / n - (n > 1 ? 0.06 : 0), height: Math.min(0.35, t.d * 0.2), class: 'kissen', rx: 0.05 }, g);
@@ -201,6 +314,17 @@
       var rg = findeRaum(gewaehlt.id);
       if (rg) rg.punkte.forEach(function (p, i) { el('circle', { cx: p[0], cy: p[1], r: 7 * s, class: 'griff', 'data-griff': i }, svg); });
     }
+    /* Breiten-Griffe an einem gewählten Fenster oder einer Tür an der Wand: am Ende ziehen = breiter oder schmaler */
+    if (gewaehlt && gewaehlt.typ === 'teil' && modus === 'auswahl') {
+      var tg = findeTeil(gewaehlt.id);
+      if (tg && istTuerFenster(tg) && tg.bindung) {
+        var ca = Math.cos(tg.dreh * Math.PI / 180), sa = Math.sin(tg.dreh * Math.PI / 180);
+        [-1, 1].forEach(function (sd) {
+          el('circle', { cx: tg.x + sd * ca * tg.w / 2, cy: tg.y + sd * sa * tg.w / 2, r: 7 * s, class: 'griff breite', 'data-breite': sd }, svg);
+        });
+      }
+    }
+    if (massAn) masseZeichnen(e, s);
     /* Hilfslinien beim Zeichnen */
     if (ziehen && ziehen.typ === 'rechteck' && ziehen.b) {
       var a0 = ziehen.a, b0 = ziehen.b;
@@ -218,8 +342,137 @@
       if (mp.length > 1) el('line', { x1: mp[0][0], y1: mp[0][1], x2: mp[1][0], y2: mp[1][1], class: 'hilfslinie' }, svg);
       massPunkte.forEach(function (p) { el('circle', { cx: p[0], cy: p[1], r: 6 * s, class: 'hilfspunkt' }, svg); });
     }
-    svg.setAttribute('class', modus === 'auswahl' ? '' : 'zeichnen');
+    svg.setAttribute('class', 'planzeichnung' + (modus === 'auswahl' ? '' : ' zeichnen'));
     if (fokusId) { var f = svg.querySelector('[data-id="' + fokusId + '"]'); if (f) f.focus({ preventScroll: true }); }
+  }
+
+  /* ---------- Maßlinien ---------- */
+  function sprachCode() { return window.TXT ? window.TXT.lang() : 'de'; }
+  function zahl2(x, stellen) {
+    var loc = { de: 'de-DE', en: 'en-GB', ru: 'ru-RU' }[sprachCode()] || 'de-DE';
+    return new Intl.NumberFormat(loc, { minimumFractionDigits: stellen, maximumFractionDigits: stellen }).format(x);
+  }
+  function massText(x) { return zahl2(x, 2) + ' ' + tr('einheitM'); }
+  /* Gedrehtes Rechteck (Mitte, halbe Seiten, Drehwinkel) und Schnitt zweier Rechtecke (Trennachsen-Verfahren) */
+  function obbVon(x, y, hw, hh, grad) { var r = (grad || 0) * Math.PI / 180; return { x: x, y: y, hw: hw, hh: hh, c: Math.cos(r), s: Math.sin(r) }; }
+  function obbSchnitt(A, B) {
+    var ax = [[A.c, A.s], [-A.s, A.c]], bx = [[B.c, B.s], [-B.s, B.c]], d = [B.x - A.x, B.y - A.y], ach = ax.concat(bx);
+    function dot(p, q) { return p[0] * q[0] + p[1] * q[1]; }
+    for (var i = 0; i < 4; i++) {
+      var u = ach[i];
+      var ra = A.hw * Math.abs(dot(u, ax[0])) + A.hh * Math.abs(dot(u, ax[1]));
+      var rb = B.hw * Math.abs(dot(u, bx[0])) + B.hh * Math.abs(dot(u, bx[1]));
+      if (Math.abs(dot(d, u)) > ra + rb) return false;
+    }
+    return true;
+  }
+  /* Rechteck eines Bedienelements (Zoom-Knöpfe, Windrose) in Plan-Koordinaten; nur am Bildschirm, nicht beim Drucken */
+  function bildschirmHindernis(elm) {
+    if (!elm || skalaUeber) return null;
+    var b = elm.getBoundingClientRect(), m = svg.getScreenCTM();
+    if (!b.width || !b.height || !m) return null;
+    var inv = m.inverse(), p = svg.createSVGPoint(), q = svg.createSVGPoint();
+    p.x = b.left - 6; p.y = b.top - 6; q.x = b.right + 6; q.y = b.bottom + 6;
+    p = p.matrixTransform(inv); q = q.matrixTransform(inv);
+    return { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2, hw: Math.abs(q.x - p.x) / 2, hh: Math.abs(q.y - p.y) / 2, c: 1, s: 0 };
+  }
+  /* Maßlinien (Knopf „Maße zeigen“). Jede Raumkante wird in Stücke geteilt (GEO.massstuecke, jedes Stück einmal):
+     - freies Stück (draußen): Maßlinie mit Zahl außerhalb der Umrisse; liegt dort ein Raum im Weg, weiter hinaus,
+       sonst die Zahl auf der Außenwand;
+     - geteiltes Stück (Innenwand, Wand zum Balkon): die Zahl steht auf der Wand, bei Bedarf entlang der Wand
+       verschoben, mit Hintergrundrand.
+     Eine Zahl wird nie über ein Möbelstück, ein Fenster, eine Tür, die Zoom-Knöpfe, die Windrose oder eine andere Zahl
+     gesetzt; findet sich kein freier Platz, bleibt sie weg. Dazu die Breite jedes Fensters und jeder Tür.
+     Textgröße in Bildschirmpunkten (s = Meter je Punkt); Stücke, die auf dem Bildschirm kürzer als 40 Punkte sind
+     oder kürzer als ihre Zahl, bleiben ohne Zahl. */
+  function masseZeichnen(e, s) {
+    var g = el('g', { class: 'masse', 'aria-hidden': 'true' }, svg);
+    var fs = 13 * s, pad = 2 * s, dA = e.aussenwand || 0.3;
+    var cache = {}, platziert = [];
+    var teilO = e.teile.map(function (t) { return { id: t.id, o: obbVon(t.x, t.y, t.w / 2, t.d / 2, t.dreh) }; });
+    var sperren = [bildschirmHindernis($('g-zoom')), bildschirmHindernis($('g-nord'))].filter(function (x) { return !!x; });
+    function winkel(u) { var gr = Math.atan2(u[1], u[0]) * 180 / Math.PI; if (gr > 90) gr -= 180; if (gr <= -90) gr += 180; return Math.abs(gr) < 0.5 ? 0 : gr; }
+    function messen(text) {
+      if (cache[text]) return cache[text];
+      var w = text.length * 0.6 * fs, h = 1.25 * fs;
+      try {
+        var t = el('text', { x: 0, y: 0, 'font-size': fs, class: 'masszahl' }, g); t.textContent = text;
+        var b = t.getBBox(); g.removeChild(t);
+        if (b.width > 0 && b.height > 0) { w = b.width; h = b.height; }
+      } catch (err) { /* ohne Messung gilt die Schätzung */ }
+      cache[text] = { w: w, h: h };
+      return cache[text];
+    }
+    function frei(o, eigen) {
+      var i;
+      for (i = 0; i < teilO.length; i++) if (teilO[i].id !== eigen && obbSchnitt(o, teilO[i].o)) return false;
+      for (i = 0; i < sperren.length; i++) if (obbSchnitt(o, sperren[i])) return false;
+      for (i = 0; i < platziert.length; i++) if (obbSchnitt(o, platziert[i])) return false;
+      return true;
+    }
+    /* erster freier Platz aus der Liste [x, y, Grad]; merkt ihn sich als belegt */
+    function finde(text, kand, eigen) {
+      var m = messen(text);
+      for (var i = 0; i < kand.length; i++) {
+        var o = obbVon(kand[i][0], kand[i][1], m.w / 2 + pad, m.h / 2 + pad / 2, kand[i][2]);
+        if (frei(o, eigen)) { platziert.push(o); return kand[i]; }
+      }
+      return null;
+    }
+    function beschriften(k, text, attr) {
+      var a = Object.assign({ x: k[0], y: k[1], 'font-size': fs, 'stroke-width': 3.5 * s, class: 'masszahl' }, attr || {});
+      if (k[2]) a.transform = 'rotate(' + k[2] + ' ' + k[0] + ' ' + k[1] + ')';
+      el('text', a, g).textContent = text;
+    }
+    /* Plätze entlang einer Strecke: Mitte, dann abwechselnd zu beiden Seiten (Meter ab der Mitte), nur innerhalb der Strecke */
+    function entlang(p, u, L, halb, grad) {
+      var res = [], schritt = Math.max(0.1, halb * 0.5), mx = L / 2 - halb - 2 * s;
+      for (var d = 0; d <= mx + 1e-9; d += schritt) {
+        res.push([p[0] + u[0] * d, p[1] + u[1] * d, grad]);
+        if (d > 0) res.push([p[0] - u[0] * d, p[1] - u[1] * d, grad]);
+      }
+      return res;
+    }
+    GEO.massstuecke(e).forEach(function (m) {
+      var text = massText(m.L), mb = messen(text), grad = winkel(m.u), halb = mb.w / 2 + pad;
+      if (m.L < 0.3 || m.L / s < Math.max(40, mb.w / s + 8)) return;
+      var attr = { 'data-mass': m.raum + ':' + m.kante + (m.n > 1 ? ':' + m.i : ''), 'data-laenge': m.L.toFixed(3) };
+      var n = [m.nx, m.ny], mid = [(m.a[0] + m.b[0]) / 2, (m.a[1] + m.b[1]) / 2], k;
+      if (m.geteilt) {                          /* auf der Wand */
+        k = finde(text, entlang(m.mitte, m.u, m.L, halb, grad));
+        if (k) { attr['data-geteilt'] = '1'; beschriften(k, text, attr); }
+        return;
+      }
+      var basis = (m.balkon ? 0.1 : dA) + 24 * s;
+      for (var i = 0; i < 3; i++) {             /* draußen: Maßlinie, nötigenfalls weiter hinaus */
+        var off = basis + i * 22 * s;
+        var ax = m.a[0] + n[0] * off, ay = m.a[1] + n[1] * off, bx = m.b[0] + n[0] * off, by = m.b[1] + n[1] * off;
+        if (!GEO.streckeFrei(e, [ax, ay], [bx, by], 0.04)) continue;
+        k = finde(text, entlang([(ax + bx) / 2, (ay + by) / 2], m.u, m.L, halb, grad));
+        if (!k) continue;
+        el('line', { x1: ax, y1: ay, x2: bx, y2: by, class: 'masslinie', 'data-haupt': '1' }, g);
+        [[ax, ay], [bx, by]].forEach(function (q) { el('line', { x1: q[0] - n[0] * 5 * s, y1: q[1] - n[1] * 5 * s, x2: q[0] + n[0] * 5 * s, y2: q[1] + n[1] * 5 * s, class: 'masslinie' }, g); });
+        beschriften(k, text, attr);
+        return;
+      }
+      /* kein Platz draußen: Zahl auf die Außenwand (Wohnraum) bzw. auf die Kante (Balkon) */
+      var wm = [mid[0] + n[0] * (m.balkon ? 0 : dA / 2), mid[1] + n[1] * (m.balkon ? 0 : dA / 2)];
+      k = finde(text, entlang(wm, m.u, m.L, halb, grad));
+      if (k) beschriften(k, text, attr);
+    });
+    e.teile.forEach(function (t) {
+      if (!istTuerFenster(t)) return;
+      var c = Math.cos(t.dreh * Math.PI / 180), sn = Math.sin(t.dreh * Math.PI / 180), text = massText(t.w);
+      /* Fenster: im Raum (lokal +y, dort liegt keine Maßlinie der Kante); Tür: gegenüber der Schwenkseite (lokal -y);
+         ist dort kein Platz, die andere Seite, dann weiter weg */
+      var sg0 = ART[t.art].form === 'fenster' ? 1 : -1, kand = [];
+      [1, 2.4].forEach(function (f) { [sg0, -sg0].forEach(function (sg) {
+        var off = t.d / 2 + 9 * s * f;
+        kand.push([t.x - sn * off * sg, t.y + c * off * sg, winkel([c, sn])]);
+      }); });
+      var k = finde(text, kand, t.id);
+      if (k) beschriften(k, text, { 'data-mass-teil': t.id, 'data-breite': t.w.toFixed(3) });
+    });
   }
 
   function findeRaum(id) { return etage().raeume.filter(function (r) { return r.id === id; })[0]; }
@@ -256,8 +509,10 @@
       if (massPunkte.length === 2) { modusSetzen('auswahl'); $('g-mass-frage').hidden = false; $('g-mass-laenge').focus(); }
       zeichnen(); return;
     } else {
-      var griff = ev.target.closest('[data-griff]'), teil = ev.target.closest('[data-teil]'), raum = ev.target.closest('[data-raum]');
-      if (griff && gewaehlt && gewaehlt.typ === 'raum') {
+      var griff = ev.target.closest('[data-griff]'), teil = ev.target.closest('[data-teil]'), raum = ev.target.closest('[data-raum]'), bgriff = ev.target.closest('[data-breite]');
+      if (bgriff && gewaehlt && gewaehlt.typ === 'teil') {
+        ziehen = { typ: 'breite', id: gewaehlt.id, seite: Number(bgriff.getAttribute('data-breite')) };
+      } else if (griff && gewaehlt && gewaehlt.typ === 'raum') {
         ziehen = { typ: 'griff', id: gewaehlt.id, i: Number(griff.getAttribute('data-griff')) };
       } else if (teil) {
         var t = findeTeil(teil.getAttribute('data-teil'));
@@ -289,7 +544,27 @@
       svg.setAttribute('viewBox', vb.x + ' ' + vb.y + ' ' + vb.w + ' ' + vb.h);
     } else if (ziehen.typ === 'teil') {
       var t = findeTeil(ziehen.id);
-      t.x = rund(p[0] + ziehen.dx, 0.1); t.y = rund(p[1] + ziehen.dy, 0.1); ziehen.bewegt = true; zeichnen();
+      if (istTuerFenster(t)) { anWand(t, [p[0] + ziehen.dx, p[1] + ziehen.dy]); }
+      else { t.x = rund(p[0] + ziehen.dx, 0.1); t.y = rund(p[1] + ziehen.dy, 0.1); }
+      ziehen.bewegt = true; zeichnen();
+    } else if (ziehen.typ === 'breite') {
+      var tb = findeTeil(ziehen.id);
+      if (tb && tb.bindung) {
+        /* festes Ende gegenüber, bewegtes Ende folgt der Maus entlang der Kante */
+        var ux = Math.cos(tb.dreh * Math.PI / 180), uy = Math.sin(tb.dreh * Math.PI / 180);
+        var sm = (p[0] - tb.x) * ux + (p[1] - tb.y) * uy;           /* Mausstelle entlang des Teils, 0 = Mitte */
+        var fest = -ziehen.seite * tb.w / 2;
+        var neuB = Math.min(3, Math.max(0.3, rund(Math.abs(sm * ziehen.seite - fest * ziehen.seite), 0.05)));
+        var neueMitte = (fest + (fest + ziehen.seite * neuB)) / 2;   /* verschiebt die Mitte längs der Kante */
+        var raum = raumIn(etage(), tb.bindung.raum), kk = raum && GEO.kanten(raum)[tb.bindung.kante];
+        if (kk) {
+          var sMitte = (tb.x - kk.a[0]) * kk.u[0] + (tb.y - kk.a[1]) * kk.u[1];   /* Mitte entlang der Kante (wandnormal ignoriert) */
+          var dirKante = kk.u[0] * ux + kk.u[1] * uy >= 0 ? 1 : -1;
+          tb.w = neuB;
+          tb.bindung.t = Math.min(1, Math.max(0, (sMitte + dirKante * neueMitte) / kk.L));
+          ziehen.bewegt = true; zeichnen();
+        }
+      }
     } else if (ziehen.typ === 'raum') {
       var r = findeRaum(ziehen.id), dx = rund(p[0] - ziehen.start[0], 0.05), dy = rund(p[1] - ziehen.start[1], 0.05);
       r.punkte = ziehen.alt.map(function (q) { return [q[0] + dx, q[1] + dy]; }); ziehen.bewegt = dx || dy; zeichnen();
@@ -309,7 +584,23 @@
         return;
       }
     }
+    if (z.typ === 'teil' || z.typ === 'breite') { var tz = findeTeil(z.id); if (tz && istTuerFenster(tz) && z.bewegt) rueckmeldungWand(tz); }
     if (z.typ !== 'schieben') geaendert(); else zeichnen();
+  }
+  /* Freundliche Rückmeldung nach dem Setzen: kurze Hervorhebung am Teil und ein Satz */
+  var markTimer = null;
+  function rueckmeldungWand(t) {
+    clearTimeout(markTimer);
+    if (gewaehlt && gewaehlt.id === t.id && !/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) auswahlZeigen();  /* Seitenfeld: "sitzt an der Wand" */
+    var raum = t.bindung && raumIn(etage(), t.bindung.raum);
+    if (raum) {
+      markiert = t.id;
+      markTimer = setTimeout(function () { markiert = null; zeichnen(); }, 1400);
+      meldung(tr('eingerastet', { teil: teilName(t), raum: raum.name }));
+    } else {
+      markiert = null;
+      meldung(tr('frei', { teil: teilName(t) }));
+    }
   }
   svg.addEventListener('pointerup', loslassen);
   svg.addEventListener('pointercancel', loslassen);
@@ -342,7 +633,11 @@
     if (ev.key === 'ArrowLeft') dx = -schritt; else if (ev.key === 'ArrowRight') dx = schritt;
     else if (ev.key === 'ArrowUp') dy = -schritt; else if (ev.key === 'ArrowDown') dy = schritt;
     if (dx || dy) {
-      if (gewaehlt.typ === 'teil') { var t = findeTeil(gewaehlt.id); t.x = rund(t.x + dx, 0.05); t.y = rund(t.y + dy, 0.05); }
+      if (gewaehlt.typ === 'teil') {
+        var t = findeTeil(gewaehlt.id);
+        if (istTuerFenster(t)) { anWand(t, [t.x + dx, t.y + dy]); rueckmeldungWand(t); }
+        else { t.x = rund(t.x + dx, 0.05); t.y = rund(t.y + dy, 0.05); }
+      }
       else { var r = findeRaum(gewaehlt.id); r.punkte = r.punkte.map(function (q) { return [rund(q[0] + dx, 0.05), rund(q[1] + dy, 0.05)]; }); }
       geaendert(); ev.preventDefault(); return;
     }
@@ -351,7 +646,7 @@
   });
 
   /* ---------- Aktionen ---------- */
-  function geaendert() { speichern(); zeichnen(); auswerten(); }
+  function geaendert() { nachfuehrenAlle(); speichern(); zeichnen(); auswerten(); }
   function raumNummer() {
     var n = 0; plan.etagen.forEach(function (e) { n += e.raeume.length; }); return n + 1;
   }
@@ -374,17 +669,40 @@
   function drehen() {
     var t = gewaehlt && gewaehlt.typ === 'teil' && findeTeil(gewaehlt.id);
     if (!t) return;
-    t.dreh = (t.dreh + 90) % 360; geaendert(); auswahlZeigen();
+    /* an der Wand: nur die Schwenkseite wechseln (um 180 Grad), sonst Vierteldrehung */
+    t.dreh = Math.round(((t.dreh + (istTuerFenster(t) && t.bindung ? 180 : 90)) % 360) * 100) / 100; geaendert(); auswahlZeigen();
   }
   function loeschen() {
     if (!gewaehlt) return;
     var e = etage(), name;
     if (gewaehlt.typ === 'teil') { var t = findeTeil(gewaehlt.id); name = ART[t.art].name; e.teile = e.teile.filter(function (x) { return x.id !== gewaehlt.id; }); }
-    else { var r = findeRaum(gewaehlt.id); name = r.name; e.raeume = e.raeume.filter(function (x) { return x.id !== gewaehlt.id; }); }
+    else {
+      var r = findeRaum(gewaehlt.id); name = r.name; e.raeume = e.raeume.filter(function (x) { return x.id !== gewaehlt.id; });
+      /* Fenster und Türen dieses Raums bleiben stehen, sind aber nicht mehr an einer Wand befestigt (mit Grund) */
+      var frei = 0;
+      e.teile.forEach(function (t) { if (t.bindung && t.bindung.raum === r.id) { loseBindung(t, 'geloescht|' + r.name); frei++; } });
+      if (frei) name += '\u0000' + frei;
+    }
     gewaehlt = null;
     geaendert(); auswahlZeigen();
-    meldung('„' + name + '“ gelöscht.');
+    var np = String(name).split('\u0000');
+    meldung('„' + np[0] + '“ gelöscht.' + (np[1] ? ' ' + tr('loeschFrei', { n: np[1], name: np[0] }) : ''));
     svg.focus();
+  }
+  /* Passende Kante eines gewählten Raums: Fenster = längste Außenkante, Tür = längste gemeinsame Kante (sonst längste) */
+  function kanteFuer(e, raum, form) {
+    var ks = GEO.kanten(raum).filter(function (k) { return !k.leer; }), wl = GEO.waende(e);
+    function typ(k) {
+      var m = wl.filter(function (w) { return w.raum === raum.id && w.kante === k.i; });
+      var innen = m.some(function (w) { return w.typ === 'innen'; }), aussen = m.some(function (w) { return w.typ === 'aussen'; });
+      return { innen: innen, aussen: aussen };
+    }
+    var wunschTyp = form === 'fenster' ? 'aussen' : 'innen';
+    var passend = ks.filter(function (k) { return typ(k)[wunschTyp]; });
+    var pool = passend.length ? passend : ks;
+    if (!pool.length) return null;
+    pool.sort(function (a, b) { return b.L - a.L; });
+    return { raum: raum, kante: pool[0] };
   }
   function teilHinzu(artId) {
     var a = ART[artId], e = etage(), x, y;
@@ -392,9 +710,30 @@
     if (r) { var c = schwerpunkt(r.punkte); x = c[0]; y = c[1]; }
     else { if (!vb) einpassen(); x = vb.x + vb.w / 2; y = vb.y + vb.h / 2; }
     var t = { id: neueId('t'), art: artId, x: rund(x, 0.1), y: rund(y, 0.1), w: a.breite / 100, d: a.tiefe / 100, dreh: 0 };
+    var wandMeld = null;
+    if (a.form === 'tuer' || a.form === 'fenster') {
+      t.hoehe = a.hoehe / 100; t.bruestung = a.form === 'fenster' ? 0.9 : 0; t.bindung = null; t.bindungGrund = '';
+      /* Gleich an eine Wand setzen (sonst läge das Teil mitten im Raum, außerhalb der 40 cm): in den gewählten Raum,
+         sonst an die Kante, die der Bildmitte am nächsten ist. Fenster bevorzugt an eine Außenkante, Türen an eine gemeinsame. */
+      var ziel = null;
+      if (r) ziel = kanteFuer(e, r, a.form);
+      else { var nk = GEO.naechsteKante(e, [x, y], 1e9, null); if (nk) { var rr = raumIn(e, nk.raum), ek = GEO.kanten(rr)[nk.kante]; ziel = { raum: rr, kante: ek }; } }
+      if (ziel) {
+        var L = ziel.kante.L, pos = 0.5, versuche = 0;
+        /* nicht auf ein Teil legen, das dort schon sitzt */
+        while (versuche++ < 8 && e.teile.some(function (o) {
+          return o.bindung && o.bindung.raum === ziel.raum.id && o.bindung.kante === ziel.kante.i && Math.abs(o.bindung.t - pos) * L < (o.w + t.w) / 2 + 0.05;
+        })) { pos += (t.w + 0.2) / L; if (pos > 1 - t.w / 2 / L) { pos = 0.5; break; } }
+        var wunsch = [ziel.kante.a[0] + ziel.kante.u[0] * L * pos, ziel.kante.a[1] + ziel.kante.u[1] * L * pos];
+        anWand(t, wunsch, 0.4);
+      }
+      wandMeld = t.bindung ? 'ja' : 'nein';
+    }
     e.teile.push(t);
     gewaehlt = { typ: 'teil', id: t.id };
     geaendert(); auswahlZeigen();
+    if (wandMeld === 'ja') { rueckmeldungWand(t); ersthinweisWand(); }
+    else if (wandMeld === 'nein') meldung(tr('keinRaum'));
     var g = svg.querySelector('[data-id="' + t.id + '"]'); if (g) g.focus({ preventScroll: true });
   }
 
@@ -454,7 +793,10 @@
     });
     var e = etage();
     $('g-etage-name').value = e.name;
-    $('g-wandhoehe').value = fmt1.format(plan.wandhoehe).replace(/,0$/, ',0');
+    $('g-wandhoehe').value = fmt1.format(e.hoehe).replace(/,0$/, ',0');
+    $('g-wandhoehe-f').textContent = ''; $('g-wandhoehe').removeAttribute('aria-invalid');
+    wandHinweisZeigen();
+    wandFelderZeigen();
     $('g-etage-weg').disabled = plan.etagen.length < 2;
     $('g-bild-weg').disabled = !e.bild;
     $('g-mass-start').disabled = !e.bild;
@@ -465,7 +807,7 @@
   $('g-etage-neu').addEventListener('click', function () {
     var namen = ['Erdgeschoss', 'Obergeschoss', 'Dachgeschoss', 'Keller', '2. Obergeschoss'];
     var frei = namen.filter(function (n) { return !plan.etagen.some(function (e) { return e.name === n; }); })[0] || ('Etage ' + (plan.etagen.length + 1));
-    plan.etagen.push(neueEtage(frei)); plan.aktiv = plan.etagen.length - 1; gewaehlt = null; vb = null;
+    plan.etagen.push(neueEtage(frei, plan.wandhoehe)); plan.aktiv = plan.etagen.length - 1; gewaehlt = null; vb = null;
     speichern(); allesZeigen(); schrittZeigen(1);
     meldung('Etage „' + frei + '“ angelegt. Laden Sie ihr Grundrissbild oder zeichnen Sie direkt.');
   });
@@ -476,10 +818,37 @@
   });
   $('g-wandhoehe').addEventListener('input', function () {
     var v = zahl(this.value), f = $('g-wandhoehe-f');
-    if (v == null || v < 1.8 || v > 6) { f.textContent = 'Bitte eine Höhe zwischen 1,8 und 6 m eingeben.'; this.setAttribute('aria-invalid', 'true'); return; }
+    if (v == null || v < 1.8 || v > 6) { f.textContent = tr('hoeheFehler'); this.setAttribute('aria-invalid', 'true'); return; }
     f.textContent = ''; this.removeAttribute('aria-invalid');
-    plan.wandhoehe = v; speichern(); if (ansicht3d) dreiD();
+    etage().hoehe = v; speichern(); if (ansicht3d) dreiD();
   });
+  /* Wanddicken dieser Etage (cm): Felder in Schritt 1. Grenzen 5 bis 80 cm, gleich wie in pruefePlan. */
+  function cmFeldText(m) { return String(Math.round(m * 1000) / 10).replace('.', ','); }
+  function wandFelderZeigen() {
+    var e = etage();
+    [['g-aussenwand', e.aussenwand], ['g-innenwand', e.innenwand]].forEach(function (p) {
+      var f = $(p[0]); if (!f) return;
+      f.value = cmFeldText(p[1]); f.removeAttribute('aria-invalid'); $(p[0] + '-f').textContent = '';
+    });
+  }
+  ['aussenwand', 'innenwand'].forEach(function (key) {
+    var f = $('g-' + key); if (!f) return;
+    f.addEventListener('input', function () {
+      var v = zahl(this.value), fe = $('g-' + key + '-f');
+      if (v == null || v < 5 || v > 80) { fe.textContent = tr('wandFeldFehler', { min: 5, max: 80 }); this.setAttribute('aria-invalid', 'true'); return; }
+      fe.textContent = ''; this.removeAttribute('aria-invalid');
+      var e = etage(); e[key] = Math.round(v * 10) / 1000;
+      nachfuehren(e); speichern(); zeichnen(); wandHinweisZeigen(); auswahlZeigen(); if (ansicht3d) dreiD();
+    });
+  });
+  /* Sichtbare Annahme zu den Wandstärken (R005) unter dem Plan */
+  function wandHinweisZeigen() {
+    var e = etage(), box = $('g-wand-hinweis');
+    if (!box) return;
+    box.setAttribute('lang', sprachCode());
+    var cm = function (m) { var c = Math.round(m * 1000) / 10; return zahl2(c, c % 1 ? 1 : 0); };
+    $('g-wand-hinweis-text').textContent = tr('wandHinweis', { aussen: cm(e.aussenwand), innen: cm(e.innenwand) });
+  }
   /* Etage löschen, vom Knopf in Schritt 1 und vom „ד an der Etage oben. Mit Inhalt erst
      beim zweiten Klick (der Knopf zeigt dann frageText), leer sofort. */
   var etageWegBestaetigt = null;
@@ -631,6 +1000,7 @@
     } else {
       var t = findeTeil(gewaehlt.id); if (!t) { box.innerHTML = ''; return; }
       var a = ART[t.art];
+      if (istTuerFenster(t)) { tuerFensterPanel(box, t, a); return; }
       box.innerHTML = '<h4>' + esc(a.name) + '</h4>' +
         '<div class="g-mini">' + feld('g-t-b', 'Breite in cm', fmt0.format(t.w * 100), '') + feld('g-t-d', 'Tiefe in cm', fmt0.format(t.d * 100), '') + '</div>' +
         (a.einheit === 'm' ? '<p class="klein" style="margin:6px 0 0">Kosten nach Länge: ' + fmt1.format(t.w) + ' m.</p>' : '') +
@@ -648,6 +1018,62 @@
       $('g-t-dreh').addEventListener('click', drehen);
       $('g-t-weg').addEventListener('click', loeschen);
     }
+  }
+  /* Kleine Skizze zu einem Maß: Wand von vorn, Fenster darin, das gemeinte Maß als Pfeil */
+  function skizze(welche) {
+    var pf = 'fill="none" stroke-linecap="round" stroke-linejoin="round"';
+    var pfeil = function (d) { return '<path d="' + d + '" ' + pf + ' stroke="var(--akzent-text)" stroke-width="2.4"/>'; };
+    var m = {
+      breite: pfeil('M22 37h24M25 34l-3 3 3 3M43 34l3 3-3 3'),
+      hoehe: pfeil('M53 14v18M50 17l3-3 3 3M50 29l3 3 3-3'),
+      bruestung: pfeil('M34 44V32M31 41l3 3 3-3M31 35l3-3 3 3')
+    };
+    return '<svg class="skizze" viewBox="0 0 64 48" width="64" height="48" aria-hidden="true" focusable="false">' +
+      '<rect x="4" y="3" width="56" height="41" ' + pf + ' stroke="var(--leise)" stroke-width="1.6"/>' +
+      '<rect x="22" y="14" width="24" height="18" ' + pf + ' stroke="var(--text)" stroke-width="2"/>' +
+      '<path d="M2 44h60" ' + pf + ' stroke="var(--text)" stroke-width="3"/>' + (m[welche] || '') + '</svg>';
+  }
+  function feldMitSkizze(welche, id, label, wert, hilfe) {
+    return '<div class="g-sk">' + skizze(welche) + feld(id, label, wert, hilfe) + '</div>';
+  }
+  function tuerFensterPanel(box, t, a) {
+    var fenster = a.form === 'fenster', raum = t.bindung && raumIn(etage(), t.bindung.raum), h;
+    h = '<h4><svg class="sym" aria-hidden="true"><use href="#' + (fenster ? 'i-fenster' : 'i-tuer') + '"/></svg> ' + esc(teilName(t)) + '</h4>';
+    if (raum) h += '<p class="g-wand-ok" role="status"><b aria-hidden="true">✓</b> ' + esc(tr('panelAnWand', { raum: raum.name })) + '</p>';
+    else if (t.bindungGrund) h += '<p class="g-wand-weg" role="status"><b aria-hidden="true">!</b> ' + esc(tr('panelFrei')) + ' ' + esc(grundText(t.bindungGrund)) + '</p>';
+    else h += '<p class="g-wand-weg" role="status"><b aria-hidden="true">!</b> ' + esc(tr('panelNichtAnWand')) + '</p>';
+    if (!raum) h += '<div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf zweit" id="g-t-wand"><svg class="sym" aria-hidden="true"><use href="#i-wand"/></svg> ' + esc(tr('anWandSetzen')) + '</button></div>';
+    h += '<div style="display:grid;gap:10px">' +
+      feldMitSkizze('breite', 'g-t-b', tr('feldBreite'), fmt0.format(t.w * 100), tr('feldBreiteKurz')) +
+      feldMitSkizze('hoehe', 'g-t-h', tr('feldHoehe'), fmt0.format(t.hoehe * 100), tr('feldHoeheKurz')) +
+      (fenster ? feldMitSkizze('bruestung', 'g-t-br', tr('feldBruestung'), fmt0.format(t.bruestung * 100), tr('feldBruestungKurz')) : '') + '</div>' +
+      '<div class="knopfreihe">' + (!fenster || !raum ? '<button type="button" class="knopf zweit" id="g-t-dreh"><svg class="sym" aria-hidden="true"><use href="#i-dreh"/></svg> ' + esc(raum ? tr('seiteWechseln') : tr('drehenR')) + '</button>' : '') +
+      '<button type="button" class="knopf zweit" id="g-t-weg"><svg class="sym" aria-hidden="true"><use href="#i-weg-teil"/></svg> ' + esc(tr('loeschenEntf')) + '</button>' +
+      '<button type="button" class="hilfe-knopf" id="g-t-hilfe" aria-expanded="false" aria-controls="g-t-hilfe-text" aria-label="' + esc(tr('hilfeKnopf')) + '">?</button></div>' +
+      '<p class="klein" id="g-t-hilfe-text" hidden>' + esc(tr(fenster ? 'hilfeFenster' : 'hilfeTuer')) + '</p>' +
+      '<p class="klein" style="margin:8px 0 0">' + esc(tr('panelZiehen')) + '</p>';
+    box.innerHTML = h;
+    box.setAttribute('lang', sprachCode());
+    [['g-t-b', function (v) { t.w = v / 100; }, 20, 300], ['g-t-h', function (v) { t.hoehe = v / 100; }, 30, 400], ['g-t-br', function (v) { t.bruestung = v / 100; }, 0, 300]].forEach(function (p) {
+      var inp = $(p[0]); if (!inp) return;
+      inp.addEventListener('input', function () {
+        var v = zahl(this.value), fe = $(p[0] + '-f');
+        if (v == null || v < p[2] || v > p[3]) { fe.textContent = tr('feldFehler', { von: p[2], bis: p[3] }); this.setAttribute('aria-invalid', 'true'); return; }
+        fe.textContent = ''; this.removeAttribute('aria-invalid');
+        p[1](v); geaendert();
+      });
+    });
+    if ($('g-t-dreh')) $('g-t-dreh').addEventListener('click', drehen);
+    $('g-t-weg').addEventListener('click', loeschen);
+    $('g-t-hilfe').addEventListener('click', function () {
+      var x = $('g-t-hilfe-text'), auf = x.hidden;
+      x.hidden = !auf; this.setAttribute('aria-expanded', auf ? 'true' : 'false');
+    });
+    if ($('g-t-wand')) $('g-t-wand').addEventListener('click', function () {
+      /* weiter suchen als beim Ziehen, damit "an die nächste Wand" auch aus der Raummitte klappt */
+      if (anWand(t, [t.x, t.y], 3)) { geaendert(); auswahlZeigen(); rueckmeldungWand(t); }
+      else meldung(tr('wandFehlt'));
+    });
   }
   function prozentFeld(id, setzen, max) {
     var e = $(id); if (!e) return;
@@ -720,6 +1146,13 @@
         art = 'warn'; zeichen = '!';
         klein = 'Achtung: Für ' + s.ohneMassstab.join(', ') + ' ist noch kein Maßstab festgelegt, die Flächen stimmen erst danach. ' + klein;
       }
+    }
+    /* Fenster/Türen, die ihre Wand verloren haben: sichtbar mit Grund (kommt aus dem gespeicherten Zustand der Teile) */
+    var fr = freieTeile();
+    if (fr.length) {
+      art = 'warn'; zeichen = '!';
+      var ft = fr[0].t;
+      klein = tr('freiSatz', { n: fr.length, teil: teilName(ft), grund: grundText(ft.bindungGrund) }) + ' ' + klein;
     }
     box.className = 'satz ' + art;
     box.querySelector('.lampe').textContent = zeichen;
@@ -810,6 +1243,7 @@
   function heute() { var d = new Date(); return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); }
   function dateiSichern(zusatz) {
     try {
+      nachfuehrenAlle();
       var daten = JSON.parse(JSON.stringify(plan)); daten.exportiert = new Date().toISOString();
       var blob = new Blob([JSON.stringify(daten)], { type: 'application/json' });
       var url = URL.createObjectURL(blob), a = document.createElement('a');
@@ -876,6 +1310,7 @@
   /* ---------- Ansicht von oben / 3D ---------- */
   function dreiD() {
     if (!window.GRUNDRISS3D) return;
+    nachfuehrenAlle();
     window.GRUNDRISS3D.zeige(plan, ART);
   }
   function ansichtSetzen(drei) {
@@ -885,6 +1320,7 @@
     svg.style.visibility = ansicht3d ? 'hidden' : '';
     $('g-szene').hidden = !ansicht3d;
     $('g-zoom').hidden = ansicht3d;
+    $('g-nord').hidden = ansicht3d;
     $('g-tipp').textContent = ansicht3d ? '' : $('g-tipp').textContent;
     if (ansicht3d) dreiD(); else zeichnen();
   }
@@ -897,7 +1333,162 @@
   if ('ResizeObserver' in window) new ResizeObserver(function () { if (sichtbar && !ansicht3d) { seitenverhaeltnis(); zeichnen(); } }).observe($('g-buehne'));
   window.addEventListener('themagewechselt', function () { if (ansicht3d) dreiD(); });
 
-  function allesZeigen() { etagenZeigen(); zeichnen(); auswahlZeigen(); auswerten(); }
+  function allesZeigen() { nachfuehrenAlle(); etagenZeigen(); zeichnen(); auswahlZeigen(); auswerten(); nordZeigen(); }
+
+  /* ---------- Himmelsrichtung (Windrose) ---------- */
+  function nordZeigen() {
+    var g = plan.nord || 0, pf = $('g-nord-pfeil'), n = $('g-nord-n'), r = $('g-nord'), f = $('g-nord-grad');
+    if (!r) return;
+    pf.setAttribute('transform', 'rotate(' + g + ' 32 32)');
+    n.setAttribute('transform', 'rotate(' + (-g) + ' 32 17)');
+    n.textContent = tr('nordBuchstabe');
+    r.setAttribute('aria-valuenow', String(g)); r.setAttribute('aria-valuetext', tr('nordWert', { grad: g }));
+    if (f && document.activeElement !== f) f.value = String(g);
+  }
+  function nordSetzen(grad) {
+    plan.nord = Math.round(((grad % 360) + 360) % 360) % 360;
+    speichern(); nordZeigen();
+  }
+  (function nordBedienen() {
+    var r = $('g-nord'), f = $('g-nord-grad'); if (!r) return;
+    var zieht = false;
+    function ausMaus(ev) {
+      var b = r.getBoundingClientRect(), dx = ev.clientX - (b.left + b.width / 2), dy = ev.clientY - (b.top + b.height / 2);
+      if (Math.hypot(dx, dy) < 4) return;
+      nordSetzen(Math.atan2(dx, -dy) * 180 / Math.PI);
+    }
+    r.addEventListener('pointerdown', function (ev) { zieht = true; try { r.setPointerCapture(ev.pointerId); } catch (err) { /* ohne Capture reicht move auf dem Element */ } ausMaus(ev); ev.preventDefault(); });
+    r.addEventListener('pointermove', function (ev) { if (zieht) ausMaus(ev); });
+    r.addEventListener('pointerup', function () { zieht = false; });
+    r.addEventListener('pointercancel', function () { zieht = false; });
+    r.addEventListener('keydown', function (ev) {
+      var s = ev.shiftKey ? 15 : 1, k = ev.key, g = plan.nord || 0;
+      if (k === 'ArrowRight' || k === 'ArrowUp') nordSetzen(g + s);
+      else if (k === 'ArrowLeft' || k === 'ArrowDown') nordSetzen(g - s);
+      else if (k === 'Home') nordSetzen(0);
+      else return;
+      ev.preventDefault(); ev.stopPropagation();
+    });
+    f.addEventListener('input', function () {
+      var v = zahl(this.value), fe = $('g-nord-grad-f');
+      if (v == null || v < 0 || v > 360) { fe.textContent = tr('nordFehler'); this.setAttribute('aria-invalid', 'true'); return; }
+      fe.textContent = ''; this.removeAttribute('aria-invalid');
+      nordSetzen(v);
+    });
+    f.addEventListener('blur', nordZeigen);
+    $('g-nord-hilfe').addEventListener('click', function () {
+      var x = $('g-nord-hilfe-text'), auf = x.hidden;
+      x.hidden = !auf; this.setAttribute('aria-expanded', auf ? 'true' : 'false');
+    });
+  })();
+
+  /* ---------- Maße zeigen (Knopf), erster Hinweis ---------- */
+  var MASS_KEY = 'immo-grundriss-masse', HINWEIS_KEY = 'immo-hinweis-wand';
+  try { if (localStorage.getItem(MASS_KEY) === '0') massAn = false; } catch (err) { /* ohne Speicher bleibt es an */ }
+  function masseKnopf() { var b = $('g-masse'); if (b) b.setAttribute('aria-pressed', massAn ? 'true' : 'false'); }
+  if ($('g-masse')) $('g-masse').addEventListener('click', function () {
+    massAn = !massAn; masseKnopf();
+    try { localStorage.setItem(MASS_KEY, massAn ? '1' : '0'); } catch (err) { meldung(tr('masseNichtGemerkt')); }
+    zeichnen();
+  });
+  masseKnopf();
+  if ($('g-wand-hilfe')) $('g-wand-hilfe').addEventListener('click', function () {
+    var x = $('g-wand-hilfe-text'), auf = x.hidden;
+    x.hidden = !auf; this.setAttribute('aria-expanded', auf ? 'true' : 'false');
+  });
+  function hinweisZeigen(text) {
+    var b = $('g-hinweis'); if (!b) return;
+    $('g-hinweis-text').textContent = text; b.setAttribute('lang', sprachCode()); b.hidden = false;
+  }
+  if ($('g-hinweis-zu')) $('g-hinweis-zu').addEventListener('click', function () { $('g-hinweis').hidden = true; svg.focus({ preventScroll: true }); });
+  /* kurzer Hinweis beim ersten Fenster/Tür: wird nur einmal gezeigt (Bewegung nur ohne "reduzierte Bewegung") */
+  function ersthinweisWand() {
+    var schon = false;
+    try { schon = localStorage.getItem(HINWEIS_KEY) === '1'; } catch (err) { schon = false; }
+    if (schon) return;
+    try { localStorage.setItem(HINWEIS_KEY, '1'); } catch (err) { /* dann kommt er beim nächsten Mal wieder, kein Schaden */ }
+    hinweisZeigen(tr('hinweisWand'));
+  }
+
+  /* ---------- Plan drucken ---------- */
+  var druckZustand = null;
+  function nettoSkala(r) {
+    var s = [10, 20, 25, 50, 75, 100, 125, 150, 200, 250, 300, 400, 500, 750, 1000, 2000], i;
+    for (i = 0; i < s.length; i++) if (s[i] >= r) return s[i];
+    return Math.ceil(r / 1000) * 1000;
+  }
+  function druckAufraeumen() {
+    document.body.classList.remove('plan-druck');
+    var box = $('g-druck'); if (box) box.innerHTML = '';
+    if (druckZustand) {
+      massAn = druckZustand.mass; ansicht3d = druckZustand.drei; vb = druckZustand.vb; druckZustand = null;
+      if (sichtbar && !ansicht3d) zeichnen();
+    }
+  }
+  /* baut die Druckseite (Plan mit Maßlinien, Maßstab, Raumliste, Datum); false = nichts zu drucken */
+  function druckVorbereiten() {
+    if (druckZustand) druckAufraeumen();
+    var e = etage(), box = $('g-druck');
+    if (!box || !e.raeume.length) return false;
+    druckZustand = { vb: vb ? { x: vb.x, y: vb.y, w: vb.w, h: vb.h } : null, mass: massAn, drei: ansicht3d };
+    ansicht3d = false; massAn = true;
+    var altSichtbar = sichtbar; sichtbar = true;
+    vb = null; einpassen(true); zeichnen();
+    var fit = { w: vb.w, h: vb.h };
+    /* Maßstab: 180 mm breit, 150 mm hoch verfügbar; auf eine runde Zahl 1:N gerundet, Größe dann exakt */
+    var verh = Math.max(fit.w * 1000 / 180, fit.h * 1000 / 150), N = nettoSkala(verh);
+    /* Beschriftungen in Papiergröße rechnen (1 Punkt = 0,2646 mm), dann neu zeichnen */
+    skalaUeber = (0.2646 / 1000) * N;
+    try { zeichnen(); } finally { skalaUeber = 0; }
+    var klon = svg.cloneNode(true);
+    sichtbar = altSichtbar;
+    ['id', 'style', 'tabindex'].forEach(function (a) { klon.removeAttribute(a); });
+    klon.setAttribute('class', 'planzeichnung'); klon.setAttribute('role', 'img'); klon.setAttribute('aria-label', tr('druckTitel', { etage: e.name }));
+    klon.querySelectorAll('.raster-linie, .griff, .hilfslinie, .hilfsflaeche, .hilfspunkt').forEach(function (n) { n.remove(); });
+    klon.querySelectorAll('[tabindex]').forEach(function (n) { n.removeAttribute('tabindex'); n.removeAttribute('role'); });
+    klon.style.width = (fit.w * 1000 / N) + 'mm'; klon.style.height = (fit.h * 1000 / N) + 'mm';
+    var loc = { de: 'de-DE', en: 'en-GB', ru: 'ru-RU' }[sprachCode()] || 'de-DE';
+    var datum = new Intl.DateTimeFormat(loc, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
+    var rows = '', sw = 0, sg = 0;
+    e.raeume.forEach(function (r) {
+      var d = raumDaten(r), w = R.wohnflaecheRaum(d), art = { voll: 'artVoll', balkon: 'artBalkon', wintergarten: 'artWinter', zubehoer: 'artZubehoer' }[r.art];
+      sw += w; sg += d.flaeche;
+      rows += '<tr><td>' + esc(r.name) + '</td><td>' + esc(tr(art)) + '</td><td class="z">' + zahl2(d.flaeche, 1) + ' m²</td><td class="z">' + zahl2(w, 1) + ' m²</td></tr>';
+    });
+    box.setAttribute('lang', sprachCode());
+    var nordGrad = plan.nord || 0;
+    /* Windrose für den Druck: feste helle Farben (keine Farbvariablen, die im Dunkelmodus dunkel wären), keine IDs */
+    var rose = '<svg class="g-druck-rose" viewBox="0 0 64 64" width="84" height="84" role="img" aria-label="' + esc(tr('nordName') + ': ' + tr('nordWert', { grad: nordGrad })) + '">' +
+      '<circle cx="32" cy="32" r="24" fill="#ffffff" stroke="#241d2e" stroke-width="2"/>' +
+      '<g data-rose-pfeil="1" transform="rotate(' + nordGrad + ' 32 32)"><path d="M32 12 38 34 32 30 26 34Z" fill="#b23b2b" stroke="#241d2e" stroke-width="1.2" stroke-linejoin="round"/>' +
+      '<text x="32" y="17" transform="rotate(' + (-nordGrad) + ' 32 17)" text-anchor="middle" dominant-baseline="central" font-family="Manrope, Arial, sans-serif" font-weight="800" font-size="16" fill="#241d2e" stroke="#ffffff" stroke-width="3" paint-order="stroke">' + esc(tr('nordBuchstabe')) + '</text></g>' +
+      '<circle cx="32" cy="32" r="3" fill="#241d2e"/></svg>';
+    box.innerHTML = '<div class="g-druck-kopf"><div class="g-druck-kopf-text"><h1>' + esc(tr('druckTitel', { etage: e.name })) + '</h1>' +
+      '<p class="g-druck-meta">' + esc(tr('druckDatum')) + ': <b>' + esc(datum) + '</b> · ' + esc(tr('druckMassstab')) + ': <b>1:' + N + '</b> · ' + esc(tr('druckHoehe')) + ': <b>' + zahl2(e.hoehe, 2) + ' ' + esc(tr('einheitM')) + '</b> · ' + esc(tr('nordName')) + ': <b>' + (plan.nord || 0) + '°</b></p></div>' + rose + '</div>' +
+      '<div class="g-druck-plan"></div>' +
+      '<p class="g-druck-klein">' + esc(tr('druckMassstabNote', { n: N })) + '</p>' +
+      '<table class="g-druck-tab"><thead><tr><th>' + esc(tr('druckRaum')) + '</th><th>' + esc(tr('druckArt')) + '</th><th class="z">' + esc(tr('druckGrund')) + '</th><th class="z">' + esc(tr('druckWohn')) + '</th></tr></thead><tbody>' + rows +
+      '<tr class="summe"><th colspan="2">' + esc(tr('druckSumme')) + '</th><td class="z">' + zahl2(sg, 1) + ' m²</td><td class="z">' + zahl2(sw, 1) + ' m²</td></tr></tbody></table>' +
+      '<p class="g-druck-klein">' + esc($('g-wand-hinweis-text').textContent) + ' ' + esc(tr('druckKeinBauplan')) + '</p>';
+    box.querySelector('.g-druck-plan').appendChild(klon);
+    document.body.classList.add('plan-druck');
+    return true;
+  }
+  function drucken() {
+    var ok = false;
+    try { ok = druckVorbereiten(); } catch (err) { druckAufraeumen(); meldung(tr('druckFehler', { grund: err && err.message ? err.message : '?' })); return; }
+    if (!ok) { meldung(tr('druckLeer')); return; }
+    try { window.print(); }
+    catch (err) { druckAufraeumen(); meldung(tr('druckFehler', { grund: err && err.message ? err.message : '?' })); }
+  }
+  window.addEventListener('afterprint', druckAufraeumen);
+  if ($('g-drucken')) $('g-drucken').addEventListener('click', drucken);
+
+  /* Sprache gewechselt: neue Texte in Seitenfeld, Statuszeile, Maßzahlen */
+  window.addEventListener('sprachegewechselt', function () {
+    if (!$('g-hinweis').hidden) $('g-hinweis-text').textContent = tr('hinweisWand');
+    allesZeigen();
+  });
 
   katalogZeigen();
   auswerten();
@@ -906,12 +1497,16 @@
     /* von app.js beim Reiterwechsel gerufen: Größe ist erst messbar, wenn der Bereich sichtbar ist */
     zeigt: function (an) {
       sichtbar = !!an;
-      if (!sichtbar) return;
+      if (!sichtbar) { druckAufraeumen(); return; }
       if (!vb) einpassen(); else seitenverhaeltnis();
       allesZeigen(); tipp();
     },
     summen: summen,
     plan: function () { return plan; },
+    /* reine Geometrie: Wandstücke einer Etage (Standard: die gezeigte) */
+    waende: function (e) { return GEO.waende(e || etage()); },
+    nachfuehren: nachfuehrenAlle,
+    druckVorbereiten: druckVorbereiten, druckAufraeumen: druckAufraeumen,
     /* für Prüfskripte: Plan setzen, geprüft wie beim Datei-Import */
     setzePlan: function (p) { var n = pruefePlan(p); if (!n) return false; plan = n; gewaehlt = null; vb = null; speichern(); allesZeigen(); return true; }
   };

@@ -89,7 +89,7 @@
 
   function zeige(plan, ART) {
     if (!renderer && !anlegen()) return;
-    var e = plan.etagen[plan.aktiv] || plan.etagen[0], H = plan.wandhoehe || 2.5;
+    var e = plan.etagen[plan.aktiv] || plan.etagen[0], H = e.hoehe || plan.wandhoehe || 2.5;
     var dunkel = document.documentElement.getAttribute('data-theme') === 'dark' ||
       (!document.documentElement.getAttribute('data-theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     leeren();
@@ -130,7 +130,7 @@
       var f = new THREE.Color(teilFarbe[a.gruppe] || teilFarbe.wohnung);
       if (a.form === 'wand') { h = H; y = H / 2; }
       if (a.form === 'wandweg') { h = H; y = H / 2; f = new THREE.Color(css('--schlecht')); opak = 0.35; }
-      if (a.form === 'fenster') { y = 0.9 + h / 2; f = new THREE.Color(css('--c2')); opak = 0.55; }
+      if (a.form === 'fenster') { if (t.hoehe) h = t.hoehe; y = (t.bruestung != null ? t.bruestung : 0.9) + h / 2; f = new THREE.Color(css('--c2')); opak = 0.55; }
       if (a.form === 'flaeche') { h = 0.04; y = 0.03; opak = 0.6; }
       kasten(t.w, h, t.d, f, t.x, y, t.y, drehY, opak);
       nimm(t.x - t.w / 2, t.y - t.w / 2); nimm(t.x + t.w / 2, t.y + t.w / 2);
