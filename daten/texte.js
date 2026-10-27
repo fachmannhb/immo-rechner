@@ -329,9 +329,9 @@ window.TEXTE = {
   vorlageKurzGross: { de: 'Erfunden: zwei Geschosse, drei Schlafzimmer, Ankleide.', en: 'Invented: two floors, three bedrooms, dressing room.', ru: 'Выдуманный: два этажа, три спальни, гардеробная.' },
   vorlageTextBeispiel: { de: 'Beispielhaus mit erfundenen Maßen.', en: 'Example house with invented dimensions.', ru: 'Пример дома с выдуманными размерами.' },
   vorlageTextMuster: {
-    de: 'Musterhaus nach einer Vorlage des Nutzers. Angenommen: das Obergeschoss (wie das Erdgeschoss), die Treppe (im Wohnzimmer, weil der Flur zu schmal ist) und einzelne Maße, die um 1 bis 4 cm geändert sind.',
-    en: 'Show house based on a template by the user. Assumed: the upper floor (same as the ground floor), the staircase (in the living room because the hall is too narrow) and a few dimensions changed by 1 to 4 cm.',
-    ru: 'Типовой дом по шаблону пользователя. Предположено: верхний этаж (как первый), лестница (в гостиной, потому что прихожая слишком узкая) и несколько размеров, изменённых на 1–4 см.'
+    de: 'Musterhaus nach einer Vorlage des Nutzers. Angenommen: das Obergeschoss (wie das Erdgeschoss), die Treppe (im Wohnzimmer, weil der Flur zu schmal ist) und einzelne Maße, die um 1 bis 4 cm geändert sind. Die Fenster von Wohnzimmer und Schlafzimmer sind breiter gezeichnet als in der Vorlage, damit die Fensterregel erfüllt ist. Einen Abstellraum gibt es bewusst nicht: Das ist das Lehrbeispiel für „Regeln prüfen“.',
+    en: 'Show house based on a template by the user. Assumed: the upper floor (same as the ground floor), the staircase (in the living room because the hall is too narrow) and a few dimensions changed by 1 to 4 cm. The windows of the living room and bedroom are drawn wider than in the template so the window rule is met. There is deliberately no storage room: that is the teaching example for “Check the rules”.',
+    ru: 'Типовой дом по шаблону пользователя. Предположено: верхний этаж (как первый), лестница (в гостиной, потому что прихожая слишком узкая) и несколько размеров, изменённых на 1–4 см. Окна гостиной и спальни нарисованы шире, чем в шаблоне, чтобы выполнялось правило об окнах. Кладовой намеренно нет: это учебный пример для «Проверки правил».'
   },
   vorlageTextKlein: {
     de: 'Kleines Haus mit erfundenen Maßen, eingeschossig; Fenster vor allem nach Süden.',

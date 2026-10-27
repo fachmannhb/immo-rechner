@@ -1,4 +1,4 @@
-/* Verfahrensfreie Garten- und Grundstücksbauten je Bundesland, SCHLANKE Fassung für die Seite, erzeugt von tmp/verfahrensfrei_daten.py (nicht von Hand ändern).
+/* Verfahrensfreie Garten- und Grundstücksbauten je Bundesland, SCHLANKE Fassung für die Seite, erzeugt von erzeuger/verfahrensfrei_daten.py (nicht von Hand ändern).
    Aufbau: laender[Kürzel].strukturen[baustein] = Liste von Einträgen {bauwerk, art, wert, einheit, wert_roh, bedingung, aussenbereich, ausserbereich_wert, paragraf, quelle[], abruf, status, hinweis}.
    Der wörtliche Gesetzestext je Zeile steht in daten/verfahrensfrei_voll.js (nicht eingebettet); in der Seite gilt der Link zur Quelle. */
 window.DATEN = window.DATEN || {};

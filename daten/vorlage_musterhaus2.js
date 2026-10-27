@@ -2,11 +2,14 @@
    x nach rechts, y nach unten), mit Maßen aus der Zeichnung des Nutzers. Auf Wanddicke 25 cm angeglichen: die Seite erkennt eine Trennwand nur,
    wenn die Lücke höchstens Innenwand + 2 cm misst (hier 27 cm). Geändert: Lücke Wohnzimmer|Küche 28 → 26 cm und Lücke Flur|Zimmer, Bad 31 → 26 cm;
    dafür Küche 2 cm breiter (3,82 statt 3,80 m), Zimmer und Bad 4 cm tiefer (3,74 statt 3,70 m), Bad 1 cm schmaler (1,69 statt 1,70 m).
-   Alle anderen Maße sind die des Nutzers (Gesamtbreite 8,28 m, Schlafzimmer bis 10,25 m).
+   Alle anderen Maße sind die des Nutzers (Gesamtbreite 8,28 m, Schlafzimmer bis 10,25 m), mit einer Ausnahme (27.10.2026): Die Fenster von Wohnzimmer
+   (2,00 statt 1,40 m) und Schlafzimmer (1,70 statt 1,10 m), je Geschoss, sind breiter gezeichnet, damit jeder Raum die Fensterregel (Fensterfläche
+   mindestens 1/8 der Raumfläche) in Bremen und Bayern erfüllt. BEWUSST GEBLIEBEN: Das Musterhaus hat keinen Abstellraum; das ist das Lehrbeispiel
+   für die Karte „Regeln prüfen“ (Bremen verlangt einen Abstellraum je Wohnung und meldet ihn als gelben Hinweis „Abstellraum fehlt“).
    ANNAHMEN: Obergeschoss wie das Erdgeschoss (vom Nutzer nicht vorgegeben), Raumnamen oben neutral; Treppe (1,00 × 3,40 m) im Wohnzimmer
    statt im nur 1,32 m tiefen Flur (dort bliebe neben ihr 32 cm Durchgang und sie versperrte die Türen); Nord 270 Grad; Dach Satteldach 35 Grad,
    First entlang der langen Seite. Möbel: nur, was der Katalog hat (kein Ecksofa, Sessel, Teppich, keine Badewanne, WC, kein Waschbecken).
-   Erzeugt von tmp/vorlagen_erzeugen.js, nicht von Hand ändern. Alle Zahlen sind Planungswerte, keine Bauzeichnung. */
+   Erzeugt von erzeuger/vorlagen_erzeugen.js, nicht von Hand ändern. Alle Zahlen sind Planungswerte, keine Bauzeichnung. */
 window.DATEN = window.DATEN || {};
 window.DATEN.vorlagen = window.DATEN.vorlagen || {};
 window.DATEN.vorlagen.musterhaus2 = {
@@ -32,11 +35,11 @@ window.DATEN.vorlagen.musterhaus2 = {
         {"id":"me_bad","name":"Bad","art":"voll","nutzung":"bad","punkte":[[6.59,6.51],[8.28,6.51],[8.28,10.25],[6.59,10.25]]}
       ],
       teile: [
-        {"id":"vmue1n1","art":"fenster","x":1.4,"y":-0.15,"w":1.4,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"me_wohn","kante":0,"t":0.3333},"bindungGrund":""},
+        {"id":"vmue1n1","art":"fenster","x":1.4,"y":-0.15,"w":2,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"me_wohn","kante":0,"t":0.3333},"bindungGrund":""},
         {"id":"vmue1n2","art":"fenster","x":5.2,"y":-0.15,"w":1,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"me_kueche","kante":0,"t":0.1937},"bindungGrund":""},
         {"id":"vmue1n3","art":"fenster","x":7.5,"y":-0.15,"w":0.9,"d":0.3,"dreh":0,"hoehe":2.1,"bruestung":0,"bindung":{"raum":"me_kueche","kante":0,"t":0.7958},"bindungGrund":""},
         {"id":"vmue1n4","art":"tuer","x":8.43,"y":5.59,"w":1,"d":0.3,"dreh":90,"hoehe":2.1,"bruestung":0,"bindung":{"raum":"me_flur","kante":1,"t":0.5},"bindungGrund":""},
-        {"id":"vmue1n5","art":"fenster","x":1.55,"y":10.4,"w":1.1,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"me_schlaf","kante":2,"t":0.5},"bindungGrund":""},
+        {"id":"vmue1n5","art":"fenster","x":1.55,"y":10.4,"w":1.7,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"me_schlaf","kante":2,"t":0.5},"bindungGrund":""},
         {"id":"vmue1n6","art":"fenster","x":4.85,"y":10.4,"w":1.4,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"me_zimmer","kante":2,"t":0.5},"bindungGrund":""},
         {"id":"vmue1n7","art":"fenster","x":7.435,"y":10.4,"w":0.6,"d":0.3,"dreh":180,"hoehe":0.6,"bruestung":1.2,"bindung":{"raum":"me_bad","kante":2,"t":0.5},"bindungGrund":""},
         {"id":"vmue1n8","art":"tuer","x":3.78,"y":4.805,"w":0.8,"d":0.25,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"me_flur","kante":0,"t":0.0964},"bindungGrund":""},
@@ -73,11 +76,11 @@ window.DATEN.vorlagen.musterhaus2 = {
         {"id":"mo_bad","name":"Bad","art":"voll","nutzung":"bad","punkte":[[6.59,6.51],[8.28,6.51],[8.28,10.25],[6.59,10.25]]}
       ],
       teile: [
-        {"id":"vmue2n29","art":"fenster","x":1.4,"y":-0.15,"w":1.4,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_wohn","kante":0,"t":0.3333},"bindungGrund":""},
+        {"id":"vmue2n29","art":"fenster","x":1.4,"y":-0.15,"w":2,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_wohn","kante":0,"t":0.3333},"bindungGrund":""},
         {"id":"vmue2n30","art":"fenster","x":5.2,"y":-0.15,"w":1,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_kueche","kante":0,"t":0.1937},"bindungGrund":""},
         {"id":"vmue2n31","art":"fenster","x":7.5,"y":-0.15,"w":0.9,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_kueche","kante":0,"t":0.7958},"bindungGrund":""},
         {"id":"vmue2n32","art":"fenster","x":8.43,"y":5.59,"w":1,"d":0.3,"dreh":90,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_flur","kante":1,"t":0.5},"bindungGrund":""},
-        {"id":"vmue2n33","art":"fenster","x":1.55,"y":10.4,"w":1.1,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_schlaf","kante":2,"t":0.5},"bindungGrund":""},
+        {"id":"vmue2n33","art":"fenster","x":1.55,"y":10.4,"w":1.7,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_schlaf","kante":2,"t":0.5},"bindungGrund":""},
         {"id":"vmue2n34","art":"fenster","x":4.85,"y":10.4,"w":1.4,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_zimmer","kante":2,"t":0.5},"bindungGrund":""},
         {"id":"vmue2n35","art":"fenster","x":7.435,"y":10.4,"w":0.6,"d":0.3,"dreh":180,"hoehe":0.6,"bruestung":1.2,"bindung":{"raum":"mo_bad","kante":2,"t":0.5},"bindungGrund":""},
         {"id":"vmue2n36","art":"tuer","x":3.78,"y":4.805,"w":0.8,"d":0.25,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"mo_flur","kante":0,"t":0.0964},"bindungGrund":""},

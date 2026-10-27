@@ -1,4 +1,4 @@
-/* Innenausbau je Gewerk (Preise, Einheiten nach Grundrissmenge) und Ausstattungswerte. Quelle: recherche/22_innenausbau_solar.md (Abruf 26.10.2026). Erzeugt von tmp/daten_d_innenausbau.py. */
+/* Innenausbau je Gewerk (Preise, Einheiten nach Grundrissmenge) und Ausstattungswerte. Quelle: recherche/22_innenausbau_solar.md (Abruf 26.10.2026). Erzeugt von erzeuger/daten_d_innenausbau.py. */
 window.DATEN = window.DATEN || {};
 window.DATEN.innenausbau = {
 "meta":{"titel":"Innenausbau je Gewerk und Ausstattungswerte","abruf":"2026-10-26","hinweis":"Alle Handwerkerpreise stammen aus kommerziellen Ratgeberseiten (keine amtliche Preisliste): Größenordnung, durch mindestens zwei echte Angebote ersetzen. Netto/Brutto steht in nb. typisch = Wert der Quelle, wo genannt.","bezug_werte":"boden_m2, wand_m2, decke_m2 (Menge aus dem Grundriss), stueck, raum, bad, tuer, kueche, anlage","stufen":"Ausstattungsstufe 1 = Mindest-, 2 = Standard-, 3 = Komfortausstattung (RAL-RG 678)"},

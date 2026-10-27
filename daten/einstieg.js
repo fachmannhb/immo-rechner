@@ -83,6 +83,12 @@ window.DATEN.einstieg = {
       brauche: 'Nichts für die Tipps. Die Rechner nutzen Ihre Zahlen aus dem Rechner und aus „Was ist das Haus wert?“, sofern vorhanden.',
       anfang: { text: 'Verkauf nach 10 Jahren rechnen ↓', fokus: 'st-d-ws' },
       beispiel: true
+    },
+    strom: {
+      kurz: 'Rechnen Sie, was Solarstrom auf Ihrem Dach bringt und kostet.',
+      wofuer: 'Sie sehen Ertrag, Kosten, Batterie, Elektroauto und Wallbox, die Regeln für Ihr Bundesland und das Jahr, in dem sich die Anlage bezahlt hat. Eine Planung, kein Angebot und keine Beratung.',
+      brauche: 'Nichts. Fläche, Himmelsrichtung und Neigung des Dachs stellen Sie ein; alles andere hat Startwerte, die Sie ändern können.',
+      anfang: { text: 'Dachfläche einstellen ↓', fokus: 'ss-ff0m' }
     }
   },
   /* Kurzzeilen für Bereiche ohne Einstiegskasten */

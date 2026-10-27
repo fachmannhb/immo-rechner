@@ -26,7 +26,7 @@
     var b = document.getElementById('sprach-hinweis');
     if (!b) return;
     var text = '';
-    if (lang !== 'de') text = t(bereich === 'grundriss' ? 'sprachGrundrissRest' : 'sprachNurDeutsch');
+    if (lang !== 'de') text = t(bereich === 'grundriss' ? 'sprachGrundrissRest' : (bereich === 'strom' ? 'sprachStromRest' : 'sprachNurDeutsch'));
     if (speicherFehler) text += (text ? ' ' : '') + t('spracheNichtGemerkt');
     b.textContent = text; b.setAttribute('lang', lang); b.hidden = !text;
   }

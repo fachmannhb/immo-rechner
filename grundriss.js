@@ -195,6 +195,9 @@
   }
   var speicherTimer = null;
   function speichern() {
+    /* Welle D: Strom vom Dach und Kompaktheit rechnen mit dem Plan, bei jeder Änderung neu (entprellt) */
+    if (window.GRUNDRISS_ENERGIE) window.GRUNDRISS_ENERGIE.aktualisieren();
+    if (window.GRUNDRISS_FORMEN) window.GRUNDRISS_FORMEN.aktualisieren();
     clearTimeout(speicherTimer);
     speicherTimer = setTimeout(function () {
       try {

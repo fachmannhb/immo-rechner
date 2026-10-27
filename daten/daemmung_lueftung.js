@@ -1,4 +1,4 @@
-/* Dämmstandards (GModG, KfW, Passivhaus), Lüftung, Kamin (1. BImSchV, MFeuV), Brennholz, Wintergarten. Quellen: recherche/31, 33, 37 (Abruf 27.10.2026), 37 hat Vorrang. Erzeugt von tmp/daten_d_daemmung_lueftung.py. */
+/* Dämmstandards (GModG, KfW, Passivhaus), Lüftung, Kamin (1. BImSchV, MFeuV), Brennholz, Wintergarten. Quellen: recherche/31, 33, 37 (Abruf 27.10.2026), 37 hat Vorrang. Erzeugt von erzeuger/daten_d_daemmung_lueftung.py. */
 window.DATEN = window.DATEN || {};
 window.DATEN.daemmung_lueftung = {
 "meta":{"titel":"Dämmstandard, Förderung, Lüftung, Kamin, Wintergarten","abruf":"2026-10-27","hinweis":"Bericht 37 hat Vorrang vor 31 und 33; ersetzte oder bestätigte Zeilen tragen ref/ersetzt. Gesetzestexte kamen als Zusammenfassungen des Abrufwerkzeugs: Zahlen und Überschriften gelesen, voller Wortlaut nicht. Keine Rechts- oder Förderberatung; Förderanträge vor Vorhabenbeginn, Sätze vor Antrag am Original prüfen."},

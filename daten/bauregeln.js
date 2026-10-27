@@ -1,4 +1,4 @@
-/* Bauregeln je Bundesland, SCHLANKE Fassung für die Seite, erzeugt von tmp/bauregeln_daten.py aus recherche/20, 23, 24-27, 38 (nicht von Hand ändern).
+/* Bauregeln je Bundesland, SCHLANKE Fassung für die Seite, erzeugt von erzeuger/bauregeln_daten.py aus recherche/20, 23, 24-27, 38 (nicht von Hand ändern).
    Aufbau: laender[Kürzel].regeln[thema] = Liste von Einträgen {id, wert, einheit, gilt_fuer, paragraf, text, wortlaut (nur Kernregeln), quelle[], abruf, status, gilt_ab, gilt_bis, hinweis}.
    Den vollen Wortlaut aller Zeilen enthält daten/bauregeln_voll.js (nicht eingebettet). Status: geprüft, geprüft (Landesportal), prüfen vor Nutzung, Lücke. */
 window.DATEN = window.DATEN || {};

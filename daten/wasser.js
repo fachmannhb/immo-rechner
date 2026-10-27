@@ -1,4 +1,4 @@
-/* Wasser: Niederschlag 1991-2020 (DWD, CC BY 4.0), Härte, TrinkwV, Regenwasser, Gebühren, Enthärtung, Preise. Quellen: recherche/32, 37 (Abruf 27.10.2026), 37 hat Vorrang. Erzeugt von tmp/daten_d_wasser.py. */
+/* Wasser: Niederschlag 1991-2020 (DWD, CC BY 4.0), Härte, TrinkwV, Regenwasser, Gebühren, Enthärtung, Preise. Quellen: recherche/32, 37 (Abruf 27.10.2026), 37 hat Vorrang. Erzeugt von erzeuger/daten_d_wasser.py. */
 window.DATEN = window.DATEN || {};
 window.DATEN.wasser = {
 "meta":{"titel":"Wasser: Niederschlag, Härte, Trinkwasserrecht, Regenwasser, Gebühren, Enthärtung","niederschlag_hinweis":"Liste niederschlag: Jahresmittel 1991 bis 2020 in mm je Jahr (von = bis); j2024 und j2025 sind Einzeljahre.","abruf":"2026-10-27","hinweis":"Bericht 37 hat Vorrang vor 32. Das DIN 1989-100 war nicht lesbar (kostenpflichtig): Bemessungswerte sind Ratgeber- oder Satzungswerte. Solarthermie steht in energie.js.","dwd_attribution":"Datenbasis: Deutscher Wetterdienst, eigene Mittelung der Jahre 1991 bis 2020","dwd_lizenz":"CC BY 4.0 (Wortlaut des Quellenvermerks nicht verifiziert)"},

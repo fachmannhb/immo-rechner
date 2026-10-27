@@ -2,7 +2,7 @@
    Ganz erfunden, keine echten Daten. Kompakter Quader, Wohnbereich im Süden (unten im Plan, Nord = 0), Eingang, Treppe und Nebenräume im Norden,
    Satteldach 35 Grad mit waagerechtem First, damit eine Dachfläche nach Süden zeigt (Bericht recherche/29_hausform_dach.md). Treppe 1,00 × 3,40 m
    gerade, Steigung etwa 18 cm (Maß geschätzt). Die Außenmaße sind größer als der Wunsch 10 × 11 m, damit die Wohnfläche bei 200 m² landet.
-   Erzeugt von tmp/vorlagen_erzeugen.js, nicht von Hand ändern. */
+   Erzeugt von erzeuger/vorlagen_erzeugen.js, nicht von Hand ändern. */
 window.DATEN = window.DATEN || {};
 window.DATEN.vorlagen = window.DATEN.vorlagen || {};
 window.DATEN.vorlagen.gross = {

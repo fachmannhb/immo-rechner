@@ -1020,6 +1020,156 @@ __PALETTE_CSS__
     #g-druck .g-druck-tab .z { text-align: right; }
     #g-druck .g-druck-tab .summe th, #g-druck .g-druck-tab .summe td { font-weight: 800; border-top: 2px solid #241d2e; }
   }
+  /* Welle D, Teil 1: Strom vom eigenen Dach (es-), Haus- und Dachform (fm-). Farben nur aus der Palette (R024). */
+  .es-karte-summary, .fm-karte-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; min-height: 48px; cursor: pointer; list-style: none; }
+  .es-karte-summary::-webkit-details-marker, .fm-karte-summary::-webkit-details-marker { display: none; }
+  .es-karte-summary svg.sym, .fm-karte-summary svg.sym { width: 1.6em; height: 1.6em; color: var(--akzent-text); flex: none; }
+  .es-karte-frage { font: 700 1.3rem/1.2 var(--display); }
+  .es-karte-kopf { font-size: 1.05rem; padding: 2px 12px; border-radius: 999px; background: var(--akzent-flaeche); border: 2px solid var(--akzent); }
+  .es-karte-auf { margin-left: auto; color: var(--akzent-text); font-weight: 700; }
+  .es-karte-auf::after { content: " ▾"; }
+  details[open] > .es-karte-summary .es-karte-auf::after, details[open] > .fm-karte-summary .es-karte-auf::after { content: " ▴"; }
+  .es-karte-koerper { margin-top: 12px; padding-bottom: 6px; }
+  .es-schritt { margin: 0 0 22px; padding-top: 4px; border-top: 1px solid var(--linie); }
+  .es-schritt:first-child { border-top: 0; }
+  .es-h { display: flex; align-items: center; gap: 10px; margin: 14px 0 10px; font: 800 1.2rem/1.25 var(--display); }
+  .es-h svg.sym { width: 1.4em; height: 1.4em; flex: none; color: var(--akzent-text); }
+  .es-nr { flex: none; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--akzent); color: var(--auf-akzent); font: 800 16px var(--display); }
+  .es-h5 { display: flex; align-items: center; gap: 8px; margin: 18px 0 8px; font: 700 1.05rem/1.3 var(--display); }
+  .es-h5 svg.sym { width: 1.3em; height: 1.3em; flex: none; color: var(--akzent-text); }
+  .es-raster { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px 22px; }
+  .es-feld { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .es-label { font-weight: 700; }
+  .es-haken { display: flex; align-items: flex-start; gap: 10px; font-weight: 700; cursor: pointer; margin: 4px 0; }
+  .es-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 4px; }
+  .es-chips .chip[aria-pressed="true"] { background: var(--akzent); border-color: var(--akzent); color: var(--auf-akzent); }
+  .es-landzeile { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0 0 12px; }
+  .es-landzeile svg.sym { width: 1.4em; height: 1.4em; color: var(--akzent-text); }
+  .es-link { color: var(--akzent-text); font-weight: 700; }
+  .es-flaechen { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .es-flaeche, .es-frei-zeile { border: 2px solid var(--linie); border-radius: 14px; background: var(--karte); padding: 10px 14px; }
+  .es-fl-kopf { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+  .es-fl-name { min-width: 0; }
+  .es-fl-wert { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; margin-top: 8px; }
+  .es-fl-zahl { font-size: 16px; }
+  .es-fl-klasse { font-weight: 700; }
+  .es-frei-felder { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 10px 16px; }
+  .es-frage { margin-top: 12px; }
+  .es-fl-knoepfe { margin-top: 12px; }
+  .es-balken { height: 16px; border-radius: 999px; background: var(--linie); overflow: hidden; display: flex; }
+  .es-b { display: block; height: 100%; }
+  .es-b.c1 { background: var(--c1); } .es-b.c2 { background: var(--c2); } .es-b.c3 { background: var(--c3); }
+  .es-b.gut { background: var(--gut); } .es-b.gut2 { background: var(--gut); opacity: .7; } .es-b.warn { background: var(--warn); } .es-b.schlecht { background: var(--schlecht); }
+  .es-stapel .es-b { border-right: 2px solid var(--karte); }
+  .es-legende { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 6px 0 8px; font-size: 16px; }
+  .es-legende .sw, .fm-legende .sw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 6px; vertical-align: -1px; border: 1px solid var(--text); }
+  .sw.c1 { background: var(--c1); } .sw.c2 { background: var(--c2); } .sw.c3 { background: var(--c3); }
+  .es-legende .sw.neg { background: var(--c3); } .es-legende .sw.pos { background: var(--gut); }
+  .fm-legende .sw.ihr { background: var(--c1); } .fm-legende .sw.wue { background: var(--c3); } .fm-legende .sw.bd { background: var(--linie2); }
+  .es-zeile { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; margin: 14px 0 6px; font-weight: 700; }
+  .es-z-name { display: inline-flex; align-items: center; gap: 8px; }
+  .es-z-name svg.sym { width: 1.3em; height: 1.3em; color: var(--akzent-text); }
+  .es-satz { margin: 4px 0 14px; padding: 14px 18px; border-radius: 16px; background: var(--akzent-flaeche); border-left: 6px solid var(--akzent); font: 700 clamp(1.1rem, 1.9vw, 1.4rem)/1.4 var(--display); }
+  .es-satz.klein-satz { font-size: 1.05rem; margin-top: 10px; }
+  .es-zahl { font-variant-numeric: tabular-nums; }
+  .es-q { margin: 6px 0 10px; }
+  .es-qeintrag { white-space: normal; }
+  .es-an { margin-right: 4px; }
+  .es-hk { width: 36px; height: 36px; font-size: 16px; vertical-align: middle; margin-left: 4px; }
+  .es-hilfe { margin: 8px 0; }
+  .es-warn { margin: 8px 0; padding: 10px 14px; border-radius: 12px; background: var(--warn-fl); border-left: 5px solid var(--warn); font-size: 16px; }
+  .es-geld { margin: 10px 0 4px; display: grid; gap: 6px; }
+  .es-geld > div { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 12px; padding: 8px 12px; border-radius: 12px; background: var(--karte2); }
+  .es-geld dt { font-weight: 700; }
+  .es-geld dd { margin: 0; text-align: right; font-weight: 700; }
+  .es-geld dd .klein { font-weight: 400; }
+  .es-geld .gesamt { background: var(--akzent-flaeche); border: 2px solid var(--akzent); }
+  .es-vars { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 12px; }
+  .es-var { text-align: left; border: 2px solid var(--linie2); border-radius: 14px; background: var(--karte); padding: 12px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; font: inherit; color: var(--text); }
+  .es-var:hover { border-color: var(--akzent); }
+  .es-var[aria-pressed="true"] { border-color: var(--akzent); background: var(--akzent-flaeche); box-shadow: inset 0 0 0 1px var(--akzent); }
+  .es-var-kopf { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .es-var-kopf svg.sym { width: 1.5em; height: 1.5em; color: var(--akzent-text); }
+  .es-gew { margin-left: auto; padding: 0 10px; border-radius: 999px; background: var(--akzent); color: var(--auf-akzent); font-size: 16px; font-weight: 700; }
+  .es-var-zeile { display: flex; justify-content: space-between; gap: 8px; font-size: 16px; }
+  .es-cash { width: 100%; height: auto; max-height: 220px; display: block; background: var(--karte2); border-radius: 12px; }
+  .es-null { stroke: var(--text); stroke-width: 1; }
+  .es-bar.neg { fill: var(--c3); } .es-bar.pos { fill: var(--gut); } .es-bar.mark { stroke: var(--text); stroke-width: 2; }
+  .es-jt { fill: var(--leise); font: 700 14px var(--sans); }
+  .es-steuer { margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: var(--info-fl); border-left: 5px solid var(--info); }
+  .es-steuer p { margin: 4px 0; font-size: 16px; }
+  .es-steuer svg.sym { width: 1.2em; height: 1.2em; vertical-align: -3px; color: var(--info); }
+  .es-az { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; margin: 10px 0 4px; font-size: 16px; }
+  .es-az b { text-align: right; }
+  .es-auto-zeilen { margin-top: 6px; }
+  .es-pflicht p { margin: 6px 0; }
+  .es-schw { position: relative; height: 96px; margin: 14px 18px 8px; }
+  .es-schw-balken { position: absolute; left: 0; right: 0; top: 40px; height: 18px; border-radius: 999px; background: var(--linie); }
+  .es-schw-fuell { position: absolute; left: 0; top: 0; bottom: 0; background: var(--c1); border-radius: 999px 0 0 999px; }
+  .es-marke { position: absolute; transform: translateX(-50%); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--karte); border: 2px solid var(--text); font: 800 16px var(--display); z-index: 1; }
+  .es-marke.z0 { top: 35px; } .es-marke.z1 { top: 60px; }
+  .es-marke.erreicht { background: var(--viol-fl2); color: var(--text); border: 3px solid var(--c1); }
+  .es-ihre { position: absolute; top: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; font-size: 16px; white-space: nowrap; }
+  .es-ihre.links { transform: translateX(-12px); align-items: flex-start; } .es-ihre.rechts { transform: translateX(calc(-100% + 12px)); align-items: flex-end; }
+  .es-ihre i { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid var(--c1); margin-top: 2px; }
+  .es-schw-liste { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
+  .es-schw-liste li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 12px; border: 2px solid var(--linie); }
+  .es-schw-liste li.erreicht { border-color: var(--c1); background: var(--viol-fl); }
+  .es-nummer { flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--text); font: 800 16px var(--display); }
+  .es-erreicht { font-weight: 700; color: var(--akzent-text); }
+  .es-arten { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 12px; }
+  .es-art { margin: 0; }
+  .es-punkte { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 6px; }
+  .es-punkte li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; }
+  .es-pz { font-weight: 800; }
+  .es-punkte li.ok .es-pz { color: var(--gut); } .es-punkte li.achtung .es-pz { color: var(--warn); }
+  .es-alle summary { min-height: 44px; display: flex; align-items: center; }
+  .es-regelliste { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 8px; }
+  .es-regelliste li { padding: 8px 10px; border-radius: 10px; background: var(--karte2); font-size: 16px; }
+  .es-th { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 14px; margin: 10px 0; }
+  .es-th-spalte { border: 2px solid var(--linie); border-radius: 14px; padding: 4px 14px 12px; background: var(--karte); }
+  .rg-status.st-eigen, .rg-status.st-annahme { color: var(--info); border-style: dashed; }
+  .es-leer { margin: 6px 0; }
+  .es-annahmenliste li { align-items: flex-start; }
+  .fm-gross { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 18px; margin: 4px 0 10px; }
+  .fm-zahl { font: 800 clamp(2.2rem, 5vw, 3rem)/1 var(--display); }
+  .fm-ampel { --amp: var(--leise); display: inline-flex; align-items: center; gap: 6px; padding: 2px 12px 2px 4px; border-radius: 999px; border: 2px solid var(--amp); color: var(--amp); font-weight: 700; font-size: 16px; white-space: nowrap; }
+  .fm-ampel i { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--amp); color: var(--karte); font-style: normal; font-weight: 800; }
+  .fm-ampel.gruen { --amp: var(--gut); } .fm-ampel.gelb { --amp: var(--warn); } .fm-ampel.rot { --amp: var(--schlecht); } .fm-ampel.offen { --amp: var(--leise); border-style: dotted; }
+  .fm-skala { margin: 8px 0; }
+  .fm-band, .fm-marke-zeile { display: grid; grid-template-columns: minmax(96px, 190px) minmax(0, 1fr) 92px; gap: 8px; align-items: center; margin: 4px 0; font-size: 16px; }
+  .fm-band-spur { position: relative; height: 16px; border-radius: 999px; background: var(--linie); }
+  .fm-band-bereich { position: absolute; top: 0; bottom: 0; background: var(--linie2); border: 2px solid var(--leise); border-radius: 999px; box-sizing: border-box; }
+  .fm-band-wert { text-align: right; font-variant-numeric: tabular-nums; }
+  .fm-ihr, .fm-wuerfel { position: absolute; top: -4px; width: 0; height: 24px; }
+  .fm-ihr i { position: absolute; left: -7px; top: 0; width: 14px; height: 24px; border-radius: 4px; background: var(--c1); border: 2px solid var(--karte); box-shadow: 0 0 0 1px var(--text); }
+  .fm-wuerfel i { position: absolute; left: -2px; top: 0; width: 4px; height: 24px; background: var(--c3); box-shadow: 0 0 0 1px var(--text); }
+  .fm-achse { display: flex; justify-content: space-between; padding: 0 100px 0 198px; font-size: 16px; color: var(--leise); }
+  .fm-legende { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 16px; margin: 6px 0 10px; }
+  .fm-annahmen { margin-top: 8px; }
+  .fm-krit { margin: 6px 0; }
+  .fm-liste { list-style: none; margin: 10px 0; padding: 0; display: grid; gap: 10px; }
+  .fm-form { border: 2px solid var(--linie); border-radius: 14px; background: var(--karte); padding: 10px 14px; }
+  .fm-form[data-meins="1"] { border-color: var(--akzent); background: var(--akzent-flaeche); }
+  .fm-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+  .fm-meins { padding: 0 10px; border-radius: 999px; background: var(--akzent); color: var(--auf-akzent); font-size: 16px; font-weight: 700; }
+  .fm-duenn { padding: 0 10px; border-radius: 999px; background: var(--warn-fl); color: var(--text); border: 2px dashed var(--warn); font-size: 16px; font-weight: 700; }
+  .fm-wertzeile { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; margin: 8px 0 4px; }
+  .fm-bereich { position: relative; height: 14px; border-radius: 999px; background: var(--linie); }
+  .fm-bereich-b { position: absolute; top: 0; bottom: 0; border-radius: 999px; }
+  .fm-bereich-b.gruen { background: var(--gut); } .fm-bereich-b.gelb { background: var(--warn); } .fm-bereich-b.rot { background: var(--schlecht); } .fm-bereich-b.offen { background: var(--leise); }
+  .fm-wert { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+  .fm-nachteil { margin: 4px 0 0; color: var(--text); }
+  .fm-q { margin: 6px 0 0; }
+  @media (max-width: 760px) {
+    .fm-band, .fm-marke-zeile { grid-template-columns: minmax(0, 1fr) 88px; }
+    .fm-band-name { grid-column: 1 / -1; font-weight: 700; }
+    .fm-band-spur { grid-column: 1; }
+    .fm-achse { padding: 0 96px 0 0; }
+    .fm-wertzeile { grid-template-columns: minmax(0, 1fr) auto; }
+    .fm-wertzeile .fm-bereich { grid-column: 1 / -1; }
+    .es-marke.z0 { top: 35px; } .es-schw { margin: 14px 16px 8px; }
+  }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -1080,6 +1230,10 @@ __PALETTE_CSS__
   <symbol id="c-faust" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15L15 3l6 6L9 21zM8 10l2 2M11 7l2 2M5 13l2 2"/></symbol>
   <symbol id="c-pflicht" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V9l8-6 8 6v12zM9 21v-6h6v6"/></symbol>
   <symbol id="c-mauer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 12h18M9 5v7M15 12v7"/></symbol>
+  <symbol id="i-batterie" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 10.5v3M8 10v4M12 10v4"/></symbol>
+  <symbol id="i-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16v-4l2-5h14l2 5v4z"/><circle cx="7.5" cy="16.5" r="1.8"/><circle cx="16.5" cy="16.5" r="1.8"/><path d="M5 12h14"/></symbol>
+  <symbol id="i-blitz" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L5 14h6l-1 8 8-12h-6z"/></symbol>
+  <symbol id="i-thermo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0z"/><path d="M12 9v7"/></symbol>
 </svg>
 
 <a class="sprung" href="#inhalt">Zum Inhalt springen</a>
@@ -1104,6 +1258,7 @@ __PALETTE_CSS__
           <button type="button" class="bereich-knopf" id="tab-grundriss" data-ziel="grundriss" style="--f:var(--f8)"><svg aria-hidden="true"><use href="#i-grundriss"/></svg>Grundriss und Einrichtung</button>
           <button type="button" class="bereich-knopf" id="tab-pruefliste" data-ziel="pruefliste" style="--f:var(--f5)"><svg aria-hidden="true"><use href="#i-weg"/></svg>Schritt für Schritt zum Kauf</button>
           <button type="button" class="bereich-knopf" id="tab-recht" data-ziel="recht" style="--f:var(--f6)"><svg aria-hidden="true"><use href="#i-paragraf"/></svg>Gesetze und Hilfe</button>
+          <button type="button" class="bereich-knopf" id="tab-strom" data-ziel="strom" style="--f:var(--f8)"><svg aria-hidden="true"><use href="#i-sonne"/></svg>Strom vom eigenen Dach</button>
           <button type="button" class="bereich-knopf optional" id="tab-steuern" data-ziel="steuern" style="--f:var(--f6)"><svg aria-hidden="true"><use href="#i-waage"/></svg>Steuern sparen</button>
           <button type="button" class="bereich-knopf optional" id="tab-monteur" data-ziel="monteur" style="--f:var(--f7)"><svg aria-hidden="true"><use href="#i-bett"/></svg>Extra: Monteurzimmer</button>
           <button type="button" class="bereich-knopf optional" id="tab-impressum" data-ziel="impressum" style="--f:var(--f7)"><svg aria-hidden="true"><use href="#i-paragraf"/></svg>Impressum und Datenschutz</button>
@@ -1180,7 +1335,7 @@ __PALETTE_CSS__
     <li><a class="start-kachel info" href="#wert" data-ziel="wert"><span class="nr">Schritt 5</span><span class="bild"><svg aria-hidden="true"><use href="#i-waage"/></svg></span><strong>Wert prüfen</strong><span class="text">Ist der Preis angemessen?</span></a></li>
     <li class="kachel-doppel"><a class="start-kachel" href="#umbau" data-ziel="umbau"><span class="nr">Schritt 6</span><span class="bild"><svg aria-hidden="true"><use href="#i-werkzeug"/></svg></span><strong>Umbau und Grundriss</strong><span class="text">Was kostet der Umbau?</span></a><a class="start-kachel unter" href="#grundriss" data-ziel="grundriss">Grundriss und Einrichtung →</a></li>
     <li><a class="start-kachel info" href="#pruefliste" data-ziel="pruefliste"><span class="nr">Schritt 7</span><span class="bild"><svg aria-hidden="true"><use href="#i-weg"/></svg></span><strong>Kaufablauf</strong><span class="text">Prüfliste bis zum Notartermin.</span></a></li>
-    <li><div class="neben"><h3>Außerdem</h3><a href="#recht" data-ziel="recht">Gesetze nachschlagen</a><a href="#steuern" data-ziel="steuern">Steuern sparen</a><a href="#monteur" data-ziel="monteur">Monteurzimmer (optional)</a><p>Nebenbereiche, nicht Teil der sieben Schritte.</p></div></li>
+    <li><div class="neben"><h3>Außerdem</h3><a href="#recht" data-ziel="recht">Gesetze nachschlagen</a><a href="#steuern" data-ziel="steuern">Steuern sparen</a><a href="#strom" data-ziel="strom">Strom vom eigenen Dach</a><a href="#monteur" data-ziel="monteur">Monteurzimmer (optional)</a><p>Nebenbereiche, nicht Teil der sieben Schritte.</p></div></li>
   </ol>
 
   <div class="start-mehr">
@@ -2235,6 +2390,31 @@ __PALETTE_CSS__
     <div id="g-frei-inhalt"></div>
   </div>
 
+  <!-- Welle D, Teil 1: Strom vom eigenen Dach (rechnet mit dem Dach der Zeichnung; derselbe Rechenkern wie der Rechner im Menü) -->
+  <div class="karte g-strom" id="g-strom-karte">
+    <details id="g-strom-details">
+      <summary class="es-karte-summary"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-sonne"/></svg><span class="es-karte-frage" data-t="esKartenTitel">Strom vom eigenen Dach</span><b class="es-karte-kopf" id="g-strom-kopfzeile"></b><span class="es-karte-auf" data-t="esAufklappen">Ansehen</span></summary>
+      <div class="es-karte-koerper">
+        <p class="klein" data-t="esKartenKurz">Was bringt Solarstrom auf Ihrem Dach, was kostet er, und rechnet er sich?</p>
+        <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="esKeineAnlageberatung">Eigene Berechnung mit Annahmen, keine Anlage-, Steuer- oder Rechtsberatung.</span></p>
+        <div id="g-strom-inhalt"></div>
+      </div>
+    </details>
+    <p class="fehler" id="g-strom-fehler" role="alert" hidden></p>
+  </div>
+
+  <!-- Welle D, Teil 1: Haus- und Dachform (Kompaktheit live aus der Zeichnung, Vergleich der Dachformen) -->
+  <div class="karte g-formen" id="g-formen-karte">
+    <details id="g-formen-details">
+      <summary class="fm-karte-summary"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-haus"/></svg><span class="es-karte-frage" data-t="fmKartenTitel">Haus- und Dachform vergleichen</span><b class="es-karte-kopf" id="g-formen-kopfzeile"></b><span class="es-karte-auf" data-t="esAufklappen">Ansehen</span></summary>
+      <div class="es-karte-koerper">
+        <p class="klein" data-t="fmKartenKurz">Wie kompakt ist Ihr Haus, und welche Dachform passt?</p>
+        <div id="g-formen-inhalt"></div>
+      </div>
+    </details>
+    <p class="fehler" id="g-formen-fehler" role="alert" hidden></p>
+  </div>
+
   <div class="karte" id="g-kosten-karte">
     <h3>Was kostet die Einrichtung?</h3>
     <p class="klein" id="g-preis-hinweis"></p>
@@ -2690,6 +2870,27 @@ __PALETTE_CSS__
 </section>
 
 <!-- STEUERN SPAREN (Block 4, 09.10.2026): Nebenbereich, nicht in der Leiste. Keine Steuerberatung (R078). -->
+<section id="strom" aria-label="Strom vom eigenen Dach" hidden>
+  <header class="bereich-kopf" style="--f:var(--f8)">
+    <div class="kopf-text">
+      <p class="schritt-nr"></p>
+      <h2>Strom vom eigenen Dach</h2>
+      <p class="lead" data-kurz></p>
+    </div>
+    <svg class="il" data-bild="strom" aria-hidden="true" focusable="false"></svg>
+  </header>
+  <div class="einstieg-platz" data-einstieg="strom"></div>
+  <div class="karte" id="s-strom-karte">
+    <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="esKeineAnlageberatung">Eigene Berechnung mit Annahmen, keine Anlage-, Steuer- oder Rechtsberatung.</span></p>
+    <div id="s-strom-inhalt"></div>
+  </div>
+  <div class="karte">
+    <h3>Haus- und Dachform</h3>
+    <p class="klein">Wie kompakt ist Ihr Haus, und welche Dachform passt? Dafür brauchen Sie die Zeichnung.</p>
+    <div class="knopfreihe"><button type="button" class="knopf zweit" data-ziel="grundriss" data-anker="g-formen-karte">Zum Vergleich im Grundriss</button></div>
+  </div>
+</section>
+
 <section id="steuern" aria-label="Steuern sparen" hidden>
   <header class="bereich-kopf" style="--f:var(--f6)">
     <div class="kopf-text">
@@ -2974,20 +3175,26 @@ __PALETTE_CSS__
 <script src="daten/karte_werke.js"></script>
 <script src="daten/karte_orte.js"></script>
 <script src="daten/pvgis.js"></script>
+<script src="daten/energie.js"></script>
+<script src="daten/formen.js"></script>
 <script src="daten/bauregeln.js"></script>
 <script src="daten/verfahrensfrei.js"></script>
 <div class="g-druck" id="g-druck" aria-hidden="true"></div>
 <script src="daten/texte.js"></script>
+<script src="daten/texte_energie.js"></script>
 <script src="sprache.js"></script>
 <script src="grundriss_geo.js"></script>
 <script src="grundriss_dach.js"></script>
 <script src="regeln_kern.js"></script>
+<script src="energie_kern.js"></script>
 <script src="rechner.js"></script>
 <script src="grafik.js"></script>
 <script src="haus3d.js"></script>
 <script src="grundriss3d.js"></script>
 <script src="grundriss.js"></script>
 <script src="grundriss_regeln.js"></script>
+<script src="grundriss_energie.js"></script>
+<script src="grundriss_formen.js"></script>
 <script src="karte3d.js"></script>
 <script src="karte.js"></script>
 <script src="app.js"></script>

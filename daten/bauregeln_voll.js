@@ -1,4 +1,4 @@
-/* VOLLE Fassung (nicht in die Seite eingebettet, nur fürs Repository) der Bauregeln je Bundesland für die Grundriss- und Umbauprüfung, erzeugt von tmp/bauregeln_daten.py aus recherche/20, 23, 24-27 (nicht von Hand ändern).
+/* VOLLE Fassung (nicht in die Seite eingebettet, nur fürs Repository) der Bauregeln je Bundesland für die Grundriss- und Umbauprüfung, erzeugt von erzeuger/bauregeln_daten.py aus recherche/20, 23, 24-27 (nicht von Hand ändern).
    Aufbau: laender[Kürzel].regeln[thema] = Liste von Einträgen {id, wert, wert_text, einheit, gilt_fuer, paragraf, wortlaut, quelle[], abruf, status, gilt_ab, gilt_bis, hinweis}.
    Lücken tragen status "Lücke" und luecke_grund. Quellen unter quellen[Schlüssel]. Werte werden nie umgerechnet. */
 window.DATEN = window.DATEN || {};

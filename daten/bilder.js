@@ -100,6 +100,12 @@ window.DATEN = window.DATEN || {};
     '<rect x="338" y="196" width="60" height="9" rx="4.5" fill="var(--i5)"/>' +
     EURO(368, 128, 24) + EURO(402, 82, 17) + '<path d="M368 160v30" stroke="var(--i1)" stroke-width="5" stroke-dasharray="4 8" stroke-linecap="round"/>';
 
+  /* Strom vom eigenen Dach: Haus mit Solarmodulen auf dem Dach, Sonne, Blitz */
+  Z.strom = GRUND + haus(220, 308, .9) +
+    '<circle cx="420" cy="92" r="34" fill="var(--i2)"/><path d="M420 34v14M420 136v14M362 92h14M464 92h14M379 51l10 10M451 123l10 10M379 133l10-10M451 61l10-10" stroke="var(--i2)" stroke-width="6" stroke-linecap="round"/>' +
+    '<polygon points="148,176 200,124 232,124 196,176" fill="var(--i2)" stroke="var(--i5)" stroke-width="3"/><polygon points="204,176 240,124 272,124 252,176" fill="var(--i2)" stroke="var(--i5)" stroke-width="3"/>' +
+    '<path d="M410 232l-26 40h20l-8 36 34-48h-22l14-28z" fill="var(--i1)"/>';
+
   window.DATEN.bilder = {
     namen: Object.keys(Z),
     symbole: function () {

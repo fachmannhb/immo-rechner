@@ -2,7 +2,7 @@
    Ganz erfunden, keine echten Daten. Kompakter Quader ohne Vor- und Rücksprünge (Bericht recherche/29_hausform_dach.md: Erker und Versprünge
    verschlechtern die Kompaktheit), Fenster vor allem nach Süden (unten im Plan, Nord = 0), Satteldach 30 Grad, First waagerecht im Plan,
    damit eine Dachfläche nach Süden zeigt. Die Außenmaße weichen vom Wunsch 7,5 × 8,5 m ab, weil sonst nur etwa 50 m² Wohnfläche herauskommen.
-   Erzeugt von tmp/vorlagen_erzeugen.js, nicht von Hand ändern. */
+   Erzeugt von erzeuger/vorlagen_erzeugen.js, nicht von Hand ändern. */
 window.DATEN = window.DATEN || {};
 window.DATEN.vorlagen = window.DATEN.vorlagen || {};
 window.DATEN.vorlagen.klein = {

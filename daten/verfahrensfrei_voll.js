@@ -1,4 +1,4 @@
-/* VOLLE Fassung (nicht eingebettet, nur fürs Repository) der verfahrensfreien Garten- und Grundstücksbauten je Bundesland, erzeugt von tmp/verfahrensfrei_daten.py aus recherche/34, 35, 36 (nicht von Hand ändern).
+/* VOLLE Fassung (nicht eingebettet, nur fürs Repository) der verfahrensfreien Garten- und Grundstücksbauten je Bundesland, erzeugt von erzeuger/verfahrensfrei_daten.py aus recherche/34, 35, 36 (nicht von Hand ändern).
    Aufbau: laender[Kürzel].strukturen[baustein] = Liste von Einträgen {id, bauwerk, art, wert, einheit, wert_roh, einheit_roh, bedingung, paragraf, wortlaut, quelle[], abruf, status}.
    art "grenze" = verfahrensfrei bis wert (einheit m³, m² oder m, nie umgerechnet). Lücken tragen status "Lücke" und luecke_grund. */
 window.DATEN = window.DATEN || {};
