@@ -144,6 +144,17 @@
     };
     /* Pultdach: hohe Seite. Nur gespeichert, wenn nicht der Standard ('min' = oben bzw. links im Plan), damit ältere Pläne unverändert bleiben */
     if (d0.hoch === 'max') neu.dach.hoch = 'max';
+    /* Welle D, Teil 2a: Materialwahl (optional). Fehlt das Feld, bleibt es weg (alte Pläne laden unverändert); die Standardwerte setzt erst die Rechnung ein
+       (AUSBAU_KERN.planMaterial). Eine unbekannte Id wird mit gespeichert und in der Karte als Meldung gezeigt, der Standard gilt dann. */
+    if (p.material && typeof p.material === 'object' && !Array.isArray(p.material)) {
+      var pm = {}, pmOk = false;
+      ['aussenwand', 'daemmung', 'dach', 'fenster', 'verglasung', 'boden'].forEach(function (k) {
+        var v = p.material[k];
+        if (typeof v === 'string' && /^[a-z0-9_]{0,30}$/.test(v)) { pm[k] = v; pmOk = true; }
+      });
+      if (typeof p.material.daemmdicke_cm === 'number' && isFinite(p.material.daemmdicke_cm)) { pm.daemmdicke_cm = klemme(p.material.daemmdicke_cm, 0, 40); pmOk = true; }
+      if (pmOk) neu.material = pm;
+    }
     neu.preise = {}; neu.mengen = {};
     Object.keys(p.preise || {}).forEach(function (k) { var v = Number(p.preise[k]); if (isFinite(v) && v >= 0) neu.preise[k] = v; });
     Object.keys(p.mengen || {}).forEach(function (k) { var v = Number(p.mengen[k]); if (isFinite(v) && v >= 0) neu.mengen[k] = v; });
@@ -198,6 +209,7 @@
     /* Welle D: Strom vom Dach und Kompaktheit rechnen mit dem Plan, bei jeder Änderung neu (entprellt) */
     if (window.GRUNDRISS_ENERGIE) window.GRUNDRISS_ENERGIE.aktualisieren();
     if (window.GRUNDRISS_FORMEN) window.GRUNDRISS_FORMEN.aktualisieren();
+    if (window.GRUNDRISS_AUSBAU) window.GRUNDRISS_AUSBAU.aktualisieren();   /* Welle D, Teil 2a: Innenausbau, Material und Umbau-Hinweis */
     clearTimeout(speicherTimer);
     speicherTimer = setTimeout(function () {
       try {

@@ -89,6 +89,12 @@ window.DATEN.einstieg = {
       wofuer: 'Sie sehen Ertrag, Kosten, Batterie, Elektroauto und Wallbox, die Regeln für Ihr Bundesland und das Jahr, in dem sich die Anlage bezahlt hat. Eine Planung, kein Angebot und keine Beratung.',
       brauche: 'Nichts. Fläche, Himmelsrichtung und Neigung des Dachs stellen Sie ein; alles andere hat Startwerte, die Sie ändern können.',
       anfang: { text: 'Dachfläche einstellen ↓', fokus: 'ss-ff0m' }
+    },
+    material: {
+      kurz: 'Vergleichen Sie Wand, Dämmung, Dach, Fenster und Boden nach Preis, Dämmwert, Brand und mehr.',
+      wofuer: 'Sie sehen Materialien nebeneinander, mit einem Balken je Eigenschaft und einer eigenen Einordnung als Ampel. Gefällt Ihnen eins, übernehmen Sie es in Ihre Planung und sehen im Grundriss, was es kostet und wie sich der Wärmebedarf ändert.',
+      brauche: 'Nichts zum Vergleichen und Rechnen. Für „In meine Planung übernehmen“ brauchen Sie einen Plan im Grundriss; eine Vorlage genügt.',
+      anfang: { text: 'Bauteil wählen ↓', fokus: 'm-bk-daemmung' }
     }
   },
   /* Kurzzeilen für Bereiche ohne Einstiegskasten */

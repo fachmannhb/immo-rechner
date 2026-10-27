@@ -106,6 +106,17 @@ window.DATEN = window.DATEN || {};
     '<polygon points="148,176 200,124 232,124 196,176" fill="var(--i2)" stroke="var(--i5)" stroke-width="3"/><polygon points="204,176 240,124 272,124 252,176" fill="var(--i2)" stroke="var(--i5)" stroke-width="3"/>' +
     '<path d="M410 232l-26 40h20l-8 36 34-48h-22l14-28z" fill="var(--i1)"/>';
 
+  /* Material vergleichen: Ziegelwand im Schnitt mit Dämmschicht und Glasscheibe daneben (Welle D, Teil 2a) */
+  Z.material = GRUND +
+    '<rect x="96" y="150" width="220" height="156" rx="6" fill="var(--i5)" stroke="var(--i1)" stroke-width="5"/>' +
+    '<path d="M96 182h220M96 214h220M96 246h220M96 278h220M150 150v32M258 150v32M204 182v32M312 182v32M150 214v32M258 214v32M204 246v32M312 246v32M150 278v28M258 278v28" stroke="var(--i1)" stroke-width="3"/>' +
+    '<rect x="316" y="150" width="46" height="156" fill="var(--i4)" stroke="var(--i2)" stroke-width="4"/>' +
+    '<path d="M322 164c8 6 8 12 0 18s-8 12 0 18 8 12 0 18 8 12 0 18" stroke="var(--i2)" stroke-width="3" fill="none"/>' +
+    '<rect x="386" y="150" width="12" height="156" rx="3" fill="var(--i3)" stroke="var(--i2)" stroke-width="4"/>' +
+    '<rect x="408" y="150" width="12" height="156" rx="3" fill="var(--i3)" stroke="var(--i2)" stroke-width="4"/>' +
+    '<path d="M388 170l20-20M388 214l30-30M388 258l30-30M400 300l18-18" stroke="var(--i1)" stroke-width="3" stroke-linecap="round"/>' +
+    '<circle cx="124" cy="90" r="30" fill="var(--i2)"/><path d="M124 140V120" stroke="var(--i1)" stroke-width="6" stroke-linecap="round"/>';
+
   window.DATEN.bilder = {
     namen: Object.keys(Z),
     symbole: function () {
