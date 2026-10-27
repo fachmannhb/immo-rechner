@@ -765,6 +765,118 @@ __PALETTE_CSS__
   .g-vorlage .vk-meta { font: 600 16px/1.3 var(--sans); white-space: pre-line; }
   .g-vorlage .vk-text { font: 400 16px/1.3 var(--sans); color: var(--leise); }
   .g-vorlage .vk-los { margin-top: auto; padding-top: 4px; font: 700 16px/1.2 var(--sans); color: var(--akzent-text); }
+  /* Welle C: Bundesland, Haus-Angaben, Gebäudeklasse, Raumnutzung, Regeln prüfen, Genehmigung, Freiflächen */
+  .g-kopfzeile { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .g-kopfzeile h3, .g-kopfzeile p { margin: 0; }
+  .g-land { padding: 6px 20px; margin-bottom: 12px; }
+  .g-land-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; min-height: 48px; cursor: pointer; list-style: none; }
+  .g-land-summary::-webkit-details-marker { display: none; }
+  .g-land-summary svg.sym { width: 1.6em; height: 1.6em; color: var(--akzent-text); flex: none; }
+  .g-land-frage { font: 700 1.3rem/1.2 var(--display); }
+  .g-land-aktuell { font-size: 1.1rem; padding: 2px 12px; border-radius: 999px; background: var(--akzent-flaeche); border: 2px solid var(--akzent); }
+  .g-land-aendern { margin-left: auto; color: var(--akzent-text); font-weight: 700; }
+  .g-land-aendern::after { content: " ▾"; }
+  .g-land[open] .g-land-aendern::after, details[open] > .g-land-summary .g-land-aendern::after { content: " ▴"; }
+  .g-land-koerper { margin-top: 10px; padding-bottom: 8px; }
+  .g-land-raster { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 20px; align-items: start; margin-top: 10px; }
+  .g-land-svg { display: block; width: 100%; height: auto; max-height: 360px; }
+  .g-land-flaeche { fill: var(--akzent-flaeche); stroke: var(--leise); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-linejoin: round; cursor: pointer; }
+  .g-land-flaeche:hover { fill: var(--akzent-flaeche); }
+  .g-land-flaeche[aria-pressed="true"] { fill: var(--akzent); stroke: var(--text); stroke-width: 2; }
+  .g-land-flaeche:focus-visible { outline: 3px solid var(--akzent-text); outline-offset: 1px; }
+  .g-land-gewaehlt { margin: 0 0 10px; font-size: 1.1rem; }
+  .g-land-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .g-land-chip { min-height: 44px; }
+  .g-haus-details { margin-top: 18px; }
+  .g-haus-titel { font: 700 1.15rem/1.2 var(--display); display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; min-height: 48px; padding: 8px 14px; border: 2px solid var(--linie2); border-radius: 12px; background: var(--karte); cursor: pointer; list-style: none; }
+  .g-haus-titel::-webkit-details-marker { display: none; }
+  .g-haus-titel::after { content: "▾"; margin-left: auto; color: var(--leise); }
+  .g-haus-details[open] > .g-haus-titel::after { content: "▴"; }
+  .g-haus-titel .klein { font-family: var(--sans); font-weight: 400; }
+  .g-haus-details > .g-haus-raster { margin-top: 14px; }
+  .g-haus-raster { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+  .g-haus-frage { margin: 0 0 6px; font-weight: 700; }
+  .g-schritter { display: inline-flex; align-items: center; gap: 10px; }
+  .g-schritter .chip { min-width: 48px; min-height: 48px; font-size: 24px; line-height: 1; }
+  .g-schritter-zahl { min-width: 2ch; text-align: center; font: 800 28px var(--display); }
+  .g-gk { margin-top: 18px; }
+  .g-gk-reihe { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .g-gk-knopf { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 104px; min-height: 108px; padding: 8px 8px 6px; border: 2px solid var(--linie2); border-radius: 14px; background: var(--karte); color: var(--text); cursor: pointer; font: 700 16px var(--sans); }
+  .g-gk-knopf:hover { border-color: var(--akzent); }
+  .g-gk-knopf[aria-pressed="true"] { border-color: var(--akzent); background: var(--akzent-flaeche); box-shadow: inset 0 0 0 1px var(--akzent); }
+  .g-gk-knopf svg { width: 48px; height: 48px; }
+  .g-gk-wort { font-weight: 400; }
+  .g-gk-vorschlag { margin-top: 2px; padding: 0 8px; border-radius: 999px; background: var(--info-fl); color: var(--info); border: 1.5px dashed var(--info); font-size: 16px; font-weight: 700; }
+  .g-gk-vorschlag[hidden] { display: none; }
+  #g-gk-nehmen[hidden] { display: none; }
+  .g-nutz { margin-top: 2px; }
+  .g-nutz-details summary { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-height: 48px; padding: 6px 12px; border: 2px solid var(--linie2); border-radius: 12px; background: var(--karte); cursor: pointer; list-style: none; }
+  .g-nutz-details summary::-webkit-details-marker { display: none; }
+  .g-nutz-details summary::after { content: "▾"; margin-left: auto; color: var(--leise); }
+  .g-nutz-details[open] summary::after { content: "▴"; }
+  .g-nutz-details svg.sym { width: 1.5em; height: 1.5em; flex: none; }
+  .g-nutz-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 128px), 1fr)); gap: 6px; margin-top: 8px; }
+  .g-nutz-raster .chip { justify-content: flex-start; text-align: left; }
+  .g-bestand { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .g-kein-baurecht { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 8px 0 14px; padding: 10px 14px; border-radius: 12px; background: var(--info-fl); border-left: 5px solid var(--info); font-size: 16px; }
+  .rg-mini { display: inline-flex; gap: 6px; margin-left: 2px; font-weight: 800; }
+  .rg-mini:empty { display: none; }
+  .rg-mini .gruen { color: var(--gut); } .rg-mini .gelb { color: var(--warn); } .rg-mini .rot { color: var(--schlecht); }
+  .rg-summe { margin: 6px 0 4px; }
+  .rg-balken { display: flex; height: 18px; border-radius: 999px; overflow: hidden; background: var(--linie); }
+  .rg-b.gruen { background: var(--gut); } .rg-b.gelb { background: var(--warn); } .rg-b.rot { background: var(--schlecht); }
+  .rg-zahlen { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; }
+  .rg-zahlen li { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; }
+  .rg-zahl { font: 800 1.6rem var(--display); }
+  .rg-lampe { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 800 18px var(--display); color: var(--karte); background: var(--leise); }
+  .rg-lampe.gruen { background: var(--gut); } .rg-lampe.gelb { background: var(--warn); } .rg-lampe.rot { background: var(--schlecht); }
+  .rg-stichtag { margin: 10px 0 8px; }
+  .rg-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .rg-etage h4 { margin: 12px 0 0; font: 700 1.05rem var(--display); }
+  .rg-raum { border: 2px solid var(--linie); border-left-width: 8px; border-radius: 14px; background: var(--karte); }
+  .rg-raum.rg-gruen { border-left-color: var(--gut); } .rg-raum.rg-gelb { border-left-color: var(--warn); } .rg-raum.rg-rot { border-left-color: var(--schlecht); }
+  .rg-kopf { display: grid; grid-template-columns: 34px 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; min-height: 56px; padding: 8px 12px; text-align: left; background: none; border: 0; color: var(--text); font: inherit; cursor: pointer; border-radius: 12px; }
+  .rg-kopf:hover { background: var(--akzent-flaeche); }
+  .rg-nutzbild svg { width: 24px; height: 24px; }
+  .rg-text b { display: block; }
+  .rg-grund { display: block; color: var(--leise); font-size: 16px; line-height: 1.35; }
+  .rg-ampelwort { font-weight: 800; white-space: nowrap; }
+  .rg-ampelwort.gruen { color: var(--gut); } .rg-ampelwort.gelb { color: var(--warn); } .rg-ampelwort.rot { color: var(--schlecht); }
+  .rg-items { list-style: none; margin: 0; padding: 0 12px 10px; }
+  .rg-item { display: grid; grid-template-columns: 28px minmax(0, 1fr) 44px; gap: 8px; align-items: start; padding: 8px 0; border-top: 1px solid var(--linie); }
+  .rg-pkt svg { width: 24px; height: 24px; color: var(--leise); }
+  .rg-zeichen { display: inline-block; min-width: 1.2em; font-weight: 800; }
+  .rg-zeichen.gruen { color: var(--gut); } .rg-zeichen.gelb { color: var(--warn); } .rg-zeichen.rot { color: var(--schlecht); } .rg-zeichen.info { color: var(--info); }
+  .rg-status { display: inline-block; padding: 0 10px; border-radius: 999px; font-size: 16px; font-weight: 700; line-height: 1.4; border: 1.5px solid currentColor; max-width: 100%; border-radius: 14px; }
+  .rg-status.st-gepr, .rg-status.st-portal { color: var(--gut); } .rg-status.st-pruef { color: var(--warn); border-style: dashed; } .rg-status.st-luecke { color: var(--leise); border-style: dotted; }
+  .rg-beleg-box { margin-top: 8px; }
+  .rg-beleg { margin: 6px 0 0; padding: 10px 12px; background: var(--karte2); border-radius: 10px; border-left: 4px solid var(--info); font-size: 16px; }
+  .rg-beleg.eigen { border-left-style: dashed; }
+  .rg-beleg p { margin: 0 0 6px; }
+  .rg-beleg-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .rg-wortlaut { margin: 6px 0; padding: 0 0 0 12px; border-left: 3px solid var(--linie2); font-style: normal; }
+  .rg-beleg a { color: var(--akzent-text); overflow-wrap: anywhere; }
+  .rg-leer { display: flex; align-items: center; gap: 14px; padding: 8px 0; }
+  .rg-leer svg { width: 44px; height: 44px; flex: none; color: var(--leise); }
+  .fg-liste { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 10px; }
+  .fg-zeile { display: grid; grid-template-columns: 40px minmax(0, 1fr) 44px; gap: 10px; align-items: start; padding: 10px 12px; border: 2px solid var(--linie); border-radius: 14px; background: var(--karte); }
+  .fg-icon svg { width: 32px; height: 32px; color: var(--akzent-text); }
+  .fg-antwort { margin: 4px 0 0; }
+  .frei-zone { stroke-width: 0.03; stroke-dasharray: 0.12 0.08; pointer-events: none; }
+  .frei-zone.ok { stroke: var(--info); } .frei-zone.eng { stroke: var(--schlecht); }
+  line.frei-schr-ok { stroke: var(--info); } line.frei-schr-eng { stroke: var(--schlecht); }
+  .g-frei-legende { margin: 0 0 10px; }
+  @media (max-width: 760px) {
+    .g-land-raster { grid-template-columns: minmax(0, 1fr); }
+    .g-land-svg { max-height: 260px; margin: 0 auto; }
+    .rg-kopf { grid-template-columns: 34px minmax(0, 1fr) auto; }
+    .rg-nutzbild { display: none; }
+    .rg-ampelwort { font-size: 16px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .rg-b { transition: flex .4s ease; }
+    .g-gk-knopf, .rg-kopf { transition: background .15s ease, border-color .15s ease; }
+  }
   .planzeichnung .teil .stufe { stroke: var(--text); stroke-width: 1; vector-effect: non-scaling-stroke; fill: none; opacity: .65; pointer-events: none; }
   .planzeichnung .teil .stufe.pfeil { stroke-width: 2; opacity: 1; }
   .planzeichnung .teil.oben rect.koerper { stroke-dasharray: 6 4; fill-opacity: .45; }
@@ -944,6 +1056,30 @@ __PALETTE_CSS__
   <symbol id="i-pfeil-ab" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M5 12l7 7 7-7"/></symbol>
   <symbol id="i-drehl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v5h5"/></symbol>
   <symbol id="i-drehr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-3-6.2M20 4v5h-5"/></symbol>
+  <!-- Welle C: Raumnutzung (n-), Prüfpunkte (c-), Werkzeug -->
+  <symbol id="i-hammer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l9-9M12 5l3-2 5 5-2 3z"/></symbol>
+  <symbol id="n-wohnen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a2 2 0 012-2h12a2 2 0 012 2v3M3 15a2 2 0 012-2h14a2 2 0 012 2v3H3zM6 18v2M18 18v2"/></symbol>
+  <symbol id="n-schlafen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V7M3 14h18v4M21 18v-4a3 3 0 00-3-3h-8v3"/><circle cx="6.5" cy="10.5" r="1.5"/></symbol>
+  <symbol id="n-kind" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="7" height="7" rx="1"/><rect x="13" y="12" width="7" height="7" rx="1"/><rect x="8.5" y="4" width="7" height="7" rx="1"/></symbol>
+  <symbol id="n-arbeiten" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="11" rx="1.5"/><path d="M9 20h6M12 15v5"/></symbol>
+  <symbol id="n-kueche" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10h14v7a3 3 0 01-3 3H8a3 3 0 01-3-3zM3 10h18M9 6c0-2 2-2 2-4M14 6c0-2 2-2 2-4"/></symbol>
+  <symbol id="n-essen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v6a2 2 0 002 2v10M11 3v6M3 3v6a2 2 0 002 2M17 3c-2 2-2 6 0 8v10"/></symbol>
+  <symbol id="n-bad" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18v3a4 4 0 01-4 4H7a4 4 0 01-4-4zM6 12V6a2 2 0 014 0M6 19l-1 2M18 19l1 2"/></symbol>
+  <symbol id="n-wc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v6H7zM5 9h14v2a7 7 0 01-14 0zM9 18l-1 3h8l-1-3"/></symbol>
+  <symbol id="n-flur" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h9v17M3 21h14M10.5 12h.01M17 8l3 3-3 3M14 11h6"/></symbol>
+  <symbol id="n-abstell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8-4 8 4v9l-8 4-8-4zM4 8l8 4 8-4M12 12v9"/></symbol>
+  <symbol id="n-technik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></symbol>
+  <symbol id="n-treppe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h5v-4h5v-4h5V8h3"/></symbol>
+  <symbol id="n-sonstiges" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/></symbol>
+  <symbol id="c-hoehe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></symbol>
+  <symbol id="c-rettung" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v18M16 3v18M8 8h8M8 13h8M8 18h8"/></symbol>
+  <symbol id="c-bruestung" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 15h16"/></symbol>
+  <symbol id="c-melder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="c-bewegung" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="1.5" stroke-dasharray="3 3"/><path d="M9 12h6M12 9v6"/></symbol>
+  <symbol id="c-frei" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 12L12 4M4 20L20 4M12 20l8-8"/></symbol>
+  <symbol id="c-faust" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15L15 3l6 6L9 21zM8 10l2 2M11 7l2 2M5 13l2 2"/></symbol>
+  <symbol id="c-pflicht" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V9l8-6 8 6v12zM9 21v-6h6v6"/></symbol>
+  <symbol id="c-mauer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 12h18M9 5v7M15 12v7"/></symbol>
 </svg>
 
 <a class="sprung" href="#inhalt">Zum Inhalt springen</a>
@@ -1807,6 +1943,21 @@ __PALETTE_CSS__
     </div>
     <svg class="il" data-bild="grundriss" aria-hidden="true" focusable="false"></svg>
   </header>
+  <!-- Welle C: Bundesland und Haus-Angaben, damit die Regeln des richtigen Landes gelten -->
+  <div class="karte g-land" id="g-land-karte">
+    <details id="g-land-details">
+      <summary class="g-land-summary"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-karte"/></svg><span class="g-land-frage" data-t="landTitel">Wo steht das Haus?</span><b class="g-land-aktuell" id="g-land-aktuell"></b><span class="g-land-aendern" data-t="landAendern">Ändern</span></summary>
+      <div class="g-land-koerper">
+        <div class="g-kopfzeile"><p class="klein" style="margin:0" data-t="landKurz">Die Regeln hängen vom Bundesland ab.</p>
+          <button type="button" class="hilfe-knopf" id="g-land-hilfe" aria-expanded="false" aria-controls="g-land-hilfe-text" data-t-aria="hilfeKnopf" aria-label="Mehr erklären">?</button></div>
+        <p class="klein" id="g-land-hilfe-text" data-t="landHilfe" hidden></p>
+        <div id="g-land-inhalt"></div>
+      </div>
+    </details>
+    <p class="fehler" id="g-land-fehler" role="alert" hidden></p>
+    <div class="meldung" id="g-land-meldung" role="status" aria-live="polite"></div>
+  </div>
+
   <div class="karte g-start" id="g-start">
     <h3>So fangen Sie an</h3>
     <h4 class="g-start-teil" data-t="vorlageUeberschrift">Vorlage laden</h4>
@@ -1854,8 +2005,11 @@ __PALETTE_CSS__
       <div class="g-gruppe" role="group" aria-label="Etagen"><span>Etage:</span><span id="g-etagen" class="g-gruppe"></span><button type="button" class="chip klein" id="g-etage-neu" aria-label="Etage hinzufügen">+</button></div>
       <div class="g-gruppe" role="group" aria-label="Ansicht"><span>Ansicht:</span><button type="button" class="chip" id="g-ansicht-plan" aria-pressed="true">Von oben</button><button type="button" class="chip" id="g-ansicht-3d" aria-pressed="false">3D</button>
         <button type="button" class="chip mit-symbol" id="g-masse" aria-pressed="true"><svg class="sym" aria-hidden="true"><use href="#i-mass"/></svg><span data-t="masse">Maße zeigen</span></button>
+        <button type="button" class="chip mit-symbol" id="g-zur-regeln"><svg class="sym" aria-hidden="true"><use href="#c-pflicht"/></svg><span data-t="regKnopf">Regeln prüfen</span><span class="rg-mini" id="g-zur-regeln-zahl" aria-hidden="true"></span></button>
+        <button type="button" class="chip mit-symbol" id="g-frei-knopf" aria-pressed="false"><svg class="sym" aria-hidden="true"><use href="#c-frei"/></svg><span data-t="freiKnopf">Freiflächen zeigen</span></button>
         <button type="button" class="chip mit-symbol" id="g-drucken"><svg class="sym" aria-hidden="true"><use href="#i-druck"/></svg><span data-t="drucken">Plan drucken</span></button></div>
     </div>
+    <p class="klein g-frei-legende" id="g-frei-legende" data-t="freiLegende" hidden></p>
     <div class="g-3d-leiste" id="g-3d-leiste" hidden>
       <div class="g-3d-zeile">
         <div class="g-gruppe" role="group" aria-label="Etagen in der 3D-Ansicht ein- und ausblenden" data-t-aria="dreiEtagenAria"><span data-t="dreiEtagen">Etagen zeigen:</span><span id="g-3d-etagen" class="g-gruppe"></span></div>
@@ -2062,6 +2216,23 @@ __PALETTE_CSS__
       </table>
     </div>
     <p class="formel">Wohnfläche nach Wohnflächenverordnung (WoFlV, Wortlaut §§ 2 und 4 geprüft 08.10.2026 auf <a href="https://www.gesetze-im-internet.de/woflv/__4.html" target="_blank" rel="noopener">gesetze-im-internet.de</a>): Flächen mit mindestens 2 m lichter Höhe voll, mit 1 bis unter 2 m zur Hälfte, unter 1 m gar nicht. Unbeheizte Wintergärten zur Hälfte. Balkone, Loggien und Terrassen in der Regel zu einem Viertel, höchstens zur Hälfte. Keller, Garage, Heizraum und Abstellräume außerhalb der Wohnung zählen nicht zur Wohnfläche; sie stehen hier getrennt als Nutzfläche, weil man sie oft extra vermieten kann.</p>
+  </div>
+
+  <!-- Welle C: Regeln prüfen (Ampel je Raum) und "Darf ich das ohne Genehmigung?" -->
+  <div class="karte g-regeln" id="g-regeln-karte">
+    <div class="g-kopfzeile"><h3 data-t="regTitel">Regeln prüfen</h3>
+      <button type="button" class="hilfe-knopf" id="g-regeln-hilfe" aria-expanded="false" aria-controls="g-regeln-hilfe-text" data-t-aria="hilfeKnopf" aria-label="Mehr erklären">?</button></div>
+    <p class="klein" id="g-regeln-hilfe-text" data-t="regHilfe" hidden></p>
+    <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="regKeinBaurecht">Das ist keine Baugenehmigung und keine Statik. Bauamt, Statiker und Architekt entscheiden.</span></p>
+    <div id="g-regeln-inhalt" aria-live="polite"></div>
+  </div>
+
+  <div class="karte g-frei" id="g-frei-karte">
+    <div class="g-kopfzeile"><h3 data-t="genTitel">Darf ich das ohne Genehmigung?</h3>
+      <button type="button" class="hilfe-knopf" id="g-frei-hilfe" aria-expanded="false" aria-controls="g-frei-hilfe-text" data-t-aria="hilfeKnopf" aria-label="Mehr erklären">?</button></div>
+    <p class="klein" id="g-frei-hilfe-text" data-t="genHilfe" hidden></p>
+    <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="genWarn">Verfahrensfrei heißt nur: kein Bauantrag. Es heißt nicht, dass keine Regeln gelten.</span></p>
+    <div id="g-frei-inhalt"></div>
   </div>
 
   <div class="karte" id="g-kosten-karte">
@@ -2803,16 +2974,20 @@ __PALETTE_CSS__
 <script src="daten/karte_werke.js"></script>
 <script src="daten/karte_orte.js"></script>
 <script src="daten/pvgis.js"></script>
+<script src="daten/bauregeln.js"></script>
+<script src="daten/verfahrensfrei.js"></script>
 <div class="g-druck" id="g-druck" aria-hidden="true"></div>
 <script src="daten/texte.js"></script>
 <script src="sprache.js"></script>
 <script src="grundriss_geo.js"></script>
 <script src="grundriss_dach.js"></script>
+<script src="regeln_kern.js"></script>
 <script src="rechner.js"></script>
 <script src="grafik.js"></script>
 <script src="haus3d.js"></script>
 <script src="grundriss3d.js"></script>
 <script src="grundriss.js"></script>
+<script src="grundriss_regeln.js"></script>
 <script src="karte3d.js"></script>
 <script src="karte.js"></script>
 <script src="app.js"></script>

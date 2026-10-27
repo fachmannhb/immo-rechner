@@ -20,12 +20,12 @@ window.DATEN.vorlagen.gross = {
     {
       name: "Erdgeschoss", bild: null, hoehe: 2.5, aussenwand: 0.3, innenwand: 0.115, decke: 0.25,
       raeume: [
-        {"id":"ge_arbeit","name":"Arbeitszimmer","art":"voll","punkte":[[0,0],[3.4,0],[3.4,4.4],[0,4.4]]},
-        {"id":"ge_wc","name":"WC","art":"voll","punkte":[[3.515,0],[5.3,0],[5.3,2],[3.515,2]]},
-        {"id":"ge_hwr","name":"HWR / Technik","art":"voll","punkte":[[3.515,2.115],[5.3,2.115],[5.3,4.4],[3.515,4.4]]},
-        {"id":"ge_flur","name":"Flur","art":"voll","punkte":[[5.415,0],[8,0],[8,4.4],[5.415,4.4]]},
-        {"id":"ge_speis","name":"Abstell","art":"voll","punkte":[[8.115,0],[10,0],[10,4.4],[8.115,4.4]]},
-        {"id":"ge_wek","name":"Wohnen / Essen / Küche","art":"voll","punkte":[[0,4.515],[10,4.515],[10,10.4],[0,10.4]]}
+        {"id":"ge_arbeit","name":"Arbeitszimmer","art":"voll","nutzung":"arbeiten","punkte":[[0,0],[3.4,0],[3.4,4.4],[0,4.4]]},
+        {"id":"ge_wc","name":"WC","art":"voll","nutzung":"wc","punkte":[[3.515,0],[5.3,0],[5.3,2],[3.515,2]]},
+        {"id":"ge_hwr","name":"HWR / Technik","art":"voll","nutzung":"technik","punkte":[[3.515,2.115],[5.3,2.115],[5.3,4.4],[3.515,4.4]]},
+        {"id":"ge_flur","name":"Flur","art":"voll","nutzung":"flur","punkte":[[5.415,0],[8,0],[8,4.4],[5.415,4.4]]},
+        {"id":"ge_speis","name":"Abstell","art":"voll","nutzung":"abstell","punkte":[[8.115,0],[10,0],[10,4.4],[8.115,4.4]]},
+        {"id":"ge_wek","name":"Wohnen / Essen / Küche","art":"voll","nutzung":"wohnen","punkte":[[0,4.515],[10,4.515],[10,10.4],[0,10.4]]}
       ],
       teile: [
         {"id":"vgre1n1","art":"tuer","x":6.25,"y":-0.15,"w":1.1,"d":0.3,"dreh":0,"hoehe":2.1,"bruestung":0,"bindung":{"raum":"ge_flur","kante":0,"t":0.323},"bindungGrund":""},
@@ -64,12 +64,12 @@ window.DATEN.vorlagen.gross = {
     {
       name: "Obergeschoss", bild: null, hoehe: 2.5, aussenwand: 0.3, innenwand: 0.115, decke: 0.25,
       raeume: [
-        {"id":"go_schlaf2","name":"Schlafzimmer 2","art":"voll","punkte":[[0,0],[3.4,0],[3.4,4.4],[0,4.4]]},
-        {"id":"go_flur","name":"Flur / Galerie","art":"voll","punkte":[[3.515,0],[8,0],[8,4.4],[3.515,4.4]]},
-        {"id":"go_bad","name":"Bad","art":"voll","punkte":[[8.115,0],[10,0],[10,4.4],[8.115,4.4]]},
-        {"id":"go_ankleide","name":"Ankleide / Abstell","art":"voll","punkte":[[0,4.515],[6.4,4.515],[6.4,6.3],[0,6.3]]},
-        {"id":"go_eltern","name":"Schlafzimmer 1","art":"voll","punkte":[[0,6.415],[6.4,6.415],[6.4,10.4],[0,10.4]]},
-        {"id":"go_zimmer3","name":"Schlafzimmer 3","art":"voll","punkte":[[6.515,4.515],[10,4.515],[10,10.4],[6.515,10.4]]}
+        {"id":"go_schlaf2","name":"Schlafzimmer 2","art":"voll","nutzung":"schlafen","punkte":[[0,0],[3.4,0],[3.4,4.4],[0,4.4]]},
+        {"id":"go_flur","name":"Flur / Galerie","art":"voll","nutzung":"flur","punkte":[[3.515,0],[8,0],[8,4.4],[3.515,4.4]]},
+        {"id":"go_bad","name":"Bad","art":"voll","nutzung":"bad","punkte":[[8.115,0],[10,0],[10,4.4],[8.115,4.4]]},
+        {"id":"go_ankleide","name":"Ankleide / Abstell","art":"voll","nutzung":"abstell","punkte":[[0,4.515],[6.4,4.515],[6.4,6.3],[0,6.3]]},
+        {"id":"go_eltern","name":"Schlafzimmer 1","art":"voll","nutzung":"schlafen","punkte":[[0,6.415],[6.4,6.415],[6.4,10.4],[0,10.4]]},
+        {"id":"go_zimmer3","name":"Schlafzimmer 3","art":"voll","nutzung":"schlafen","punkte":[[6.515,4.515],[10,4.515],[10,10.4],[6.515,10.4]]}
       ],
       teile: [
         {"id":"vgre2n32","art":"tuer","x":3.458,"y":1.8,"w":0.9,"d":0.115,"dreh":90,"hoehe":2,"bruestung":0,"bindung":{"raum":"go_schlaf2","kante":1,"t":0.4091},"bindungGrund":""},

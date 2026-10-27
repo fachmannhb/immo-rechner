@@ -2,7 +2,8 @@
    Grundfläche 10 × 8 m, 6 Zimmer auf zwei Etagen, dazu Küche, 2 Bäder, Flure, Terrasse, Garage, Keller.
    Alle Maße erfunden, keine echten Daten. Möbelmaße (w, d) ergänzt grundriss.js aus daten/moebel.js.
    Sollwerte (tmp/grundriss_test.ps1): Wohnfläche EG 80 + Terrasse 16,5 × 25 % = 84,125;
-   DG 18 + 18 + 11,2 + 8,75 + 12,25 = 68,2; zusammen 152,3 m². Nutzfläche Garage 18 + Keller 80 = 98 m². */
+   DG 18 + 18 + 11,2 + 8,75 + 12,25 = 68,2; zusammen 152,3 m². Nutzfläche Garage 18 + Keller 80 = 98 m².
+   Welle C: jeder Wohnraum trägt nutzung (Wohnen, Schlafen ...), keine Treppe und keine Fenster, darum bleiben Wohnfläche und Kosten gleich. */
 window.DATEN = window.DATEN || {};
 window.DATEN.beispielhaus = {
   app: 'immo-grundriss', version: 1, aktiv: 0, wandhoehe: 2.5, beispiel: true,
@@ -10,12 +11,12 @@ window.DATEN.beispielhaus = {
   etagen: [
     {
       name: 'Beispiel: Erdgeschoss', bild: null, raeume: [
-        { name: 'Wohnzimmer', art: 'voll', punkte: [[0, 0], [5.5, 0], [5.5, 4.5], [0, 4.5]] },
-        { name: 'Esszimmer', art: 'voll', punkte: [[5.5, 0], [10, 0], [10, 4.5], [5.5, 4.5]] },
-        { name: 'Arbeitszimmer', art: 'voll', punkte: [[0, 4.5], [3, 4.5], [3, 8], [0, 8]] },
-        { name: 'Bad', art: 'voll', punkte: [[3, 4.5], [4.5, 4.5], [4.5, 8], [3, 8]] },
-        { name: 'Flur', art: 'voll', punkte: [[4.5, 4.5], [6, 4.5], [6, 8], [4.5, 8]] },
-        { name: 'Küche', art: 'voll', punkte: [[6, 4.5], [10, 4.5], [10, 8], [6, 8]] },
+        { name: 'Wohnzimmer', art: 'voll', nutzung: 'wohnen', punkte: [[0, 0], [5.5, 0], [5.5, 4.5], [0, 4.5]] },
+        { name: 'Esszimmer', art: 'voll', nutzung: 'essen', punkte: [[5.5, 0], [10, 0], [10, 4.5], [5.5, 4.5]] },
+        { name: 'Arbeitszimmer', art: 'voll', nutzung: 'arbeiten', punkte: [[0, 4.5], [3, 4.5], [3, 8], [0, 8]] },
+        { name: 'Bad', art: 'voll', nutzung: 'bad', punkte: [[3, 4.5], [4.5, 4.5], [4.5, 8], [3, 8]] },
+        { name: 'Flur', art: 'voll', nutzung: 'flur', punkte: [[4.5, 4.5], [6, 4.5], [6, 8], [4.5, 8]] },
+        { name: 'Küche', art: 'voll', nutzung: 'kueche', punkte: [[6, 4.5], [10, 4.5], [10, 8], [6, 8]] },
         { name: 'Terrasse', art: 'balkon', balkon: 25, punkte: [[0, -3], [5.5, -3], [5.5, 0], [0, 0]] },
         { name: 'Garage', art: 'zubehoer', separat: true, punkte: [[10, 0], [13, 0], [13, 6], [10, 6]] }
       ],
@@ -33,11 +34,11 @@ window.DATEN.beispielhaus = {
     },
     {
       name: 'Beispiel: Dachgeschoss', bild: null, raeume: [
-        { name: 'Schlafzimmer', art: 'voll', teil12: 20, teil0: 10, punkte: [[0, 0], [5, 0], [5, 4.5], [0, 4.5]] },
-        { name: 'Kinderzimmer 1', art: 'voll', teil12: 20, teil0: 10, punkte: [[5, 0], [10, 0], [10, 4.5], [5, 4.5]] },
-        { name: 'Kinderzimmer 2', art: 'voll', teil12: 20, teil0: 10, punkte: [[0, 4.5], [4, 4.5], [4, 8], [0, 8]] },
-        { name: 'Bad', art: 'voll', punkte: [[4, 4.5], [6.5, 4.5], [6.5, 8], [4, 8]] },
-        { name: 'Flur', art: 'voll', punkte: [[6.5, 4.5], [10, 4.5], [10, 8], [6.5, 8]] }
+        { name: 'Schlafzimmer', art: 'voll', nutzung: 'schlafen', teil12: 20, teil0: 10, punkte: [[0, 0], [5, 0], [5, 4.5], [0, 4.5]] },
+        { name: 'Kinderzimmer 1', art: 'voll', nutzung: 'kind', teil12: 20, teil0: 10, punkte: [[5, 0], [10, 0], [10, 4.5], [5, 4.5]] },
+        { name: 'Kinderzimmer 2', art: 'voll', nutzung: 'kind', teil12: 20, teil0: 10, punkte: [[0, 4.5], [4, 4.5], [4, 8], [0, 8]] },
+        { name: 'Bad', art: 'voll', nutzung: 'bad', punkte: [[4, 4.5], [6.5, 4.5], [6.5, 8], [4, 8]] },
+        { name: 'Flur', art: 'voll', nutzung: 'flur', punkte: [[6.5, 4.5], [10, 4.5], [10, 8], [6.5, 8]] }
       ],
       teile: [
         { art: 'bett180', x: 2.5, y: 1.25 }, { art: 'nachttisch', x: 1.1, y: 0.4 }, { art: 'nachttisch', x: 3.9, y: 0.4 }, { art: 'schrank3', x: 2.5, y: 4.2 },

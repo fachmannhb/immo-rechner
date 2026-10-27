@@ -20,11 +20,11 @@ window.DATEN.vorlagen.klein = {
     {
       name: "Erdgeschoss", bild: null, hoehe: 2.5, aussenwand: 0.3, innenwand: 0.115, decke: 0.25,
       raeume: [
-        {"id":"k_bad","name":"Bad","art":"voll","punkte":[[0,0],[2.1,0],[2.1,2.9],[0,2.9]]},
-        {"id":"k_flur","name":"Flur/Technik","art":"voll","punkte":[[2.215,0],[4,0],[4,2.9],[2.215,2.9]]},
-        {"id":"k_zimmer","name":"Kleines Zimmer","art":"voll","punkte":[[4.115,0],[7.4,0],[7.4,2.9],[4.115,2.9]]},
-        {"id":"k_wohn","name":"Wohnen / Kochen","art":"voll","punkte":[[0,3.015],[4.4,3.015],[4.4,8.4],[0,8.4]]},
-        {"id":"k_schlaf","name":"Schlafzimmer","art":"voll","punkte":[[4.515,3.015],[7.4,3.015],[7.4,8.4],[4.515,8.4]]}
+        {"id":"k_bad","name":"Bad","art":"voll","nutzung":"bad","punkte":[[0,0],[2.1,0],[2.1,2.9],[0,2.9]]},
+        {"id":"k_flur","name":"Flur/Technik","art":"voll","nutzung":"flur","punkte":[[2.215,0],[4,0],[4,2.9],[2.215,2.9]]},
+        {"id":"k_zimmer","name":"Kleines Zimmer","art":"voll","nutzung":"arbeiten","punkte":[[4.115,0],[7.4,0],[7.4,2.9],[4.115,2.9]]},
+        {"id":"k_wohn","name":"Wohnen / Kochen","art":"voll","nutzung":"wohnen","punkte":[[0,3.015],[4.4,3.015],[4.4,8.4],[0,8.4]]},
+        {"id":"k_schlaf","name":"Schlafzimmer","art":"voll","nutzung":"schlafen","punkte":[[4.515,3.015],[7.4,3.015],[7.4,8.4],[4.515,8.4]]}
       ],
       teile: [
         {"id":"vkle1n1","art":"tuer","x":3.1,"y":-0.15,"w":1,"d":0.3,"dreh":0,"hoehe":2.1,"bruestung":0,"bindung":{"raum":"k_flur","kante":0,"t":0.4958},"bindungGrund":""},

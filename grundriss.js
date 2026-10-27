@@ -50,7 +50,17 @@
     return { name: name, bild: null, bildB: 0, bildH: 0, mpp: 0.01, massstab: false, hoehe: hoehe || 2.5, aussenwand: 0.30, innenwand: 0.115, decke: 0.25, raeume: [], teile: [] };
   }
   function neuesDach() { return { form: 'sattel', neigung: 35, first: 'x', ueberstand: 0.3 }; }
-  function leererPlan() { return { app: 'immo-grundriss', version: 2, aktiv: 0, wandhoehe: 2.5, nord: 0, dach: neuesDach(), preise: {}, mengen: {}, etagen: [neueEtage('Erdgeschoss', 2.5)] }; }
+  /* Welle C (Regeln): plan.land = Bundesland-Kürzel (Standard Bremen, zuletzt gewähltes merkt sich die Seite für neue Pläne),
+     plan.gebaeudeklasse 0 = noch nicht gewählt (dann gilt der Vorschlag), 1 bis 5; plan.wohnungen; plan.freistehend; raum.nutzung ('' = aus dem Namen);
+     Fenster/Tür bestand:true = schon vorhanden, kostet beim Umbau nichts (Vorlagen). Alte Pläne laden unverändert (Datenmodell bleibt Version 2). */
+  var RK = window.REGELN || null;
+  var LAND_KEY = 'immo-land';
+  function landLesen() {
+    try { var k = localStorage.getItem(LAND_KEY); if (k && RK && RK.landOk(k)) return k; } catch (e) { /* ohne Speicher bleibt Bremen */ }
+    return 'HB';
+  }
+  function landMerken(k) { try { localStorage.setItem(LAND_KEY, k); return true; } catch (e) { return false; } }
+  function leererPlan() { return { app: 'immo-grundriss', version: 2, aktiv: 0, wandhoehe: 2.5, nord: 0, land: landLesen(), gebaeudeklasse: 0, wohnungen: 1, freistehend: true, dach: neuesDach(), preise: {}, mengen: {}, etagen: [neueEtage('Erdgeschoss', 2.5)] }; }
   function istTuerFenster(t) { var a = ART[t.art]; return !!a && (a.form === 'tuer' || a.form === 'fenster'); }
   var plan = laden() || leererPlan();
   var massAn = true;        /* Maßlinien zeigen */
@@ -121,6 +131,10 @@
     /* Himmelsrichtung: Winkel in Grad, in den Norden auf dem Plan zeigt (0 = nach oben, im Uhrzeigersinn); v1-Pläne: 0 */
     neu.nord = Math.round(((zahlOk(p.nord, 0) % 360) + 360) % 360) % 360;
     neu.wandhoehe = klemme(zahlOk(p.wandhoehe, 2.5), 1.8, 6);
+    neu.land = RK && RK.landOk(p.land) ? p.land : landLesen();
+    neu.gebaeudeklasse = Math.round(klemme(zahlOk(p.gebaeudeklasse, 0), 0, 5));
+    neu.wohnungen = Math.round(klemme(zahlOk(p.wohnungen, 1), 1, 50));
+    neu.freistehend = p.freistehend !== false;
     var d0 = p.dach && typeof p.dach === 'object' ? p.dach : {};
     neu.dach = {
       form: ['sattel', 'walm', 'pult', 'flach'].indexOf(d0.form) >= 0 ? d0.form : 'sattel',
@@ -148,6 +162,7 @@
         return {
           id: String(r.id || neueId('r')), name: String(r.name || 'Raum').slice(0, 40),
           art: ARTEN.some(function (a) { return a[0] === r.art; }) ? r.art : 'voll',
+          nutzung: RK && RK.NUTZUNGEN.indexOf(r.nutzung) >= 0 ? r.nutzung : '',
           punkte: r.punkte.map(function (q) { return [zahlOk(q[0], 0), zahlOk(q[1], 0)]; }),
           teil12: zahlOk(r.teil12, 0), teil0: zahlOk(r.teil0, 0), balkon: zahlOk(r.balkon, 25), separat: !!r.separat
         };
@@ -163,6 +178,7 @@
           o.bindung = bd && typeof bd === 'object' && typeof bd.raum === 'string' && bd.raum && isFinite(Number(bd.kante)) && Number(bd.kante) >= 0
             ? { raum: bd.raum.slice(0, 60), kante: Math.floor(Number(bd.kante)), t: klemme(zahlOk(bd.t, 0.5), 0, 1) } : null;
           o.bindungGrund = typeof t.bindungGrund === 'string' ? t.bindungGrund.slice(0, 90) : '';
+          if (t.bestand === true) o.bestand = true;
         }
         return o;
       });
@@ -322,6 +338,8 @@
         tx.textContent = kurz;
       }
     });
+    /* Freiflächen vor Möbeln (Knopf "Freiflächen zeigen", grundriss_regeln.js) */
+    if (window.GRUNDRISS_REGELN && window.GRUNDRISS_REGELN.zeichneFrei) window.GRUNDRISS_REGELN.zeichneFrei(e, svg, s);
     /* Raumnamen über den Möbeln; Konturbreite in Metern, weil im Plan eine Einheit ein Meter ist */
     e.raeume.forEach(function (r) {
       var c = schwerpunkt(r.punkte), t = el('text', { x: c[0], y: c[1], class: 'raum-text', 'font-size': 14 * s, 'stroke-width': 3 * s }, svg);
@@ -995,9 +1013,10 @@
     if (gewaehlt.typ === 'raum') {
       var r = findeRaum(gewaehlt.id); if (!r) { box.innerHTML = ''; return; }
       var f = flaeche(r);
-      var h = '<h4>Raum: ' + esc(r.name) + '</h4><p>Grundfläche <b>' + qm(f) + '</b>, davon Wohnfläche <b>' + qm(R.wohnflaecheRaum(raumDaten(r))) + '</b>.</p>' +
+      var h = '<h4>Raum: ' + esc(r.name) + '</h4><p>' + raumSatz(r) + '</p>' +
         '<div style="display:grid;gap:12px"><div><label for="g-r-name">Name</label><input type="text" id="g-r-name" value="' + esc(r.name) + '"></div>' +
-        '<div><label for="g-r-art">Art des Raums</label><select id="g-r-art">' + ARTEN.map(function (a) { return '<option value="' + a[0] + '"' + (a[0] === r.art ? ' selected' : '') + '>' + esc(a[1]) + '</option>'; }).join('') + '</select></div>';
+        '<div><label for="g-r-art">Art des Raums</label><select id="g-r-art">' + ARTEN.map(function (a) { return '<option value="' + a[0] + '"' + (a[0] === r.art ? ' selected' : '') + '>' + esc(a[1]) + '</option>'; }).join('') + '</select></div>' +
+        (r.art === 'voll' ? '<div id="g-r-nutz"></div>' : '');
       if (r.art === 'voll' || r.art === 'wintergarten') {
         h += '<div class="g-mini">' + feld('g-r-t12', 'Anteil 1 bis 2 m hoch, in %', fmt0.format(r.teil12), '') + feld('g-r-t0', 'Anteil unter 1 m hoch, in %', fmt0.format(r.teil0), '') + '</div>' +
           '<p class="klein" style="margin:0">Nur bei Dachschrägen: welcher Teil der Fläche niedriger ist. Zählt halb bzw. gar nicht.</p>';
@@ -1009,7 +1028,11 @@
       h += '</div><div class="knopfreihe"><button type="button" class="knopf zweit" id="g-r-weg">Raum löschen</button></div>' +
         '<p class="klein" style="margin:8px 0 0">Ecken verschieben: an den Kreisen ziehen. Ganzen Raum: in der Fläche ziehen oder Pfeiltasten.</p>';
       box.innerHTML = h;
-      $('g-r-name').addEventListener('input', function () { r.name = this.value.trim().slice(0, 40) || 'Raum'; box.querySelector('h4').textContent = 'Raum: ' + r.name; speichern(); zeichnen(); auswerten(); });
+      if ($('g-r-nutz') && window.GRUNDRISS_REGELN) window.GRUNDRISS_REGELN.raumPanel($('g-r-nutz'), r, function () { speichern(); auswerten(); });
+      $('g-r-name').addEventListener('input', function () {
+        r.name = this.value.trim().slice(0, 40) || 'Raum'; box.querySelector('h4').textContent = 'Raum: ' + r.name; speichern(); zeichnen(); auswerten();
+        if ($('g-r-nutz') && window.GRUNDRISS_REGELN) window.GRUNDRISS_REGELN.raumPanel($('g-r-nutz'), r, function () { speichern(); auswerten(); }, true);
+      });
       $('g-r-art').addEventListener('change', function () { r.art = this.value; geaendert(); auswahlZeigen(); $('g-r-art').focus(); });
       prozentFeld('g-r-t12', function (v) { r.teil12 = v; }, 100);
       prozentFeld('g-r-t0', function (v) { r.teil0 = v; }, 100);
@@ -1066,6 +1089,10 @@
       feldMitSkizze('breite', 'g-t-b', tr('feldBreite'), fmt0.format(t.w * 100), tr('feldBreiteKurz')) +
       feldMitSkizze('hoehe', 'g-t-h', tr('feldHoehe'), fmt0.format(t.hoehe * 100), tr('feldHoeheKurz')) +
       (fenster ? feldMitSkizze('bruestung', 'g-t-br', tr('feldBruestung'), fmt0.format(t.bruestung * 100), tr('feldBruestungKurz')) : '') + '</div>' +
+      '<div class="g-bestand" role="group" aria-label="' + esc(tr('teilBestandGruppe')) + '">' +
+      '<button type="button" class="chip mit-symbol" id="g-t-bestand" aria-pressed="' + (t.bestand === true ? 'true' : 'false') + '"><svg class="sym" aria-hidden="true"><use href="#i-haus"/></svg>' + esc(tr('teilBestand')) + '</button>' +
+      '<button type="button" class="chip mit-symbol" id="g-t-neu" aria-pressed="' + (t.bestand === true ? 'false' : 'true') + '"><svg class="sym" aria-hidden="true"><use href="#i-hammer"/></svg>' + esc(tr('teilNeu')) + '</button></div>' +
+      '<p class="klein" style="margin:6px 0 0">' + esc(tr(t.bestand === true ? 'teilBestandHinweis' : 'teilNeuHinweis')) + '</p>' +
       '<div class="knopfreihe">' + (!fenster || !raum ? '<button type="button" class="knopf zweit" id="g-t-dreh"><svg class="sym" aria-hidden="true"><use href="#i-dreh"/></svg> ' + esc(raum ? tr('seiteWechseln') : tr('drehenR')) + '</button>' : '') +
       '<button type="button" class="knopf zweit" id="g-t-weg"><svg class="sym" aria-hidden="true"><use href="#i-weg-teil"/></svg> ' + esc(tr('loeschenEntf')) + '</button>' +
       '<button type="button" class="hilfe-knopf" id="g-t-hilfe" aria-expanded="false" aria-controls="g-t-hilfe-text" aria-label="' + esc(tr('hilfeKnopf')) + '">?</button></div>' +
@@ -1080,6 +1107,12 @@
         if (v == null || v < p[2] || v > p[3]) { fe.textContent = tr('feldFehler', { von: p[2], bis: p[3] }); this.setAttribute('aria-invalid', 'true'); return; }
         fe.textContent = ''; this.removeAttribute('aria-invalid');
         p[1](v); geaendert();
+      });
+    });
+    [['g-t-bestand', true], ['g-t-neu', false]].forEach(function (p) {
+      $(p[0]).addEventListener('click', function () {
+        if (p[1]) t.bestand = true; else delete t.bestand;
+        geaendert(); auswahlZeigen(); var f = $(p[0]); if (f) f.focus({ preventScroll: true });
       });
     });
     if ($('g-t-dreh')) $('g-t-dreh').addEventListener('click', drehen);
@@ -1102,10 +1135,18 @@
       f.textContent = ''; this.removeAttribute('aria-invalid');
       setzen(v); speichern(); auswerten();
       var p = $('g-auswahl').querySelector('p'); var r = findeRaum(gewaehlt.id);
-      if (p && r) p.innerHTML = 'Grundfläche <b>' + qm(flaeche(r)) + '</b>, davon Wohnfläche <b>' + qm(R.wohnflaecheRaum(raumDaten(r))) + '</b>.';
+      if (p && r) p.innerHTML = raumSatz(r);
     });
   }
   function raumDaten(r) { return { flaeche: flaeche(r), art: r.art, teil12: r.teil12, teil0: r.teil0, balkonProzent: r.balkon }; }
+  /* Wohnfläche eines Raums nach WoFlV: Treppen mit mehr als drei Steigungen und Treppenabsätze zählen nicht (§ 3 Abs. 3 Nr. 2),
+     darum wird die Grundfläche der Treppe (und der Treppenöffnung darüber) im Raum abgezogen. Nur für Wohnräume ("voll"). */
+  function treppeAbzug(e, r) { return r.art === 'voll' && RK ? RK.treppenAbzug(e, r, ART) : 0; }
+  function raumWohn(e, r) { return Math.max(0, R.wohnflaecheRaum(raumDaten(r)) - treppeAbzug(e, r)); }
+  function raumSatz(r) {
+    var e = etage(), ab = treppeAbzug(e, r);
+    return 'Grundfläche <b>' + qm(flaeche(r)) + '</b>, davon Wohnfläche <b>' + qm(raumWohn(e, r)) + '</b>.' + (ab > 0.005 ? ' ' + esc(tr('wohnTreppeAbzug', { qm: qm(ab) })) : '');
+  }
 
   /* ---------- Auswertung ---------- */
   function preisVon(a) { return plan.preise[a.id] != null ? plan.preise[a.id] : a.start; }
@@ -1113,13 +1154,14 @@
     var wfl = 0, nfl = 0, sep = 0, betten = 0, mengen = {}, raeumeRows = [], bettRows = [], monteur = false;
     plan.etagen.forEach(function (e) {
       e.raeume.forEach(function (r) {
-        var d = raumDaten(r), w = R.wohnflaecheRaum(d), n = R.nutzflaecheRaum(d);
+        var d = raumDaten(r), w = raumWohn(e, r), n = R.nutzflaecheRaum(d);
         wfl += w; nfl += n; if (r.separat && n) sep += n;
-        raeumeRows.push({ r: r, etage: e.name, f: d.flaeche, w: w, n: n });
+        raeumeRows.push({ r: r, etage: e.name, f: d.flaeche, w: w, n: n, treppe: treppeAbzug(e, r) });
       });
       var jeRaum = {};
       e.teile.forEach(function (t) {
         var a = ART[t.art];
+        if (t.bestand === true && istTuerFenster(t)) return;   /* schon vorhanden (Vorlage): kein Umbau, keine Kosten, bis "neu einbauen" gewählt wird */
         mengen[a.id] = (mengen[a.id] || 0) + (a.einheit === 'm' ? t.w : 1);
         if (a.gruppe === 'monteur') monteur = true;
         if (a.betten) {
@@ -1217,6 +1259,7 @@
       return '<tr><td data-titel="Zimmer">' + esc(b.name) + ' <span class="klein">(' + esc(b.etage) + ')</span></td><td class="z" data-titel="Schlafplätze">' + b.n + '</td><td class="z" data-titel="m² je Schlafplatz">' + (b.f ? fmt1.format(b.f / b.n) : '-') + '</td></tr>';
     }).join('');
     if (ansicht3d) dreiD();
+    if (window.GRUNDRISS_REGELN) window.GRUNDRISS_REGELN.aktualisieren();
   }
   $('g-kosten').addEventListener('input', function (ev) {
     var id = ev.target.id, v = ev.target.value.trim(), n = v === '' ? null : zahl(v);
@@ -1323,6 +1366,9 @@
     });
     var neu = pruefePlan(p);
     if (!neu) { meldung(tr('vorlageNichtGeladen')); return; }
+    /* Fenster und Türen der Vorlage sind "Bestand" (kosten keinen Umbau); beim Beispielhaus bleibt es wie bisher, damit seine Umbaukosten gleich bleiben */
+    if (id !== 'beispielhaus') neu.etagen.forEach(function (e) { e.teile.forEach(function (t) { if (istTuerFenster(t)) t.bestand = true; }); });
+    neu.land = plan.land;   /* das gewählte Bundesland bleibt */
     plan = neu; gewaehlt = null; vb = null; vorlageWartet = null; $('g-beispiel-frage').hidden = true;
     speichern(); allesZeigen();
     if (id === 'beispielhaus') meldung('Beispielhaus geladen: oben bei „Etage“ zwischen Erdgeschoss, Dachgeschoss und Keller wechseln, mit „3D“ ansehen. Alle Maße sind erfunden.');
@@ -1336,7 +1382,12 @@
   }
   function vorlageWohnflaeche(v) {
     var s = 0;
-    v.etagen.forEach(function (e) { e.raeume.forEach(function (r) { s += R.wohnflaecheRaum(raumDaten({ punkte: r.punkte, art: r.art || 'voll', teil12: r.teil12, teil0: r.teil0, balkon: r.balkon })); }); });
+    v.etagen.forEach(function (e) {
+      e.raeume.forEach(function (r) {
+        var rr = { punkte: r.punkte, art: r.art || 'voll', teil12: r.teil12, teil0: r.teil0, balkon: r.balkon };
+        s += Math.max(0, R.wohnflaecheRaum(raumDaten(rr)) - treppeAbzug(e, rr));
+      });
+    });
     return s;
   }
   /* Kleine Skizze der ersten Etage: nur die Räume, Farben über CSS-Klassen aus der Palette */
@@ -1416,7 +1467,11 @@
   if ('ResizeObserver' in window) new ResizeObserver(function () { if (sichtbar && !ansicht3d) { seitenverhaeltnis(); zeichnen(); } }).observe($('g-buehne'));
   window.addEventListener('themagewechselt', function () { if (ansicht3d) dreiD(); });
 
-  function allesZeigen() { nachfuehrenAlle(); etagenZeigen(); zeichnen(); auswahlZeigen(); auswerten(); nordZeigen(); dachZeigen(); }
+  /* Sonne und Dachertrag der 3D-Ansicht richten sich nach der Hauptstadt des gewählten Bundeslandes */
+  function landAnwenden() {
+    if (RK && window.GRUNDRISS3D && window.GRUNDRISS3D.ort) window.GRUNDRISS3D.ort(RK.landInfo(plan.land).stadt);
+  }
+  function allesZeigen() { landAnwenden(); nachfuehrenAlle(); etagenZeigen(); zeichnen(); auswahlZeigen(); auswerten(); nordZeigen(); dachZeigen(); }
 
   /* ---------- Himmelsrichtung (Windrose) ---------- */
   function nordZeigen() {
@@ -1579,7 +1634,7 @@
     var datum = new Intl.DateTimeFormat(loc, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
     var rows = '', sw = 0, sg = 0;
     e.raeume.forEach(function (r) {
-      var d = raumDaten(r), w = R.wohnflaecheRaum(d), art = { voll: 'artVoll', balkon: 'artBalkon', wintergarten: 'artWinter', zubehoer: 'artZubehoer' }[r.art];
+      var d = raumDaten(r), w = raumWohn(e, r), art = { voll: 'artVoll', balkon: 'artBalkon', wintergarten: 'artWinter', zubehoer: 'artZubehoer' }[r.art];
       sw += w; sg += d.flaeche;
       rows += '<tr><td>' + esc(r.name) + '</td><td>' + esc(tr(art)) + '</td><td class="z">' + zahl2(d.flaeche, 1) + ' m²</td><td class="z">' + zahl2(w, 1) + ' m²</td></tr>';
     });
@@ -1619,9 +1674,15 @@
   });
 
   katalogZeigen();
+  landAnwenden();
   auswerten();
 
   window.GRUNDRISS = {
+    /* Welle C: grundriss_regeln.js ändert Bundesland, Gebäudeklasse usw. am Plan und ruft dann geaendert(); landMerken merkt das Land für neue Pläne */
+    geaendert: function () { speichern(); landAnwenden(); auswerten(); if (sichtbar && !ansicht3d) zeichnen(); },
+    landMerken: landMerken,
+    zeichnen: function () { if (sichtbar && !ansicht3d) zeichnen(); },
+    raumWohn: raumWohn,
     /* von app.js beim Reiterwechsel gerufen: Größe ist erst messbar, wenn der Bereich sichtbar ist */
     zeigt: function (an) {
       sichtbar = !!an;
