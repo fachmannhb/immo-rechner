@@ -57,7 +57,7 @@ window.DATEN.einstieg = {
       kurz: 'Zeichnen Sie den Grundriss nach und richten Sie ihn ein.',
       wofuer: 'Sie sehen die Wohnfläche nach Wohnflächenverordnung und was die Einrichtung kostet. Das ist kein Bauplan und kein Aufmaß.',
       brauche: 'Ein Bild des Grundrisses aus dem Exposé, oder zeichnen Sie einfach auf dem Raster.',
-      anfang: { text: 'Zum Beispielhaus ↑', fokus: 'g-beispiel' }
+      anfang: { text: 'Zu den Vorlagen ↑', fokus: 'g-beispiel' }
     },
     pruefliste: {
       kurz: 'Haken Sie den Weg vom Geldrahmen bis zur Vermietung ab.',

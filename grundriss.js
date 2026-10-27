@@ -33,6 +33,14 @@
     ['zubehoer', 'Keller, Garage, Heizraum, Abstellraum außerhalb']
   ];
 
+  /* Vorlagen: Schlüssel der Texte (daten/texte.js) je Vorlage als volle Zeichenketten, damit tmp/planung_test.py sie findet */
+  var VORLAGEN_T = {
+    beispielhaus: { name: 'vorlageNameBeispiel', kurz: 'vorlageKurzBeispiel', text: 'vorlageTextBeispiel' },
+    musterhaus2: { name: 'vorlageNameMuster', kurz: 'vorlageKurzMuster', text: 'vorlageTextMuster' },
+    klein: { name: 'vorlageNameKlein', kurz: 'vorlageKurzKlein', text: 'vorlageTextKlein' },
+    gross: { name: 'vorlageNameGross', kurz: 'vorlageKurzGross', text: 'vorlageTextGross' }
+  };
+
   /* ---------- Zustand ---------- */
   /* Datenmodell Version 2 (Version 1 lädt mit Standardwerten):
      Etage: hoehe (lichte Raumhöhe, Standard = alte plan.wandhoehe), aussenwand 0,30, innenwand 0,115, decke 0,25.
@@ -162,6 +170,8 @@
     });
     neu.aktiv = Math.min(neu.etagen.length - 1, Math.max(0, zahlOk(p.aktiv, 0) | 0));
     if (p.beispiel === true) neu.beispiel = true;
+    /* Kennung der geladenen Vorlage (daten/vorlage_*.js), nur Kleinbuchstaben, Ziffern und _ */
+    if (typeof p.vorlage === 'string' && /^[a-z0-9_]{1,30}$/.test(p.vorlage)) neu.vorlage = p.vorlage;
     return neu;
   }
   function laden() {
@@ -297,6 +307,13 @@
         var k = Math.min(0.5, t.w * 0.4), n = t.w > 1.2 ? 2 : 1;
         for (var i = 0; i < n; i++) el('rect', { x: -t.w / 2 + 0.08 + i * (t.w - 0.16) / n, y: -t.d / 2 + 0.08, width: (t.w - 0.16) / n - (n > 1 ? 0.06 : 0), height: Math.min(0.35, t.d * 0.2), class: 'kissen', rx: 0.05 }, g);
         void k;
+      }
+      if (a.form === 'treppe' || a.form === 'treppeoben') {
+        /* Stufenlinien quer zur Laufrichtung (etwa 24 cm Auftritt), Pfeil nach oben = Laufrichtung; oben im Obergeschoss gestrichelt */
+        var nSt = Math.max(2, Math.round(t.d / 0.24));
+        for (var si = 1; si < nSt; si++) el('line', { x1: -t.w / 2, x2: t.w / 2, y1: -t.d / 2 + si * t.d / nSt, y2: -t.d / 2 + si * t.d / nSt, class: 'stufe' }, g);
+        el('path', { d: 'M 0 ' + (t.d / 2 - 0.25) + ' L 0 ' + (-t.d / 2 + 0.3) + ' M -0.14 ' + (-t.d / 2 + 0.52) + ' L 0 ' + (-t.d / 2 + 0.3) + ' L 0.14 ' + (-t.d / 2 + 0.52), class: 'stufe pfeil' }, g);
+        if (a.form === 'treppeoben') g.setAttribute('class', g.getAttribute('class') + ' oben');
       }
       if (a.form === 'tuer') el('path', { d: 'M ' + (-t.w / 2) + ' ' + (t.d / 2) + ' A ' + t.w + ' ' + t.w + ' 0 0 0 ' + (t.w / 2) + ' ' + (t.d / 2 - t.w), class: 'hilfslinie', style: 'stroke-dasharray:4 4;stroke-width:1.5' }, g);
       var fs = 11 * s, kurz = a.kurz || a.name;
@@ -1118,6 +1135,7 @@
     var posten = [];
     KAT.artikel.forEach(function (a) {
       var m;
+      if (a.keinPosten) return;   /* z. B. Treppenöffnung oben: gehört zur Treppe darunter, kein eigener Posten */
       if (a.jeBett) m = monteur ? betten * a.jeBett : 0;
       else if (a.zeichnen === false) m = plan.mengen[a.id] || 0;
       else m = mengen[a.id] || 0;
@@ -1137,12 +1155,12 @@
     var box = $('g-satz'), titel, klein, art = 'leer', zeichen = '?';
     if (!nRaeume) {
       titel = 'Noch kein Raum gezeichnet.';
-      klein = 'Fangen Sie oben bei „So fangen Sie an“ an: Bild wählen oder das Beispielhaus laden, oder zeichnen Sie gleich in Schritt 2 auf dem Raster.';
+      klein = 'Fangen Sie oben bei „So fangen Sie an“ an: eine Vorlage laden oder ein Bild wählen, oder zeichnen Sie gleich in Schritt 2 auf dem Raster.';
     } else {
       titel = qm(s.wfl) + ' Wohnfläche' + (s.summe ? ', Einrichtung und Umbau etwa ' + euro(s.summe) : '') + '.';
       klein = (s.nfl ? 'Dazu ' + qm(s.nfl) + ' Nutzfläche' + (s.sep ? ', davon ' + qm(s.sep) + ' separat vermietbar' : '') + '. ' : '') +
         (s.betten ? s.betten + ' Schlafplätze. ' : '') + 'Preise sind Richtwerte, keine Angebote.';
-      if (plan.beispiel) klein = 'Beispielhaus mit erfundenen Maßen. ' + klein;
+      if (plan.beispiel) klein = tr((VORLAGEN_T[plan.vorlage] || VORLAGEN_T.beispielhaus).text) + ' ' + klein;
       zeichen = '✓'; art = 'gut';
       if (s.ohneMassstab.length) {
         art = 'warn'; zeichen = '!';
@@ -1286,28 +1304,89 @@
   $('g-neu-ohne').addEventListener('click', function () { neuBeginnen(); $('g-datei-meldung').textContent = 'Neuer Plan begonnen.'; });
   $('g-neu-nein').addEventListener('click', function () { $('g-neu-frage').hidden = true; });
 
-  /* ---------- Beispielhaus (daten/beispielhaus.js) ---------- */
-  function beispielLaden() {
-    var vorlage = window.DATEN && window.DATEN.beispielhaus;
-    if (!vorlage) { meldung('Das Beispielhaus fehlt in dieser Fassung der Seite.'); return; }
+  /* ---------- Vorlagen: Beispielhaus (daten/beispielhaus.js) und drei weitere Häuser (daten/vorlage_*.js) ----------
+     Vier Karten mit Skizze, Name, Wohnfläche und Geschosszahl (beides aus den Daten gerechnet, nicht von Hand
+     eingetragen). Ist schon etwas im Plan, fragt die Seite vor dem Ersetzen und bietet an, den Plan zuerst als Datei zu sichern. */
+  var VORLAGEN = ['beispielhaus', 'musterhaus2', 'klein', 'gross'];
+  var vorlageWartet = null;      /* Vorlage, die nach der Rückfrage geladen wird */
+  function vorlageDaten(id) { var D = window.DATEN || {}; return id === 'beispielhaus' ? D.beispielhaus : (D.vorlagen || {})[id]; }
+  function vorlageKarteId(id) { return id === 'beispielhaus' ? 'g-beispiel' : 'g-vorlage-' + id; }
+  function vorlageLaden(id) {
+    id = id || vorlageWartet || 'beispielhaus';
+    var vorlage = vorlageDaten(id);
+    if (!vorlage) { meldung(tr('vorlageFehlt')); return; }
     var p = JSON.parse(JSON.stringify(vorlage));
+    /* Ids und Maße ergänzen, wo sie fehlen (das Beispielhaus hat keine); feste Ids der Vorlagen bleiben, sonst verlieren Fenster und Türen ihre Wand */
     p.etagen.forEach(function (e) {
-      e.raeume.forEach(function (r) { r.id = neueId('r'); });
-      e.teile.forEach(function (t) { var a = ART[t.art]; t.id = neueId('t'); if (a) { t.w = a.breite / 100; t.d = a.tiefe / 100; } });
+      e.raeume.forEach(function (r) { if (!r.id) r.id = neueId('r'); });
+      e.teile.forEach(function (t) { var a = ART[t.art]; if (!t.id) t.id = neueId('t'); if (a) { if (t.w == null) t.w = a.breite / 100; if (t.d == null) t.d = a.tiefe / 100; } });
     });
     var neu = pruefePlan(p);
-    if (!neu) { meldung('Das Beispielhaus konnte nicht geladen werden.'); return; }
-    plan = neu; gewaehlt = null; vb = null; $('g-beispiel-frage').hidden = true;
+    if (!neu) { meldung(tr('vorlageNichtGeladen')); return; }
+    plan = neu; gewaehlt = null; vb = null; vorlageWartet = null; $('g-beispiel-frage').hidden = true;
     speichern(); allesZeigen();
-    meldung('Beispielhaus geladen: oben bei „Etage“ zwischen Erdgeschoss, Dachgeschoss und Keller wechseln, mit „3D“ ansehen. Alle Maße sind erfunden.');
+    if (id === 'beispielhaus') meldung('Beispielhaus geladen: oben bei „Etage“ zwischen Erdgeschoss, Dachgeschoss und Keller wechseln, mit „3D“ ansehen. Alle Maße sind erfunden.');
+    else meldung(tr('vorlageGeladen', { name: tr(VORLAGEN_T[id].name), text: tr(VORLAGEN_T[id].text) }));
+    /* Das Ergebnis liegt unter den Karten: dorthin blättern, damit der Erfolg sofort sichtbar ist (ohne Animation bei "weniger Bewegung") */
+    var sz = $('g-satz');
+    if (sz && sz.scrollIntoView) {
+      var b = sz.getBoundingClientRect();
+      if (b.top < 80 || b.bottom > window.innerHeight) sz.scrollIntoView({ block: 'start', behavior: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }
   }
-  $('g-beispiel').addEventListener('click', function () {
-    if (leer()) { beispielLaden(); return; }
+  function vorlageWohnflaeche(v) {
+    var s = 0;
+    v.etagen.forEach(function (e) { e.raeume.forEach(function (r) { s += R.wohnflaecheRaum(raumDaten({ punkte: r.punkte, art: r.art || 'voll', teil12: r.teil12, teil0: r.teil0, balkon: r.balkon })); }); });
+    return s;
+  }
+  /* Kleine Skizze der ersten Etage: nur die Räume, Farben über CSS-Klassen aus der Palette */
+  function vorlageSkizze(v) {
+    var e = v.etagen[0], x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    e.raeume.forEach(function (r) { r.punkte.forEach(function (q) { x0 = Math.min(x0, q[0]); y0 = Math.min(y0, q[1]); x1 = Math.max(x1, q[0]); y1 = Math.max(y1, q[1]); }); });
+    var pad = Math.max(x1 - x0, y1 - y0) * 0.04;
+    var s = document.createElementNS(NS, 'svg');
+    s.setAttribute('viewBox', (x0 - pad) + ' ' + (y0 - pad) + ' ' + (x1 - x0 + 2 * pad) + ' ' + (y1 - y0 + 2 * pad));
+    s.setAttribute('class', 'vk-skizze'); s.setAttribute('aria-hidden', 'true'); s.setAttribute('focusable', 'false');
+    s.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    e.raeume.forEach(function (r) {
+      el('polygon', { points: r.punkte.map(function (q) { return q[0] + ',' + q[1]; }).join(' '), class: 'vk-raum art-' + (r.art || 'voll') }, s);
+    });
+    return s;
+  }
+  function vorlagenZeigen() {
+    var ul = $('g-vorlagen'); if (!ul) return;
+    var hatFokus = document.activeElement && ul.contains(document.activeElement) ? document.activeElement.id : '';
+    ul.textContent = '';
+    VORLAGEN.forEach(function (id) {
+      var v = vorlageDaten(id); if (!v) return;
+      var li = document.createElement('li'), b = document.createElement('button');
+      b.type = 'button'; b.className = 'g-vorlage'; b.id = vorlageKarteId(id); b.setAttribute('data-vorlage', id);
+      b.appendChild(vorlageSkizze(v));
+      function zeile(klasse, text) { var sp = document.createElement('span'); sp.className = klasse; sp.textContent = text; b.appendChild(sp); }
+      zeile('vk-name', tr(VORLAGEN_T[id].name));
+      zeile('vk-meta', tr(v.etagen.length === 1 ? 'vorlageMetaEins' : 'vorlageMeta', { qm: fmt0.format(Math.round(vorlageWohnflaeche(v))), n: v.etagen.length }));
+      zeile('vk-text', tr(VORLAGEN_T[id].kurz));
+      zeile('vk-los', tr('vorlageLos'));
+      b.addEventListener('click', function () { vorlageAnfordern(id); });
+      li.appendChild(b); ul.appendChild(li);
+    });
+    if (hatFokus && $(hatFokus)) $(hatFokus).focus({ preventScroll: true });
+  }
+  function vorlageAnfordern(id) {
+    if (!vorlageDaten(id)) { meldung(tr('vorlageFehlt')); return; }
+    if (leer()) { vorlageLaden(id); return; }
+    vorlageWartet = id;
+    $('g-beispiel-frage-text').textContent = tr('vorlageFrage', { name: tr(VORLAGEN_T[id].name) });
     $('g-beispiel-frage').hidden = false; $('g-beispiel-sichern').focus();
+  }
+  vorlagenZeigen();
+  window.addEventListener('sprachegewechselt', vorlagenZeigen);
+  $('g-beispiel-sichern').addEventListener('click', function () { if (dateiSichern('_vor_vorlage')) vorlageLaden(); });
+  $('g-beispiel-ohne').addEventListener('click', function () { vorlageLaden(); });
+  $('g-beispiel-nein').addEventListener('click', function () {
+    var id = vorlageWartet; vorlageWartet = null;
+    $('g-beispiel-frage').hidden = true; var k = $(vorlageKarteId(id || 'beispielhaus')); if (k) k.focus();
   });
-  $('g-beispiel-sichern').addEventListener('click', function () { if (dateiSichern('_vor_beispiel')) beispielLaden(); });
-  $('g-beispiel-ohne').addEventListener('click', beispielLaden);
-  $('g-beispiel-nein').addEventListener('click', function () { $('g-beispiel-frage').hidden = true; $('g-beispiel').focus(); });
 
   /* ---------- Ansicht von oben / 3D ---------- */
   function dreiD() {

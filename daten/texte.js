@@ -306,5 +306,56 @@ window.TEXTE = {
   dachHochLinks: { de: 'links im Plan', en: 'left of the plan', ru: 'слева на плане' },
   dachHochRechts: { de: 'rechts im Plan', en: 'right of the plan', ru: 'справа на плане' },
   dachUeberstand: { de: 'Dachüberstand in cm', en: 'Roof overhang in cm', ru: 'Свес крыши в см' },
-  dachFehlerUeberstand: { de: 'Bitte einen Überstand von 0 bis 200 cm eingeben.', en: 'Please enter an overhang from 0 to 200 cm.', ru: 'Введите свес от 0 до 200 см.' }
+  dachFehlerUeberstand: { de: 'Bitte einen Überstand von 0 bis 200 cm eingeben.', en: 'Please enter an overhang from 0 to 200 cm.', ru: 'Введите свес от 0 до 200 см.' },
+
+  /* Vorlagen: Auswahl "Vorlage laden" (Karten mit Skizze) */
+  vorlageUeberschrift: { de: 'Vorlage laden', en: 'Load a template', ru: 'Загрузить шаблон' },
+  vorlageHilfe: {
+    de: 'Wählen Sie ein Haus zum Ausprobieren. Es ist schon eingerichtet; alle Maße sind Beispiele, und Sie können danach alles ändern.',
+    en: 'Pick a house to try out. It is already furnished; all dimensions are examples, and you can change everything afterwards.',
+    ru: 'Выберите дом, чтобы попробовать. Он уже обставлен; все размеры условные, потом можно изменить всё.'
+  },
+  bildUeberschrift: { de: 'Oder: Grundriss-Bild laden', en: 'Or: load a floor plan image', ru: 'Или: загрузить изображение плана' },
+  vorlageLos: { de: 'Antippen zum Laden', en: 'Tap to load', ru: 'Нажмите, чтобы загрузить' },
+  vorlageMeta: { de: 'ca. {qm} m² Wohnfläche\n{n} Geschosse', en: 'approx. {qm} m² living area\n{n} floors', ru: 'около {qm} м² жилой площади\nэтажей: {n}' },
+  vorlageMetaEins: { de: 'ca. {qm} m² Wohnfläche\n1 Geschoss', en: 'approx. {qm} m² living area\n1 floor', ru: 'около {qm} м² жилой площади\n1 этаж' },
+  vorlageNameBeispiel: { de: 'Beispielhaus', en: 'Example house', ru: 'Пример дома' },
+  vorlageNameMuster: { de: 'Musterhaus', en: 'Show house', ru: 'Типовой дом' },
+  vorlageNameKlein: { de: 'Kleines Haus', en: 'Small house', ru: 'Маленький дом' },
+  vorlageNameGross: { de: 'Großes Haus', en: 'Large house', ru: 'Большой дом' },
+  vorlageKurzBeispiel: { de: 'Erfunden: Wohnen, Dachgeschoss, Keller und Garage.', en: 'Invented: living floor, attic, cellar and garage.', ru: 'Выдуманный: жилой этаж, мансарда, подвал и гараж.' },
+  vorlageKurzMuster: { de: 'Nach einer Vorlage des Nutzers; Obergeschoss angenommen.', en: 'Based on a template by the user; upper floor assumed.', ru: 'По шаблону пользователя; верхний этаж предположен.' },
+  vorlageKurzKlein: { de: 'Erfunden: eingeschossig, Wohnen und Kochen offen.', en: 'Invented: single storey, open living and cooking.', ru: 'Выдуманный: один этаж, гостиная и кухня вместе.' },
+  vorlageKurzGross: { de: 'Erfunden: zwei Geschosse, drei Schlafzimmer, Ankleide.', en: 'Invented: two floors, three bedrooms, dressing room.', ru: 'Выдуманный: два этажа, три спальни, гардеробная.' },
+  vorlageTextBeispiel: { de: 'Beispielhaus mit erfundenen Maßen.', en: 'Example house with invented dimensions.', ru: 'Пример дома с выдуманными размерами.' },
+  vorlageTextMuster: {
+    de: 'Musterhaus nach einer Vorlage des Nutzers. Angenommen: das Obergeschoss (wie das Erdgeschoss), die Treppe (im Wohnzimmer, weil der Flur zu schmal ist) und einzelne Maße, die um 1 bis 4 cm geändert sind.',
+    en: 'Show house based on a template by the user. Assumed: the upper floor (same as the ground floor), the staircase (in the living room because the hall is too narrow) and a few dimensions changed by 1 to 4 cm.',
+    ru: 'Типовой дом по шаблону пользователя. Предположено: верхний этаж (как первый), лестница (в гостиной, потому что прихожая слишком узкая) и несколько размеров, изменённых на 1–4 см.'
+  },
+  vorlageTextKlein: {
+    de: 'Kleines Haus mit erfundenen Maßen, eingeschossig; Fenster vor allem nach Süden.',
+    en: 'Small house with invented dimensions, single storey; windows mainly facing south.',
+    ru: 'Маленький дом с выдуманными размерами, один этаж; окна в основном на юг.'
+  },
+  vorlageTextGross: {
+    de: 'Großes Haus mit erfundenen Maßen, zwei Geschosse; Wohnbereich nach Süden.',
+    en: 'Large house with invented dimensions, two floors; living area facing south.',
+    ru: 'Большой дом с выдуманными размерами, два этажа; жилая зона на юг.'
+  },
+  vorlageFrage: {
+    de: 'Ihr jetziger Plan wird durch die Vorlage „{name}“ ersetzt. Vorher als Datei sichern?',
+    en: 'Your current plan will be replaced by the template “{name}”. Save it as a file first?',
+    ru: 'Ваш текущий план будет заменён шаблоном «{name}». Сначала сохранить его в файл?'
+  },
+  vorlageSichern: { de: 'Sichern und Vorlage laden', en: 'Save, then load template', ru: 'Сохранить и загрузить шаблон' },
+  vorlageOhne: { de: 'Ohne Sichern ersetzen', en: 'Replace without saving', ru: 'Заменить без сохранения' },
+  vorlageAbbrechen: { de: 'Abbrechen', en: 'Cancel', ru: 'Отмена' },
+  vorlageGeladen: {
+    de: '{name} geladen. {text} Oben bei „Etage“ wechseln Sie das Geschoss, mit „3D“ sehen Sie das Haus von außen.',
+    en: '{name} loaded. {text} Use “Floor” above to switch floors; “3D” shows the house from outside.',
+    ru: '{name} загружен. {text} Вверху в «Этаж» можно сменить этаж, в «3D» виден дом снаружи.'
+  },
+  vorlageFehlt: { de: 'Diese Vorlage fehlt in dieser Fassung der Seite.', en: 'This template is missing in this version of the page.', ru: 'Этого шаблона нет в этой версии страницы.' },
+  vorlageNichtGeladen: { de: 'Die Vorlage konnte nicht geladen werden (die Daten sind unvollständig).', en: 'The template could not be loaded (its data is incomplete).', ru: 'Шаблон не удалось загрузить (данные неполные).' }
 };

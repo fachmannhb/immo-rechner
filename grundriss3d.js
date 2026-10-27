@@ -158,6 +158,47 @@
     g.add(m);
     return m;
   }
+  /* Treppen: Löcher in Boden und Decke, Stufen. Maße (Grundfläche w × d, Laufrichtung zur Planoberkante bei Drehung 0) aus dem Teil. */
+  function eckenVon(t, schrumpf) {
+    var hw = Math.max(0.01, t.w / 2 - schrumpf), hd = Math.max(0.01, t.d / 2 - schrumpf), r = (t.dreh || 0) * Math.PI / 180, c = Math.cos(r), s = Math.sin(r);
+    return [[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]].map(function (q) { return [t.x + q[0] * c - q[1] * s, t.y + q[0] * s + q[1] * c]; });
+  }
+  /* Ecken der Öffnungen (Teile dieser Arten), deren Mitte im Raum r liegt; 2 cm nach innen gerückt, damit das Loch den Rand nicht berührt */
+  function loecher(e, r, arten) {
+    var res = [];
+    (e.teile || []).forEach(function (t) {
+      var a = A[t.art];
+      if (!a || arten.indexOf(a.form) < 0 || !GEO.punktImVieleck([t.x, t.y], r.punkte)) return;
+      res.push(eckenVon(t, 0.02));
+    });
+    return res;
+  }
+  function lochPfad(q) {
+    var p = new THREE.Path();
+    q.forEach(function (c, k) { if (k) p.lineTo(c[0], -c[1]); else p.moveTo(c[0], -c[1]); });
+    p.closePath();
+    return p;
+  }
+  function treppeBauen(g, t, oben, z, hatOben, mat, matGel) {
+    var r = (t.dreh || 0) * Math.PI / 180, c = Math.cos(r), s = Math.sin(r), drehY = -r;
+    function ort(lx, ly) { return [t.x + lx * c - ly * s, t.y + lx * s + ly * c]; }
+    if (oben) {
+      /* Geländer an den beiden langen Seiten und am unteren Ende der Öffnung; oben (Planoberkante) bleibt sie frei */
+      [[-t.w / 2 + 0.02, 0, 0.04, t.d], [t.w / 2 - 0.02, 0, 0.04, t.d], [0, t.d / 2 - 0.02, t.w, 0.04]].forEach(function (k) {
+        var p = ort(k[0], k[1]); kasten(g, k[2], 1.0, k[3], matGel, p[0], 0.5, p[1], drehY, 'treppe');
+      });
+      return;
+    }
+    var gesamt = z.hoehe + z.decke;
+    if (!hatOben) {   /* keine Etage darüber: nur die Grundfläche andeuten */
+      var q = ort(0, 0); kasten(g, t.w, 0.04, t.d, mat, q[0], 0.03, q[1], drehY, 'treppe'); return;
+    }
+    var n = Math.max(3, Math.round(gesamt / 0.18)), steig = gesamt / n, lauf = t.d / (n - 1);
+    for (var k = 1; k < n; k++) {
+      var p2 = ort(0, t.d / 2 - (k - 0.5) * lauf);
+      kasten(g, t.w, k * steig, lauf, mat, p2[0], k * steig / 2, p2[1], drehY, 'treppe');
+    }
+  }
   function textur(url) {
     if (texturen[url]) return texturen[url];
     var t = new THREE.TextureLoader().load(url, function () { zeichnen(); });
@@ -218,9 +259,13 @@
         nimm(0, 0); nimm(bw, bh);
       }
       var deckeG = new THREE.Group(); g.add(deckeG); g.userData.decke = deckeG;
+      var hatOben = plan.etagen.some(function (e2, j) { return j !== i && eb[j] && !eb[j].keller && eb[j].basis > z.basis; });
       e.raeume.forEach(function (r) {
-        var form = new THREE.Shape();
-        r.punkte.forEach(function (p, k) { if (k) form.lineTo(p[0], -p[1]); else form.moveTo(p[0], -p[1]); nimm(p[0], p[1]); });
+        var form = new THREE.Shape(), formDecke = new THREE.Shape();
+        r.punkte.forEach(function (p, k) { if (k) form.lineTo(p[0], -p[1]); else form.moveTo(p[0], -p[1]); if (k) formDecke.lineTo(p[0], -p[1]); else formDecke.moveTo(p[0], -p[1]); nimm(p[0], p[1]); });
+        /* Treppenöffnung: im Boden dieser Etage (Teil „Treppenöffnung“) und in der Decke über der Treppe (Teil „Treppe“, nur wenn oben eine Etage liegt) */
+        loecher(e, r, ['treppeoben']).forEach(function (q) { form.holes.push(lochPfad(q)); });
+        if (hatOben) loecher(e, r, ['treppe']).forEach(function (q) { formDecke.holes.push(lochPfad(q)); });
         var b = new THREE.Mesh(new THREE.ShapeGeometry(form), new THREE.MeshLambertMaterial({ color: farbe[r.art] || farbe.voll, transparent: true, opacity: 0.55, side: THREE.DoubleSide }));
         b.rotation.x = -Math.PI / 2; b.position.y = 0.01; b.receiveShadow = true; b.userData.kind = 'boden';
         g.add(b);
@@ -231,7 +276,7 @@
             kasten(g, L + 0.1, 1.0, 0.1, M.gelaender, (p[0] + q[0]) / 2, 0.5, (p[1] + q[1]) / 2, -Math.atan2(dz, dx), 'gelaender').renderOrder = 2;
           });
         } else {
-          var sl = new THREE.Mesh(new THREE.ExtrudeGeometry(form, { depth: z.decke, bevelEnabled: false }), M.decke);
+          var sl = new THREE.Mesh(new THREE.ExtrudeGeometry(formDecke, { depth: z.decke, bevelEnabled: false }), M.decke);
           sl.rotation.x = -Math.PI / 2; sl.position.y = H; sl.castShadow = true; sl.receiveShadow = true; sl.userData.kind = 'decke';
           deckeG.add(sl);
         }
@@ -248,6 +293,11 @@
       e.teile.forEach(function (t) {
         var a = A[t.art]; if (!a) return;
         if (kk.verbraucht && kk.verbraucht[t.id]) return;
+        if (a.form === 'treppe' || a.form === 'treppeoben') {
+          treppeBauen(g, t, a.form === 'treppeoben', z, hatOben, lambert(new THREE.Color(teilFarbe.umbau)), M.gelaender);
+          nimm(t.x - t.w / 2, t.y - t.w / 2); nimm(t.x + t.w / 2, t.y + t.w / 2);
+          return;
+        }
         var drehY = -t.dreh * Math.PI / 180, h = (a.hoehe || 80) / 100, y = h / 2, mat;
         var f = new THREE.Color(teilFarbe[a.gruppe] || teilFarbe.wohnung), opak = 1;
         if (a.form === 'wand') { h = H; y = H / 2; }

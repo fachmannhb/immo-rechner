@@ -502,7 +502,8 @@ __PALETTE_CSS__
   .g-nord-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 0; }
   .g-nord-zeile svg.sym { width: 1.4em; height: 1.4em; color: var(--text); }
   .g-nord-zeile label { margin: 0; }
-  .g-nord-feld { width: 5.5em; }
+  /* input[type="text"] { width: 100% } ist spezifischer als .g-nord-feld allein, darum mit Elementnamen und Attribut */
+  input[type="text"].g-nord-feld { width: 5.5em; flex: 0 0 auto; }
   .raum.art-voll { fill: var(--f2); } .raum.art-balkon { fill: var(--f4); } .raum.art-wintergarten { fill: var(--f1); } .raum.art-zubehoer { fill: var(--f7); }
   .g-tipp { position: absolute; left: 10px; right: 10px; top: 10px; pointer-events: none; display: flex; justify-content: center; }
   .g-tipp span { background: color-mix(in srgb, var(--karte) 92%, transparent); border: 1px solid var(--linie2); border-radius: 12px; padding: 6px 12px; font-size: 16px; max-width: 100%; }
@@ -744,6 +745,29 @@ __PALETTE_CSS__
   .g-start-feld { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
   .g-start-feld .knopf.gross { width: 100%; text-align: center; }
   .g-start-feld p { margin: 0; }
+  /* Vorlagen-Auswahl: vier Karten mit Skizze; die ganze Karte ist der Knopf (Schrift mindestens 20 px, Karte mindestens 56 px hoch) */
+  .g-start-teil { font: 700 1.15rem/1.2 var(--display); margin: 18px 0 6px; }
+  .g-start-teil:first-of-type { margin-top: 6px; }
+  .g-start-hilfe { margin: 0 0 12px; }
+  #g-start .g-start-wahl { grid-template-columns: minmax(0, 560px); }
+  #g-satz { scroll-margin-top: 96px; }
+  .g-vorlagen { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: var(--abstand-m); }
+  .g-vorlagen li { display: flex; }
+  .g-vorlage { display: flex; flex-direction: column; align-items: stretch; gap: 6px; width: 100%; min-height: 56px; text-align: left; padding: 12px; font: 700 20px/1.2 var(--sans); color: var(--text); background: var(--karte); border: 2px solid var(--linie); border-radius: 16px; cursor: pointer; }
+  .g-vorlage:hover { border-color: var(--akzent); background: var(--akzent-flaeche); }
+  .g-vorlage.gewaehlt { border-color: var(--akzent); }
+  .g-vorlage .vk-skizze { display: block; width: 100%; height: 110px; margin-bottom: 4px; background: var(--karte2); border-radius: 10px; padding: 6px; box-sizing: border-box; }
+  .g-vorlage .vk-raum { stroke: var(--text); stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+  .g-vorlage .vk-raum.art-voll { fill: color-mix(in srgb, var(--f2) 45%, var(--karte)); }
+  .g-vorlage .vk-raum.art-balkon { fill: color-mix(in srgb, var(--f4) 35%, var(--karte)); }
+  .g-vorlage .vk-raum.art-wintergarten { fill: color-mix(in srgb, var(--f1) 35%, var(--karte)); }
+  .g-vorlage .vk-raum.art-zubehoer { fill: color-mix(in srgb, var(--f7) 35%, var(--karte)); }
+  .g-vorlage .vk-meta { font: 600 16px/1.3 var(--sans); white-space: pre-line; }
+  .g-vorlage .vk-text { font: 400 16px/1.3 var(--sans); color: var(--leise); }
+  .g-vorlage .vk-los { margin-top: auto; padding-top: 4px; font: 700 16px/1.2 var(--sans); color: var(--akzent-text); }
+  .planzeichnung .teil .stufe { stroke: var(--text); stroke-width: 1; vector-effect: non-scaling-stroke; fill: none; opacity: .65; pointer-events: none; }
+  .planzeichnung .teil .stufe.pfeil { stroke-width: 2; opacity: 1; }
+  .planzeichnung .teil.oben rect.koerper { stroke-dasharray: 6 4; fill-opacity: .45; }
   #grundriss .knopf.zweit { border-color: var(--akzent-text); }
   #grundriss .knopf.zweit[disabled] { opacity: 1; color: var(--leise); border-color: var(--leise); border-style: dashed; background: var(--karte2); }
   /* Block 4: Ergebnis weiterleiten, Steuern sparen */
@@ -1785,21 +1809,21 @@ __PALETTE_CSS__
   </header>
   <div class="karte g-start" id="g-start">
     <h3>So fangen Sie an</h3>
+    <h4 class="g-start-teil" data-t="vorlageUeberschrift">Vorlage laden</h4>
+    <p class="klein g-start-hilfe" data-t="vorlageHilfe">Wählen Sie ein Haus zum Ausprobieren. Es ist schon eingerichtet; alle Maße sind Beispiele, und Sie können danach alles ändern.</p>
+    <ul class="g-vorlagen" id="g-vorlagen"></ul>
+    <div class="g-frage" id="g-beispiel-frage" role="group" aria-labelledby="g-beispiel-frage-text" hidden>
+      <p style="margin:0 0 10px" id="g-beispiel-frage-text">Ihr jetziger Plan wird durch die Vorlage ersetzt. Vorher als Datei sichern?</p>
+      <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-beispiel-sichern" data-t="vorlageSichern">Sichern und Vorlage laden</button><button type="button" class="knopf zweit" id="g-beispiel-ohne" data-t="vorlageOhne">Ohne Sichern ersetzen</button><button type="button" class="knopf zweit" id="g-beispiel-nein" data-t="vorlageAbbrechen">Abbrechen</button></div>
+    </div>
+    <h4 class="g-start-teil" data-t="bildUeberschrift">Oder: Grundriss-Bild laden</h4>
     <div class="g-start-wahl">
-      <div class="g-start-feld">
-        <button type="button" class="knopf gross" id="g-beispiel">Beispielhaus laden</button>
-        <p class="klein">Ein erfundenes kleines Haus mit 6 Zimmern auf zwei Etagen, Keller und Garage, schon eingerichtet. Zum Ausprobieren.</p>
-      </div>
       <div class="g-start-feld">
         <input type="file" id="g-bild-datei" accept="image/png,image/jpeg,image/webp" hidden>
         <label class="knopf gross" for="g-bild-datei" tabindex="0" role="button" id="g-bild-knopf">Bild wählen</label>
         <p class="klein">Ein Bild oder Foto des Grundrisses aus dem Exposé (JPG oder PNG). Ohne Bild zeichnen Sie auf dem Raster, ein Kästchen ist 1 m. Das Bild bleibt auf Ihrem Gerät.</p>
         <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf zweit" id="g-bild-weg">Bild entfernen</button></div>
       </div>
-    </div>
-    <div class="g-frage" id="g-beispiel-frage" hidden>
-      <p style="margin:0 0 10px">Ihr jetziger Plan wird durch das Beispielhaus ersetzt. Vorher als Datei sichern?</p>
-      <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-beispiel-sichern">Sichern und Beispiel laden</button><button type="button" class="knopf zweit" id="g-beispiel-ohne">Ohne Sichern ersetzen</button><button type="button" class="knopf zweit" id="g-beispiel-nein">Abbrechen</button></div>
     </div>
   </div>
 
@@ -1895,7 +1919,7 @@ __PALETTE_CSS__
       <div class="g-seite">
         <div class="g-panel" data-gpanel="1">
           <h4>1. Bild und Maßstab</h4>
-          <p>Bild oder Beispielhaus wählen Sie oben bei „So fangen Sie an“. Hier legen Sie den Maßstab fest und benennen die Etage.</p>
+          <p>Bild oder Vorlage wählen Sie oben bei „So fangen Sie an“. Hier legen Sie den Maßstab fest und benennen die Etage.</p>
           <h4 style="margin-top:16px">Maßstab festlegen</h4>
           <small class="kurz" id="g-mass-kurz">Maßstab heißt: Sie sagen der Seite, wie lang eine Strecke im Bild in echt ist. Danach stimmen alle Flächen.</small>
           <p>Klicken Sie auf den Anfang und das Ende einer Wand, deren Länge Sie kennen (steht oft im Grundriss), und geben Sie die Länge ein.</p>
@@ -2764,6 +2788,9 @@ __PALETTE_CSS__
 <script src="daten/begriffe.js"></script>
 <script src="daten/moebel.js"></script>
 <script src="daten/beispielhaus.js"></script>
+<script src="daten/vorlage_musterhaus2.js"></script>
+<script src="daten/vorlage_klein.js"></script>
+<script src="daten/vorlage_gross.js"></script>
 <script src="daten/musterhaus.js"></script>
 <script src="daten/einstieg.js"></script>
 <script src="daten/steuern.js"></script>

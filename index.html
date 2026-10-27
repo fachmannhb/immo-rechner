@@ -510,7 +510,8 @@
   .g-nord-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 0; }
   .g-nord-zeile svg.sym { width: 1.4em; height: 1.4em; color: var(--text); }
   .g-nord-zeile label { margin: 0; }
-  .g-nord-feld { width: 5.5em; }
+  /* input[type="text"] { width: 100% } ist spezifischer als .g-nord-feld allein, darum mit Elementnamen und Attribut */
+  input[type="text"].g-nord-feld { width: 5.5em; flex: 0 0 auto; }
   .raum.art-voll { fill: var(--f2); } .raum.art-balkon { fill: var(--f4); } .raum.art-wintergarten { fill: var(--f1); } .raum.art-zubehoer { fill: var(--f7); }
   .g-tipp { position: absolute; left: 10px; right: 10px; top: 10px; pointer-events: none; display: flex; justify-content: center; }
   .g-tipp span { background: color-mix(in srgb, var(--karte) 92%, transparent); border: 1px solid var(--linie2); border-radius: 12px; padding: 6px 12px; font-size: 16px; max-width: 100%; }
@@ -752,6 +753,29 @@
   .g-start-feld { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
   .g-start-feld .knopf.gross { width: 100%; text-align: center; }
   .g-start-feld p { margin: 0; }
+  /* Vorlagen-Auswahl: vier Karten mit Skizze; die ganze Karte ist der Knopf (Schrift mindestens 20 px, Karte mindestens 56 px hoch) */
+  .g-start-teil { font: 700 1.15rem/1.2 var(--display); margin: 18px 0 6px; }
+  .g-start-teil:first-of-type { margin-top: 6px; }
+  .g-start-hilfe { margin: 0 0 12px; }
+  #g-start .g-start-wahl { grid-template-columns: minmax(0, 560px); }
+  #g-satz { scroll-margin-top: 96px; }
+  .g-vorlagen { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: var(--abstand-m); }
+  .g-vorlagen li { display: flex; }
+  .g-vorlage { display: flex; flex-direction: column; align-items: stretch; gap: 6px; width: 100%; min-height: 56px; text-align: left; padding: 12px; font: 700 20px/1.2 var(--sans); color: var(--text); background: var(--karte); border: 2px solid var(--linie); border-radius: 16px; cursor: pointer; }
+  .g-vorlage:hover { border-color: var(--akzent); background: var(--akzent-flaeche); }
+  .g-vorlage.gewaehlt { border-color: var(--akzent); }
+  .g-vorlage .vk-skizze { display: block; width: 100%; height: 110px; margin-bottom: 4px; background: var(--karte2); border-radius: 10px; padding: 6px; box-sizing: border-box; }
+  .g-vorlage .vk-raum { stroke: var(--text); stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+  .g-vorlage .vk-raum.art-voll { fill: color-mix(in srgb, var(--f2) 45%, var(--karte)); }
+  .g-vorlage .vk-raum.art-balkon { fill: color-mix(in srgb, var(--f4) 35%, var(--karte)); }
+  .g-vorlage .vk-raum.art-wintergarten { fill: color-mix(in srgb, var(--f1) 35%, var(--karte)); }
+  .g-vorlage .vk-raum.art-zubehoer { fill: color-mix(in srgb, var(--f7) 35%, var(--karte)); }
+  .g-vorlage .vk-meta { font: 600 16px/1.3 var(--sans); white-space: pre-line; }
+  .g-vorlage .vk-text { font: 400 16px/1.3 var(--sans); color: var(--leise); }
+  .g-vorlage .vk-los { margin-top: auto; padding-top: 4px; font: 700 16px/1.2 var(--sans); color: var(--akzent-text); }
+  .planzeichnung .teil .stufe { stroke: var(--text); stroke-width: 1; vector-effect: non-scaling-stroke; fill: none; opacity: .65; pointer-events: none; }
+  .planzeichnung .teil .stufe.pfeil { stroke-width: 2; opacity: 1; }
+  .planzeichnung .teil.oben rect.koerper { stroke-dasharray: 6 4; fill-opacity: .45; }
   #grundriss .knopf.zweit { border-color: var(--akzent-text); }
   #grundriss .knopf.zweit[disabled] { opacity: 1; color: var(--leise); border-color: var(--leise); border-style: dashed; background: var(--karte2); }
   /* Block 4: Ergebnis weiterleiten, Steuern sparen */
@@ -1793,21 +1817,21 @@
   </header>
   <div class="karte g-start" id="g-start">
     <h3>So fangen Sie an</h3>
+    <h4 class="g-start-teil" data-t="vorlageUeberschrift">Vorlage laden</h4>
+    <p class="klein g-start-hilfe" data-t="vorlageHilfe">Wählen Sie ein Haus zum Ausprobieren. Es ist schon eingerichtet; alle Maße sind Beispiele, und Sie können danach alles ändern.</p>
+    <ul class="g-vorlagen" id="g-vorlagen"></ul>
+    <div class="g-frage" id="g-beispiel-frage" role="group" aria-labelledby="g-beispiel-frage-text" hidden>
+      <p style="margin:0 0 10px" id="g-beispiel-frage-text">Ihr jetziger Plan wird durch die Vorlage ersetzt. Vorher als Datei sichern?</p>
+      <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-beispiel-sichern" data-t="vorlageSichern">Sichern und Vorlage laden</button><button type="button" class="knopf zweit" id="g-beispiel-ohne" data-t="vorlageOhne">Ohne Sichern ersetzen</button><button type="button" class="knopf zweit" id="g-beispiel-nein" data-t="vorlageAbbrechen">Abbrechen</button></div>
+    </div>
+    <h4 class="g-start-teil" data-t="bildUeberschrift">Oder: Grundriss-Bild laden</h4>
     <div class="g-start-wahl">
-      <div class="g-start-feld">
-        <button type="button" class="knopf gross" id="g-beispiel">Beispielhaus laden</button>
-        <p class="klein">Ein erfundenes kleines Haus mit 6 Zimmern auf zwei Etagen, Keller und Garage, schon eingerichtet. Zum Ausprobieren.</p>
-      </div>
       <div class="g-start-feld">
         <input type="file" id="g-bild-datei" accept="image/png,image/jpeg,image/webp" hidden>
         <label class="knopf gross" for="g-bild-datei" tabindex="0" role="button" id="g-bild-knopf">Bild wählen</label>
         <p class="klein">Ein Bild oder Foto des Grundrisses aus dem Exposé (JPG oder PNG). Ohne Bild zeichnen Sie auf dem Raster, ein Kästchen ist 1 m. Das Bild bleibt auf Ihrem Gerät.</p>
         <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf zweit" id="g-bild-weg">Bild entfernen</button></div>
       </div>
-    </div>
-    <div class="g-frage" id="g-beispiel-frage" hidden>
-      <p style="margin:0 0 10px">Ihr jetziger Plan wird durch das Beispielhaus ersetzt. Vorher als Datei sichern?</p>
-      <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-beispiel-sichern">Sichern und Beispiel laden</button><button type="button" class="knopf zweit" id="g-beispiel-ohne">Ohne Sichern ersetzen</button><button type="button" class="knopf zweit" id="g-beispiel-nein">Abbrechen</button></div>
     </div>
   </div>
 
@@ -1903,7 +1927,7 @@
       <div class="g-seite">
         <div class="g-panel" data-gpanel="1">
           <h4>1. Bild und Maßstab</h4>
-          <p>Bild oder Beispielhaus wählen Sie oben bei „So fangen Sie an“. Hier legen Sie den Maßstab fest und benennen die Etage.</p>
+          <p>Bild oder Vorlage wählen Sie oben bei „So fangen Sie an“. Hier legen Sie den Maßstab fest und benennen die Etage.</p>
           <h4 style="margin-top:16px">Maßstab festlegen</h4>
           <small class="kurz" id="g-mass-kurz">Maßstab heißt: Sie sagen der Seite, wie lang eine Strecke im Bild in echt ist. Danach stimmen alle Flächen.</small>
           <p>Klicken Sie auf den Anfang und das Ende einer Wand, deren Länge Sie kennen (steht oft im Grundriss), und geben Sie die Länge ein.</p>
@@ -3127,6 +3151,8 @@ window.DATEN = window.DATEN || {};
       { id: 'fenster', gruppe: 'umbau', name: 'Fenster tauschen (Kunststoff, mit Einbau)', kurz: 'Fenster', form: 'fenster', breite: 120, tiefe: 15, hoehe: 130, von: 340, bis: 580, start: 420, quelle: 'Preisratgeber, Abruf 08.10.2026, einfache Verglasung' },
       { id: 'wandneu', gruppe: 'umbau', name: 'Trockenbauwand neu (je m Länge, 2,5 m hoch)', kurz: 'neue Wand', form: 'wand', einheit: 'm', breite: 300, tiefe: 10, hoehe: 250, von: 125, bis: 262.5, start: 155, quelle: '50–105 €/m² × 2,5 m Höhe, Abruf 08.10.2026' },
       { id: 'wandweg', gruppe: 'umbau', name: 'Nicht tragende Wand entfernen (je m Länge, 2,5 m hoch)', kurz: 'Wand weg', form: 'wandweg', einheit: 'm', breite: 300, tiefe: 15, hoehe: 250, von: null, bis: null, start: 700, quelle: 'Nur eine Quelle (sanier.de, ca. 280 €/m² × 2,5 m), unsicher. Vorher Statiker fragen, ob die Wand wirklich nicht trägt.' },
+      { id: 'treppe', gruppe: 'umbau', name: 'Treppe gerade nach oben (1,00 m breit, 3,40 m lang)', kurz: 'Treppe', form: 'treppe', breite: 100, tiefe: 340, hoehe: 275, masz: 'geschätzt (Steigung etwa 18 cm, Auftritt etwa 24 cm; keine Quelle)', von: null, bis: null, start: null, quelle: 'Maß geschätzt, kein geprüfter Preis. Treppe, Maße und Preis vor der Planung mit einem Fachbetrieb klären. Die Treppe steigt im Plan nach oben (Richtung Planoberkante), solange sie nicht gedreht ist.' },
+      { id: 'treppeoben', gruppe: 'umbau', name: 'Treppenöffnung im Obergeschoss (Treppe kommt von unten)', kurz: 'Treppe ↓', form: 'treppeoben', keinPosten: true, breite: 100, tiefe: 340, hoehe: 100, masz: 'geschätzt, gehört zur Treppe darunter', von: null, bis: null, start: null, quelle: 'Gehört zur Treppe in der Etage darunter und wird nicht noch einmal gezählt. Geländer, Maß und Brandschutz mit einem Fachbetrieb klären.' },
       { id: 'badneu', gruppe: 'umbau', name: 'Bad komplett einbauen', kurz: 'Bad neu', form: 'flaeche', breite: 200, tiefe: 250, hoehe: 5, von: bad.von || 16000, bis: bad.bis || 28000, start: bad.start || 20000, quelle: 'wie „Umbauen und renovieren“: ' + (bad.quelle || '') },
       { id: 'kuechemontage', gruppe: 'umbau', name: 'Küche montieren (je m Küchenzeile)', kurz: 'Küchenmontage', form: 'flaeche', einheit: 'm', breite: 270, tiefe: 60, hoehe: 5, von: 150, bis: 350, start: 250, quelle: 'Preisratgeber, Abruf 08.10.2026; Wasser und Elektro extra (Elektro nur Fachbetrieb)' }
     ]
@@ -3189,6 +3215,276 @@ window.DATEN.beispielhaus = {
         { name: 'Heizraum', art: 'zubehoer', punkte: [[6, 0], [10, 0], [10, 8], [6, 8]] }
       ],
       teile: [{ art: 'trockner', x: 0.5, y: 0.5 }]
+    }
+  ]
+};
+
+</script>
+<script>/* daten/vorlage_musterhaus2.js */
+/* Vorlage „Musterhaus“ für „Grundriss und Einrichtung“: Grundriss nach einer Vorlage des Nutzers (lichte Maße, Ursprung links oben,
+   x nach rechts, y nach unten), mit Maßen aus der Zeichnung des Nutzers. Auf Wanddicke 25 cm angeglichen: die Seite erkennt eine Trennwand nur,
+   wenn die Lücke höchstens Innenwand + 2 cm misst (hier 27 cm). Geändert: Lücke Wohnzimmer|Küche 28 → 26 cm und Lücke Flur|Zimmer, Bad 31 → 26 cm;
+   dafür Küche 2 cm breiter (3,82 statt 3,80 m), Zimmer und Bad 4 cm tiefer (3,74 statt 3,70 m), Bad 1 cm schmaler (1,69 statt 1,70 m).
+   Alle anderen Maße sind die des Nutzers (Gesamtbreite 8,28 m, Schlafzimmer bis 10,25 m).
+   ANNAHMEN: Obergeschoss wie das Erdgeschoss (vom Nutzer nicht vorgegeben), Raumnamen oben neutral; Treppe (1,00 × 3,40 m) im Wohnzimmer
+   statt im nur 1,32 m tiefen Flur (dort bliebe neben ihr 32 cm Durchgang und sie versperrte die Türen); Nord 270 Grad; Dach Satteldach 35 Grad,
+   First entlang der langen Seite. Möbel: nur, was der Katalog hat (kein Ecksofa, Sessel, Teppich, keine Badewanne, WC, kein Waschbecken).
+   Erzeugt von tmp/vorlagen_erzeugen.js, nicht von Hand ändern. Alle Zahlen sind Planungswerte, keine Bauzeichnung. */
+window.DATEN = window.DATEN || {};
+window.DATEN.vorlagen = window.DATEN.vorlagen || {};
+window.DATEN.vorlagen.musterhaus2 = {
+  app: "immo-grundriss",
+  version: 2,
+  aktiv: 0,
+  wandhoehe: 2.5,
+  nord: 270,
+  beispiel: true,
+  vorlage: "musterhaus2",
+  dach: {"form":"sattel","neigung":35,"first":"y","ueberstand":0.3},
+  preise: {},
+  mengen: {},
+  etagen: [
+    {
+      name: "Erdgeschoss", bild: null, hoehe: 2.5, aussenwand: 0.3, innenwand: 0.25, decke: 0.25,
+      raeume: [
+        {"id":"me_wohn","name":"Wohnzimmer","art":"voll","punkte":[[0,0],[4.2,0],[4.2,4.68],[0,4.68]]},
+        {"id":"me_kueche","name":"Küche","art":"voll","punkte":[[4.46,0],[8.28,0],[8.28,4.68],[4.46,4.68]]},
+        {"id":"me_flur","name":"Flur","art":"voll","punkte":[[3.3,4.93],[8.28,4.93],[8.28,6.25],[3.3,6.25]]},
+        {"id":"me_schlaf","name":"Schlafzimmer","art":"voll","punkte":[[0,4.93],[3.1,4.93],[3.1,10.25],[0,10.25]]},
+        {"id":"me_zimmer","name":"Zimmer","art":"voll","punkte":[[3.3,6.51],[6.4,6.51],[6.4,10.25],[3.3,10.25]]},
+        {"id":"me_bad","name":"Bad","art":"voll","punkte":[[6.59,6.51],[8.28,6.51],[8.28,10.25],[6.59,10.25]]}
+      ],
+      teile: [
+        {"id":"vmue1n1","art":"fenster","x":1.4,"y":-0.15,"w":1.4,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"me_wohn","kante":0,"t":0.3333},"bindungGrund":""},
+        {"id":"vmue1n2","art":"fenster","x":5.2,"y":-0.15,"w":1,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"me_kueche","kante":0,"t":0.1937},"bindungGrund":""},
+        {"id":"vmue1n3","art":"fenster","x":7.5,"y":-0.15,"w":0.9,"d":0.3,"dreh":0,"hoehe":2.1,"bruestung":0,"bindung":{"raum":"me_kueche","kante":0,"t":0.7958},"bindungGrund":""},
+        {"id":"vmue1n4","art":"tuer","x":8.43,"y":5.59,"w":1,"d":0.3,"dreh":90,"hoehe":2.1,"bruestung":0,"bindung":{"raum":"me_flur","kante":1,"t":0.5},"bindungGrund":""},
+        {"id":"vmue1n5","art":"fenster","x":1.55,"y":10.4,"w":1.1,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"me_schlaf","kante":2,"t":0.5},"bindungGrund":""},
+        {"id":"vmue1n6","art":"fenster","x":4.85,"y":10.4,"w":1.4,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"me_zimmer","kante":2,"t":0.5},"bindungGrund":""},
+        {"id":"vmue1n7","art":"fenster","x":7.435,"y":10.4,"w":0.6,"d":0.3,"dreh":180,"hoehe":0.6,"bruestung":1.2,"bindung":{"raum":"me_bad","kante":2,"t":0.5},"bindungGrund":""},
+        {"id":"vmue1n8","art":"tuer","x":3.78,"y":4.805,"w":0.8,"d":0.25,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"me_flur","kante":0,"t":0.0964},"bindungGrund":""},
+        {"id":"vmue1n9","art":"tuer","x":5.6,"y":4.805,"w":0.9,"d":0.25,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"me_flur","kante":0,"t":0.4618},"bindungGrund":""},
+        {"id":"vmue1n10","art":"tuer","x":3.2,"y":5.59,"w":0.9,"d":0.25,"dreh":90,"hoehe":2,"bruestung":0,"bindung":{"raum":"me_schlaf","kante":1,"t":0.1241},"bindungGrund":""},
+        {"id":"vmue1n11","art":"tuer","x":3.9,"y":6.38,"w":0.8,"d":0.25,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"me_zimmer","kante":0,"t":0.1935},"bindungGrund":""},
+        {"id":"vmue1n12","art":"tuer","x":7.1,"y":6.38,"w":0.8,"d":0.25,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"me_bad","kante":0,"t":0.3018},"bindungGrund":""},
+        {"id":"vmue1n13","art":"treppe","x":0.55,"y":2.55,"w":1,"d":3.4,"dreh":0},
+        {"id":"vmue1n14","art":"sofa","x":3.7,"y":2.7,"w":2.18,"d":0.88,"dreh":270},
+        {"id":"vmue1n15","art":"couchtisch","x":2.55,"y":2.7,"w":0.9,"d":0.55,"dreh":90},
+        {"id":"vmue1n16","art":"tvboard","x":1.6,"y":2.7,"w":1.2,"d":0.41,"dreh":90},
+        {"id":"vmue1n17","art":"kueche","x":7.98,"y":2.45,"w":2.7,"d":0.6,"dreh":270},
+        {"id":"vmue1n18","art":"kuehlschrank","x":7.995,"y":4.13,"w":0.55,"d":0.57,"dreh":270},
+        {"id":"vmue1n19","art":"esstisch","x":6,"y":2.5,"w":1.25,"d":0.75,"dreh":0},
+        {"id":"vmue1n20","art":"stuhl","x":5.65,"y":1.8,"w":0.45,"d":0.5,"dreh":0},
+        {"id":"vmue1n21","art":"stuhl","x":6.35,"y":1.8,"w":0.45,"d":0.5,"dreh":0},
+        {"id":"vmue1n22","art":"stuhl","x":5.65,"y":3.2,"w":0.45,"d":0.5,"dreh":180},
+        {"id":"vmue1n23","art":"stuhl","x":6.35,"y":3.2,"w":0.45,"d":0.5,"dreh":180},
+        {"id":"vmue1n24","art":"bett180","x":1.25,"y":5.98,"w":1.9,"d":2.1,"dreh":0},
+        {"id":"vmue1n25","art":"schrank3","x":0.3,"y":8.6,"w":1.17,"d":0.55,"dreh":90},
+        {"id":"vmue1n26","art":"sofa","x":5.94,"y":8.4,"w":2.18,"d":0.88,"dreh":270},
+        {"id":"vmue1n27","art":"spiegelschrank","x":8.195,"y":8.2,"w":0.5,"d":0.17,"dreh":270},
+        {"id":"vmue1n28","art":"waschmaschine","x":6.875,"y":9.1,"w":0.6,"d":0.57,"dreh":90}
+      ]
+    },
+    {
+      name: "Obergeschoss (Annahme: wie EG)", bild: null, hoehe: 2.5, aussenwand: 0.3, innenwand: 0.25, decke: 0.25,
+      raeume: [
+        {"id":"mo_wohn","name":"Zimmer 1","art":"voll","punkte":[[0,0],[4.2,0],[4.2,4.68],[0,4.68]]},
+        {"id":"mo_kueche","name":"Zimmer 2","art":"voll","punkte":[[4.46,0],[8.28,0],[8.28,4.68],[4.46,4.68]]},
+        {"id":"mo_flur","name":"Flur","art":"voll","punkte":[[3.3,4.93],[8.28,4.93],[8.28,6.25],[3.3,6.25]]},
+        {"id":"mo_schlaf","name":"Zimmer 3","art":"voll","punkte":[[0,4.93],[3.1,4.93],[3.1,10.25],[0,10.25]]},
+        {"id":"mo_zimmer","name":"Zimmer 4","art":"voll","punkte":[[3.3,6.51],[6.4,6.51],[6.4,10.25],[3.3,10.25]]},
+        {"id":"mo_bad","name":"Bad","art":"voll","punkte":[[6.59,6.51],[8.28,6.51],[8.28,10.25],[6.59,10.25]]}
+      ],
+      teile: [
+        {"id":"vmue2n29","art":"fenster","x":1.4,"y":-0.15,"w":1.4,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_wohn","kante":0,"t":0.3333},"bindungGrund":""},
+        {"id":"vmue2n30","art":"fenster","x":5.2,"y":-0.15,"w":1,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_kueche","kante":0,"t":0.1937},"bindungGrund":""},
+        {"id":"vmue2n31","art":"fenster","x":7.5,"y":-0.15,"w":0.9,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_kueche","kante":0,"t":0.7958},"bindungGrund":""},
+        {"id":"vmue2n32","art":"fenster","x":8.43,"y":5.59,"w":1,"d":0.3,"dreh":90,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_flur","kante":1,"t":0.5},"bindungGrund":""},
+        {"id":"vmue2n33","art":"fenster","x":1.55,"y":10.4,"w":1.1,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_schlaf","kante":2,"t":0.5},"bindungGrund":""},
+        {"id":"vmue2n34","art":"fenster","x":4.85,"y":10.4,"w":1.4,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"mo_zimmer","kante":2,"t":0.5},"bindungGrund":""},
+        {"id":"vmue2n35","art":"fenster","x":7.435,"y":10.4,"w":0.6,"d":0.3,"dreh":180,"hoehe":0.6,"bruestung":1.2,"bindung":{"raum":"mo_bad","kante":2,"t":0.5},"bindungGrund":""},
+        {"id":"vmue2n36","art":"tuer","x":3.78,"y":4.805,"w":0.8,"d":0.25,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"mo_flur","kante":0,"t":0.0964},"bindungGrund":""},
+        {"id":"vmue2n37","art":"tuer","x":5.6,"y":4.805,"w":0.9,"d":0.25,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"mo_flur","kante":0,"t":0.4618},"bindungGrund":""},
+        {"id":"vmue2n38","art":"tuer","x":3.2,"y":5.59,"w":0.9,"d":0.25,"dreh":90,"hoehe":2,"bruestung":0,"bindung":{"raum":"mo_schlaf","kante":1,"t":0.1241},"bindungGrund":""},
+        {"id":"vmue2n39","art":"tuer","x":3.9,"y":6.38,"w":0.8,"d":0.25,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"mo_zimmer","kante":0,"t":0.1935},"bindungGrund":""},
+        {"id":"vmue2n40","art":"tuer","x":7.1,"y":6.38,"w":0.8,"d":0.25,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"mo_bad","kante":0,"t":0.3018},"bindungGrund":""},
+        {"id":"vmue2n41","art":"treppeoben","x":0.55,"y":2.55,"w":1,"d":3.4,"dreh":0}
+      ]
+    }
+  ]
+};
+
+</script>
+<script>/* daten/vorlage_klein.js */
+/* Vorlage „Kleines Haus“ für „Grundriss und Einrichtung“: eingeschossig, innen 7,40 × 8,40 m (außen etwa 8,0 × 9,0 m), Wohnfläche etwa 60 m².
+   Ganz erfunden, keine echten Daten. Kompakter Quader ohne Vor- und Rücksprünge (Bericht recherche/29_hausform_dach.md: Erker und Versprünge
+   verschlechtern die Kompaktheit), Fenster vor allem nach Süden (unten im Plan, Nord = 0), Satteldach 30 Grad, First waagerecht im Plan,
+   damit eine Dachfläche nach Süden zeigt. Die Außenmaße weichen vom Wunsch 7,5 × 8,5 m ab, weil sonst nur etwa 50 m² Wohnfläche herauskommen.
+   Erzeugt von tmp/vorlagen_erzeugen.js, nicht von Hand ändern. */
+window.DATEN = window.DATEN || {};
+window.DATEN.vorlagen = window.DATEN.vorlagen || {};
+window.DATEN.vorlagen.klein = {
+  app: "immo-grundriss",
+  version: 2,
+  aktiv: 0,
+  wandhoehe: 2.5,
+  nord: 0,
+  beispiel: true,
+  vorlage: "klein",
+  dach: {"form":"sattel","neigung":30,"first":"x","ueberstand":0.3},
+  preise: {},
+  mengen: {},
+  etagen: [
+    {
+      name: "Erdgeschoss", bild: null, hoehe: 2.5, aussenwand: 0.3, innenwand: 0.115, decke: 0.25,
+      raeume: [
+        {"id":"k_bad","name":"Bad","art":"voll","punkte":[[0,0],[2.1,0],[2.1,2.9],[0,2.9]]},
+        {"id":"k_flur","name":"Flur/Technik","art":"voll","punkte":[[2.215,0],[4,0],[4,2.9],[2.215,2.9]]},
+        {"id":"k_zimmer","name":"Kleines Zimmer","art":"voll","punkte":[[4.115,0],[7.4,0],[7.4,2.9],[4.115,2.9]]},
+        {"id":"k_wohn","name":"Wohnen / Kochen","art":"voll","punkte":[[0,3.015],[4.4,3.015],[4.4,8.4],[0,8.4]]},
+        {"id":"k_schlaf","name":"Schlafzimmer","art":"voll","punkte":[[4.515,3.015],[7.4,3.015],[7.4,8.4],[4.515,8.4]]}
+      ],
+      teile: [
+        {"id":"vkle1n1","art":"tuer","x":3.1,"y":-0.15,"w":1,"d":0.3,"dreh":0,"hoehe":2.1,"bruestung":0,"bindung":{"raum":"k_flur","kante":0,"t":0.4958},"bindungGrund":""},
+        {"id":"vkle1n2","art":"tuer","x":3.2,"y":2.958,"w":0.9,"d":0.115,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"k_wohn","kante":0,"t":0.7273},"bindungGrund":""},
+        {"id":"vkle1n3","art":"tuer","x":2.157,"y":1.45,"w":0.8,"d":0.115,"dreh":90,"hoehe":2,"bruestung":0,"bindung":{"raum":"k_bad","kante":1,"t":0.5},"bindungGrund":""},
+        {"id":"vkle1n4","art":"tuer","x":4.058,"y":1.45,"w":0.8,"d":0.115,"dreh":270,"hoehe":2,"bruestung":0,"bindung":{"raum":"k_zimmer","kante":3,"t":0.5},"bindungGrund":""},
+        {"id":"vkle1n5","art":"tuer","x":4.458,"y":7,"w":0.8,"d":0.115,"dreh":270,"hoehe":2,"bruestung":0,"bindung":{"raum":"k_schlaf","kante":3,"t":0.26},"bindungGrund":""},
+        {"id":"vkle1n6","art":"fenster","x":1.2,"y":8.55,"w":1.6,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"k_wohn","kante":2,"t":0.7273},"bindungGrund":""},
+        {"id":"vkle1n7","art":"fenster","x":3.3,"y":8.55,"w":0.9,"d":0.3,"dreh":180,"hoehe":2.1,"bruestung":0,"bindung":{"raum":"k_wohn","kante":2,"t":0.25},"bindungGrund":""},
+        {"id":"vkle1n8","art":"fenster","x":-0.15,"y":7.2,"w":1.2,"d":0.3,"dreh":270,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"k_wohn","kante":3,"t":0.2228},"bindungGrund":""},
+        {"id":"vkle1n9","art":"fenster","x":5.95,"y":8.55,"w":1.4,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"k_schlaf","kante":2,"t":0.5026},"bindungGrund":""},
+        {"id":"vkle1n10","art":"fenster","x":7.55,"y":6.5,"w":1,"d":0.3,"dreh":90,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"k_schlaf","kante":1,"t":0.6472},"bindungGrund":""},
+        {"id":"vkle1n11","art":"fenster","x":7.55,"y":1.45,"w":1,"d":0.3,"dreh":90,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"k_zimmer","kante":1,"t":0.5},"bindungGrund":""},
+        {"id":"vkle1n12","art":"fenster","x":1.05,"y":-0.15,"w":0.6,"d":0.3,"dreh":0,"hoehe":0.6,"bruestung":1.2,"bindung":{"raum":"k_bad","kante":0,"t":0.5},"bindungGrund":""},
+        {"id":"vkle1n13","art":"kueche","x":0.3,"y":4.55,"w":2.7,"d":0.6,"dreh":90},
+        {"id":"vkle1n14","art":"kuehlschrank","x":0.285,"y":6.2,"w":0.55,"d":0.57,"dreh":90},
+        {"id":"vkle1n15","art":"esstisch","x":2.45,"y":4.95,"w":1.25,"d":0.75,"dreh":0},
+        {"id":"vkle1n16","art":"stuhl","x":2.1,"y":4.25,"w":0.45,"d":0.5,"dreh":0},
+        {"id":"vkle1n17","art":"stuhl","x":2.8,"y":4.25,"w":0.45,"d":0.5,"dreh":0},
+        {"id":"vkle1n18","art":"stuhl","x":2.1,"y":5.65,"w":0.45,"d":0.5,"dreh":180},
+        {"id":"vkle1n19","art":"stuhl","x":2.8,"y":5.65,"w":0.45,"d":0.5,"dreh":180},
+        {"id":"vkle1n20","art":"sofa","x":2.2,"y":7.85,"w":2.18,"d":0.88,"dreh":0},
+        {"id":"vkle1n21","art":"couchtisch","x":2.2,"y":6.75,"w":0.9,"d":0.55,"dreh":0},
+        {"id":"vkle1n22","art":"bett180","x":6,"y":4.1,"w":1.9,"d":2.1,"dreh":0},
+        {"id":"vkle1n23","art":"nachttisch","x":4.8,"y":3.25,"w":0.39,"d":0.41,"dreh":0},
+        {"id":"vkle1n24","art":"nachttisch","x":7.15,"y":3.25,"w":0.39,"d":0.41,"dreh":0},
+        {"id":"vkle1n25","art":"schrank2","x":7,"y":8.1,"w":0.79,"d":0.55,"dreh":0},
+        {"id":"vkle1n26","art":"schreibtisch","x":5.7,"y":0.35,"w":1.2,"d":0.6,"dreh":180},
+        {"id":"vkle1n27","art":"buerostuhl","x":5.7,"y":1,"w":0.6,"d":0.6,"dreh":0},
+        {"id":"vkle1n28","art":"regal","x":6.8,"y":2.75,"w":0.8,"d":0.28,"dreh":0},
+        {"id":"vkle1n29","art":"waschmaschine","x":0.35,"y":2.55,"w":0.6,"d":0.57,"dreh":0},
+        {"id":"vkle1n30","art":"spiegelschrank","x":2.015,"y":0.7,"w":0.5,"d":0.17,"dreh":270}
+      ]
+    }
+  ]
+};
+
+</script>
+<script>/* daten/vorlage_gross.js */
+/* Vorlage „Großes Haus“ für „Grundriss und Einrichtung“: zwei Geschosse, innen 10,0 × 10,4 m (außen etwa 10,6 × 11,0 m), Wohnfläche etwa 200 m².
+   Ganz erfunden, keine echten Daten. Kompakter Quader, Wohnbereich im Süden (unten im Plan, Nord = 0), Eingang, Treppe und Nebenräume im Norden,
+   Satteldach 35 Grad mit waagerechtem First, damit eine Dachfläche nach Süden zeigt (Bericht recherche/29_hausform_dach.md). Treppe 1,00 × 3,40 m
+   gerade, Steigung etwa 18 cm (Maß geschätzt). Die Außenmaße sind größer als der Wunsch 10 × 11 m, damit die Wohnfläche bei 200 m² landet.
+   Erzeugt von tmp/vorlagen_erzeugen.js, nicht von Hand ändern. */
+window.DATEN = window.DATEN || {};
+window.DATEN.vorlagen = window.DATEN.vorlagen || {};
+window.DATEN.vorlagen.gross = {
+  app: "immo-grundriss",
+  version: 2,
+  aktiv: 0,
+  wandhoehe: 2.5,
+  nord: 0,
+  beispiel: true,
+  vorlage: "gross",
+  dach: {"form":"sattel","neigung":35,"first":"x","ueberstand":0.3},
+  preise: {},
+  mengen: {},
+  etagen: [
+    {
+      name: "Erdgeschoss", bild: null, hoehe: 2.5, aussenwand: 0.3, innenwand: 0.115, decke: 0.25,
+      raeume: [
+        {"id":"ge_arbeit","name":"Arbeitszimmer","art":"voll","punkte":[[0,0],[3.4,0],[3.4,4.4],[0,4.4]]},
+        {"id":"ge_wc","name":"WC","art":"voll","punkte":[[3.515,0],[5.3,0],[5.3,2],[3.515,2]]},
+        {"id":"ge_hwr","name":"HWR / Technik","art":"voll","punkte":[[3.515,2.115],[5.3,2.115],[5.3,4.4],[3.515,4.4]]},
+        {"id":"ge_flur","name":"Flur","art":"voll","punkte":[[5.415,0],[8,0],[8,4.4],[5.415,4.4]]},
+        {"id":"ge_speis","name":"Abstell","art":"voll","punkte":[[8.115,0],[10,0],[10,4.4],[8.115,4.4]]},
+        {"id":"ge_wek","name":"Wohnen / Essen / Küche","art":"voll","punkte":[[0,4.515],[10,4.515],[10,10.4],[0,10.4]]}
+      ],
+      teile: [
+        {"id":"vgre1n1","art":"tuer","x":6.25,"y":-0.15,"w":1.1,"d":0.3,"dreh":0,"hoehe":2.1,"bruestung":0,"bindung":{"raum":"ge_flur","kante":0,"t":0.323},"bindungGrund":""},
+        {"id":"vgre1n2","art":"tuer","x":6,"y":4.458,"w":0.9,"d":0.115,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"ge_wek","kante":0,"t":0.6},"bindungGrund":""},
+        {"id":"vgre1n3","art":"tuer","x":1.7,"y":4.458,"w":0.9,"d":0.115,"dreh":180,"hoehe":2,"bruestung":0,"bindung":{"raum":"ge_arbeit","kante":2,"t":0.5},"bindungGrund":""},
+        {"id":"vgre1n4","art":"tuer","x":9,"y":4.458,"w":0.8,"d":0.115,"dreh":180,"hoehe":2,"bruestung":0,"bindung":{"raum":"ge_speis","kante":2,"t":0.5305},"bindungGrund":""},
+        {"id":"vgre1n5","art":"tuer","x":5.358,"y":1,"w":0.8,"d":0.115,"dreh":90,"hoehe":2,"bruestung":0,"bindung":{"raum":"ge_wc","kante":1,"t":0.5},"bindungGrund":""},
+        {"id":"vgre1n6","art":"tuer","x":5.358,"y":3,"w":0.8,"d":0.115,"dreh":90,"hoehe":2,"bruestung":0,"bindung":{"raum":"ge_hwr","kante":1,"t":0.3873},"bindungGrund":""},
+        {"id":"vgre1n7","art":"fenster","x":1.5,"y":10.55,"w":1.6,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"ge_wek","kante":2,"t":0.85},"bindungGrund":""},
+        {"id":"vgre1n8","art":"fenster","x":3.9,"y":10.55,"w":1.6,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"ge_wek","kante":2,"t":0.61},"bindungGrund":""},
+        {"id":"vgre1n9","art":"fenster","x":6.5,"y":10.55,"w":1.2,"d":0.3,"dreh":180,"hoehe":2.1,"bruestung":0,"bindung":{"raum":"ge_wek","kante":2,"t":0.35},"bindungGrund":""},
+        {"id":"vgre1n10","art":"fenster","x":8.6,"y":10.55,"w":1.2,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"ge_wek","kante":2,"t":0.14},"bindungGrund":""},
+        {"id":"vgre1n11","art":"fenster","x":-0.15,"y":7.5,"w":1.4,"d":0.3,"dreh":270,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"ge_wek","kante":3,"t":0.4928},"bindungGrund":""},
+        {"id":"vgre1n12","art":"fenster","x":10.15,"y":9.2,"w":1,"d":0.3,"dreh":90,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"ge_wek","kante":1,"t":0.7961},"bindungGrund":""},
+        {"id":"vgre1n13","art":"fenster","x":1.7,"y":-0.15,"w":1.4,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"ge_arbeit","kante":0,"t":0.5},"bindungGrund":""},
+        {"id":"vgre1n14","art":"fenster","x":-0.15,"y":1.8,"w":1.2,"d":0.3,"dreh":270,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"ge_arbeit","kante":3,"t":0.5909},"bindungGrund":""},
+        {"id":"vgre1n15","art":"fenster","x":4.4,"y":-0.15,"w":0.6,"d":0.3,"dreh":0,"hoehe":0.6,"bruestung":1.2,"bindung":{"raum":"ge_wc","kante":0,"t":0.4958},"bindungGrund":""},
+        {"id":"vgre1n16","art":"treppe","x":7.47,"y":1.85,"w":1,"d":3.4,"dreh":180},
+        {"id":"vgre1n17","art":"schreibtisch","x":1.7,"y":0.35,"w":1.2,"d":0.6,"dreh":180},
+        {"id":"vgre1n18","art":"buerostuhl","x":1.7,"y":1,"w":0.6,"d":0.6,"dreh":0},
+        {"id":"vgre1n19","art":"regal","x":3.26,"y":2.6,"w":0.8,"d":0.28,"dreh":90},
+        {"id":"vgre1n20","art":"waschmaschine","x":3.95,"y":3.95,"w":0.6,"d":0.57,"dreh":0},
+        {"id":"vgre1n21","art":"trockner","x":4.75,"y":3.95,"w":0.6,"d":0.6,"dreh":0},
+        {"id":"vgre1n22","art":"sofa","x":2.5,"y":9,"w":2.18,"d":0.88,"dreh":0},
+        {"id":"vgre1n23","art":"couchtisch","x":2.5,"y":7.8,"w":0.9,"d":0.55,"dreh":0},
+        {"id":"vgre1n24","art":"tvboard","x":2.5,"y":5.4,"w":1.2,"d":0.41,"dreh":180},
+        {"id":"vgre1n25","art":"kueche","x":9.7,"y":7,"w":2.7,"d":0.6,"dreh":270},
+        {"id":"vgre1n26","art":"kuehlschrank","x":9.715,"y":5.25,"w":0.55,"d":0.57,"dreh":270},
+        {"id":"vgre1n27","art":"esstisch","x":6.8,"y":7.2,"w":1.25,"d":0.75,"dreh":0},
+        {"id":"vgre1n28","art":"stuhl","x":6.45,"y":6.5,"w":0.45,"d":0.5,"dreh":0},
+        {"id":"vgre1n29","art":"stuhl","x":7.15,"y":6.5,"w":0.45,"d":0.5,"dreh":0},
+        {"id":"vgre1n30","art":"stuhl","x":6.45,"y":7.9,"w":0.45,"d":0.5,"dreh":180},
+        {"id":"vgre1n31","art":"stuhl","x":7.15,"y":7.9,"w":0.45,"d":0.5,"dreh":180}
+      ]
+    },
+    {
+      name: "Obergeschoss", bild: null, hoehe: 2.5, aussenwand: 0.3, innenwand: 0.115, decke: 0.25,
+      raeume: [
+        {"id":"go_schlaf2","name":"Schlafzimmer 2","art":"voll","punkte":[[0,0],[3.4,0],[3.4,4.4],[0,4.4]]},
+        {"id":"go_flur","name":"Flur / Galerie","art":"voll","punkte":[[3.515,0],[8,0],[8,4.4],[3.515,4.4]]},
+        {"id":"go_bad","name":"Bad","art":"voll","punkte":[[8.115,0],[10,0],[10,4.4],[8.115,4.4]]},
+        {"id":"go_ankleide","name":"Ankleide / Abstell","art":"voll","punkte":[[0,4.515],[6.4,4.515],[6.4,6.3],[0,6.3]]},
+        {"id":"go_eltern","name":"Schlafzimmer 1","art":"voll","punkte":[[0,6.415],[6.4,6.415],[6.4,10.4],[0,10.4]]},
+        {"id":"go_zimmer3","name":"Schlafzimmer 3","art":"voll","punkte":[[6.515,4.515],[10,4.515],[10,10.4],[6.515,10.4]]}
+      ],
+      teile: [
+        {"id":"vgre2n32","art":"tuer","x":3.458,"y":1.8,"w":0.9,"d":0.115,"dreh":90,"hoehe":2,"bruestung":0,"bindung":{"raum":"go_schlaf2","kante":1,"t":0.4091},"bindungGrund":""},
+        {"id":"vgre2n33","art":"tuer","x":8.058,"y":1.8,"w":0.8,"d":0.115,"dreh":270,"hoehe":2,"bruestung":0,"bindung":{"raum":"go_bad","kante":3,"t":0.5909},"bindungGrund":""},
+        {"id":"vgre2n34","art":"tuer","x":4.6,"y":4.458,"w":0.9,"d":0.115,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"go_ankleide","kante":0,"t":0.7187},"bindungGrund":""},
+        {"id":"vgre2n35","art":"tuer","x":3,"y":6.358,"w":0.9,"d":0.115,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"go_eltern","kante":0,"t":0.4688},"bindungGrund":""},
+        {"id":"vgre2n36","art":"tuer","x":7.3,"y":4.458,"w":0.9,"d":0.115,"dreh":0,"hoehe":2,"bruestung":0,"bindung":{"raum":"go_zimmer3","kante":0,"t":0.2253},"bindungGrund":""},
+        {"id":"vgre2n37","art":"fenster","x":1.7,"y":-0.15,"w":1.4,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"go_schlaf2","kante":0,"t":0.5},"bindungGrund":""},
+        {"id":"vgre2n38","art":"fenster","x":-0.15,"y":1.8,"w":1.2,"d":0.3,"dreh":270,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"go_schlaf2","kante":3,"t":0.5909},"bindungGrund":""},
+        {"id":"vgre2n39","art":"fenster","x":5.75,"y":-0.15,"w":1.2,"d":0.3,"dreh":0,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"go_flur","kante":0,"t":0.4983},"bindungGrund":""},
+        {"id":"vgre2n40","art":"fenster","x":9.05,"y":-0.15,"w":0.6,"d":0.3,"dreh":0,"hoehe":0.6,"bruestung":1.2,"bindung":{"raum":"go_bad","kante":0,"t":0.496},"bindungGrund":""},
+        {"id":"vgre2n41","art":"fenster","x":-0.15,"y":5.4,"w":1,"d":0.3,"dreh":270,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"go_ankleide","kante":3,"t":0.5042},"bindungGrund":""},
+        {"id":"vgre2n42","art":"fenster","x":-0.15,"y":9.3,"w":1,"d":0.3,"dreh":270,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"go_eltern","kante":3,"t":0.276},"bindungGrund":""},
+        {"id":"vgre2n43","art":"fenster","x":1.6,"y":10.55,"w":1.6,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"go_eltern","kante":2,"t":0.75},"bindungGrund":""},
+        {"id":"vgre2n44","art":"fenster","x":4.4,"y":10.55,"w":1.6,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"go_eltern","kante":2,"t":0.3125},"bindungGrund":""},
+        {"id":"vgre2n45","art":"fenster","x":8.25,"y":10.55,"w":1.6,"d":0.3,"dreh":180,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"go_zimmer3","kante":2,"t":0.5022},"bindungGrund":""},
+        {"id":"vgre2n46","art":"fenster","x":10.15,"y":9,"w":1.2,"d":0.3,"dreh":90,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"go_zimmer3","kante":1,"t":0.7621},"bindungGrund":""},
+        {"id":"vgre2n47","art":"fenster","x":10.15,"y":5.6,"w":1,"d":0.3,"dreh":90,"hoehe":1.3,"bruestung":0.9,"bindung":{"raum":"go_zimmer3","kante":1,"t":0.1844},"bindungGrund":""},
+        {"id":"vgre2n48","art":"treppeoben","x":7.47,"y":1.85,"w":1,"d":3.4,"dreh":180},
+        {"id":"vgre2n49","art":"bett140","x":1.5,"y":1.35,"w":1.5,"d":2.1,"dreh":0},
+        {"id":"vgre2n50","art":"schrank2","x":0.45,"y":4.05,"w":0.79,"d":0.55,"dreh":180},
+        {"id":"vgre2n51","art":"bett180","x":5.33,"y":8.4,"w":1.9,"d":2.1,"dreh":90},
+        {"id":"vgre2n52","art":"nachttisch","x":6.18,"y":7.25,"w":0.39,"d":0.41,"dreh":90},
+        {"id":"vgre2n53","art":"nachttisch","x":6.18,"y":9.55,"w":0.39,"d":0.41,"dreh":90},
+        {"id":"vgre2n54","art":"schrank3","x":0.3,"y":7.3,"w":1.17,"d":0.55,"dreh":90},
+        {"id":"vgre2n55","art":"bett140","x":8.6,"y":5.7,"w":1.5,"d":2.1,"dreh":0},
+        {"id":"vgre2n56","art":"schreibtisch","x":7.2,"y":10.05,"w":1.2,"d":0.6,"dreh":180},
+        {"id":"vgre2n57","art":"buerostuhl","x":7.2,"y":9.4,"w":0.6,"d":0.6,"dreh":0},
+        {"id":"vgre2n58","art":"waschmaschine","x":8.45,"y":4.1,"w":0.6,"d":0.57,"dreh":0},
+        {"id":"vgre2n59","art":"spiegelschrank","x":9.915,"y":2.7,"w":0.5,"d":0.17,"dreh":270}
+      ]
     }
   ]
 };
@@ -3315,7 +3611,7 @@ window.DATEN.einstieg = {
       kurz: 'Zeichnen Sie den Grundriss nach und richten Sie ihn ein.',
       wofuer: 'Sie sehen die Wohnfläche nach Wohnflächenverordnung und was die Einrichtung kostet. Das ist kein Bauplan und kein Aufmaß.',
       brauche: 'Ein Bild des Grundrisses aus dem Exposé, oder zeichnen Sie einfach auf dem Raster.',
-      anfang: { text: 'Zum Beispielhaus ↑', fokus: 'g-beispiel' }
+      anfang: { text: 'Zu den Vorlagen ↑', fokus: 'g-beispiel' }
     },
     pruefliste: {
       kurz: 'Haken Sie den Weg vom Geldrahmen bis zur Vermietung ab.',
@@ -4268,7 +4564,58 @@ window.TEXTE = {
   dachHochLinks: { de: 'links im Plan', en: 'left of the plan', ru: 'слева на плане' },
   dachHochRechts: { de: 'rechts im Plan', en: 'right of the plan', ru: 'справа на плане' },
   dachUeberstand: { de: 'Dachüberstand in cm', en: 'Roof overhang in cm', ru: 'Свес крыши в см' },
-  dachFehlerUeberstand: { de: 'Bitte einen Überstand von 0 bis 200 cm eingeben.', en: 'Please enter an overhang from 0 to 200 cm.', ru: 'Введите свес от 0 до 200 см.' }
+  dachFehlerUeberstand: { de: 'Bitte einen Überstand von 0 bis 200 cm eingeben.', en: 'Please enter an overhang from 0 to 200 cm.', ru: 'Введите свес от 0 до 200 см.' },
+
+  /* Vorlagen: Auswahl "Vorlage laden" (Karten mit Skizze) */
+  vorlageUeberschrift: { de: 'Vorlage laden', en: 'Load a template', ru: 'Загрузить шаблон' },
+  vorlageHilfe: {
+    de: 'Wählen Sie ein Haus zum Ausprobieren. Es ist schon eingerichtet; alle Maße sind Beispiele, und Sie können danach alles ändern.',
+    en: 'Pick a house to try out. It is already furnished; all dimensions are examples, and you can change everything afterwards.',
+    ru: 'Выберите дом, чтобы попробовать. Он уже обставлен; все размеры условные, потом можно изменить всё.'
+  },
+  bildUeberschrift: { de: 'Oder: Grundriss-Bild laden', en: 'Or: load a floor plan image', ru: 'Или: загрузить изображение плана' },
+  vorlageLos: { de: 'Antippen zum Laden', en: 'Tap to load', ru: 'Нажмите, чтобы загрузить' },
+  vorlageMeta: { de: 'ca. {qm} m² Wohnfläche\n{n} Geschosse', en: 'approx. {qm} m² living area\n{n} floors', ru: 'около {qm} м² жилой площади\nэтажей: {n}' },
+  vorlageMetaEins: { de: 'ca. {qm} m² Wohnfläche\n1 Geschoss', en: 'approx. {qm} m² living area\n1 floor', ru: 'около {qm} м² жилой площади\n1 этаж' },
+  vorlageNameBeispiel: { de: 'Beispielhaus', en: 'Example house', ru: 'Пример дома' },
+  vorlageNameMuster: { de: 'Musterhaus', en: 'Show house', ru: 'Типовой дом' },
+  vorlageNameKlein: { de: 'Kleines Haus', en: 'Small house', ru: 'Маленький дом' },
+  vorlageNameGross: { de: 'Großes Haus', en: 'Large house', ru: 'Большой дом' },
+  vorlageKurzBeispiel: { de: 'Erfunden: Wohnen, Dachgeschoss, Keller und Garage.', en: 'Invented: living floor, attic, cellar and garage.', ru: 'Выдуманный: жилой этаж, мансарда, подвал и гараж.' },
+  vorlageKurzMuster: { de: 'Nach einer Vorlage des Nutzers; Obergeschoss angenommen.', en: 'Based on a template by the user; upper floor assumed.', ru: 'По шаблону пользователя; верхний этаж предположен.' },
+  vorlageKurzKlein: { de: 'Erfunden: eingeschossig, Wohnen und Kochen offen.', en: 'Invented: single storey, open living and cooking.', ru: 'Выдуманный: один этаж, гостиная и кухня вместе.' },
+  vorlageKurzGross: { de: 'Erfunden: zwei Geschosse, drei Schlafzimmer, Ankleide.', en: 'Invented: two floors, three bedrooms, dressing room.', ru: 'Выдуманный: два этажа, три спальни, гардеробная.' },
+  vorlageTextBeispiel: { de: 'Beispielhaus mit erfundenen Maßen.', en: 'Example house with invented dimensions.', ru: 'Пример дома с выдуманными размерами.' },
+  vorlageTextMuster: {
+    de: 'Musterhaus nach einer Vorlage des Nutzers. Angenommen: das Obergeschoss (wie das Erdgeschoss), die Treppe (im Wohnzimmer, weil der Flur zu schmal ist) und einzelne Maße, die um 1 bis 4 cm geändert sind.',
+    en: 'Show house based on a template by the user. Assumed: the upper floor (same as the ground floor), the staircase (in the living room because the hall is too narrow) and a few dimensions changed by 1 to 4 cm.',
+    ru: 'Типовой дом по шаблону пользователя. Предположено: верхний этаж (как первый), лестница (в гостиной, потому что прихожая слишком узкая) и несколько размеров, изменённых на 1–4 см.'
+  },
+  vorlageTextKlein: {
+    de: 'Kleines Haus mit erfundenen Maßen, eingeschossig; Fenster vor allem nach Süden.',
+    en: 'Small house with invented dimensions, single storey; windows mainly facing south.',
+    ru: 'Маленький дом с выдуманными размерами, один этаж; окна в основном на юг.'
+  },
+  vorlageTextGross: {
+    de: 'Großes Haus mit erfundenen Maßen, zwei Geschosse; Wohnbereich nach Süden.',
+    en: 'Large house with invented dimensions, two floors; living area facing south.',
+    ru: 'Большой дом с выдуманными размерами, два этажа; жилая зона на юг.'
+  },
+  vorlageFrage: {
+    de: 'Ihr jetziger Plan wird durch die Vorlage „{name}“ ersetzt. Vorher als Datei sichern?',
+    en: 'Your current plan will be replaced by the template “{name}”. Save it as a file first?',
+    ru: 'Ваш текущий план будет заменён шаблоном «{name}». Сначала сохранить его в файл?'
+  },
+  vorlageSichern: { de: 'Sichern und Vorlage laden', en: 'Save, then load template', ru: 'Сохранить и загрузить шаблон' },
+  vorlageOhne: { de: 'Ohne Sichern ersetzen', en: 'Replace without saving', ru: 'Заменить без сохранения' },
+  vorlageAbbrechen: { de: 'Abbrechen', en: 'Cancel', ru: 'Отмена' },
+  vorlageGeladen: {
+    de: '{name} geladen. {text} Oben bei „Etage“ wechseln Sie das Geschoss, mit „3D“ sehen Sie das Haus von außen.',
+    en: '{name} loaded. {text} Use “Floor” above to switch floors; “3D” shows the house from outside.',
+    ru: '{name} загружен. {text} Вверху в «Этаж» можно сменить этаж, в «3D» виден дом снаружи.'
+  },
+  vorlageFehlt: { de: 'Diese Vorlage fehlt in dieser Fassung der Seite.', en: 'This template is missing in this version of the page.', ru: 'Этого шаблона нет в этой версии страницы.' },
+  vorlageNichtGeladen: { de: 'Die Vorlage konnte nicht geladen werden (die Daten sind unvollständig).', en: 'The template could not be loaded (its data is incomplete).', ru: 'Шаблон не удалось загрузить (данные неполные).' }
 };
 
 </script>
@@ -6306,6 +6653,47 @@ window.TEXTE = {
     g.add(m);
     return m;
   }
+  /* Treppen: Löcher in Boden und Decke, Stufen. Maße (Grundfläche w × d, Laufrichtung zur Planoberkante bei Drehung 0) aus dem Teil. */
+  function eckenVon(t, schrumpf) {
+    var hw = Math.max(0.01, t.w / 2 - schrumpf), hd = Math.max(0.01, t.d / 2 - schrumpf), r = (t.dreh || 0) * Math.PI / 180, c = Math.cos(r), s = Math.sin(r);
+    return [[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]].map(function (q) { return [t.x + q[0] * c - q[1] * s, t.y + q[0] * s + q[1] * c]; });
+  }
+  /* Ecken der Öffnungen (Teile dieser Arten), deren Mitte im Raum r liegt; 2 cm nach innen gerückt, damit das Loch den Rand nicht berührt */
+  function loecher(e, r, arten) {
+    var res = [];
+    (e.teile || []).forEach(function (t) {
+      var a = A[t.art];
+      if (!a || arten.indexOf(a.form) < 0 || !GEO.punktImVieleck([t.x, t.y], r.punkte)) return;
+      res.push(eckenVon(t, 0.02));
+    });
+    return res;
+  }
+  function lochPfad(q) {
+    var p = new THREE.Path();
+    q.forEach(function (c, k) { if (k) p.lineTo(c[0], -c[1]); else p.moveTo(c[0], -c[1]); });
+    p.closePath();
+    return p;
+  }
+  function treppeBauen(g, t, oben, z, hatOben, mat, matGel) {
+    var r = (t.dreh || 0) * Math.PI / 180, c = Math.cos(r), s = Math.sin(r), drehY = -r;
+    function ort(lx, ly) { return [t.x + lx * c - ly * s, t.y + lx * s + ly * c]; }
+    if (oben) {
+      /* Geländer an den beiden langen Seiten und am unteren Ende der Öffnung; oben (Planoberkante) bleibt sie frei */
+      [[-t.w / 2 + 0.02, 0, 0.04, t.d], [t.w / 2 - 0.02, 0, 0.04, t.d], [0, t.d / 2 - 0.02, t.w, 0.04]].forEach(function (k) {
+        var p = ort(k[0], k[1]); kasten(g, k[2], 1.0, k[3], matGel, p[0], 0.5, p[1], drehY, 'treppe');
+      });
+      return;
+    }
+    var gesamt = z.hoehe + z.decke;
+    if (!hatOben) {   /* keine Etage darüber: nur die Grundfläche andeuten */
+      var q = ort(0, 0); kasten(g, t.w, 0.04, t.d, mat, q[0], 0.03, q[1], drehY, 'treppe'); return;
+    }
+    var n = Math.max(3, Math.round(gesamt / 0.18)), steig = gesamt / n, lauf = t.d / (n - 1);
+    for (var k = 1; k < n; k++) {
+      var p2 = ort(0, t.d / 2 - (k - 0.5) * lauf);
+      kasten(g, t.w, k * steig, lauf, mat, p2[0], k * steig / 2, p2[1], drehY, 'treppe');
+    }
+  }
   function textur(url) {
     if (texturen[url]) return texturen[url];
     var t = new THREE.TextureLoader().load(url, function () { zeichnen(); });
@@ -6366,9 +6754,13 @@ window.TEXTE = {
         nimm(0, 0); nimm(bw, bh);
       }
       var deckeG = new THREE.Group(); g.add(deckeG); g.userData.decke = deckeG;
+      var hatOben = plan.etagen.some(function (e2, j) { return j !== i && eb[j] && !eb[j].keller && eb[j].basis > z.basis; });
       e.raeume.forEach(function (r) {
-        var form = new THREE.Shape();
-        r.punkte.forEach(function (p, k) { if (k) form.lineTo(p[0], -p[1]); else form.moveTo(p[0], -p[1]); nimm(p[0], p[1]); });
+        var form = new THREE.Shape(), formDecke = new THREE.Shape();
+        r.punkte.forEach(function (p, k) { if (k) form.lineTo(p[0], -p[1]); else form.moveTo(p[0], -p[1]); if (k) formDecke.lineTo(p[0], -p[1]); else formDecke.moveTo(p[0], -p[1]); nimm(p[0], p[1]); });
+        /* Treppenöffnung: im Boden dieser Etage (Teil „Treppenöffnung“) und in der Decke über der Treppe (Teil „Treppe“, nur wenn oben eine Etage liegt) */
+        loecher(e, r, ['treppeoben']).forEach(function (q) { form.holes.push(lochPfad(q)); });
+        if (hatOben) loecher(e, r, ['treppe']).forEach(function (q) { formDecke.holes.push(lochPfad(q)); });
         var b = new THREE.Mesh(new THREE.ShapeGeometry(form), new THREE.MeshLambertMaterial({ color: farbe[r.art] || farbe.voll, transparent: true, opacity: 0.55, side: THREE.DoubleSide }));
         b.rotation.x = -Math.PI / 2; b.position.y = 0.01; b.receiveShadow = true; b.userData.kind = 'boden';
         g.add(b);
@@ -6379,7 +6771,7 @@ window.TEXTE = {
             kasten(g, L + 0.1, 1.0, 0.1, M.gelaender, (p[0] + q[0]) / 2, 0.5, (p[1] + q[1]) / 2, -Math.atan2(dz, dx), 'gelaender').renderOrder = 2;
           });
         } else {
-          var sl = new THREE.Mesh(new THREE.ExtrudeGeometry(form, { depth: z.decke, bevelEnabled: false }), M.decke);
+          var sl = new THREE.Mesh(new THREE.ExtrudeGeometry(formDecke, { depth: z.decke, bevelEnabled: false }), M.decke);
           sl.rotation.x = -Math.PI / 2; sl.position.y = H; sl.castShadow = true; sl.receiveShadow = true; sl.userData.kind = 'decke';
           deckeG.add(sl);
         }
@@ -6396,6 +6788,11 @@ window.TEXTE = {
       e.teile.forEach(function (t) {
         var a = A[t.art]; if (!a) return;
         if (kk.verbraucht && kk.verbraucht[t.id]) return;
+        if (a.form === 'treppe' || a.form === 'treppeoben') {
+          treppeBauen(g, t, a.form === 'treppeoben', z, hatOben, lambert(new THREE.Color(teilFarbe.umbau)), M.gelaender);
+          nimm(t.x - t.w / 2, t.y - t.w / 2); nimm(t.x + t.w / 2, t.y + t.w / 2);
+          return;
+        }
         var drehY = -t.dreh * Math.PI / 180, h = (a.hoehe || 80) / 100, y = h / 2, mat;
         var f = new THREE.Color(teilFarbe[a.gruppe] || teilFarbe.wohnung), opak = 1;
         if (a.form === 'wand') { h = H; y = H / 2; }
@@ -6847,6 +7244,14 @@ window.TEXTE = {
     ['zubehoer', 'Keller, Garage, Heizraum, Abstellraum außerhalb']
   ];
 
+  /* Vorlagen: Schlüssel der Texte (daten/texte.js) je Vorlage als volle Zeichenketten, damit tmp/planung_test.py sie findet */
+  var VORLAGEN_T = {
+    beispielhaus: { name: 'vorlageNameBeispiel', kurz: 'vorlageKurzBeispiel', text: 'vorlageTextBeispiel' },
+    musterhaus2: { name: 'vorlageNameMuster', kurz: 'vorlageKurzMuster', text: 'vorlageTextMuster' },
+    klein: { name: 'vorlageNameKlein', kurz: 'vorlageKurzKlein', text: 'vorlageTextKlein' },
+    gross: { name: 'vorlageNameGross', kurz: 'vorlageKurzGross', text: 'vorlageTextGross' }
+  };
+
   /* ---------- Zustand ---------- */
   /* Datenmodell Version 2 (Version 1 lädt mit Standardwerten):
      Etage: hoehe (lichte Raumhöhe, Standard = alte plan.wandhoehe), aussenwand 0,30, innenwand 0,115, decke 0,25.
@@ -6976,6 +7381,8 @@ window.TEXTE = {
     });
     neu.aktiv = Math.min(neu.etagen.length - 1, Math.max(0, zahlOk(p.aktiv, 0) | 0));
     if (p.beispiel === true) neu.beispiel = true;
+    /* Kennung der geladenen Vorlage (daten/vorlage_*.js), nur Kleinbuchstaben, Ziffern und _ */
+    if (typeof p.vorlage === 'string' && /^[a-z0-9_]{1,30}$/.test(p.vorlage)) neu.vorlage = p.vorlage;
     return neu;
   }
   function laden() {
@@ -7111,6 +7518,13 @@ window.TEXTE = {
         var k = Math.min(0.5, t.w * 0.4), n = t.w > 1.2 ? 2 : 1;
         for (var i = 0; i < n; i++) el('rect', { x: -t.w / 2 + 0.08 + i * (t.w - 0.16) / n, y: -t.d / 2 + 0.08, width: (t.w - 0.16) / n - (n > 1 ? 0.06 : 0), height: Math.min(0.35, t.d * 0.2), class: 'kissen', rx: 0.05 }, g);
         void k;
+      }
+      if (a.form === 'treppe' || a.form === 'treppeoben') {
+        /* Stufenlinien quer zur Laufrichtung (etwa 24 cm Auftritt), Pfeil nach oben = Laufrichtung; oben im Obergeschoss gestrichelt */
+        var nSt = Math.max(2, Math.round(t.d / 0.24));
+        for (var si = 1; si < nSt; si++) el('line', { x1: -t.w / 2, x2: t.w / 2, y1: -t.d / 2 + si * t.d / nSt, y2: -t.d / 2 + si * t.d / nSt, class: 'stufe' }, g);
+        el('path', { d: 'M 0 ' + (t.d / 2 - 0.25) + ' L 0 ' + (-t.d / 2 + 0.3) + ' M -0.14 ' + (-t.d / 2 + 0.52) + ' L 0 ' + (-t.d / 2 + 0.3) + ' L 0.14 ' + (-t.d / 2 + 0.52), class: 'stufe pfeil' }, g);
+        if (a.form === 'treppeoben') g.setAttribute('class', g.getAttribute('class') + ' oben');
       }
       if (a.form === 'tuer') el('path', { d: 'M ' + (-t.w / 2) + ' ' + (t.d / 2) + ' A ' + t.w + ' ' + t.w + ' 0 0 0 ' + (t.w / 2) + ' ' + (t.d / 2 - t.w), class: 'hilfslinie', style: 'stroke-dasharray:4 4;stroke-width:1.5' }, g);
       var fs = 11 * s, kurz = a.kurz || a.name;
@@ -7932,6 +8346,7 @@ window.TEXTE = {
     var posten = [];
     KAT.artikel.forEach(function (a) {
       var m;
+      if (a.keinPosten) return;   /* z. B. Treppenöffnung oben: gehört zur Treppe darunter, kein eigener Posten */
       if (a.jeBett) m = monteur ? betten * a.jeBett : 0;
       else if (a.zeichnen === false) m = plan.mengen[a.id] || 0;
       else m = mengen[a.id] || 0;
@@ -7951,12 +8366,12 @@ window.TEXTE = {
     var box = $('g-satz'), titel, klein, art = 'leer', zeichen = '?';
     if (!nRaeume) {
       titel = 'Noch kein Raum gezeichnet.';
-      klein = 'Fangen Sie oben bei „So fangen Sie an“ an: Bild wählen oder das Beispielhaus laden, oder zeichnen Sie gleich in Schritt 2 auf dem Raster.';
+      klein = 'Fangen Sie oben bei „So fangen Sie an“ an: eine Vorlage laden oder ein Bild wählen, oder zeichnen Sie gleich in Schritt 2 auf dem Raster.';
     } else {
       titel = qm(s.wfl) + ' Wohnfläche' + (s.summe ? ', Einrichtung und Umbau etwa ' + euro(s.summe) : '') + '.';
       klein = (s.nfl ? 'Dazu ' + qm(s.nfl) + ' Nutzfläche' + (s.sep ? ', davon ' + qm(s.sep) + ' separat vermietbar' : '') + '. ' : '') +
         (s.betten ? s.betten + ' Schlafplätze. ' : '') + 'Preise sind Richtwerte, keine Angebote.';
-      if (plan.beispiel) klein = 'Beispielhaus mit erfundenen Maßen. ' + klein;
+      if (plan.beispiel) klein = tr((VORLAGEN_T[plan.vorlage] || VORLAGEN_T.beispielhaus).text) + ' ' + klein;
       zeichen = '✓'; art = 'gut';
       if (s.ohneMassstab.length) {
         art = 'warn'; zeichen = '!';
@@ -8100,28 +8515,89 @@ window.TEXTE = {
   $('g-neu-ohne').addEventListener('click', function () { neuBeginnen(); $('g-datei-meldung').textContent = 'Neuer Plan begonnen.'; });
   $('g-neu-nein').addEventListener('click', function () { $('g-neu-frage').hidden = true; });
 
-  /* ---------- Beispielhaus (daten/beispielhaus.js) ---------- */
-  function beispielLaden() {
-    var vorlage = window.DATEN && window.DATEN.beispielhaus;
-    if (!vorlage) { meldung('Das Beispielhaus fehlt in dieser Fassung der Seite.'); return; }
+  /* ---------- Vorlagen: Beispielhaus (daten/beispielhaus.js) und drei weitere Häuser (daten/vorlage_*.js) ----------
+     Vier Karten mit Skizze, Name, Wohnfläche und Geschosszahl (beides aus den Daten gerechnet, nicht von Hand
+     eingetragen). Ist schon etwas im Plan, fragt die Seite vor dem Ersetzen und bietet an, den Plan zuerst als Datei zu sichern. */
+  var VORLAGEN = ['beispielhaus', 'musterhaus2', 'klein', 'gross'];
+  var vorlageWartet = null;      /* Vorlage, die nach der Rückfrage geladen wird */
+  function vorlageDaten(id) { var D = window.DATEN || {}; return id === 'beispielhaus' ? D.beispielhaus : (D.vorlagen || {})[id]; }
+  function vorlageKarteId(id) { return id === 'beispielhaus' ? 'g-beispiel' : 'g-vorlage-' + id; }
+  function vorlageLaden(id) {
+    id = id || vorlageWartet || 'beispielhaus';
+    var vorlage = vorlageDaten(id);
+    if (!vorlage) { meldung(tr('vorlageFehlt')); return; }
     var p = JSON.parse(JSON.stringify(vorlage));
+    /* Ids und Maße ergänzen, wo sie fehlen (das Beispielhaus hat keine); feste Ids der Vorlagen bleiben, sonst verlieren Fenster und Türen ihre Wand */
     p.etagen.forEach(function (e) {
-      e.raeume.forEach(function (r) { r.id = neueId('r'); });
-      e.teile.forEach(function (t) { var a = ART[t.art]; t.id = neueId('t'); if (a) { t.w = a.breite / 100; t.d = a.tiefe / 100; } });
+      e.raeume.forEach(function (r) { if (!r.id) r.id = neueId('r'); });
+      e.teile.forEach(function (t) { var a = ART[t.art]; if (!t.id) t.id = neueId('t'); if (a) { if (t.w == null) t.w = a.breite / 100; if (t.d == null) t.d = a.tiefe / 100; } });
     });
     var neu = pruefePlan(p);
-    if (!neu) { meldung('Das Beispielhaus konnte nicht geladen werden.'); return; }
-    plan = neu; gewaehlt = null; vb = null; $('g-beispiel-frage').hidden = true;
+    if (!neu) { meldung(tr('vorlageNichtGeladen')); return; }
+    plan = neu; gewaehlt = null; vb = null; vorlageWartet = null; $('g-beispiel-frage').hidden = true;
     speichern(); allesZeigen();
-    meldung('Beispielhaus geladen: oben bei „Etage“ zwischen Erdgeschoss, Dachgeschoss und Keller wechseln, mit „3D“ ansehen. Alle Maße sind erfunden.');
+    if (id === 'beispielhaus') meldung('Beispielhaus geladen: oben bei „Etage“ zwischen Erdgeschoss, Dachgeschoss und Keller wechseln, mit „3D“ ansehen. Alle Maße sind erfunden.');
+    else meldung(tr('vorlageGeladen', { name: tr(VORLAGEN_T[id].name), text: tr(VORLAGEN_T[id].text) }));
+    /* Das Ergebnis liegt unter den Karten: dorthin blättern, damit der Erfolg sofort sichtbar ist (ohne Animation bei "weniger Bewegung") */
+    var sz = $('g-satz');
+    if (sz && sz.scrollIntoView) {
+      var b = sz.getBoundingClientRect();
+      if (b.top < 80 || b.bottom > window.innerHeight) sz.scrollIntoView({ block: 'start', behavior: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }
   }
-  $('g-beispiel').addEventListener('click', function () {
-    if (leer()) { beispielLaden(); return; }
+  function vorlageWohnflaeche(v) {
+    var s = 0;
+    v.etagen.forEach(function (e) { e.raeume.forEach(function (r) { s += R.wohnflaecheRaum(raumDaten({ punkte: r.punkte, art: r.art || 'voll', teil12: r.teil12, teil0: r.teil0, balkon: r.balkon })); }); });
+    return s;
+  }
+  /* Kleine Skizze der ersten Etage: nur die Räume, Farben über CSS-Klassen aus der Palette */
+  function vorlageSkizze(v) {
+    var e = v.etagen[0], x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    e.raeume.forEach(function (r) { r.punkte.forEach(function (q) { x0 = Math.min(x0, q[0]); y0 = Math.min(y0, q[1]); x1 = Math.max(x1, q[0]); y1 = Math.max(y1, q[1]); }); });
+    var pad = Math.max(x1 - x0, y1 - y0) * 0.04;
+    var s = document.createElementNS(NS, 'svg');
+    s.setAttribute('viewBox', (x0 - pad) + ' ' + (y0 - pad) + ' ' + (x1 - x0 + 2 * pad) + ' ' + (y1 - y0 + 2 * pad));
+    s.setAttribute('class', 'vk-skizze'); s.setAttribute('aria-hidden', 'true'); s.setAttribute('focusable', 'false');
+    s.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    e.raeume.forEach(function (r) {
+      el('polygon', { points: r.punkte.map(function (q) { return q[0] + ',' + q[1]; }).join(' '), class: 'vk-raum art-' + (r.art || 'voll') }, s);
+    });
+    return s;
+  }
+  function vorlagenZeigen() {
+    var ul = $('g-vorlagen'); if (!ul) return;
+    var hatFokus = document.activeElement && ul.contains(document.activeElement) ? document.activeElement.id : '';
+    ul.textContent = '';
+    VORLAGEN.forEach(function (id) {
+      var v = vorlageDaten(id); if (!v) return;
+      var li = document.createElement('li'), b = document.createElement('button');
+      b.type = 'button'; b.className = 'g-vorlage'; b.id = vorlageKarteId(id); b.setAttribute('data-vorlage', id);
+      b.appendChild(vorlageSkizze(v));
+      function zeile(klasse, text) { var sp = document.createElement('span'); sp.className = klasse; sp.textContent = text; b.appendChild(sp); }
+      zeile('vk-name', tr(VORLAGEN_T[id].name));
+      zeile('vk-meta', tr(v.etagen.length === 1 ? 'vorlageMetaEins' : 'vorlageMeta', { qm: fmt0.format(Math.round(vorlageWohnflaeche(v))), n: v.etagen.length }));
+      zeile('vk-text', tr(VORLAGEN_T[id].kurz));
+      zeile('vk-los', tr('vorlageLos'));
+      b.addEventListener('click', function () { vorlageAnfordern(id); });
+      li.appendChild(b); ul.appendChild(li);
+    });
+    if (hatFokus && $(hatFokus)) $(hatFokus).focus({ preventScroll: true });
+  }
+  function vorlageAnfordern(id) {
+    if (!vorlageDaten(id)) { meldung(tr('vorlageFehlt')); return; }
+    if (leer()) { vorlageLaden(id); return; }
+    vorlageWartet = id;
+    $('g-beispiel-frage-text').textContent = tr('vorlageFrage', { name: tr(VORLAGEN_T[id].name) });
     $('g-beispiel-frage').hidden = false; $('g-beispiel-sichern').focus();
+  }
+  vorlagenZeigen();
+  window.addEventListener('sprachegewechselt', vorlagenZeigen);
+  $('g-beispiel-sichern').addEventListener('click', function () { if (dateiSichern('_vor_vorlage')) vorlageLaden(); });
+  $('g-beispiel-ohne').addEventListener('click', function () { vorlageLaden(); });
+  $('g-beispiel-nein').addEventListener('click', function () {
+    var id = vorlageWartet; vorlageWartet = null;
+    $('g-beispiel-frage').hidden = true; var k = $(vorlageKarteId(id || 'beispielhaus')); if (k) k.focus();
   });
-  $('g-beispiel-sichern').addEventListener('click', function () { if (dateiSichern('_vor_beispiel')) beispielLaden(); });
-  $('g-beispiel-ohne').addEventListener('click', beispielLaden);
-  $('g-beispiel-nein').addEventListener('click', function () { $('g-beispiel-frage').hidden = true; $('g-beispiel').focus(); });
 
   /* ---------- Ansicht von oben / 3D ---------- */
   function dreiD() {
