@@ -510,6 +510,60 @@ __PALETTE_CSS__
   .g-zoom { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 6px; }
   .g-zoom .chip { background: var(--karte); }
   .g-szene { position: absolute; inset: 0; aspect-ratio: auto; border-radius: 0; }
+  /* Welle B: 3D-Ansicht des ganzen Hauses, Sonne, Dach, Durchgehen */
+  .szene canvas:focus-visible { outline: 3px solid var(--akzent); outline-offset: -3px; border-radius: 0; }
+  .g-3d-leiste { display: flex; flex-direction: column; gap: 10px; margin: 0 0 12px; padding: 10px 12px; background: var(--karte2); border-radius: 14px; }
+  .g-3d-zeile { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; justify-content: space-between; }
+  .g-3d-sonne { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 16px; align-items: center; margin-top: 8px; }
+  .g-3d-sonnebox > summary { cursor: pointer; min-height: 36px; }
+  .g-3d-titel { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+  .g-3d-titel svg.sym, .g-dach h4 svg.sym { width: 1.3em; height: 1.3em; color: var(--text); }
+  .g-3d-regler { min-width: 0; }
+  .g-3d-regler label { display: block; font-size: 16px; margin: 0; }
+  .g-3d-regler output { font-weight: 700; }
+  .g-3d-text { margin: 0; }
+  .g-3d-text.fehler:empty { display: none; }
+  .chip svg.sym { width: 1.25em; height: 1.25em; flex: none; }
+  .g-3d-etage svg.sym { width: 1.2em; height: 1.2em; }
+  .g-3d-tipp { position: absolute; left: 10px; right: 10px; top: 10px; z-index: 3; pointer-events: none; display: flex; justify-content: center; }
+  .g-3d-tipp span { background: var(--karte); color: var(--text); border: 2px solid var(--text); border-radius: 12px; padding: 6px 12px; font-size: 16px; max-width: 100%; }
+  .g-3d-geh { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 3; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; justify-content: space-between; pointer-events: none; }
+  .g-3d-geh > * { pointer-events: auto; }
+  .g-3d-pfeile { display: flex; gap: 6px; }
+  .chip.g-3d-pf { min-width: 48px; min-height: 48px; padding: 0; display: inline-grid; place-items: center; touch-action: none; }
+  .chip.g-3d-pf svg.sym { width: 1.6em; height: 1.6em; }
+  .chip.g-3d-pf.an { background: var(--f8); border-color: var(--f8); color: var(--grund); }
+  .g-3d-geh .chip { background: var(--karte); }
+  .g-3d-gehhinweis { top: 10px; bottom: auto; left: 10px; }
+  .g-3d-gehhinweis .pfeil { animation: gehhin 1.4s ease-in-out infinite alternate; }
+  @keyframes gehhin { from { transform: translateY(3px); } to { transform: translateY(-3px); } }
+  .g-3d-dachbox { margin: 14px 0 0; padding: 12px 14px; background: var(--karte2); border-radius: 14px; }
+  .g-3d-dachbox h4 { margin: 0 0 8px; font: 700 1.05rem var(--display); }
+  .g-3d-legende { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .g-3d-legende li { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+  .g-3d-legende .muster { width: 28px; height: 20px; border-radius: 5px; border: 2px solid var(--text); flex: none; }
+  .g-3d-dachliste { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 6px; }
+  .g-3d-dachliste li { display: flex; gap: 10px; align-items: flex-start; }
+  .g-3d-dachliste .muster { width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--text); flex: none; margin-top: 3px; }
+  .g-3d-dachbox .klein { margin: 6px 0; }
+  .g-dach { margin-top: 14px; }
+  .g-dach h4 { margin-bottom: 4px; }
+  .g-dachformen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 6px 0 12px; }
+  .g-dachform { position: relative; display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 6px 26px 6px 8px; border: 2px solid var(--linie2); border-radius: 12px; background: var(--karte); color: var(--text); font: 600 16px/1.15 var(--sans); cursor: pointer; text-align: left; }
+  .g-dachform svg { flex: none; width: 44px; height: 30px; fill: color-mix(in srgb, var(--f2) 22%, var(--karte)); stroke: currentColor; stroke-width: 2.4; stroke-linejoin: round; }
+  .g-dachform:hover { border-color: var(--f8); }
+  .g-dachform[aria-pressed="true"] { border-color: var(--f8); background: color-mix(in srgb, var(--f8) 16%, var(--karte)); box-shadow: inset 0 0 0 1px var(--f8); }
+  .g-dachform[aria-pressed="true"]::after { content: "✓"; position: absolute; top: 3px; right: 6px; font-size: 14px; font-weight: 800; color: var(--f8); }
+  .g-dach label { display: block; margin-top: 12px; }
+  .g-dach-neig { display: grid; grid-template-columns: minmax(0, 1fr) 5.5em; gap: 10px; align-items: center; }
+  .g-dach-wahl { margin: 10px 0 0; }
+  .g-dach-wahl > span { display: block; font-size: 16px; margin-bottom: 4px; }
+  .g-dach-feld { width: 6em; }
+  .g-dach .g-wand-hinweis { margin-top: 12px; }
+  @media (max-width: 640px) {
+    .g-3d-sonne { grid-template-columns: minmax(0, 1fr); }
+  }
+  .g-3d-sonnebox > summary + .g-3d-sonne + .g-3d-text { margin-top: 8px; }
   .g-seite { display: flex; flex-direction: column; gap: 14px; }
   .g-seite h4 { margin: 0 0 6px; font: 700 1.05rem var(--display); }
   .g-panel { background: var(--karte2); border-radius: 14px; padding: 14px 16px; }
@@ -857,6 +911,15 @@ __PALETTE_CSS__
   <symbol id="i-kompass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 5l3 7h-6z"/></symbol>
   <symbol id="i-mass"viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 8v8M21 8v8M7 9l-4 3 4 3M17 9l4 3-4 3"/></symbol>
   <symbol id="i-druck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></symbol>
+  <symbol id="i-gehen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.5" r="2"/><path d="M12 8l-2 5 3 3 1 5M10 13l-3 1M12 8l3 3 3 1M13 16l-3 5"/></symbol>
+  <symbol id="i-schnitt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V9l7-5 7 5v12zM2 14h20" stroke-dasharray="3 2"/></symbol>
+  <symbol id="i-dach" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13L12 4l10 9M5 11v9h14v-9"/></symbol>
+  <symbol id="i-auge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-auge-zu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><path d="M4 4l16 16"/></symbol>
+  <symbol id="i-pfeil-auf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V5M5 12l7-7 7 7"/></symbol>
+  <symbol id="i-pfeil-ab" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M5 12l7 7 7-7"/></symbol>
+  <symbol id="i-drehl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v5h5"/></symbol>
+  <symbol id="i-drehr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-3-6.2M20 4v5h-5"/></symbol>
 </svg>
 
 <a class="sprung" href="#inhalt">Zum Inhalt springen</a>
@@ -1769,13 +1832,49 @@ __PALETTE_CSS__
         <button type="button" class="chip mit-symbol" id="g-masse" aria-pressed="true"><svg class="sym" aria-hidden="true"><use href="#i-mass"/></svg><span data-t="masse">Maße zeigen</span></button>
         <button type="button" class="chip mit-symbol" id="g-drucken"><svg class="sym" aria-hidden="true"><use href="#i-druck"/></svg><span data-t="drucken">Plan drucken</span></button></div>
     </div>
+    <div class="g-3d-leiste" id="g-3d-leiste" hidden>
+      <div class="g-3d-zeile">
+        <div class="g-gruppe" role="group" aria-label="Etagen in der 3D-Ansicht ein- und ausblenden" data-t-aria="dreiEtagenAria"><span data-t="dreiEtagen">Etagen zeigen:</span><span id="g-3d-etagen" class="g-gruppe"></span></div>
+        <div class="g-gruppe">
+          <button type="button" class="chip mit-symbol" id="g-3d-schnitt" aria-pressed="false" title="Blendet alles über der gewählten Etage aus, so sehen Sie von oben hinein." data-t-title="dreiSchnittHilfe"><svg class="sym" aria-hidden="true"><use href="#i-schnitt"/></svg><span data-t="dreiSchnitt">Aufschneiden</span></button>
+          <button type="button" class="chip mit-symbol" id="g-3d-dachfarbe" aria-pressed="true"><svg class="sym" aria-hidden="true"><use href="#i-dach"/></svg><span data-t="dreiDachfarbe">Dach nach Sonnenertrag</span></button>
+          <button type="button" class="chip mit-symbol" id="g-3d-gehen" aria-pressed="false" title="Mit den Pfeiltasten durch die gewählte Etage gehen, Augenhöhe 1,60 m." data-t-title="dreiGehenHilfe"><svg class="sym" aria-hidden="true"><use href="#i-gehen"/></svg><span data-t="dreiGehen">Durchgehen</span></button>
+        </div>
+      </div>
+      <details class="g-3d-sonnebox" id="g-3d-sonnebox" open>
+        <summary class="g-3d-titel"><svg class="sym" aria-hidden="true"><use href="#i-sonne"/></svg><span data-t="dreiSonne">Sonne und Schatten</span></summary>
+        <div class="g-3d-sonne">
+          <div class="g-3d-regler"><label for="g-3d-zeit"><span data-t="dreiZeit">Tageszeit</span>: <output id="g-3d-zeit-w" for="g-3d-zeit"></output></label><input type="range" id="g-3d-zeit" min="4" max="23" step="0.25" value="14"></div>
+          <div class="g-3d-regler"><label for="g-3d-jahr"><span data-t="dreiJahr">Jahreszeit</span>: <output id="g-3d-jahr-w" for="g-3d-jahr"></output></label><input type="range" id="g-3d-jahr" min="1" max="12" step="1" value="6"></div>
+        </div>
+        <p class="klein g-3d-text" id="g-3d-sonnetext"></p>
+      </details>
+      <p class="klein g-3d-text" data-t="dreiBedienung">Ziehen dreht das Haus, Strg + Mausrad zoomt. Mit der Tastatur: Pfeiltasten drehen, + und − zoomen.</p>
+      <p class="klein g-3d-text" id="g-3d-gehstatus" hidden></p>
+      <p class="fehler g-3d-text" id="g-3d-fehler" role="alert"></p>
+    </div>
     <div class="g-flaeche">
       <div class="g-buehne" id="g-buehne">
         <svg id="g-plan" class="planzeichnung" role="application" aria-label="Grundriss. Räume und Möbel anklicken oder mit Tab auswählen; Pfeiltasten verschieben, R dreht, Entf löscht."></svg>
         <figure class="szene g-szene" id="g-szene" aria-label="Dreidimensionale Ansicht des Grundrisses, mit der Maus drehbar" hidden>
-          <canvas id="g-3d"></canvas>
+          <canvas id="g-3d" tabindex="0" aria-label="3D-Ansicht des Hauses. Pfeiltasten drehen, plus und minus zoomen." data-t-aria="dreiCanvasAria"></canvas>
           <div class="ersatz" id="g-3d-ersatz" hidden>3D-Ansicht nicht verfügbar (WebGL ist in diesem Browser aus). Der Plan von oben funktioniert trotzdem.</div>
           <figcaption class="szenen-text"><span>ziehen zum Drehen</span><span id="g-3d-etikett"></span></figcaption>
+          <div class="g-3d-tipp" id="g-3d-tipp" role="status" hidden></div>
+          <div class="g-3d-geh" id="g-3d-geh" role="group" aria-label="Bedienung zum Durchgehen" data-t-aria="dreiGehenAria" hidden>
+            <div class="g-3d-pfeile">
+              <button type="button" class="chip g-3d-pf" data-geh="links" aria-label="Nach links drehen" data-t-aria="dreiLinks"><svg class="sym" aria-hidden="true"><use href="#i-drehl"/></svg></button>
+              <button type="button" class="chip g-3d-pf" data-geh="vor" aria-label="Vorwärts gehen" data-t-aria="dreiVor"><svg class="sym" aria-hidden="true"><use href="#i-pfeil-auf"/></svg></button>
+              <button type="button" class="chip g-3d-pf" data-geh="zurueck" aria-label="Rückwärts gehen" data-t-aria="dreiZurueck"><svg class="sym" aria-hidden="true"><use href="#i-pfeil-ab"/></svg></button>
+              <button type="button" class="chip g-3d-pf" data-geh="rechts" aria-label="Nach rechts drehen" data-t-aria="dreiRechts"><svg class="sym" aria-hidden="true"><use href="#i-drehr"/></svg></button>
+            </div>
+            <button type="button" class="chip" id="g-3d-geh-zu" data-t="dreiGehenZurueck">Zurück zur Übersicht (Esc)</button>
+          </div>
+          <div class="g-hinweis g-3d-gehhinweis" id="g-3d-gehhinweis" role="status" hidden>
+            <svg class="anim" viewBox="0 0 64 30" aria-hidden="true" focusable="false"><g class="pfeil"><rect x="22" y="3" width="20" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="3"/><path d="M32 5v7M29 8l3-3 3 3" fill="none" stroke="currentColor" stroke-width="2"/></g><rect x="10" y="17" width="20" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="34" y="17" width="20" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            <span id="g-3d-gehhinweis-text"></span>
+            <button type="button" class="chip" id="g-3d-gehhinweis-zu" data-t="verstanden">Verstanden</button>
+          </div>
         </figure>
         <div class="g-tipp" aria-live="polite"><span id="g-tipp"></span></div>
         <div class="g-nord" id="g-nord" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="359" aria-valuenow="0" aria-label="Norden" data-t-aria="nordName" title="Windrose ziehen" data-t-title="nordZiehen">
@@ -1831,6 +1930,35 @@ __PALETTE_CSS__
             </div>
             <p class="klein" id="g-wd-kurz" data-t="wandFeldKurz">Dicke der Wand in cm. Der gezeichnete Raum behält sein Maß, die Außenwand kommt nach außen dazu.</p>
           </div>
+          <div class="g-dach" id="g-dach">
+            <h4><svg class="sym" aria-hidden="true"><use href="#i-dach"/></svg> <span data-t="dachTitel">Dach</span></h4>
+            <p class="klein" data-t="dachKurz">Das Dach sehen Sie in der 3D-Ansicht. Es sitzt auf der obersten Etage.</p>
+            <div class="g-dachformen" role="group" aria-label="Dachform" data-t-aria="dachFormAria">
+              <button type="button" class="g-dachform" data-dachform="sattel" aria-pressed="true"><svg viewBox="0 0 48 32" aria-hidden="true" focusable="false"><path d="M6 30V16L24 4l18 12v14z"/></svg><span data-t="dachSattel">Satteldach</span></button>
+              <button type="button" class="g-dachform" data-dachform="walm" aria-pressed="false"><svg viewBox="0 0 48 32" aria-hidden="true" focusable="false"><path d="M4 18L14 6h20l10 12v12H4zM4 18h40"/></svg><span data-t="dachWalm">Walmdach</span></button>
+              <button type="button" class="g-dachform" data-dachform="pult" aria-pressed="false"><svg viewBox="0 0 48 32" aria-hidden="true" focusable="false"><path d="M6 30V14L42 6v24z"/></svg><span data-t="dachPult">Pultdach</span></button>
+              <button type="button" class="g-dachform" data-dachform="flach" aria-pressed="false"><svg viewBox="0 0 48 32" aria-hidden="true" focusable="false"><path d="M6 30V12h36v18zM3 12h42"/></svg><span data-t="dachFlach">Flachdach</span></button>
+            </div>
+            <label for="g-dach-neigung" data-t="dachNeigung">Neigung in Grad</label>
+            <div class="g-dach-neig">
+              <input type="range" id="g-dach-schieber" min="0" max="80" step="1" value="35" aria-label="Dachneigung mit Schieber einstellen" data-t-aria="dachNeigungSchieber">
+              <input type="text" id="g-dach-neigung" inputmode="decimal" aria-describedby="g-dach-neigung-f" value="35">
+            </div>
+            <div class="fehler" id="g-dach-neigung-f"></div>
+            <div class="g-dach-wahl" id="g-dach-first">
+              <span data-t="dachFirst">Firstrichtung (höchste Linie)</span>
+              <div class="g-gruppe" role="group"><button type="button" class="chip" data-first="x" aria-pressed="true" data-t="dachFirstX">waagerecht im Plan</button><button type="button" class="chip" data-first="y" aria-pressed="false" data-t="dachFirstY">senkrecht im Plan</button></div>
+            </div>
+            <div class="g-dach-wahl" id="g-dach-hoch">
+              <span data-t="dachHoch">Hohe Seite des Pultdachs</span>
+              <div class="g-gruppe" role="group"><button type="button" class="chip" data-hoch="min" aria-pressed="true"></button><button type="button" class="chip" data-hoch="max" aria-pressed="false"></button></div>
+            </div>
+            <p class="klein" id="g-dach-firstnur" data-t="dachFirstNur" hidden>Beim Walm- und Flachdach bestimmt die Form die Firstrichtung, hier gibt es nichts einzustellen.</p>
+            <label for="g-dach-ueberstand" data-t="dachUeberstand">Dachüberstand in cm</label>
+            <input type="text" id="g-dach-ueberstand" class="g-dach-feld" inputmode="decimal" aria-describedby="g-dach-ueberstand-f" value="30">
+            <div class="fehler" id="g-dach-ueberstand-f"></div>
+            <div class="g-wand-hinweis"><span class="annahme" data-t="annahme">Annahme</span><p data-t="dreiDachNaeherung">Das Dach wird als einfache Form über dem umschließenden Rechteck der obersten Etage berechnet. Gauben, Anbauten, Versprünge und Schatten von Nachbarn fehlen. Der Ertrag gilt je Fläche, nicht für das ganze Dach.</p></div>
+          </div>
           <div class="knopfreihe"><button type="button" class="knopf zweit" id="g-etage-weg">Diese Etage löschen</button></div>
         </div>
 
@@ -1869,6 +1997,20 @@ __PALETTE_CSS__
 
         <div class="g-panel g-auswahl" id="g-auswahl" aria-live="polite"></div>
       </div>
+    </div>
+    <div class="g-3d-dachbox" id="g-3d-dachbox" hidden>
+      <h4 data-t="dreiDachTitel">Dach nach Sonnenertrag</h4>
+      <ul class="g-3d-legende" aria-label="Farben der Dachflächen" data-t-aria="dreiLegende">
+        <li><span class="muster" data-k="sehrgut"></span><span data-t="dreiKsehrgut">sehr gut</span></li>
+        <li><span class="muster" data-k="gut"></span><span data-t="dreiKgut">gut</span></li>
+        <li><span class="muster" data-k="maessig"></span><span data-t="dreiKmaessig">mäßig</span></li>
+        <li><span class="muster" data-k="schlecht"></span><span data-t="dreiKschlecht">schlecht</span></li>
+      </ul>
+      <p class="klein" id="g-3d-schwellen"></p>
+      <ul class="g-3d-dachliste" id="g-3d-dachliste"></ul>
+      <p class="klein" id="g-3d-dachquelle"></p>
+      <div class="g-wand-hinweis"><span class="annahme" data-t="annahme">Annahme</span><p data-t="dreiDachNaeherung">Das Dach wird als einfache Form über dem umschließenden Rechteck der obersten Etage berechnet. Gauben, Anbauten, Versprünge und Schatten von Nachbarn fehlen. Der Ertrag gilt je Fläche, nicht für das ganze Dach.</p></div>
+      <p class="klein" id="g-3d-ort"></p>
     </div>
     <div class="g-wand-hinweis" id="g-wand-hinweis">
       <span class="annahme" data-t="annahme">Annahme</span>
@@ -2633,10 +2775,12 @@ __PALETTE_CSS__
 <script src="daten/preise_amtlich.js"></script>
 <script src="daten/karte_werke.js"></script>
 <script src="daten/karte_orte.js"></script>
+<script src="daten/pvgis.js"></script>
 <div class="g-druck" id="g-druck" aria-hidden="true"></div>
 <script src="daten/texte.js"></script>
 <script src="sprache.js"></script>
 <script src="grundriss_geo.js"></script>
+<script src="grundriss_dach.js"></script>
 <script src="rechner.js"></script>
 <script src="grafik.js"></script>
 <script src="haus3d.js"></script>

@@ -120,6 +120,8 @@
       first: d0.first === 'y' ? 'y' : 'x',
       ueberstand: klemme(zahlOk(d0.ueberstand, 0.3), 0, 2)
     };
+    /* Pultdach: hohe Seite. Nur gespeichert, wenn nicht der Standard ('min' = oben bzw. links im Plan), damit ältere Pläne unverändert bleiben */
+    if (d0.hoch === 'max') neu.dach.hoch = 'max';
     neu.preise = {}; neu.mengen = {};
     Object.keys(p.preise || {}).forEach(function (k) { var v = Number(p.preise[k]); if (isFinite(v) && v >= 0) neu.preise[k] = v; });
     Object.keys(p.mengen || {}).forEach(function (k) { var v = Number(p.mengen[k]); if (isFinite(v) && v >= 0) neu.mengen[k] = v; });
@@ -1322,6 +1324,8 @@
     $('g-zoom').hidden = ansicht3d;
     $('g-nord').hidden = ansicht3d;
     $('g-tipp').textContent = ansicht3d ? '' : $('g-tipp').textContent;
+    $('g-3d-leiste').hidden = !ansicht3d;
+    if (window.GRUNDRISS3D && window.GRUNDRISS3D.aktiv) window.GRUNDRISS3D.aktiv(ansicht3d);
     if (ansicht3d) dreiD(); else zeichnen();
   }
   $('g-ansicht-plan').addEventListener('click', function () { ansichtSetzen(false); });
@@ -1333,7 +1337,7 @@
   if ('ResizeObserver' in window) new ResizeObserver(function () { if (sichtbar && !ansicht3d) { seitenverhaeltnis(); zeichnen(); } }).observe($('g-buehne'));
   window.addEventListener('themagewechselt', function () { if (ansicht3d) dreiD(); });
 
-  function allesZeigen() { nachfuehrenAlle(); etagenZeigen(); zeichnen(); auswahlZeigen(); auswerten(); nordZeigen(); }
+  function allesZeigen() { nachfuehrenAlle(); etagenZeigen(); zeichnen(); auswahlZeigen(); auswerten(); nordZeigen(); dachZeigen(); }
 
   /* ---------- Himmelsrichtung (Windrose) ---------- */
   function nordZeigen() {
@@ -1348,7 +1352,52 @@
   function nordSetzen(grad) {
     plan.nord = Math.round(((grad % 360) + 360) % 360) % 360;
     speichern(); nordZeigen();
+    if (ansicht3d) dreiD();
   }
+
+  /* ---------- Dach (Form, Neigung, Firstrichtung, Überstand); wird in der 3D-Ansicht gezeigt ---------- */
+  var FORMEN = ['sattel', 'walm', 'pult', 'flach'];
+  function dachAendern() { speichern(); dachZeigen(); if (ansicht3d) dreiD(); }
+  function dachZeigen() {
+    var d = plan.dach, box = $('g-dach'); if (!box) return;
+    box.querySelectorAll('[data-dachform]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-dachform') === d.form ? 'true' : 'false'); });
+    if (document.activeElement !== $('g-dach-neigung')) $('g-dach-neigung').value = String(Math.round(d.neigung * 10) / 10).replace('.', ',');
+    $('g-dach-schieber').value = String(Math.round(d.neigung));
+    $('g-dach-schieber').disabled = d.form === 'flach'; $('g-dach-neigung').disabled = d.form === 'flach';
+    if (document.activeElement !== $('g-dach-ueberstand')) $('g-dach-ueberstand').value = String(Math.round(d.ueberstand * 1000) / 10).replace('.', ',');
+    var mitFirst = d.form === 'sattel' || d.form === 'pult', mitHoch = d.form === 'pult';
+    $('g-dach-first').hidden = !mitFirst; $('g-dach-hoch').hidden = !mitHoch; $('g-dach-firstnur').hidden = mitFirst;
+    box.querySelectorAll('[data-first]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-first') === d.first ? 'true' : 'false'); });
+    var hoch = d.hoch === 'max' ? 'max' : 'min', hb = box.querySelectorAll('[data-hoch]');
+    hb[0].textContent = tr(d.first === 'x' ? 'dachHochOben' : 'dachHochLinks'); hb[1].textContent = tr(d.first === 'x' ? 'dachHochUnten' : 'dachHochRechts');
+    hb.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-hoch') === hoch ? 'true' : 'false'); });
+  }
+  (function dachBedienen() {
+    var box = $('g-dach'); if (!box) return;
+    box.querySelectorAll('[data-dachform]').forEach(function (b) {
+      b.addEventListener('click', function () { plan.dach.form = b.getAttribute('data-dachform'); dachAendern(); });
+    });
+    box.querySelectorAll('[data-first]').forEach(function (b) {
+      b.addEventListener('click', function () { plan.dach.first = b.getAttribute('data-first'); dachAendern(); });
+    });
+    box.querySelectorAll('[data-hoch]').forEach(function (b) {
+      b.addEventListener('click', function () { if (b.getAttribute('data-hoch') === 'max') plan.dach.hoch = 'max'; else delete plan.dach.hoch; dachAendern(); });
+    });
+    $('g-dach-schieber').addEventListener('input', function () { plan.dach.neigung = Number(this.value); $('g-dach-neigung-f').textContent = ''; $('g-dach-neigung').removeAttribute('aria-invalid'); dachAendern(); });
+    $('g-dach-neigung').addEventListener('input', function () {
+      var v = zahl(this.value), fe = $('g-dach-neigung-f');
+      if (v == null || v < 0 || v > 80) { fe.textContent = tr('dachFehlerNeigung'); this.setAttribute('aria-invalid', 'true'); return; }
+      fe.textContent = ''; this.removeAttribute('aria-invalid'); plan.dach.neigung = v; dachAendern();
+    });
+    $('g-dach-neigung').addEventListener('blur', dachZeigen);
+    $('g-dach-ueberstand').addEventListener('input', function () {
+      var v = zahl(this.value), fe = $('g-dach-ueberstand-f');
+      if (v == null || v < 0 || v > 200) { fe.textContent = tr('dachFehlerUeberstand'); this.setAttribute('aria-invalid', 'true'); return; }
+      fe.textContent = ''; this.removeAttribute('aria-invalid'); plan.dach.ueberstand = v / 100; dachAendern();
+    });
+    $('g-dach-ueberstand').addEventListener('blur', dachZeigen);
+    window.addEventListener('sprachegewechselt', dachZeigen);
+  })();
   (function nordBedienen() {
     var r = $('g-nord'), f = $('g-nord-grad'); if (!r) return;
     var zieht = false;
@@ -1497,7 +1546,7 @@
     /* von app.js beim Reiterwechsel gerufen: Größe ist erst messbar, wenn der Bereich sichtbar ist */
     zeigt: function (an) {
       sichtbar = !!an;
-      if (!sichtbar) { druckAufraeumen(); return; }
+      if (!sichtbar) { druckAufraeumen(); if (window.GRUNDRISS3D && window.GRUNDRISS3D.pause) window.GRUNDRISS3D.pause(); return; }
       if (!vb) einpassen(); else seitenverhaeltnis();
       allesZeigen(); tipp();
     },
