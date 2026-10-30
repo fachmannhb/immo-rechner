@@ -242,6 +242,12 @@
       '<p class="klein es-q" lang="de"><b>' + esc(tr('regQuelle')) + ':</b> PVGIS (EU-Kommission), ' + esc(tr('regAbruf', { datum: datumDe(ein.pvAbruf) })) + ' ' + badge('geprüft') + ' · ' + esc(tr('esPvgisHinweis', { stadt: RK.landInfo(ein.land).stadt })) + '</p>';
   }
 
+  /* Welle D, Teil 2b (Nachtrag): Die Amortisation rechnet mit gleichbleibendem Strompreis, solange der Regler 0 % steht; das sagt dieser Hinweis daneben (auch bei eigenem Strompreis).
+     Steht der Regler über 0, nennt der Hinweis den gewählten Anstieg, damit er nie das Falsche behauptet. */
+  function anstiegHinweis(tag) {
+    var s = +S.steigerung > 0 ? tr('esAnSteig', { p: n1(S.steigerung) }) : tr('esOhneAnstieg');
+    return '<' + tag + ' class="klein es-anstieg-hinweis" data-anstieg="' + (+S.steigerung > 0 ? n1(S.steigerung) : '0') + '">' + esc(s) + '</' + tag + '>';
+  }
   function htmlVarianten(res, ein) {
     var v = res.varianten, namen = { keiner: tr('esOhneSpeicher'), klein: tr('esKleinSp', { kwh: K.ANNAHMEN.speicherKlein }), gross: tr('esGrossSp', { kwh: K.ANNAHMEN.speicherGross }) };
     var maxInv = Math.max(v.gross.invest, 1), maxEv = Math.max(res.erzeugung, 1);
@@ -253,7 +259,7 @@
         '<span class="es-var-zeile"><span>' + esc(tr('esAutarkie')) + '</span><b>' + zahl(n0(x.autarkie * 100) + ' %', modell(), ' data-var="' + k + '-autarkie" data-wert="' + (x.autarkie * 100).toFixed(2) + '"') + '</b></span>' + balken(x.autarkie, 'c1', tr('esAutarkie') + ' ' + n0(x.autarkie * 100) + ' %') +
         '<span class="es-var-zeile"><span>' + esc(tr('esEigenverbrauch')) + '</span><b>' + zahl(n0(x.ev) + ' kWh', modell(), ' data-var="' + k + '-ev" data-wert="' + x.ev.toFixed(1) + '"') + '</b></span>' + balken(x.ev / maxEv, 'c2', tr('esEigenverbrauch') + ' ' + n0(x.ev) + ' kWh') +
         '<span class="es-var-zeile"><span>' + esc(tr('esInvest')) + '</span><b>' + zahl(eur(x.invest), res.preis ? K.beleg(res.preis.eintrag) : modell(), ' data-var="' + k + '-invest" data-wert="' + x.invest.toFixed(0) + '"') + '</b></span>' + balken(x.invest / maxInv, 'c3', tr('esInvest') + ' ' + eur(x.invest)) +
-        '<span class="es-var-zeile"><span>' + esc(tr('esAmortisation')) + '</span><b>' + zahl(esc(am), modell(), ' data-var="' + k + '-amort" data-wert="' + (x.amortJahr == null ? '' : x.amortJahr) + '"') + '</b></span></button>';
+        '<span class="es-var-zeile"><span>' + esc(tr('esAmortisation')) + '</span><b>' + zahl(esc(am), modell(), ' data-var="' + k + '-amort" data-wert="' + (x.amortJahr == null ? '' : x.amortJahr) + '"') + '</b></span>' + anstiegHinweis('span') + '</button>';
     }).join('');
     var sp = res.varianten.klein.speicherPreis, sg = res.varianten.gross.speicherPreis;
     var q = quellen([K.beleg(K.eint('eigenverbrauch', 'ev_autarkie')), K.beleg(K.eint('speicher', 'sp_groesse')), sp && K.beleg(sp.eintrag), sg && K.beleg(sg.eintrag), K.beleg(K.eint('speicher', 'sp_lebensdauer')), K.beleg(K.eint('speicher', 'sp_ersatz'))]);
@@ -277,7 +283,7 @@
   function htmlErgebnis(res, ein) {
     var x = res.varianten[res.gewaehlteVariante], eeg = res.eeg, h = '';
     var am = x.amortJahr != null ? tr('esSatzAmort', { jahr: x.amortJahr, genau: n1(x.amortGenau) }) : tr('esSatzNie', { n: K.ANNAHMEN.horizont });
-    h += '<p class="es-satz" data-satz="1">' + tr('esSatz', { kwp: zahl(n1(res.kwp), modell(), ' data-wert="' + res.kwp.toFixed(3) + '"'), kwh: zahl(n0(res.erzeugung), ein.belegPv, ' data-wert="' + res.erzeugung.toFixed(0) + '"'), am: zahl(esc(am), modell(), ' data-wert="' + (x.amortGenau == null ? '' : x.amortGenau.toFixed(2)) + '"') }) + '</p>';
+    h += '<p class="es-satz" data-satz="1">' + tr('esSatz', { kwp: zahl(n1(res.kwp), modell(), ' data-wert="' + res.kwp.toFixed(3) + '"'), kwh: zahl(n0(res.erzeugung), ein.belegPv, ' data-wert="' + res.erzeugung.toFixed(0) + '"'), am: zahl(esc(am), modell(), ' data-wert="' + (x.amortGenau == null ? '' : x.amortGenau.toFixed(2)) + '"') }) + '</p>' + anstiegHinweis('p');
     /* Erzeugung */
     h += '<div class="es-zeile"><span class="es-z-name">' + symbol('i-sonne') + esc(tr('esErzeugung')) + '</span><b>' + zahl(n0(res.erzeugung) + ' kWh', ein.belegPv, ' data-wert="' + res.erzeugung.toFixed(1) + '"') + '</b></div>' +
       stapel([{ wert: x.ev, klasse: 'c1' }, { wert: x.einsp, klasse: 'c2' }], tr('esEvEinspBalken', { ev: n0(x.ev), e: n0(x.einsp) })) +

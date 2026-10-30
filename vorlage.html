@@ -1261,6 +1261,47 @@ __PALETTE_CSS__
     .ma-reihe .ma-spur { grid-column: 1 / -1; grid-row: 2; }
     .ma-kosten-zeile { grid-template-columns: minmax(0, 1fr); }
   }
+  /* Welle D, Teil 2b: Dämmstandard, Lüftung, Wasser, Energiepreise. Farben nur aus der Palette (--c1, --c2, gut/warn/schlecht, info). */
+  .hu-stds { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+  .hu-std .es-var-kopf svg.sym { width: 2.2em; height: 2.2em; }
+  .hu-std b { font-size: 1.1rem; }
+  .hu-neubau { margin: 6px 0 10px; }
+  .hu-neubau > b, .hu-kfw > b { display: block; margin-bottom: 4px; }
+  .hu-kfw { margin: 8px 0; }
+  .ma-fuell.hu-v { background: var(--c2); border-radius: 0 999px 999px 0; }
+  .hu-legende { margin-top: 4px; }
+  .hu-refq { margin: -2px 0 6px; }
+  .hu-grad { margin: 6px 0; }
+  .hu-preise { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px 18px; margin: 10px 0; }
+  .hu-preise .es-feld input, .hu-eigen input, .hu-wasser-reihe input[type="text"] { min-height: 44px; }
+  .hu-eigen { max-width: 420px; margin: 10px 0; }
+  .hu-heizkosten { margin-top: 12px; }
+  .hu-utab { margin: 8px 0; }
+  .hu-zeile { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(70px, .6fr) minmax(0, 2fr) minmax(0, 1.2fr); gap: 4px 14px; align-items: center; padding: 8px 0; border-top: 1px solid var(--linie); }
+  .hu-zeile:first-child { border-top: 0; }
+  .hu-zeile > div { min-width: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+  .hu-l { display: none; font-weight: 700; color: var(--leise); margin-right: 6px; }
+  .hu-ueber { margin: 8px 0; padding: 10px 14px; border-radius: 12px; background: var(--warn-fl); border-left: 5px solid var(--warn); }
+  .hu-ueber .knopf { margin-left: 8px; }
+  .hu-drei { display: grid; gap: 0; margin: 12px 0; border: 2px solid var(--linie); border-radius: 14px; background: var(--karte); padding: 0 14px; }
+  .hu-d { display: grid; grid-template-columns: minmax(150px, 230px) minmax(0, 1fr); gap: 4px 14px; padding: 10px 0; border-top: 1px solid var(--linie); }
+  .hu-d:first-child { border-top: 0; }
+  .hu-d > div { min-width: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+  .hu-dl { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+  .hu-dl svg.sym { width: 1.4em; height: 1.4em; color: var(--akzent-text); flex: none; }
+  .hu-wasser-reihe { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px 24px; margin: 8px 0; }
+  .hu-wasser-reihe input[type="range"] { width: 100%; min-height: 44px; accent-color: var(--c1); }
+  .hu-autark .ma-fuell { background: var(--c2); }
+  .hu-dwd { font-size: 16px; color: var(--leise); }
+  .hu-haken input[type="checkbox"] { width: 26px; height: 26px; flex: none; accent-color: var(--c1); }
+  .hu-belege li { overflow-wrap: anywhere; }
+  .ab-alt summary svg.sym { width: 1.3em; height: 1.3em; margin-right: 6px; color: var(--akzent-text); }
+  .teilen-zeile.hu-teilen { margin: 14px 0 4px; }
+  @media (max-width: 760px) {
+    .hu-zeile { grid-template-columns: minmax(0, 1fr); }
+    .hu-l { display: inline; }
+    .hu-d { grid-template-columns: minmax(0, 1fr); }
+  }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -1333,6 +1374,21 @@ __PALETTE_CSS__
   <symbol id="i-schicht" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5zM3 12.5l9 5 9-5M3 17l9 5 9-5"/></symbol>
   <symbol id="i-glas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 7l3-3M9 12l6-6M9 17l8-8"/></symbol>
   <symbol id="i-material" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h8v5H3zM13 6h8v5h-8zM3 13h5v5H3zM10 13h8v5h-8zM20 13h1v5h-1z"/></symbol>
+  <!-- Welle D, Teil 2b: Haus mit 1 bis 4 Schichten (Dämmstandard), Lüftung, Wasser -->
+  <symbol id="i-huelle1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20V11l9-8 9 8v9z"/></symbol>
+  <symbol id="i-huelle2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20V11l9-8 9 8v9zM6 20v-8.2l6-5.3 6 5.3V20"/></symbol>
+  <symbol id="i-huelle3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20V11l9-8 9 8v9zM6 20v-8.2l6-5.3 6 5.3V20M9 20v-5.4l3-2.6 3 2.6V20"/></symbol>
+  <symbol id="i-huelle4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20V11l9-8 9 8v9zM6 20v-8.2l6-5.3 6 5.3V20M9 20v-5.4l3-2.6 3 2.6V20M11.2 20v-2.2l.8-.7.8.7V20"/></symbol>
+  <symbol id="i-flamme" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/></symbol>
+  <symbol id="i-uhr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-luft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8"/></symbol>
+  <symbol id="i-spar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></symbol>
+  <symbol id="i-fenster-offen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18"/><path d="M18 3l3 2v14l-3 2M11 3v18M4 12h14"/></symbol>
+  <symbol id="i-luefter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="5"/><path d="M12 12l3-3M12 12l-3-3M12 12l3 3M12 12l-3 3"/></symbol>
+  <symbol id="i-luefter-wrg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><path d="M12 9.5l1.5-4M12 14.5l-1.5 4M9.5 12l-4-1.5M14.5 12l4 1.5"/><path d="M4 12a8 8 0 0 1 8-8M20 12a8 8 0 0 1-8 8"/></symbol>
+  <symbol id="i-zentral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="12" height="8" rx="1"/><path d="M15 10h3a3 3 0 0 1 3 3M15 14h3M9 8V4M6 16v4M12 16v4"/></symbol>
+  <symbol id="i-zisterne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8c0-1.7 3.1-3 7-3s7 1.3 7 3v10c0 1.7-3.1 3-7 3s-7-1.3-7-3zM5 8c0 1.7 3.1 3 7 3s7-1.3 7-3"/><path d="M12 13s2 2 2 3.2a2 2 0 0 1-4 0C10 15 12 13 12 13z"/></symbol>
+  <symbol id="i-kalk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M7 20l2-9 2 9M13 20l1.5-6 1.5 6"/></symbol>
 </svg>
 
 <a class="sprung" href="#inhalt">Zum Inhalt springen</a>
@@ -2526,6 +2582,7 @@ __PALETTE_CSS__
         <p class="klein" data-t="abKurz">Aus den Mengen Ihres Plans: Böden, Wände, Decken, Türen, Bäder.</p>
         <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="abKeineBeratung">Richtwerte aus Ratgeberseiten, keine Angebote und keine Bauberatung.</span></p>
         <div id="g-ausbau-inhalt"></div>
+        <div class="teilen-zeile hu-teilen"><button type="button" class="knopf zweit mittel teilen-knopf" data-teilen="grundriss" id="g-ausbau-teilen">Ergebnis weiterleiten</button></div>
       </div>
     </details>
     <p class="fehler" id="g-ausbau-fehler" role="alert" hidden></p>
@@ -2542,6 +2599,56 @@ __PALETTE_CSS__
       </div>
     </details>
     <p class="fehler" id="g-material-fehler" role="alert" hidden></p>
+  </div>
+
+  <!-- Welle D, Teil 2b: Dämmstandard (Altbau, Gesetz, KfW, Passivhaus), Heizwärme-Balken, Energiepreise, Mehrkosten, Förderung, Amortisation -->
+  <div class="karte g-daemmung" id="g-daemmung-karte">
+    <details id="g-daemmung-details" open>
+      <summary class="es-karte-summary"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-huelle3"/></svg><span class="es-karte-frage" data-t="hdTitel">Wie gut gedämmt?</span><b class="es-karte-kopf" id="g-daemmung-kopfzeile"></b><span class="es-karte-auf" data-t="esAufklappen">Ansehen</span></summary>
+      <div class="es-karte-koerper">
+        <p class="klein" data-t="hdKurz">Wählen Sie, wie gut Ihr Haus gedämmt sein soll. Heizwärme, Kosten und Förderung ändern sich sofort.</p>
+        <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="hdKeineBeratung">Eigene Näherung mit Annahmen, keine Bau-, Förder- oder Rechtsberatung. Fördersätze vor dem Antrag am Original prüfen.</span></p>
+        <div id="g-daemmung-inhalt">
+          <div id="hu-d-steuer"></div>
+          <div id="hu-d-balken" aria-live="polite"></div>
+          <div id="hu-d-preise"></div>
+          <div id="hu-d-rest" aria-live="polite"></div>
+        </div>
+      </div>
+    </details>
+    <p class="fehler" id="g-daemmung-fehler" role="alert" hidden></p>
+  </div>
+
+  <!-- Welle D, Teil 2b: Lüftung -->
+  <div class="karte g-lueftung" id="g-lueftung-karte">
+    <details id="g-lueftung-details" open>
+      <summary class="es-karte-summary"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-luft"/></svg><span class="es-karte-frage" data-t="hlTitel">Frische Luft</span><b class="es-karte-kopf" id="g-lueftung-kopfzeile"></b><span class="es-karte-auf" data-t="esAufklappen">Ansehen</span></summary>
+      <div class="es-karte-koerper">
+        <p class="klein" data-t="hlKurz">Fenster auf, Lüfter in der Wand oder eine Anlage mit Wärmerückgewinnung: Kosten, Strom und Heizwärme ändern sich sofort.</p>
+        <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="hlKeineBeratung">Richtwerte aus Ratgeber- und Herstellerseiten, keine Angebote und keine Planung einer Lüftungsanlage.</span></p>
+        <div id="g-lueftung-inhalt">
+          <div id="hu-l-steuer"></div>
+          <div id="hu-l-ergebnis" aria-live="polite"></div>
+        </div>
+      </div>
+    </details>
+    <p class="fehler" id="g-lueftung-fehler" role="alert" hidden></p>
+  </div>
+
+  <!-- Welle D, Teil 2b: Wasser (Regenwasser aus dem Dach, Enthärtung) -->
+  <div class="karte g-wasser" id="g-wasser-karte">
+    <details id="g-wasser-details" open>
+      <summary class="es-karte-summary"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-zisterne"/></svg><span class="es-karte-frage" data-t="hwTitel">Wasser</span><b class="es-karte-kopf" id="g-wasser-kopfzeile"></b><span class="es-karte-auf" data-t="esAufklappen">Ansehen</span></summary>
+      <div class="es-karte-koerper">
+        <p class="klein" data-t="hwKurz">Was kommt im Jahr vom Dach, und wie viel davon können WC und Waschmaschine nutzen?</p>
+        <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="hwKeineBeratung">Eigene Näherung mit Annahmen aus Ratgebern und einem Satzungsbeispiel, keine Planung einer Regenwasseranlage.</span></p>
+        <div id="g-wasser-inhalt">
+          <div id="hu-w-steuer"></div>
+          <div id="hu-w-ergebnis" aria-live="polite"></div>
+        </div>
+      </div>
+    </details>
+    <p class="fehler" id="g-wasser-fehler" role="alert" hidden></p>
   </div>
 
   <div class="karte" id="g-kosten-karte">
@@ -3344,17 +3451,22 @@ __PALETTE_CSS__
 <script src="daten/innenausbau.js"></script>
 <script src="daten/material_seite.js"></script>
 <script src="daten/gradtage.js"></script>
+<script src="daten/daemmung_seite.js"></script>
+<script src="daten/wasser_seite.js"></script>
+<script src="daten/energiepreise.js"></script>
 <script src="daten/ausbau_entscheidungen.js"></script>
 <div class="g-druck" id="g-druck" aria-hidden="true"></div>
 <script src="daten/texte.js"></script>
 <script src="daten/texte_energie.js"></script>
 <script src="daten/texte_ausbau.js"></script>
+<script src="daten/texte_huelle.js"></script>
 <script src="sprache.js"></script>
 <script src="grundriss_geo.js"></script>
 <script src="grundriss_dach.js"></script>
 <script src="regeln_kern.js"></script>
 <script src="energie_kern.js"></script>
 <script src="ausbau_kern.js"></script>
+<script src="huelle_kern.js"></script>
 <script src="rechner.js"></script>
 <script src="grafik.js"></script>
 <script src="haus3d.js"></script>
@@ -3364,6 +3476,7 @@ __PALETTE_CSS__
 <script src="grundriss_energie.js"></script>
 <script src="grundriss_formen.js"></script>
 <script src="grundriss_ausbau.js"></script>
+<script src="grundriss_huelle.js"></script>
 <script src="karte3d.js"></script>
 <script src="karte.js"></script>
 <script src="app.js"></script>

@@ -105,6 +105,7 @@
     esInvest: { de: 'Kosten', en: 'Cost', ru: 'Затраты' },
     esAmortisation: { de: 'Rechnet sich', en: 'Pays off', ru: 'Окупается' },
     esAmortJahr: { de: 'im Jahr {jahr}', en: 'in year {jahr}', ru: 'на {jahr}-й год' },
+    esOhneAnstieg: { de: 'ohne Strompreisanstieg gerechnet (der Strompreis bleibt gleich)', en: 'calculated without an electricity price increase (the price stays the same)', ru: 'расчёт без роста цены на электроэнергию (цена остаётся прежней)' },
     esAmortNie: { de: 'nicht in {n} Jahren', en: 'not within {n} years', ru: 'не за {n} лет' },
     esSpeicherAnnahme: { de: 'Die Größen {klein} und {gross} kWh sind Beispiele, keine Empfehlung.', en: 'The sizes {klein} and {gross} kWh are examples, not a recommendation.', ru: 'Размеры {klein} и {gross} кВт·ч — это примеры, а не рекомендация.' },
     esSpeicherErsatz: { de: 'Im Jahr {jahr} setzen wir einen Ersatz der Batterie an (Mitte der Preisspanne, nach Größe anteilig).', en: 'In year {jahr} we include replacing the battery (middle of the price range, scaled by size).', ru: 'В {jahr}-й год мы закладываем замену аккумулятора (середина диапазона цен, пропорционально размеру).' },

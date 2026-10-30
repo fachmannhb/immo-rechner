@@ -232,10 +232,15 @@
     var heiz = b.heizung, ref = (D.material.heizwaerme_referenz || []);
     h += '<h4 class="es-h5">' + symbol('i-thermo') + esc(tr('maHeizTitel')) + '</h4>';
     if (heiz && heiz.ok) {
-      var max = Math.max(200, heiz.kwhM2Hoch * 1.1, heiz.kwhM2 * 1.1);
-      var span = '<span class="ma-spanne" style="left:' + (100 * heiz.kwhM2Niedrig / max).toFixed(2) + '%;width:' + Math.max(0.6, 100 * (heiz.kwhM2Hoch - heiz.kwhM2Niedrig) / max).toFixed(2) + '%"></span>';
-      h += '<div class="ma-reihe" data-heiz="ihr"><span class="ma-name">' + esc(tr('maIhrHaus')) + '</span><span class="ma-spur" aria-hidden="true"><span class="ma-fuell" style="width:' + (100 * heiz.kwhM2 / max).toFixed(2) + '%"></span>' + span + '</span><span class="ma-wert es-zahl" id="ma-heiz-wert" data-kwh-m2="' + heiz.kwhM2 + '" data-lo="' + heiz.kwhM2Niedrig + '" data-hi="' + heiz.kwhM2Hoch + '">' + n0(heiz.kwhM2) + '</span></div>';
-      h += '<p class="klein">' + esc(tr('maHeizSatz', { kwh: n0(heiz.kwhM2), lo: n0(heiz.kwhM2Niedrig), hi: n0(heiz.kwhM2Hoch), q: n0(heiz.kwh), wfl: n1(heiz.wohnflaeche) })) + '</p>';
+      /* Welle D, Teil 2b: derselbe Balken wie in der Karte „Wie gut gedämmt?“ (Wände, Dach, Fenster und Lüftung, mit dem gewählten Standard); ohne grundriss_huelle.js bleibt der alte Balken */
+      var hb = window.GRUNDRISS_HUELLE && window.GRUNDRISS_HUELLE.balkenHtml ? window.GRUNDRISS_HUELLE.balkenHtml(c, 'ma') : null;
+      var max = hb ? hb.max : Math.max(200, heiz.kwhM2Hoch * 1.1, heiz.kwhM2 * 1.1);
+      if (hb) h += hb.html;
+      else {
+        var span = '<span class="ma-spanne" style="left:' + (100 * heiz.kwhM2Niedrig / max).toFixed(2) + '%;width:' + Math.max(0.6, 100 * (heiz.kwhM2Hoch - heiz.kwhM2Niedrig) / max).toFixed(2) + '%"></span>';
+        h += '<div class="ma-reihe" data-heiz="ihr"><span class="ma-name">' + esc(tr('maIhrHaus')) + '</span><span class="ma-spur" aria-hidden="true"><span class="ma-fuell" style="width:' + (100 * heiz.kwhM2 / max).toFixed(2) + '%"></span>' + span + '</span><span class="ma-wert es-zahl" id="ma-heiz-wert" data-kwh-m2="' + heiz.kwhM2 + '" data-lo="' + heiz.kwhM2Niedrig + '" data-hi="' + heiz.kwhM2Hoch + '">' + n0(heiz.kwhM2) + '</span></div>';
+        h += '<p class="klein">' + esc(tr('maHeizSatz', { kwh: n0(heiz.kwhM2), lo: n0(heiz.kwhM2Niedrig), hi: n0(heiz.kwhM2Hoch), q: n0(heiz.kwh), wfl: n1(heiz.wohnflaeche) })) + '</p>';
+      }
       h += '<div class="es-legende"><span><b>' + esc(tr('maRefTitel')) + '</b></span></div>';
       ref.forEach(function (r) { h += heizReihe(tr('maRef_' + r.id), r.wert, max, true); });
       h += '<p class="klein">' + annahmeZeile('maRefHinweis') + '</p>';
@@ -292,8 +297,8 @@
     var el = byId('g-material-kopfzeile');
     if (!el) return;
     if (c.leer || !c.bilanz) { el.textContent = tr('abKopfLeer'); return; }
-    var h = c.bilanz.heizung;
-    el.textContent = h && h.ok ? tr('maKopf', { kwh: n0(h.kwhM2) }) : tr('maKopfKeine');
+    var h = c.bilanz.heizung, ges = window.GRUNDRISS_HUELLE && window.GRUNDRISS_HUELLE.gesamtM2 ? window.GRUNDRISS_HUELLE.gesamtM2(c) : null;   /* Teil 2b: mit Lüftung */
+    el.textContent = h && h.ok ? tr('maKopf', { kwh: n0(ges != null ? ges : h.kwhM2) }) : tr('maKopfKeine');
   }
 
   /* Material setzen (Planer): schreibt plan.material und lässt den Plan speichern */

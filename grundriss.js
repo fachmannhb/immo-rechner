@@ -155,6 +155,35 @@
       if (typeof p.material.daemmdicke_cm === 'number' && isFinite(p.material.daemmdicke_cm)) { pm.daemmdicke_cm = klemme(p.material.daemmdicke_cm, 0, 40); pmOk = true; }
       if (pmOk) neu.material = pm;
     }
+    /* Welle D, Teil 2b: Dämmstandard, Lüftung, Wasser, Energiepreise (alle optional). Nur vorhandene, gültig geformte Felder werden übernommen; fehlt ein Feld, bleibt es weg
+       (alte Pläne laden unverändert). Eine unbekannte Id wird mitgespeichert und in der Karte als Meldung gezeigt (HUELLE_KERN.planStandard usw.), der Standard gilt dann. */
+    var idOk = function (v) { return typeof v === 'string' && /^[a-z0-9_]{1,30}$/.test(v); };
+    if (idOk(p.daemmstandard)) neu.daemmstandard = p.daemmstandard;
+    if (idOk(p.kfwstufe)) neu.kfwstufe = p.kfwstufe;
+    if (typeof p.mehrkosten_eigen === 'number' && isFinite(p.mehrkosten_eigen) && p.mehrkosten_eigen > 0) neu.mehrkosten_eigen = klemme(p.mehrkosten_eigen, 0, 99999999);
+    if (p.lueftung && typeof p.lueftung === 'object' && !Array.isArray(p.lueftung)) {
+      var lu = {};
+      if (idOk(p.lueftung.art)) lu.art = p.lueftung.art;
+      if (typeof p.lueftung.neubau === 'boolean') lu.neubau = p.lueftung.neubau;
+      if (Object.keys(lu).length) neu.lueftung = lu;
+    }
+    if (p.wasser && typeof p.wasser === 'object' && !Array.isArray(p.wasser)) {
+      var wa = {}, pw0 = p.wasser;
+      if (typeof pw0.personen === 'number' && isFinite(pw0.personen)) wa.personen = Math.round(klemme(pw0.personen, 1, 12));
+      if (typeof pw0.regenwasser === 'boolean') wa.regenwasser = pw0.regenwasser;
+      if (typeof pw0.gruendach === 'boolean') wa.gruendach = pw0.gruendach;
+      if (typeof pw0.enthaertung === 'boolean') wa.enthaertung = pw0.enthaertung;
+      if (idOk(pw0.haerte)) wa.haerte = pw0.haerte;
+      if (typeof pw0.preis === 'number' && isFinite(pw0.preis) && pw0.preis > 0) wa.preis = klemme(pw0.preis, 0.01, 49.99);
+      if (Object.keys(wa).length) neu.wasser = wa;
+    }
+    if (p.energiepreise && typeof p.energiepreise === 'object' && !Array.isArray(p.energiepreise)) {
+      var ep0 = p.energiepreise, ep = {};
+      if (idOk(ep0.traeger)) ep.traeger = ep0.traeger;
+      if (typeof ep0.gas_ct === 'number' && isFinite(ep0.gas_ct) && ep0.gas_ct > 0) ep.gas_ct = klemme(ep0.gas_ct, 0.01, 199.99);
+      if (typeof ep0.oel_eur100l === 'number' && isFinite(ep0.oel_eur100l) && ep0.oel_eur100l > 0) ep.oel_eur100l = klemme(ep0.oel_eur100l, 0.01, 999.99);
+      if (Object.keys(ep).length) neu.energiepreise = ep;
+    }
     neu.preise = {}; neu.mengen = {};
     Object.keys(p.preise || {}).forEach(function (k) { var v = Number(p.preise[k]); if (isFinite(v) && v >= 0) neu.preise[k] = v; });
     Object.keys(p.mengen || {}).forEach(function (k) { var v = Number(p.mengen[k]); if (isFinite(v) && v >= 0) neu.mengen[k] = v; });
@@ -210,6 +239,7 @@
     if (window.GRUNDRISS_ENERGIE) window.GRUNDRISS_ENERGIE.aktualisieren();
     if (window.GRUNDRISS_FORMEN) window.GRUNDRISS_FORMEN.aktualisieren();
     if (window.GRUNDRISS_AUSBAU) window.GRUNDRISS_AUSBAU.aktualisieren();   /* Welle D, Teil 2a: Innenausbau, Material und Umbau-Hinweis */
+    if (window.GRUNDRISS_HUELLE) window.GRUNDRISS_HUELLE.aktualisieren();   /* Welle D, Teil 2b: Dämmstandard, Lüftung, Wasser */
     clearTimeout(speicherTimer);
     speicherTimer = setTimeout(function () {
       try {
