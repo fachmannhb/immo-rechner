@@ -180,7 +180,7 @@
     var zielZelle = !z ? '<span class="klein">' + esc(tr('hdNichts')) + '</span>' : '<b class="es-zahl" data-ziel-u="' + z.wert + '">' + n2(z.wert) + '</b> ' + (z.annahme ? annahmeSchild() : quelleHtml(z.beleg));
     var mark = ok === null ? '' : (ok ? '<span class="fm-ampel gruen" data-ampel="gruen"><i aria-hidden="true">✓</i>' + esc(tr('hdErreicht')) + '</span>' : '<span class="fm-ampel gelb" data-ampel="gelb"><i aria-hidden="true">!</i>' + esc(tr('hdDarueber')) + '</span>');
     return '<div class="hu-zeile" data-bt="' + bt + '"><div><b>' + esc(tr('hdBt_' + bt)) + '</b></div><div><span class="hu-l">' + esc(tr('hdIst')) + '</span><span class="es-zahl" data-ist-u="' + ist + '">' + n2(ist) + '</span>' + (istAnnahme ? ' ' + annahmeSchild() : '') + '</div>' +
-      '<div><span class="hu-l">' + esc(tr('hdZiel')) + '</span>' + zielZelle + '</div><div>' + mark + '</div></div>';
+      '<div><span class="hu-l">' + esc(tr('hdZiel')) + '</span>' + zielZelle + '</div><div>' + (mark ? '<span class="hu-l">' + esc(tr('hdKopfErgebnis')) + '</span>' : '') + mark + '</div></div>';
   }
   function mehrkostenHtml(mf, c) {
     var mk = mf.mehrkosten;
@@ -267,7 +267,7 @@
     if (ps.id === 'kfw') h += '<p class="ab-meldung" role="status" data-kfw-ohne-u="1">' + esc(tr('hdKfwOhneU')) + '</p>';
     else {
       var z = sd.u, ist = hw.uIst;
-      h += '<div class="hu-utab">' + uZeileHtml('wand', ist.wand, z && z.wand, false) + uZeileHtml('dach', ist.dach, z && z.dach, true) + uZeileHtml('fenster', ist.fenster, z && z.glas, false) + uZeileHtml('boden', ist.boden, z && z.boden, true) + '</div>';
+      h += '<div class="hu-utab"><div class="hu-kopf" aria-hidden="false"><div>' + esc(tr('hdKopfBauteil')) + '</div><div>' + esc(tr('hdIst')) + '</div><div>' + esc(tr('hdZiel')) + '</div><div>' + esc(tr('hdKopfErgebnis')) + '</div></div>' + uZeileHtml('wand', ist.wand, z && z.wand, false) + uZeileHtml('dach', ist.dach, z && z.dach, true) + uZeileHtml('fenster', ist.fenster, z && z.glas, false) + uZeileHtml('boden', ist.boden, z && z.boden, true) + '</div>';
       if (ps.id === 'gmodg') h += '<p class="klein">' + esc(tr('hdGmodgHinweis')) + '</p>';
       if (ps.id === 'passivhaus') h += '<p class="klein">' + annahmeZeile('hdPhAnnahme') + '</p>';
       if (ps.id === 'bestand') h += '<p class="klein">' + esc(tr('hdBestandHinweis')) + '</p>';

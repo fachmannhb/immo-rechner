@@ -1279,6 +1279,8 @@ __PALETTE_CSS__
   .hu-utab { margin: 8px 0; }
   .hu-zeile { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(70px, .6fr) minmax(0, 2fr) minmax(0, 1.2fr); gap: 4px 14px; align-items: center; padding: 8px 0; border-top: 1px solid var(--linie); }
   .hu-zeile:first-child { border-top: 0; }
+  .hu-kopf { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(70px, .6fr) minmax(0, 2fr) minmax(0, 1.2fr); gap: 4px 14px; padding: 4px 0 6px; font-weight: 700; color: var(--leise); font-size: .9em; }
+  .hu-kopf > div { min-width: 0; overflow-wrap: anywhere; }
   .hu-zeile > div { min-width: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
   .hu-l { display: none; font-weight: 700; color: var(--leise); margin-right: 6px; }
   .hu-ueber { margin: 8px 0; padding: 10px 14px; border-radius: 12px; background: var(--warn-fl); border-left: 5px solid var(--warn); }
@@ -1300,6 +1302,7 @@ __PALETTE_CSS__
   @media (max-width: 760px) {
     .hu-zeile { grid-template-columns: minmax(0, 1fr); }
     .hu-l { display: inline; }
+    .hu-kopf { display: none; }
     .hu-d { grid-template-columns: minmax(0, 1fr); }
   }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
