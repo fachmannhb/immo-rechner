@@ -64,7 +64,7 @@ text = einmal(text, '<script>__THREE_JS__</script>',
 # Auftrag S1 (31.10.2026): die vier neuen Sauna-Dateien und die vier Dateien, die dieser Auftrag ohnehin ändert, werden ohne Kommentare und Einrückung eingebettet
 # (spart Platz; die Quellen bleiben lesbar, Zeilenumbrüche bleiben). Sie enthalten keine Zeilenkommentare, keine Backticks und keine Zeilen, die auf "\" enden;
 # bau.py bricht ab, falls "//" am Zeilenanfang oder "`" vorkommt. Weitere Dateien nur aufnehmen, wenn tmp/s1_probe8.py und alle Tests grün sind.
-SCHLANK = {'sauna_kern.js', 'grundriss_sauna.js', 'daten/texte_sauna.js', 'daten/sauna.js', 'grundriss.js', 'grundriss_grundstueck.js', 'grundriss_mappe.js', 'mappe_kern.js'}
+SCHLANK = {'sauna_kern.js', 'grundriss_sauna.js', 'daten/texte_sauna.js', 'daten/sauna.js', 'daten/kleinhaus.js', 'grundriss.js', 'grundriss_grundstueck.js', 'grundriss_mappe.js', 'mappe_kern.js'}
 def schlank(name, text):
     if '`' in text or re.search(r'^\s*//', text, flags=re.M):
         raise SystemExit(f'{name}: Zeilenkommentar oder Backtick, kann nicht schlank eingebettet werden.')

@@ -74,11 +74,11 @@
   }
 
   /* Diagramm- und Statusfarben: aus palette.json, von bau.py eingesetzt (R024) */
-  :root { --c1: #6332a8; --c2: #1f9bd1; --c3: #d0567f; --gut: #1f7542; --warn: #8a6400; --schlecht: #b23b2b; --info: #2f5fb3; --info-fl: #e4edfa; --info-fl2: #d3e2f7; --viol-fl: #eee6f9; --viol-fl2: #e6dbf5; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c1: #8a5cd6; --c2: #28a0d8; --c3: #d9628f; --gut: #5cc48a; --warn: #e0b84a; --schlecht: #ef8a7a; --info: #7aa8f0; --info-fl: #212c44; --info-fl2: #2a3a5c; --viol-fl: #2f2740; --viol-fl2: #3b2f55; } }
-  :root[data-theme="dark"] { --c1: #8a5cd6; --c2: #28a0d8; --c3: #d9628f; --gut: #5cc48a; --warn: #e0b84a; --schlecht: #ef8a7a; --info: #7aa8f0; --info-fl: #212c44; --info-fl2: #2a3a5c; --viol-fl: #2f2740; --viol-fl2: #3b2f55; }
+  :root { --c1: #6332a8; --c2: #1f9bd1; --c3: #d0567f; --gut: #1f7542; --warn: #8a6400; --schlecht: #b23b2b; --info: #2f5fb3; --info-fl: #e4edfa; --info-fl2: #d3e2f7; --viol-fl: #eee6f9; --viol-fl2: #e6dbf5; --holz: #946a3c; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c1: #8a5cd6; --c2: #28a0d8; --c3: #d9628f; --gut: #5cc48a; --warn: #e0b84a; --schlecht: #ef8a7a; --info: #7aa8f0; --info-fl: #212c44; --info-fl2: #2a3a5c; --viol-fl: #2f2740; --viol-fl2: #3b2f55; --holz: #c39a66; } }
+  :root[data-theme="dark"] { --c1: #8a5cd6; --c2: #28a0d8; --c3: #d9628f; --gut: #5cc48a; --warn: #e0b84a; --schlecht: #ef8a7a; --info: #7aa8f0; --info-fl: #212c44; --info-fl2: #2a3a5c; --viol-fl: #2f2740; --viol-fl2: #3b2f55; --holz: #c39a66; }
   /* Bank-Mappe: immer die helle Palette, auch im Dunkelmodus (druckfest) */
-  .blatt { --c1: #6332a8; --c2: #1f9bd1; --c3: #d0567f; --gut: #1f7542; --warn: #8a6400; --schlecht: #b23b2b; --info: #2f5fb3; --info-fl: #e4edfa; --info-fl2: #d3e2f7; --viol-fl: #eee6f9; --viol-fl2: #e6dbf5; }
+  .blatt { --c1: #6332a8; --c2: #1f9bd1; --c3: #d0567f; --gut: #1f7542; --warn: #8a6400; --schlecht: #b23b2b; --info: #2f5fb3; --info-fl: #e4edfa; --info-fl2: #d3e2f7; --viol-fl: #eee6f9; --viol-fl2: #e6dbf5; --holz: #946a3c; }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   html { -webkit-text-size-adjust: 100%; }
@@ -1359,7 +1359,7 @@
     .hu-d { grid-template-columns: minmax(0, 1fr); }
   }
   /* Welle D, Teil 3: Anbau. Farben nur aus der Palette; Ampel immer mit Form und Wort. */
-  symbol[id^="i-an-"], symbol[id^="i-gs-"], symbol[id^="i-sa-"] { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  symbol[id^="i-an-"], symbol[id^="i-gs-"], symbol[id^="i-sa-"], symbol[id^="i-kh-"] { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   #i-an-ok, #i-an-achtung, #i-an-stopp, #i-an-frage { stroke-width: 2.6; }
   .an-arten { grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); }
   .an-art .es-var-kopf svg.sym { width: 2.2em; height: 2.2em; }
@@ -1494,7 +1494,19 @@
   .sa-holz { border: 2px solid var(--linie); border-radius: 14px; padding: 12px 14px; background: var(--karte); min-width: 0; overflow-wrap: anywhere; }
   .sa-holz.sa-gewaehlt { border-color: var(--akzent); }
   .sa-ja { font-weight: 700; } .sa-offen { color: var(--leise); } .sa-ja, .sa-offen { margin-right: 12px; }
-  #g-sauna-karte .tabelle-kasten { max-height: none; }
+  #g-sauna-karte .tabelle-kasten, #g-kleinhaus-karte .tabelle-kasten { max-height: none; }
+  .kh-balken { display: flex; gap: 2px; min-height: 34px; margin: 8px 0 4px; }
+  .kh-seg { display: flex; align-items: center; justify-content: center; min-width: 14px; border-radius: 6px; color: var(--auf-akzent); font-weight: 700; font-size: .85rem; overflow: hidden; }
+  .kh-w { background: var(--c1); } .kh-t { background: var(--c2); } .kh-a { background: var(--c3); } .kh-u { background: var(--c1); opacity: .55; }
+  .kh-luecke { background: transparent; border: 2px dashed var(--leise); color: var(--text); }
+  .kh-leg { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .9rem; } .kh-leg .sw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 4px; vertical-align: -2px; }
+  .kh-verbot { border-left: 5px solid var(--schlecht); background: var(--schlecht-flaeche); padding: 8px 12px; border-radius: 8px; }
+  .kh-wahl { grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr)); }
+  .kh-holz { fill: var(--holz); fill-opacity: .35; stroke: var(--holz); stroke-width: 1.5; } .kh-stahl { fill: var(--leer-fl); stroke: var(--text); stroke-width: 1.5; } .kh-zu { fill: none; stroke: var(--leise); stroke-dasharray: 5 3; stroke-width: 1.2; }
+  .kh-glas { fill: var(--c2); fill-opacity: .35; stroke: var(--c2); } .kh-wahlt .kh-stahl, .kh-wahlt .kh-holz { stroke: var(--c1); stroke-width: 2.5; }
+  .kh-regel { border: 2px solid var(--linie); border-radius: 14px; padding: 10px 14px; margin: 8px 0; background: var(--karte); overflow-wrap: anywhere; }
+  .kh-regel-spalten { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 8px 16px; }
+  .kh-zone-wahl { grid-template-columns: repeat(auto-fit, minmax(min(100%, 70px), 1fr)); }
   @media (min-width: 761px) { .sa-tab td.z { white-space: nowrap; text-align: right; } }
   .sa-wahl { grid-template-columns: minmax(0, 1fr); margin: 8px 0 0; }
   .sa-ul { padding-left: 18px; }
@@ -1624,6 +1636,12 @@
   <symbol id="i-gs-huhn" viewBox="0 0 24 24"><path d="M5 14c0-4 3-6 6-6 2 0 3 1 3 3 0 2-1 3-1 5 0 2 2 4 4 4H9c-2 0-4-2-4-4zM11 8c0-2 1-3 3-3 1 0 2 1 2 2M16 7l3 1-3 1"/></symbol>
   <symbol id="i-gs-biene" viewBox="0 0 24 24"><path d="M7 14a5 4 0 1 0 10 0 5 4 0 1 0-10 0M10 11v6M14 11v6M9 10C6 8 6 5 8 5.5s2.5 3 1.5 4.5M15 10c3-2 3-5 1-4.5s-2.5 3-1.5 4.5"/></symbol>
   <symbol id="i-gs-fisch" viewBox="0 0 24 24"><path d="M3 12c3-5 9-6 13-2l5-2v8l-5-2c-4 4-10 3-13-2zM17 11.5h.01"/></symbol>
+  <symbol id="i-kh-box" viewBox="0 0 24 24"><path d="M3 8h18v9H3zM6 8v9M10 8v9M14 8v9M18 8v9"/></symbol>
+  <symbol id="i-kh-falt" viewBox="0 0 24 24"><path d="M3 18h18M5 18l3-9h8l3 9M8 9v9M16 9v9"/></symbol>
+  <symbol id="i-kh-aus" viewBox="0 0 24 24"><path d="M9 7h6v10H9zM9 10H4v4h5M15 10h5v4h-5M6 8l-2 2M18 8l2 2"/></symbol>
+  <symbol id="i-kh-tiny" viewBox="0 0 24 24"><path d="M4 8h13v8H4zM17 14h4M7 12h3v2H7zM8 18.5a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0M5 8l5-3l5 3"/></symbol>
+  <symbol id="i-kh-modul" viewBox="0 0 24 24"><path d="M4 11l8-6l8 6M6 10v9h12v-9M10 19v-5h4v5"/></symbol>
+  <symbol id="i-kh-welt" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
   <symbol id="i-sa-fass" viewBox="0 0 24 24"><path d="M5 6c0-1.5 3-2 7-2s7 .5 7 2v12c0 1.5-3 2-7 2s-7-.5-7-2zM5 9c0 1.5 3 2 7 2s7-.5 7-2M5 15c0 1.5 3 2 7 2s7-.5 7-2"/></symbol>
   <symbol id="i-sa-holz" viewBox="0 0 24 24"><path d="M3 6h18v4H3zM3 14h18v4H3zM7 6v4M14 6v4M10 14v4M17 14v4"/></symbol>
   <symbol id="i-an-frage" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.8.5-1.1 1-1.1 2M12 17v.5"/></symbol>
@@ -2951,6 +2969,30 @@
       </div>
     </details>
     <p class="fehler" id="g-sauna-fehler" role="alert" hidden></p>
+  </div>
+
+  <!-- Auftrag K1: Kleinhaus (Typ, 3D, Preis bis zur Aufstellung, Eignung, Regeln) -->
+  <div class="karte g-sauna" id="g-kleinhaus-karte">
+    <details id="g-kleinhaus-details">
+      <summary class="es-karte-summary"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-kh-modul"/></svg><span class="es-karte-frage" data-t="khTitel">Kleinhaus: Typ, 3D, Preis bis zur Aufstellung, Regeln</span><b class="es-karte-kopf" id="g-kleinhaus-kopfzeile"></b><span class="es-karte-auf" data-t="esAufklappen">Ansehen</span></summary>
+      <div class="es-karte-koerper">
+        <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="khKeineBeratung">Planungshilfe, keine Beratung.</span></p>
+        <div id="g-kleinhaus-inhalt">
+          <div class="sa-eins">
+            <div><div id="kh-t1"></div><div id="kh-t1e" aria-live="polite"></div></div>
+            <div class="sa-modell" id="kh-modell" data-render="">
+              <div class="szene"><canvas id="kh-3d" tabindex="0" aria-label="3D-Modell des Kleinhauses. Mit Ziehen oder Pfeiltasten drehen." data-t-aria="khModellAria"></canvas><p class="ersatz" id="kh-3d-ersatz" role="status" hidden></p></div>
+              <p class="klein" id="kh-legende"></p>
+            </div>
+          </div>
+          <div id="kh-skizzen"></div>
+          <div id="kh-t3"></div>
+          <div id="kh-t4"></div>
+          <div id="kh-t5"></div>
+        </div>
+      </div>
+    </details>
+    <p class="fehler" id="g-kleinhaus-fehler" role="alert" hidden></p>
   </div>
 
   <div class="karte" id="g-kosten-karte">
@@ -5973,7 +6015,7 @@ window.DATEN.sauna = {
 "status_fertig":"prüfen vor Nutzung",
 "quellen":{"WEKA":{"titel":"Weka Saunaofen Kompakt (3,6 kW), Anleitung 2019","url":"https://media.hornbach.de/hb/ownersmanual/as.46997682.pdf"},"K9":{"titel":"Karibu/Weka Saunaofen 9 kW (Art.-Nr. 66601), Anleitung 2015","url":"https://media.hornbach.at/hb/ownersmanual/as.46513844.pdf"},"KOFEN":{"titel":"Karibu, Ofenleistung nach Volumen","url":"https://en.karibu.de/info/wissenswertes/sauna-wissen/welcher-saunaofen"},"KINFO":{"titel":"Karibu, Produktinformation 40 mm Sauna","url":"https://www.karibu-saunen.de/media/Uploaded/allg_hinweise_sauna_40mm.pdf"},"WKAAPI":{"titel":"Weka Saunahaus Kaapi 2, Montageanleitung 2622","url":"https://cdn.koempf24.de/product/11afc7/kaapi-2-ma-2.pdf?fm=pdf"},"EINHELL":{"titel":"Einhell, DIY-Projekt Sauna (Heimwerker, kein Fachbetrieb)","url":"https://www.einhell.de/fileadmin/de/diy-projects/einhell-diy-projekt-sauna.pdf"},"VDE":{"titel":"VDE Verlag, DIN VDE 0100-703:2006-02","url":"https://vde-verlag.de/standards/0100107/din-vde-0100-703-vde-0100-703-2006-02.html"},"LWG":{"titel":"LWG Bayern, Holz der Schwarzerle, Tab. 1 (DIN 68364)","url":"https://lwg.bayern.de/mam/cms04/forsttechnik-holz/dateien/w42_das_holz_der_schwarzerle-eigenschaften_verwendung.pdf"},"THERMORY":{"titel":"Thermory, Sauna-Katalog 0422 (Hersteller, Werbung)","url":"https://thermory.com/wp-content/uploads/2022/08/Thermory_Sauna_materials_Product_catalogue_0422-A4_GER_web.pdf"},"HOHMANN":{"titel":"Holz-Hohmann Shop, Bremen","url":"https://shop.holz-hohmann.de/?s=sauna&post_type=product"},"ESAUNA":{"titel":"esaunashop.com","url":"https://esaunashop.com/"},"HBLINDE":{"titel":"Hornbach.de, Banklatte Linde 10571514","url":"https://www.hornbach.de/p/s/10571514/"},"HBFICHTE":{"titel":"Hornbach.de, Faseprofil Fichte 3558234","url":"https://www.hornbach.de/p/s/3558234/"},"HBOFEN":{"titel":"Hornbach.de, Suchlisten Saunazubehör","url":"https://www.hornbach.de/s/Saunaofen"},"CHECK24":{"titel":"Check24 Preisvergleich (Händler offen, „ab“-Preise)","url":"https://preisvergleich.check24.de/ul/gartensaunen/"},"B33":{"titel":"Bericht 33: Kamin, 1. BImSchV","url":"recherche/33_anbau_kamin_grill.md"},"B43":{"titel":"Bericht 43: Sauna bauen","url":"recherche/43_sauna_bau.md"},"B44":{"titel":"Bericht 44: Sauna, zweite Runde","url":"recherche/44_sauna_bau_luecken.md"},"HB-T2":{"titel":"Hornbach.de, Karibu Talos 2 Express","url":"https://www.hornbach.de/p/s/12012596/"},"HB-T1":{"titel":"Hornbach.de, Karibu Talos 1","url":"https://www.hornbach.de/p/s/12198205/"},"HB-T0":{"titel":"Hornbach.de, Karibu Talos 0","url":"https://www.hornbach.de/p/s/12198189/"},"HB-T3":{"titel":"Hornbach.de, Karibu Talos 3","url":"https://www.hornbach.de/p/s/12198244/"},"HB-D3":{"titel":"Hornbach.de, Karibu Dyka 3","url":"https://www.hornbach.de/p/s/12869518/"},"HB-T6":{"titel":"Hornbach.de, Karibu Talos 6","url":"https://www.hornbach.de/p/s/12198230/"},"HB-NA":{"titel":"Hornbach.de, Weka Naantali","url":"https://www.hornbach.de/p/s/6627254/"},"HB-F2":{"titel":"Hornbach.de, Karibu Fassy 2","url":"https://www.hornbach.de/p/s/10474213/"},"HB-CU":{"titel":"Hornbach.de, Home Deluxe Cube Deluxe L","url":"https://www.hornbach.de/p/s/12097871/"},"HB-FT":{"titel":"Hornbach.de, FinnTherm Spruce","url":"https://www.hornbach.de/p/s/12083846/"},"HB-SK":{"titel":"Hornbach.de, Home Deluxe Skyline XL Big","url":"https://www.hornbach.de/p/s/12097841/"}},
 "holz":[
-{"id":"fichte","name":"Fichte","wand":{"wert":"ja","ids":"S2-05","quelle":"KINFO","status":"geprüft"},"bank":{"status":"Lücke"},"harz":{"wert":"Harzausfluss unvermeidbar, gering (Karibu, Weka)","ids":"S2-03","quelle":"WKAAPI","status":"geprüft"},"splitter":{"status":"Lücke"},"rho":{"wert":470,"ids":"S2-01","quelle":"LWG","status":"prüfen vor Nutzung"},"m2":[{"v":17.85,"h":"Holz-Hohmann","i":"S2-30","quelle":"HOHMANN","status":"prüfen vor Nutzung"},{"v":18.9,"h":"Hornbach","i":"S2-30a","quelle":"HBFICHTE","status":"prüfen vor Nutzung","hinweis":"nicht als Sauna ausgewiesen"}],"lfm":[]},
+{"id":"fichte","name":"Fichte","wand":{"wert":"ja","ids":"S2-05","quelle":"KINFO","status":"geprüft"},"bank":{"status":"Lücke"},"harz":{"wert":"Harzausfluss unvermeidbar, gering (Karibu, Weka)","ids":"S2-03","quelle":"WKAAPI","status":"geprüft"},"splitter":{"status":"Lücke"},"rho":{"wert":470,"ids":"S2-01","quelle":"LWG","status":"prüfen vor Nutzung"},"m2":[{"v":17.85,"h":"Holz-Hohmann","i":"S2-30","quelle":"HOHMANN","status":"prüfen vor Nutzung"},{"v":18.9,"h":"Hornbach","i":"S2-30a","quelle":"HBFICHTE","status":"prüfen vor Nutzung","hinweis":"nicht als Sauna ausgewiesen","ausser":true}],"lfm":[]},
 {"id":"espe","name":"Espe","wand":{"wert":"ja","ids":"S2-31","quelle":"HOHMANN","status":"prüfen vor Nutzung"},"bank":{"wert":"ja","ids":"S2-05","quelle":"KINFO","status":"geprüft"},"harz":{"wert":"kein Harz (Thermory)","ids":"S2-02","quelle":"THERMORY","status":"geprüft"},"splitter":{"wert":"keine Splitter, schlecht wärmeleitend","ids":"S2-02","quelle":"THERMORY","status":"geprüft"},"rho":{"wert":490,"ids":"S2-01","quelle":"LWG","status":"prüfen vor Nutzung"},"m2":[{"v":92.53,"h":"Holz-Hohmann","i":"S2-31","quelle":"HOHMANN","status":"prüfen vor Nutzung"}],"lfm":[]},
 {"id":"thermoespe","name":"Thermo-Espe","wand":{"wert":"ja","ids":"S2-02","quelle":"THERMORY","status":"geprüft"},"bank":{"wert":"ja","ids":"S2-02","quelle":"THERMORY","status":"geprüft"},"harz":{"wert":"harzfrei (Suchtreffer), dunkler","ids":"S2-02","quelle":"THERMORY","status":"prüfen vor Nutzung"},"splitter":{"wert":"geringere Wärmeleitfähigkeit, formstabil","ids":"S2-02","quelle":"THERMORY","status":"geprüft"},"rho":{"status":"Lücke"},"m2":[{"v":101.39,"h":"Holz-Hohmann","i":"S2-32","quelle":"HOHMANN","status":"prüfen vor Nutzung"}],"lfm":[]},
 {"id":"hemlock","name":"Hemlock","wand":{"status":"Lücke"},"bank":{"status":"Lücke"},"harz":{"status":"Lücke"},"splitter":{"status":"Lücke"},"rho":{"status":"Lücke"},"m2":[],"lfm":[]},
@@ -6056,6 +6098,50 @@ window.DATEN.sauna = {
 {"id":"W-4","text":"Leuchte: Leuchtband (Einhell), geprüfte Saunaleuchte (Weka).","entscheidung":"Weka und Karibu."},
 {"id":"W-5","text":"Abluft: Weka Rückwand zwischen den Liegen, Einhell 1 m über Boden, Forum 30 cm unter der Decke.","entscheidung":"Weka; die anderen nur als Hinweis."},
 {"id":"W-7","text":"Dämmung: Styropor in der Decke (Einhell), Mineralwolle in den Wänden (Karibu).","entscheidung":"Lücke zeigen, keine Empfehlung."}
+]
+};
+</script>
+<script>/* daten/kleinhaus.js */
+window.DATEN = window.DATEN || {};
+window.DATEN.kleinhaus = {
+"stand":"2026-10-31",
+"status_fertig":"prüfen vor Nutzung",
+"quellen":{"ISO":{"titel":"Wikipedia, Intermodal container (ISO 668); Reederseiten nicht erreichbar","url":"https://en.wikipedia.org/wiki/Intermodal_container"},"HIG":{"titel":"Hig Housing Tech, Made-in-China, ausklappbares Containerhaus","url":"https://higcontainerhouse.en.made-in-china.com/product/CtVUDRplOocE/China-High-Strength-Expandable-Mobile-Home-Prefab-Modular-Container-House.html"},"YUMI":{"titel":"Xiamen Yumi, Made-in-China, Faltcontainer 20 Fuß","url":"https://yumi-steel.en.made-in-china.com/product/oOFANRPUHpTt/China-Movable-Prefabricated-Light-Steel-Frame-Folding-Container-House.html"},"ZONG":{"titel":"Shandong Zongfab, Made-in-China, Faltcontainer","url":"https://cn-containerhouse.en.made-in-china.com/product/dEmrxPJDmlUo/China-20FT-Folding-Container-Home-Prefab-Home.html"},"CGCH":{"titel":"CGCH, Alibaba, ausklappbares Haus","url":"https://www.alibaba.com/product-introduction/CGCH-Mobile-Home-20ft-40ft-Expandable_1601199489000.html"},"WANZ":{"titel":"Wanzhi Steel, 40 Fuß Doppelflügel","url":"https://wanzhi-steel.com/expandable-container-house/40ft-double-wing-expandable-house"},"DREWRY":{"titel":"Drewry, World Container Index (29.10.2026)","url":"https://www.drewry.co.uk/supply-chain-advisors/supply-chain-expertise/world-container-index-assessed-by-drewry"},"TARIC":{"titel":"EU-TARIC, 9406 20 00 00, Ursprung China","url":"https://ec.europa.eu/taxation_customs/dds2/taric/measures.jsp?Lang=de&Taric=9406200000&Area=CN&SimDate=20261031"},"UST11":{"titel":"UStG § 11 Bemessungsgrundlage für die Einfuhr","url":"https://www.gesetze-im-internet.de/ustg_1980/__11.html"},"UST12":{"titel":"UStG § 12 Steuersätze (Regelsatz 19 %)","url":"https://www.gesetze-im-internet.de/ustg_1980/__12.html"},"ECB":{"titel":"EZB-Referenzkurs USD, 30.10.2026","url":"https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html"},"PROMO":{"titel":"promobil.de, Tiny-House-Wohnwagen Niewiadow Villetta 780 (01.09.2025)","url":"https://www.promobil.de/wohnwagen/neuheiten/tiny-house-wohnwagen-aus-polen-der-niewiadow-villetta-780/"},"SHALL":{"titel":"Schwäbisch Hall, Tiny House kaufen und finanzieren (Ratgeber)","url":"https://www.schwaebisch-hall.de/ratgeber/neubau-und-anbau/minimalistisch-bauen/tiny-house-kaufen.html"},"DHZ":{"titel":"Deutsche Handwerks Zeitung, Kranpreise 2026 (16.07.2026)","url":"https://www.deutsche-handwerks-zeitung.de/?p=381287"},"SANIER":{"titel":"sanier.de, Was kosten Fundamente (17.12.2025)","url":"https://www.sanier.de/ratgeber/was-kosten-fundamente"},"NUERT":{"titel":"Stadtwerke Nürtingen, Preisblatt NAV 01/2026","url":"https://www.sw-nuertingen.de/_Resources/Persistent/b/a/a/6/baa6ef55d4cd3460f8853088abe6bcb183e14beb/Preisblatt%20NAV%2001_2026.pdf"},"HERTEN":{"titel":"Hertener Stadtwerke, Preisblatt Netzanschluss Strom 2026","url":"https://www.hertener-stadtwerke.de/fileadmin/hertener-stadtwerke/downloads/03_netze/01_versorgungsnetze/Stromnetz/Netzanschluss/ab_2026_hertenerstadtwerke_preisblatt_ergaenzende_bedingungen_nav.pdf"},"PEINE":{"titel":"Stadtwerke Peine, Preisblatt Wasser 01/2026","url":"https://www.stadtwerke-peine.de/files/9416-3-0-0a84/Preisblatt Wasser.pdf"},"GWN":{"titel":"Gemeindewerke Nümbrecht, Preisblatt Wasser 2026","url":"https://gwn24.de/wp-content/uploads/2025/12/Preisblatt_Wasser_2026.pdf"},"G3":{"titel":"GModG § 3 Begriffsbestimmungen (Adresse /geg/)","url":"https://www.gesetze-im-internet.de/geg/__3.html"},"G104":{"titel":"GModG § 104 Kleine Gebäude und Gebäude aus Raumzellen","url":"https://www.gesetze-im-internet.de/geg/__104.html"},"GA7":{"titel":"GModG Anlage 7 Höchstwerte der Wärmedurchgangskoeffizienten","url":"https://www.gesetze-im-internet.de/geg/anlage_7.html"},"DLS":{"titel":"Dlubal Knowledge Base 001530 (Schneelastzonen, Sekundärquelle)","url":"https://www.dlubal.com/de/support-und-schulungen/support/knowledge-base/001530"},"DLW":{"titel":"Dlubal Knowledge Base 001554 (Windzonen, Sekundärquelle)","url":"https://www.dlubal.com/de/support-und-schulungen/support/knowledge-base/001554"},"DIBTS":{"titel":"DIBt, Schneelastzonen je Gemeinde (Excel)","url":"https://www.dibt.de/fileadmin/dibt-website/Dokumente/Referat/P5/Technische_Bestimmungen/Schneelastzonen_nach_Verwaltungsgrenzen.xlsx"},"DIBTW":{"titel":"DIBt, Windzonen je Gemeinde (Excel)","url":"https://www.dibt.de/fileadmin/dibt-website/Dokumente/Referat/P5/Technische_Bestimmungen/Windzonen_nach_Verwaltungsgrenzen.xlsx"},"VGM":{"titel":"VG München, Beschluss 08.05.2023, M 8 S 23.2010 (Tiny-Haus)","url":"https://www.gesetze-bayern.de/Content/Rtf/Y-300-Z-BECKRS-B-2023-N-11615?all=False"},"BMG20":{"titel":"BMG § 20 Begriff der Wohnung","url":"https://www.gesetze-im-internet.de/bmg/__20.html"},"STVZO32":{"titel":"StVZO § 32 Abmessungen von Fahrzeugen","url":"https://www.gesetze-im-internet.de/stvzo_2012/__32.html"},"STVO29":{"titel":"StVO § 29 Übermäßige Straßenbenutzung","url":"https://www.gesetze-im-internet.de/stvo_2013/__29.html"},"GEBOST":{"titel":"GebOSt Anlage, Nr. 263.1.1 (40 bis 1.300 €)","url":"https://www.gesetze-im-internet.de/stgebo_2011/anlage.html"},"KOELN":{"titel":"Stadt Köln, Genehmigung für Großraumtransporte","url":"https://www.stadt-koeln.de/service/produkt/genehmigung-fuer-grossraumtransporte-und-schwertransporte"},"MBO":{"titel":"Musterbauordnung § 2 Abs. 1 (Bauministerkonferenz)","url":"https://bauministerkonferenz.de/Dokumente/42323530.pdf"},"BAYBO":{"titel":"BayBO Art. 2","url":"https://www.gesetze-bayern.de/Content/Document/BayBO-2"},"BAUONRW":{"titel":"BauO NRW 2018 § 2 (Fassung 01.09.2026)","url":"https://recht.nrw.de/lrgv/gesetz/01092026-landesbauordnung-2018-bauo-nrw-2018/"},"DRSBW":{"titel":"Landtag BW, Drucksache 16/7708 (Antwort 04.03.2020)","url":"https://www.landtag-bw.de/resource/blob/248260/0f55951d83a5eefbc444519385d27694/16_7708_D.pdf"},"DRSBY":{"titel":"Bayerischer Landtag, Anfrage 18/11865 (Antwort 03.12.2020)","url":"https://www.bayern.landtag.de/www/ElanTextAblage_WP18/Drucksachen/Schriftliche%20Anfragen/18_0011865.pdf"},"DRSNDS":{"titel":"Niedersächsischer Landtag, Drucksache 19/754","url":"https://www.landtag-niedersachsen.de/drucksachen/drucksachen_19_02500/00501-01000/19-00754.pdf"},"SHPM":{"titel":"Innenministerium SH, Pressemitteilung 16.07.2020 (Camping, Dauerwohnen)","url":"https://www.schleswig-holstein.de/DE/landesregierung/ministerien-behoerden/IV/Presse/PI/2020/200716_campingplatzverordnung.html"},"KRAFT":{"titel":"KraftStG § 9 Steuersatz","url":"https://www.gesetze-im-internet.de/kraftstg/__9.html"},"STVZOA8":{"titel":"StVZO Anlage VIII (Hauptuntersuchung, Fristen)","url":"https://www.gesetze-im-internet.de/stvzo_2012/anlage_viii.html"},"BGB549":{"titel":"BGB § 549 Auf Wohnraummietverhältnisse anwendbare Vorschriften","url":"https://www.gesetze-im-internet.de/bgb/__549.html"},"BEVO":{"titel":"BeVO NRW (Beherbergungsstättenverordnung)","url":"https://recht.nrw.de/lrgv/rechtsverordnung/30042005-verordnung-ueber-den-bau-und-betrieb-von-beherbergungsstaetten/"},"SANK":{"titel":"VO (EU) 833/2014 Art. 3i, EUR-Lex 24.07.2026","url":"https://eur-lex.europa.eu/legal-content/DE/TXT/HTML/?uri=CELEX:02014R0833-20260724"},"SANKBY":{"titel":"VO (EG) 765/2006 Art. 1o, 1ra, EUR-Lex 15.10.2026","url":"https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02006R0765-20261015"},"BER":{"titel":"Eigene Berichte 45 bis 50 (recherche/)","url":""}},
+"kurs":{"usd":1.1172,"ids":"neu","q":"ECB","stand":"2026-10-30","status":"geprüft","hinweis":"EZB-Referenzkurs 30.10.2026: 1 € = 1,1172 US-Dollar","abruf":"2026-10-31"},
+"zoll":{"satz":0.027,"nr":"9406 20 00 00","ids":"C-H01","q":"TARIC","status":"geprüft","hinweis":"Drittlandszollsatz 2,70 % für Fertigbaumodule aus Stahl, Ursprung China, keine Antidumping- oder Ausgleichsmaßnahme angezeigt (Stand 31.10.2026)","abruf":"2026-10-31"},
+"ust":{"satz":0.19,"ids":"C-15, I-22","q":"UST12","status":"geprüft","hinweis":"Einfuhrumsatzsteuer 19 % (Regelsatz § 12 UStG)","abruf":"2026-10-31"},
+"bemessung":{"ids":"neu","q":"UST11","status":"geprüft","hinweis":"EUSt-Bemessung: Zollwert plus Zölle plus Beförderung bis zum ersten Bestimmungsort in der EU (§ 11 Abs. 1, 3 UStG). Zollwert = Ware + Fracht bis zur EU-Grenze: ANNAHME (Art. 71 UZK auf zoll.de nicht lesbar). Lkw ab Hafen fehlt.","abruf":"2026-10-31"},
+"typen":[
+{"id":"cont20","regler":false,"zu":[6.058,2.438,2.591],"offen":[6.058,2.438,2.591],"innen":[5.867,2.33],"gewicht":2200,"gewichtArt":"leer","je":1,"zoll":"9406 20","wohn":{"m2":13.67,"art":"rechnung"},"mass":{"ids":"neu","q":"ISO","status":"prüfen vor Nutzung","hinweis":"ISO 668: außen 6,058 × 2,438 × 2,591 m, innen höchstens 5,867 × 2,330 m (Wikipedia-Tabelle zur Norm, Reederseiten nicht erreichbar).","abruf":"2026-10-31"},"fracht_annahme":"Annahme: ein Container je 40-Fuß-Einheit"},
+{"id":"falt","regler":true,"zu":[5.8,2.48,0.42],"offen":[5.8,2.48,2.56],"innen":[5.64,2.32],"gewicht":1300,"gewichtArt":"Haus","je":8,"jeBeleg":true,"zoll":"9406 20","wohn":{"m2":13.08,"art":"rechnung"},"mass":{"ids":"C-02 (offen), neu (zusammengeklappt 0,42 m)","q":"YUMI","status":"prüfen vor Nutzung","hinweis":"Aufgebaut 5.800 × 2.480 × 2.560 mm, zusammengeklappt 420 mm hoch, innen 5.640 × 2.320 mm, 8 Stück je 40-Fuß-HQ-Container (Datenblatt).","abruf":"2026-10-31"}},
+{"id":"ausklapp","regler":true,"zu":[5.9,2.2,2.48],"offen":[5.9,6.3,2.48],"innen":[5.64,6.14],"gewicht":2500,"gewichtArt":"Haus","je":1,"zoll":"9406 20","wohn":{"m2":34.63,"art":"rechnung"},"mass":{"ids":"C-01, neu (zu 5.900 × 2.200 × 2.480 mm)","q":"HIG","status":"prüfen vor Nutzung","hinweis":"Zu 5.900 × 2.200 × 2.480 mm, offen außen 5.900 × 6.300 mm, innen 5.640 × 6.140 mm (Datenblatt). Größere Variante C-05 (40 Fuß): offen 11.800 × 6.240 mm, etwa 73,6 m².","abruf":"2026-10-31"},"gross":{"m2":73.6,"ids":"C-05","q":"WANZ"},"fracht_annahme":"Annahme: ein Haus je 40-Fuß-Einheit"},
+{"id":"tiny","regler":false,"zu":[9.37,2.55,3.2],"offen":[9.37,2.55,3.2],"innen":null,"gewicht":2700,"gewichtArt":"zulässig","je":1,"zoll":null,"wohn":{"m2":null,"bis":24.9,"von":21.7,"art":"grenze"},"mass":{"ids":"M2-33, 47 Abschnitt B1","q":"PROMO","status":"prüfen vor Nutzung","hinweis":"Beispiel Villetta 780: 9,37 m (mit Deichsel) × 2,55 × 3,20 m, 2.500 kg im Text, 2.700 kg in der Datenliste. Wohnfläche nicht belegt; erlaubt ohne Sondergenehmigung: 2,55 m breit, 4 m hoch, 12 m lang, innen etwa 21,7 bis 24,9 m² (Bericht 47).","abruf":"2026-10-31"}},
+{"id":"modul","regler":false,"zu":[6.0,4.0,3.0],"offen":[6.0,4.0,3.0],"innen":null,"gewicht":null,"je":1,"zoll":null,"wohn":{"m2":24,"art":"anbieter"},"mass":{"ids":"C-28 (24 m²); Maße neu: ANNAHME","q":"SHALL","status":"eigene Einordnung","annahme":true,"hinweis":"Nur „ca. 24 m²“ stammt vom Anbieter (Smart House). Außenmaße 6,0 × 4,0 m und Höhe 3,0 m mit Satteldach sind eine ANNAHME für die Zeichnung, kein Herstellermaß.","abruf":"2026-10-31"}}
+],
+"komp":{"k_falt_cn":{"von":790,"bis":1500,"w":"USD","ids":"C-02, C-03","q":"YUMI, ZONG","status":"prüfen vor Nutzung","hinweis":"Angebotspreise ab Werk je Stück (Yumi 1.100 bis 1.500, Zongfab 790 bis 1.450), keine Rechnungen","abruf":"2026-10-31"},"k_ausk_cn":{"von":4200,"bis":6999,"w":"USD","ids":"C-01, C-04","q":"HIG, CGCH","status":"prüfen vor Nutzung","hinweis":"Angebotspreise ab Werk (Hig 4.999 bis 6.999, CGCH 4.200 bis 4.400), Rohbau, keine Rechnungen","abruf":"2026-10-31"},"k_tiny_pl":{"von":40000,"bis":40000,"w":"EUR","brutto":true,"ids":"M2-33","q":"PROMO","status":"prüfen vor Nutzung","hinweis":"Villetta 780 „ca. 40.000 Euro brutto (je nach Importeur)“","abruf":"2026-10-31"},"k_modul_de":{"von":52900,"bis":96000,"w":"EUR","brutto":true,"ids":"C-27, C-28","q":"SHALL","status":"prüfen vor Nutzung","hinweis":"24 m² (Smart House, schlüsselfertig) bis 30 m² (Schwörer Flying Spaces), Ratgeberpreise „ab“","abruf":"2026-10-31"},"l_kauf":{"luecke":"Kein belegter Preis in den Berichten; Anzeigen- und Suchtreffer-Preise sind nicht übernommen","ids":"C-07, C-08, C-10, I-07, M2-34","status":"Lücke","abruf":"2026-10-31"},"l_kauf_ua":{"luecke":"Kein belegter Euro-Preis; Anbieter nennen keine Preise","ids":"I-14, M2-35","status":"Lücke","abruf":"2026-10-31"},"f_cn":{"von":3686,"bis":4429,"w":"USD","ids":"C-11","q":"DREWRY","status":"prüfen vor Nutzung","hinweis":"Drewry 29.10.2026 je 40-Fuß-Container: Mittel 4.429, Shanghai bis Rotterdam 3.686 USD, Spotpreis, ohne Hafen und Lkw","abruf":"2026-10-31"},"l_fracht":{"luecke":"Frachtkosten nicht belegt","ids":"I-26","status":"Lücke","abruf":"2026-10-31"},"l_fracht_ua":{"luecke":"Transport, Versicherung, Lieferzeit: keine seriöse Quelle","ids":"I-29","status":"Lücke","abruf":"2026-10-31"},"l_zoll_ua":{"luecke":"Zollsatz der Ukraine für 9406 nicht belegt (Handelsabkommen seit 29.10.2025 überarbeitet)","ids":"I-23","status":"Lücke","abruf":"2026-10-31"},"l_zoll_holz":{"luecke":"Zollsatz 9406 10 (Holz) und Leichtstahl ohne Einreihung nicht belegt","ids":"C2-46, C-H03","status":"Lücke","abruf":"2026-10-31"},"l_zoll_wert":{"luecke":"Zollwert unbekannt, weil der Kaufpreis fehlt","ids":"C-H01","status":"Lücke","abruf":"2026-10-31"},"z_eu":{"entf":"EU-Binnenmarkt: kein Zoll","ids":"I-20","status":"eigene Einordnung","hinweis":"Bericht 46 führt die Quelle dafür als Lücke; hier als eigene Einordnung","abruf":"2026-10-31"},"u_eu":{"entf":"Preis enthält die Umsatzsteuer (brutto). Bei kleinen polnischen Verkäufern kann polnische USt gelten","ids":"I-21","status":"eigene Einordnung","abruf":"2026-10-31"},"l_eust_wert":{"luecke":"Einfuhrumsatzsteuer 19 % (Regelsatz), aber der Zollwert ist unbekannt","ids":"C-H01, C-15","status":"Lücke","abruf":"2026-10-31"},"l_eust_ua":{"luecke":"Einfuhrumsatzsteuer 19 % (Regelsatz), aber Zollwert und Zoll unbekannt","ids":"I-22, I-23","status":"Lücke","abruf":"2026-10-31"},"kran":{"von":500,"bis":800,"w":"EUR","netto":true,"ids":"C2-30","q":"DHZ","status":"prüfen vor Nutzung","hinweis":"Tagessatz 30-t-Autokran mit Kranführer, netto, ohne Transport; nur eine Quelle","abruf":"2026-10-31"},"kran_tiny":{"entf":"Das Haus steht auf eigenem Fahrgestell und wird gezogen, nicht gehoben","ids":"47 Abschnitt B","status":"eigene Einordnung","abruf":"2026-10-31"},"fundament":{"je_m2":[70,100],"w":"EUR","ids":"C2-32","q":"SANIER","status":"prüfen vor Nutzung","hinweis":"Bodenplatte 70 bis 100 €/m² mit Lohn, Dämmung oft extra; ANNAHME Bodenplatte unter der Standfläche, die Art bestimmt der Tragwerksplaner; zweite Quelle widerspricht (C2-34, nicht übernommen)","abruf":"2026-10-31"},"strom":{"von":1219.75,"bis":5593.0,"w":"EUR","brutto":true,"ids":"C2-35, C2-36","q":"NUERT, HERTEN","status":"geprüft","hinweis":"Zwei Versorger: Nürtingen ab 1.219,75 € (plus 61,88 €/m), Herten 4.046,00 bis 5.593,00 €; örtlich verschieden","abruf":"2026-10-31"},"wasser":{"von":732.95,"bis":1840.4,"w":"EUR","brutto":true,"ids":"C2-37, C2-38","q":"PEINE, GWN","status":"geprüft","hinweis":"Zwei Versorger: Nümbrecht 732,95 €, Peine 1.840,40 €, ohne Grabenarbeiten; örtlich verschieden","abruf":"2026-10-31"},"abwasser":{"luecke":"Kanalanschluss: Gebühr oder Beitrag nach Gemeindesatzung, kein Preisblatt gesichtet","ids":"C2-39","status":"Lücke","abruf":"2026-10-31"},"daemmung":{"luecke":"Nachrüstkosten für Dämmung (und Statik, Elektro) nicht belegt","ids":"C2-13 bis C2-20","status":"Lücke","abruf":"2026-10-31"}},
+"kosten":{"kauf":{"falt|cn":"k_falt_cn","ausklapp|cn":"k_ausk_cn","tiny|pl":"k_tiny_pl","modul|de":"k_modul_de"},"de":{"kauf":"l_kauf","fracht":"l_fracht","zoll":"z_eu","eust":"u_eu"},"pl":{"kauf":"l_kauf","fracht":"l_fracht","zoll":"z_eu","eust":"u_eu"},"ua":{"kauf":"l_kauf_ua","fracht":"l_fracht_ua","zoll":"l_zoll_ua","eust":"l_eust_ua"},"cn":{"kauf":"l_kauf","fracht":"f_cn","zoll":"auto","eust":"auto"}},
+"verboten":{"ru":{"stufe":"Einfuhr in die EU verboten","gesetz":"VO (EU) Nr. 833/2014, Art. 3i mit Anhang XXI","ware":"Kapitel 44 (Holz und Holzwaren) und 9406 (vorgefertigte Gebäude)","stand":"EUR-Lex konsolidiert 24.07.2026 (Anhang XXI enthält 44 und 9406)","fund":"Bericht 46, Nachprüfung am EUR-Lex-Volltext (Zeile 5); Bericht 50, G-80","ids":"46 Nachprüfung, G-80","q":"SANK","status":"geprüft","abruf":"2026-10-31"},"by":{"stufe":"Einfuhr in die EU verboten","gesetz":"VO (EG) Nr. 765/2006, Art. 1o mit Anhang X (Holz, Kapitel 44) und Art. 1ra mit Anhang XXVII (u. a. 9406 vorgefertigte Gebäude)","ware":"Kapitel 44 und 9406","stand":"EUR-Lex konsolidiert 15.10.2026 (Anhang X = KN 44; Anhang XXVII enthält 9406)","fund":"Bericht 46, Nachprüfung am EUR-Lex-Volltext (Zeile 5); Bericht 50, G-81","ids":"46 Nachprüfung, G-81","q":"SANKBY","status":"geprüft","abruf":"2026-10-31"}},
+"eignung":{"gmodg":[{"id":"klein","text":"„Kleines Gebäude“: nicht mehr als 50 m² Nutzfläche (§ 3 Abs. 1 Nr. 17); bei Wohngebäuden die nach DIN V 18599 beheizte Gebäudenutzfläche (Nr. 26). Verglichen wird nur die Wohnfläche als Näherung.","ids":"C2-01, C2-02, C2-03","q":"G3","status":"geprüft"},{"id":"s104","text":"§ 104 Satz 1: Hält ein neues kleines Gebäude die Höchstwerte nach § 36 (Anlage 7, „erstmaliger Einbau“) ein, gelten die Anforderungen des § 10 Absatz 2 als erfüllt, nur diese; Mindestwärmeschutz (§ 11) und Dichtheit (§ 13) bleiben offen. Satz 2 (Raumzellen, höchstens zehn Jahre) passt nicht zu Dauernutzung. Anwendungsbeginn einzelner Teile (Suchtreffer: 01.01.2027) prüfen.","ids":"C-H02, C2-05, C-23","q":"G104","status":"geprüft"}],"u":[{"id":"wand","name":"Außenwand","soll":0.24,"ids":"C2-06","q":"GA7","status":"geprüft"},{"id":"dach","name":"Dach (erstmaliger Einbau, nicht die 0,20 des Referenzgebäudes)","soll":0.24,"ids":"C2-10","q":"GA7","status":"geprüft"},{"id":"boden","name":"Boden gegen Erdreich","soll":0.3,"ids":"C2-11","q":"GA7","status":"geprüft"},{"id":"fenster","name":"Fenster (Uw)","soll":1.3,"ids":"C2-07","q":"GA7","status":"geprüft"},{"id":"tuer","name":"Außentür","soll":1.8,"ids":"C2-09","q":"GA7","status":"geprüft"}],"aufbau":{"falt":{"wand":"75 mm Steinwolle-Sandwich","dach":"50 mm Steinwolle-Sandwich","uWand":[0.43,0.47],"uDach":[0.58,0.7],"ids":"C-02, C2-14, C2-17","text":"U: eigene Rechnung, angenommenes Lambda (Steinwolle 0,035), ohne Wärmebrücken; Hersteller nennt keinen U-Wert"},"ausklapp":{"wand":"75 mm EPS- oder Steinwolle-Sandwich","dach":"50 mm Sandwich","uWand":[0.4,0.53],"uDach":[0.58,0.8],"ids":"C-01, C2-13, C2-17","text":"U: eigene Rechnung, angenommenes Lambda (EPS 0,032 bis 0,040), ohne Wärmebrücken; Hersteller nennt keinen U-Wert. Für 0,24 etwa 128 bis 167 mm EPS"}},"last":{"ausklapp":{"dach":150,"boden":300,"wind":"Wind bis 120 km/h (Hersteller)","ids":"C-35","text":"Der Hersteller nennt Dachlast 150 kg/m² (etwa 1,5 kN/m²), nicht ausdrücklich Schneelast; Bodenlast 300 kg/m²"},"falt":{"dach":null,"boden":null,"wind":"Wind „Stufe 8“ (Yumi, Skala nicht erklärt)","ids":"C-35","text":"Keine Last in kN/m² angegeben"}},"schnee":[{"z":"1","sk":0.65},{"z":"1a","sk":0.81},{"z":"2","sk":0.85},{"z":"2a","sk":1.06},{"z":"3","sk":1.1}],"wind":[{"z":"1","v":22.5,"q":0.32},{"z":"2","v":25.0,"q":0.39},{"z":"3","v":27.5,"q":0.47},{"z":"4","v":30.0,"q":0.56}],"zonenBeleg":{"ids":"C2-24, C2-25","q":"DLS, DLW","status":"unsicher","hinweis":"Sekundärquelle (Software-Hersteller), Mindestwerte der Geländeschneelast, höhenabhängig; Windwerte Basisdruck qb. Die Zuordnung je Gemeinde steht in zwei DIBt-Excel-Dateien (nicht geöffnet). Windstaudruck qp (Tabelle NA.B.3) ist nicht belegt. Kein Nachweis.","zuordnung":"DIBTS, DIBTW"}},
+"faelle":[
+{"id":"C2-27","titel":"VG München, Beschluss 08.05.2023, M 8 S 23.2010","text":"Nutzungsuntersagung für ein als „Tiny-Haus“ bezeichnetes Gartenhaus: Wohnnutzung formell rechtswidrig (keine Baugenehmigung), der Ausbau wohntypischer Einrichtung durfte verlangt werden. „Ein Gartenhaus mit wohnungsspezifischer Ausstattung ist kein Gartenhaus mehr.“ Kein Container, kein Import.","q":"VGM","status":"geprüft","abruf":"2026-10-31"}
+],
+"faelle_hinweis":"Kein belegter Fall eines abgelehnten oder nachgerüsteten Container- oder Importhauses gefunden (Bericht 48, Abschnitt 3); der Fall oben ist nur verwandt, C2-28 und C2-29 sind nur Suchtreffer (unsicher, nicht übernommen).",
+"regeln":[
+{"id":"baurecht","mobil":"Gleich wie fest: Was „überwiegend ortsfest benutzt“ werden soll, ist eine bauliche Anlage, die Räder ändern nichts (MBO, NRW, Bayern, Baden-Württemberg).","fest":"Baugenehmigung nötig, soweit nicht verfahrensfrei; Wohnen ist nie verfahrensfreier Kleinstbau.","ids":"M2-01, M2-02, M2-03, C-19","q":"MBO, BAUONRW, DRSBW","status":"prüfen vor Nutzung"},
+{"id":"zulassung","mobil":"Ändert das Baurecht nach den gelesenen Texten nicht: Tiny Houses für Wohnzwecke sind Gebäude (Bayern), bei jeder Verlegung gilt ein Neubau (Niedersachsen, Landtagsbeschluss, kein Urteil). Gerichtsentscheidung zum immer umgesetzten Wohnanhänger: nicht gefunden.","fest":"Entfällt","ids":"M2-10, M2-11, M2-12, M2-14","q":"DRSBY, DRSNDS","status":"prüfen vor Nutzung"},
+{"id":"wohnsitz","mobil":"Wohnwagen sind nur Wohnungen, wenn sie „nicht oder nur gelegentlich fortbewegt“ werden (§ 20 BMG); eine Zahl für „gelegentlich“ steht nicht im Gesetz.","fest":"Eine Wohnung im Sinne des Meldegesetzes, Anmeldung binnen zwei Wochen; ob der Standort baurechtlich zum Wohnen zulässig ist, prüft die Meldebehörde nicht grundsätzlich (nicht belegt).","ids":"M2-16","q":"BMG20","status":"geprüft"},
+{"id":"vermietung","mobil":"Dauermiete als Wohnraum: BGB §§ 535 ff., 549. Kurzzeitvermietung ohne Wohnbaurecht: Nutzungsuntersagung (VG München). BeVO NRW erst ab mehr als 12 Gastbetten.","fest":"Gleich. Ferienvermietung: Zweckentfremdung und Gewerbeanmeldung je Gemeinde (nicht geprüft).","ids":"M2-24, M2-26, M2-28","q":"BGB549, VGM, BEVO","status":"prüfen vor Nutzung"},
+{"id":"standort","mobil":"Wohnnutzung nur in einem Baugebiet, das Wohnen zulässt; auf Campingplätzen ist Dauerwohnen nach der Auffassung von Bayern und Schleswig-Holstein nicht zulässig.","fest":"Gleich (Baugebiet mit Wohnnutzung, Erschließung, Abstandsflächen).","ids":"M2-09c, M2-09e, M2-08","q":"DRSBW, DRSBY, SHPM","status":"prüfen vor Nutzung"},
+{"id":"transport","mobil":"Ohne Erlaubnis höchstens 2,55 m breit, 4,00 m hoch, 12,00 m lang (innen etwa 21,7 bis 24,9 m²). Größer nur mit Erlaubnis (§ 29 Abs. 3 StVO): 40 bis 1.300 €, meist etwa zwei Wochen. Begleitfahrzeug ab welcher Breite: Lücke.","fest":"Transport der Module (Lkw, Kran) beim Lieferanten; Übermaß-Erlaubnis gilt auch hier.","ids":"B1, M2-18, M2-20, M2-21","q":"STVZO32, STVO29, GEBOST, KOELN","status":"prüfen vor Nutzung"},
+{"id":"laufend","mobil":"Dauerzulassung: Kfz-Steuer 7,46 € je 200 kg, höchstens 373,24 € im Jahr; Hauptuntersuchung alle 24 Monate (0,75 bis 3,5 t); dazu Haftpflicht.","fest":"Keine Zulassungskosten.","ids":"M2-17a, M2-17c","q":"KRAFT, STVZOA8","status":"prüfen vor Nutzung"},
+{"id":"waerme","mobil":"GModG: gleiche Regeln wie fest; „kleines Gebäude“ bis 50 m² Nutzfläche (Folgen siehe Eignung).","fest":"Gleich.","ids":"M2-12, C2-01","q":"G3","status":"geprüft"}
+],
+"widersprueche":[
+{"id":"w_gmodg","text":"Geltung des GModG: Gesetzestext unter /geg/, Verbraucherzentrale „gilt seit 29.07.2026“, Suchtreffer „Teile ab 01.01.2027“","entscheidung":"Die Karte nennt „Gesetzestext mit Stand 31.10.2026, Anwendungsbeginn einzelner Teile prüfen“ (Bericht 45).","ids":"C-23"},
+{"id":"w_dach","text":"Dach-U-Wert: 0,20 (Referenzgebäude, Bericht 45) gegen 0,24 (Anlage 7, erstmaliger Einbau)","entscheidung":"Es gilt 0,24 (Bericht 48 berichtigt Bericht 45).","ids":"C2-10, C-31"},
+{"id":"w_masse","text":"Herstellermaße widersprüchlich (Zongfab C-03: 5.900 × 2.980 × 2.480 mm; Suzhou Stars C-06: 6,2 bis 6,6 m ausgeklappt)","entscheidung":"Nur die Datenblätter Hig (C-01) und Yumi (C-02) mit klaren Tabellen sind übernommen; die anderen bleiben außen vor.","ids":"C-03, C-06"},
+{"id":"w_fundament","text":"Fundamentpreise: sanier.de 70 bis 100 €/m² Bodenplatte gegen 90 bis 180 €/m² in Suchtreffern","entscheidung":"Nur sanier.de ist übernommen (Seite gelesen), die Suchtreffer nicht (R074).","ids":"C2-32, C2-34"},
+{"id":"w_by","text":"Weißrussland und 9406: Bericht 46 „nicht in Anhang X“, Bericht 50 „in Anhang XXVII“","entscheidung":"Beides gilt: Holz (Kapitel 44) in Anhang X, 9406 in Anhang XXVII; Einfuhr verboten (am EUR-Lex-Volltext bestätigt, 31.10.2026).","ids":"G-81"}
 ]
 };
 </script>
@@ -7724,7 +7810,7 @@ saOfenHolz: { de: 'Holzofen: Leistung und Abstände stehen in seiner Anleitung; 
 saModellAria: { de: '3D-Modell der Sauna in echten Maßen. Mit Ziehen oder Pfeiltasten drehen, Plus und Minus zoomen.', en: '3D model of the sauna at real size. Drag or arrow keys to turn, plus and minus to zoom.', ru: '3D-модель сауны в реальных размерах. Вращайте мышью или стрелками; плюс и минус меняют масштаб.' },
 saModellKein: { de: 'Das 3D-Modell braucht WebGL und ist hier nicht verfügbar. Die Zeichnungen darunter zeigen dieselben Maße.', en: 'The 3D model needs WebGL, not available here. The drawings below show the same sizes.', ru: '3D-модели нужен WebGL, он недоступен. Чертежи ниже показывают те же размеры.' },
 saLegende: { de: 'Wand und Decke: {w} · Bank: {b}', en: 'Wall and ceiling: {w} · bench: {b}', ru: 'Стены и потолок: {w} · лавка: {b}' },
-saModellOfen: { de: 'Farbe neutral (die Palette hat keinen Holzton), Thermoholz dunkler. Ofen in Symbolgröße (Annahme); durchsichtige Zone = Mindestabstand {s} cm zur Wand, {d} cm zur Decke ({m}).', en: 'Neutral colour (no wood tone in the palette), thermo wood darker. Heater at symbol size (assumption); transparent zone = minimum distance {s} cm to wall, {d} cm to ceiling ({m}).', ru: 'Цвет нейтральный (в палитре нет цвета дерева), термодерево темнее. Печь условного размера (допущение); прозрачная зона показывает минимум: {s} см до стены, {d} см до потолка ({m}).' },
+saModellOfen: { de: 'Ein neutraler Holzton für alle Hölzer (die Holzart steht nur hier, nicht in der Farbe); Wand durchsichtig, Bank voll. Ofen in Symbolgröße (Annahme); durchsichtige Zone = Mindestabstand {s} cm zur Wand, {d} cm zur Decke ({m}).', en: 'One neutral wood tone for all woods (the species is named here, not shown by colour); wall see-through, bench solid. Heater at symbol size (assumption); transparent zone = minimum distance {s} cm to wall, {d} cm to ceiling ({m}).', ru: 'Один нейтральный цвет дерева для всех пород (порода названа здесь, не цветом); стена прозрачная, лавка сплошная. Печь условного размера (допущение); прозрачная зона показывает минимум: {s} см до стены, {d} см до потолка ({m}).' },
 saZuNiedrig: { de: 'Achtung: über dem Ofen nur {f} m, verlangt {d} m (mit Annahme-Ofenhöhe). Kabine höher machen.', en: 'Caution: only {f} m above the heater, {d} m required (assumed heater height). Make the cabin taller.', ru: 'Внимание: над печью лишь {f} м, нужно {d} м (условная высота печи). Сделайте кабину выше.' },
 saDrauf: { de: 'Draufsicht', en: 'Top view', ru: 'Вид сверху' }, saSeite: { de: 'Seitenansicht', en: 'Side view', ru: 'Вид сбоку' },
 saMassstab: { de: 'Maßstab 1:50 (96 dpi, Originalgröße)', en: 'Scale 1:50 (96 dpi, full size)', ru: 'Масштаб 1:50 (96 dpi)' },
@@ -7737,6 +7823,7 @@ saEig_harz: { de: 'Harz', en: 'Resin', ru: 'Смола' }, saEig_splitter: { de:
 saPreisM2: { de: '{p} € je m²', en: '{p} € per m²', ru: '{p} € за м²' }, saPreisLfm: { de: '{p} € je lfm', en: '{p} € per m run', ru: '{p} € за пог. м' },
 saStartHolz: { de: 'Startwahl: {w} für die Wand, {b} für die Bank.', en: 'Start choice: {w} for the wall, {b} for the bench.', ru: 'Начальный выбор: {w} для стен, {b} для лавки.' },
 saEineQuelle: { de: 'nur eine Quelle', en: 'one source only', ru: 'один источник' },
+saAusser: { de: 'nur Hinweis, zählt nicht zur Spanne', en: 'note only, not part of the range', ru: 'только справка, не входит в диапазон' },
 saKeinPreis: { de: 'Keine Angabe: kein belegter Preis', en: 'No data: no documented price', ru: 'Нет данных: цены нет' },
 saMat_profil: { de: 'Profilholz Wand und Decke', en: 'Profile boards, wall and ceiling', ru: 'Вагонка стены и потолок' }, saMat_bank: { de: 'Bankleisten', en: 'Bench slats', ru: 'Рейки лавок' },
 saMat_ofen: { de: 'Saunaofen', en: 'Heater', ru: 'Печь' }, saMat_steuerung: { de: 'Steuerung', en: 'Controller', ru: 'Блок управления' }, saMat_tuer: { de: 'Saunatür', en: 'Door', ru: 'Дверь' }, saMat_leuchte: { de: 'Saunaleuchte', en: 'Lamp', ru: 'Светильник' },
@@ -7780,6 +7867,87 @@ mpG_sauna: { de: 'Sauna: Material, nicht in der Summe', en: 'Sauna: material, no
 window.TEXTE = window.TEXTE || {};
 Object.keys(T).forEach(function (k) { window.TEXTE[k] = T[k]; });
 })();
+</script>
+<script>/* daten/texte_kleinhaus.js */
+/* Texte „Kleinhäuser“ (K1): { schlüssel: { de, en, ru } }, ergänzt window.TEXTE; Platzhalter in allen Sprachen gleich. Texte aus daten/kleinhaus.js bleiben Deutsch wie bei der Karte Sauna. */
+(function () {
+  var T = {
+    khTitel: { de: 'Kleinhaus: Typ, 3D, Preis bis zur Aufstellung, Regeln', en: 'Small house: type, 3D, price to set-up, rules', ru: 'Малый дом: тип, 3D, цена до установки, правила' },
+    khKeineBeratung: { de: 'Planungshilfe nach Hersteller- und Händlerangaben (31.10.2026), keine Bau-, Rechts- oder Kaufberatung. Lücken bleiben Lücken.', en: 'Planning aid from maker and dealer data (31.10.2026), no building, legal or buying advice. Gaps stay gaps.', ru: 'Помощь в планировании по данным продавцов (31.10.2026), не совет. Пробелы остаются пробелами.' },
+    khKopf: { de: '{typ}, {herk}: {sum}', en: '{typ}, {herk}: {sum}', ru: '{typ}, {herk}: {sum}' },
+    khKopfSumme: { de: '{m}{von} bis {bis} €', en: '{m}{von} to {bis} €', ru: '{m}от {von} до {bis} €' },
+    khMindestens: { de: 'mindestens ', en: 'at least ', ru: 'минимум ' }, khOhneKauf: { de: 'ohne Kaufpreis: ', en: 'without price: ', ru: 'без цены: ' },
+    khNichtErlaubtKurz: { de: 'nicht erlaubt', en: 'not allowed', ru: 'запрещено' },
+    khPlanen: { de: 'Kleinhaus planen', en: 'Plan small house', ru: 'Спланировать малый дом' },
+    khFehler: { de: 'Kleinhaus-Karte: {grund}', en: 'Small-house card: {grund}', ru: 'Карта малого дома: {grund}' },
+    khMeld: { de: 'Unbekannter Wert „{w}“ im Plan ({feld}): Voreinstellung gilt.', en: 'Unknown value "{w}" in the plan ({feld}): default applies.', ru: 'Неизвестное значение «{w}» ({feld}): стандарт.' },
+    khT1: { de: 'Typ wählen', en: 'Choose a type', ru: 'Выберите тип' }, khT2: { de: '3D-Modell und Skizzen', en: '3D model and drawings', ru: '3D-модель и чертежи' },
+    khT3: { de: 'Preis bis zur Aufstellung', en: 'Price up to set-up', ru: 'Цена до установки' }, khT4: { de: 'Eignung für Deutschland', en: 'Fit for Germany', ru: 'Пригодность для Германии' },
+    khT5: { de: 'Fest oder mobil: Regeln', en: 'Fixed or mobile: rules', ru: 'Стационарный или мобильный: правила' },
+    khHilfe_t1: { de: 'Fünf Bauarten. Falt- und Ausklapp-Container haben den Regler „zu – offen“.', en: 'Five kinds. Folding and expanding containers have the "closed – open" slider.', ru: 'Пять видов. У складного и раздвижного есть ползунок «закрыт – открыт».' },
+    khHilfe_t2: { de: 'Echte Außenmaße; Ziehen oder Pfeiltasten drehen. Skizzen 1:50, unten alle fünf im gleichen Maßstab.', en: 'Real outside sizes; drag or arrow keys turn it. Drawings 1:50, all five at one scale below.', ru: 'Реальные размеры; мышь или стрелки вращают. Чертежи 1:50, внизу все пять в одном масштабе.' },
+    khHilfe_t3: { de: 'Was nicht belegt ist, heißt „Keine Angabe“; die Summe heißt dann „mindestens“.', en: 'What is not documented says "No data"; the total then says "at least".', ru: 'Что не подтверждено: «Нет данных»; итог тогда «минимум».' },
+    khHilfe_t4: { de: 'Dämmung nach GModG, „kleines Gebäude“, Schnee- und Windzone, echte Fälle. Eigene Einordnung.', en: 'Insulation under GModG, "small building", snow and wind zone, real cases. Own view.', ru: 'Утепление по GModG, «малое здание», зоны снега и ветра, случаи. Оценка.' },
+    khHilfe_t5: { de: 'Haus auf Rädern gegen festes Haus: Genehmigung, Wohnsitz, Vermietung, Transport.', en: 'House on wheels against fixed house: permit, residence, letting, transport.', ru: 'Дом на колёсах и стационарный: разрешение, прописка, аренда, перевозка.' },
+    khTyp_cont20: { de: '20-Fuß-Container', en: '20-foot container', ru: '20-футовый контейнер' }, khTyp_falt: { de: 'Faltcontainer', en: 'Folding container', ru: 'Складной контейнер' },
+    khTyp_ausklapp: { de: 'Ausklapp-Container', en: 'Expanding container', ru: 'Раздвижной контейнер' }, khTyp_tiny: { de: 'Tiny House auf Anhänger', en: 'Tiny house on trailer', ru: 'Тини-хаус на прицепе' }, khTyp_modul: { de: 'Modulhaus', en: 'Modular house', ru: 'Модульный дом' },
+    khRegler: { de: 'Klappen: zu – offen', en: 'Folding: closed – open', ru: 'Раскладка: закрыт – открыт' }, khReglerWert: { de: '{p} % offen', en: '{p} % open', ru: '{p} % открыт' },
+    khMasse: { de: 'Außenmaß jetzt: {l} × {b} × {h} m', en: 'Outside size now: {l} × {b} × {h} m', ru: 'Внешний размер: {l} × {b} × {h} м' },
+    khMasseZO: { de: 'zu {z} · offen {o} m (Länge × Breite × Höhe)', en: 'closed {z} · open {o} m (length × width × height)', ru: 'закрыт {z} · открыт {o} м (дл. × шир. × выс.)' },
+    khWohn: { de: 'Wohnfläche: {m2} m²', en: 'Living area: {m2} m²', ru: 'Жилая площадь: {m2} м²' }, khWohnKein: { de: 'Wohnfläche des Beispiels: Lücke', en: 'Living area of the example: gap', ru: 'Жилая площадь примера: пробел' },
+    khWohnArt_rechnung: { de: 'eigene Rechnung aus dem Innenmaß', en: 'own calculation from inside size', ru: 'расчёт по внутреннему размеру' }, khWohnArt_anbieter: { de: 'Anbieterangabe, Wohn- oder Grundfläche unklar', en: 'maker figure, living or floor area unclear', ru: 'данные продавца, тип площади неясен' },
+    khWohnArt_grenze: { de: 'Grenzwert ohne Sondergenehmigung {von} bis {bis} m², eigene Rechnung', en: 'limit without special permit {von} to {bis} m², own calculation', ru: 'предел без спецразрешения от {von} до {bis} м², расчёт' },
+    khGew: { de: '{art}: {kg} kg', en: '{art}: {kg} kg', ru: '{art}: {kg} кг' }, khGew_leer: { de: 'Leergewicht', en: 'Empty weight', ru: 'Вес пустого' }, khGew_Haus: { de: 'Gewicht', en: 'Weight', ru: 'Вес' }, khGew_zulässig: { de: 'zulässige Gesamtmasse', en: 'permitted total mass', ru: 'допустимая масса' },
+    khAnnahmeMass: { de: 'Außenmaße und Höhe sind eine Annahme für die Zeichnung, kein Herstellermaß.', en: 'Outside size and height are an assumption for the drawing, not a maker figure.', ru: 'Размеры и высота: допущение для чертежа, не данные производителя.' },
+    khModellAria: { de: '3D-Modell des Kleinhauses. Mit Ziehen oder Pfeiltasten drehen, Plus und Minus zoomen.', en: '3D model of the small house. Turn with drag or arrow keys, zoom with plus and minus.', ru: '3D-модель дома. Вращение: мышью или стрелками, масштаб: плюс и минус.' },
+    khModellKein: { de: 'Das 3D-Modell braucht WebGL. Maße: siehe Zeichnungen.', en: 'The 3D model needs WebGL. Sizes: see drawings.', ru: 'Для 3D нужен WebGL. Размеры: на чертежах.' },
+    khLegende: { de: 'Stahl grau, Holz im neutralen Holzton, Fenster blau. Der Regler wirkt sofort, ohne Bewegung.', en: 'Steel grey, wood in the neutral wood tone, windows blue. The slider acts at once, no motion.', ru: 'Сталь серая, дерево нейтрального цвета, окна синие. Ползунок действует сразу, без анимации.' },
+    khDrauf: { de: 'Draufsicht', en: 'Top view', ru: 'Вид сверху' }, khSeite: { de: 'Seitenansicht', en: 'Side view', ru: 'Вид сбоку' }, khAlle: { de: 'Alle fünf im gleichen Maßstab (Seitenansicht)', en: 'All five at the same scale (side view)', ru: 'Все пять в одном масштабе (вид сбоку)' },
+    khM50: { de: 'Maßstab 1:50 (1 m = 20 mm auf Papier). Gestrichelt: zugeklappt.', en: 'Scale 1:50 (1 m = 20 mm on paper). Dashed: closed.', ru: 'Масштаб 1:50 (1 м = 20 мм). Пунктир: закрыт.' },
+    khM100: { de: 'Maßstab 1:100 (1 m = 10 mm auf Papier). Gestrichelt: zugeklappt.', en: 'Scale 1:100 (1 m = 10 mm on paper). Dashed: closed.', ru: 'Масштаб 1:100 (1 м = 10 мм). Пунктир: закрыт.' },
+    khDeichsel: { de: 'Deichsel', en: 'Drawbar', ru: 'Дышло' },
+    khH_de: { de: 'Deutschland', en: 'Germany', ru: 'Германия' }, khH_pl: { de: 'Polen', en: 'Poland', ru: 'Польша' }, khH_ua: { de: 'Ukraine', en: 'Ukraine', ru: 'Украина' }, khH_cn: { de: 'China', en: 'China', ru: 'Китай' }, khH_ru: { de: 'Russland', en: 'Russia', ru: 'Россия' }, khH_by: { de: 'Weißrussland', en: 'Belarus', ru: 'Беларусь' },
+    khHerkunft: { de: 'Herkunft wählen', en: 'Choose the origin', ru: 'Выберите происхождение' },
+    khK_kauf: { de: 'Kaufpreis', en: 'Purchase price', ru: 'Цена' }, khK_fracht: { de: 'Fracht', en: 'Freight', ru: 'Фрахт' }, khK_zoll: { de: 'Zoll', en: 'Customs duty', ru: 'Пошлина' }, khK_eust: { de: 'Einfuhrumsatzsteuer', en: 'Import VAT', ru: 'НДС при ввозе' },
+    khK_kran: { de: 'Kran', en: 'Crane', ru: 'Кран' }, khK_fundament: { de: 'Fundament', en: 'Foundation', ru: 'Фундамент' }, khK_strom: { de: 'Strom-Anschluss', en: 'Power connection', ru: 'Подключение электричества' }, khK_wasser: { de: 'Wasser-Anschluss', en: 'Water connection', ru: 'Подключение воды' },
+    khK_abwasser: { de: 'Abwasser-Anschluss', en: 'Sewer connection', ru: 'Подключение канализации' }, khK_daemmung: { de: 'Dämm-Nachrüstung', en: 'Insulation upgrade', ru: 'Дооснащение утеплением' },
+    khSumme: { de: 'Summe bis zur Aufstellung', en: 'Total up to set-up', ru: 'Итого до установки' }, khSummeOhne: { de: 'mindestens, weil {n} Posten ohne Angabe fehlen', en: 'at least, as {n} items have no data', ru: 'минимум: нет данных по {n} позициям' },
+    khEntf: { de: 'entfällt', en: 'not applicable', ru: 'не требуется' }, khNetto: { de: 'netto, mit 19 % zu brutto umgerechnet', en: 'net, converted to gross with 19 %', ru: 'нетто, пересчитано в брутто (19 %)' },
+    khUsd: { de: 'US-Dollar durch {k} (EZB 30.10.2026)', en: 'US dollars divided by {k} (ECB 30.10.2026)', ru: 'доллары США / {k} (ЕЦБ 30.10.2026)' }, khTeiler: { de: 'durch {n} Stück je Container', en: 'divided by {n} units per container', ru: 'делено на {n} шт. в контейнере' },
+    khTeilerAnn: { de: 'ANNAHME: {n} je Container', en: 'ASSUMPTION: {n} per container', ru: 'ДОПУЩЕНИЕ: {n} в контейнере' }, khZollRechnung: { de: '2,70 % auf Zollwert (Ware + Fracht)', en: '2.70 % of customs value (goods + freight)', ru: '2,70 % от тамож. стоимости (товар + фрахт)' },
+    khEustRechnung: { de: '19 % auf Zollwert + Zoll; Lkw ab Hafen nicht belegt, fehlt', en: '19 % of customs value + duty; truck from port missing', ru: '19 % от тамож. стоимости + пошлина; грузовик от порта не учтён' },
+    khNichtErlaubt: { de: 'Nicht erlaubt', en: 'Not allowed', ru: 'Запрещено' }, khKeinPreis: { de: 'Kein Preis, keine Berechnung, kein Weg über Dritte.', en: 'No price, no calculation, no detour via third parties.', ru: 'Нет цены, расчёта и обходных путей.' },
+    khRecht: { de: 'Rechtsgrundlage: {g}. Waren: {w}. Stand: {s}. Fundstelle: {f}. Abruf {a}.', en: 'Legal basis: {g}. Goods: {w}. Status: {s}. Where: {f}. Retrieved {a}.', ru: 'Основание: {g}. Товары: {w}. Состояние: {s}. Где: {f}. Получено {a}.' },
+    khThHerk: { de: 'Herkunft', en: 'Origin', ru: 'Происхождение' }, khThAuf: { de: 'Aufstellung', en: 'Set-up', ru: 'Установка' }, khThAbg: { de: 'Zoll + EUSt', en: 'Duty + VAT', ru: 'Пошлина + НДС' }, khThPos: { de: 'Posten', en: 'Item', ru: 'Позиция' }, khThHinweis: { de: 'Rechenweg und Hinweis', en: 'Method and note', ru: 'Расчёт и примечание' },
+    khBal: { de: 'Balken: Mitte der Spanne je Posten; gestrichelt = ohne Angabe.', en: 'Bar: middle of each range; dashed = no data.', ru: 'Полоса: середина диапазона; пунктир: нет данных.' }, khBal_ware: { de: 'Ware', en: 'Goods', ru: 'Товар' }, khBal_transport: { de: 'Transport', en: 'Transport', ru: 'Перевозка' }, khBal_abgaben: { de: 'Abgaben', en: 'Duties', ru: 'Сборы' }, khBal_aufstellung: { de: 'Aufstellung', en: 'Set-up', ru: 'Установка' }, khBal_luecke: { de: 'Keine Angabe', en: 'No data', ru: 'Нет данных' },
+    khImport: { de: 'Alle Herkünfte im Vergleich', en: 'All origins compared', ru: 'Сравнение всех происхождений' },
+    khKlein_ja: { de: '{m2} m² sind höchstens 50 m²: „kleines Gebäude“ nach § 3 GModG (Näherung, beheizte Nutzfläche nicht berechnet).', en: '{m2} m² is at most 50 m²: "small building" under § 3 GModG (approximation, heated area not calculated).', ru: '{m2} м²: не более 50 м²: «малое здание» по § 3 GModG (приближение).' },
+    khKlein_nein: { de: '{m2} m² sind mehr als 50 m²: kein „kleines Gebäude“, die Erleichterung nach § 104 gilt nicht.', en: '{m2} m² is more than 50 m²: not a "small building", § 104 relief does not apply.', ru: '{m2} м²: больше 50 м²: не «малое здание», § 104 не действует.' },
+    khKlein_grenze: { de: 'Höchstens {m2} m² (Grenze ohne Sondergenehmigung): „kleines Gebäude“ möglich, Fläche des Beispiels nicht belegt.', en: 'At most {m2} m² (limit without special permit): "small building" possible, example area undocumented.', ru: 'Не более {m2} м²: возможно «малое здание», площадь примера не подтверждена.' },
+    khUTitel: { de: 'Dämmung: Höchstwerte gegen Aufbau', en: 'Insulation: limits against build-up', ru: 'Утепление: пределы и конструкция' }, khThSoll: { de: 'Höchstwert U in W/(m²K)', en: 'Maximum U in W/(m²K)', ru: 'Макс. U, Вт/(м²К)' }, khThIst: { de: 'Aufbau laut Angebot, U (eigene Rechnung)', en: 'Build-up per offer, U (own calculation)', ru: 'Конструкция, U (расчёт)' },
+    khULuecke: { de: 'Lücke: kein Aufbau, kein U-Wert belegt', en: 'Gap: no build-up or U value documented', ru: 'Пробел: конструкция и U не подтверждены' }, khUWert: { de: '{a}, U etwa {u} (Annahme)', en: '{a}, U about {u} (assumption)', ru: '{a}, U около {u} (допущение)' }, khUDrueber: { de: 'über dem Höchstwert', en: 'above the limit', ru: 'выше предела' },
+    khZonen: { de: 'Schnee- und Windzone', en: 'Snow and wind zone', ru: 'Зоны снега и ветра' }, khSchnee: { de: 'Schneelastzone', en: 'Snow load zone', ru: 'Снеговая зона' }, khWind: { de: 'Windzone', en: 'Wind zone', ru: 'Ветровая зона' },
+    khZoneSk: { de: 'Zone {z}: Geländeschneelast mindestens {v} kN/m²', en: 'Zone {z}: ground snow load at least {v} kN/m²', ru: 'Зона {z}: снеговая нагрузка не менее {v} кН/м²' }, khZoneWind: { de: 'Zone {z}: Basisgeschwindigkeit {v} m/s, Basisdruck {q} kN/m²', en: 'Zone {z}: basic speed {v} m/s, basic pressure {q} kN/m²', ru: 'Зона {z}: скорость {v} м/с, давление {q} кН/м²' },
+    khZonenUns: { de: 'Sekundärquelle, unsicher, Mindestwerte, höhenabhängig. Die Zone Ihrer Gemeinde steht in den DIBt-Dateien. Kein Nachweis.', en: 'Secondary source, uncertain, minimum values, depend on altitude. Your municipality\'s zone is in the DIBt files. No proof.', ru: 'Вторичный источник, неточно, минимумы, зависят от высоты. Зона общины: в файлах DIBt. Не доказательство.' },
+    khKeinVergleich: { de: 'Kein „hält aus“: Hersteller nennen keine Schneelast in kN/m², Wind nur in km/h oder „Stufe“. Vergleich mit der Zone: Lücke.', en: 'No "holds up": makers give no snow load in kN/m², wind only in km/h or "grade". Zone comparison: gap.', ru: 'Нет вывода «выдержит»: нет снеговой нагрузки в кН/м², ветер в км/ч. Сравнение с зоной: пробел.' },
+    khLastLuecke: { de: 'Hersteller: keine Last in kN/m² angegeben (Lücke)', en: 'Maker: no load in kN/m² given (gap)', ru: 'Производитель: нагрузка в кН/м² не указана (пробел)' },
+    khFaelle: { de: 'Echte Fälle', en: 'Real cases', ru: 'Реальные случаи' }, khGModG: { de: 'Wärmeschutz nach GModG', en: 'Insulation under GModG', ru: 'Теплозащита по GModG' },
+    khRegelnHinweis: { de: 'Eigene Einordnung aus den Berichten 45 bis 49, keine Empfehlung, keine Rechtsberatung.', en: 'Own classification from reports 45 to 49, no recommendation, no legal advice.', ru: 'Оценка по отчётам с 45 по 49, не рекомендация и не юр. консультация.' },
+    khRg_baurecht: { de: 'Baugenehmigung', en: 'Building permit', ru: 'Разрешение на строительство' }, khRg_zulassung: { de: 'Dauerzulassung als Anhänger', en: 'Permanent trailer registration', ru: 'Постоянная регистрация прицепа' }, khRg_wohnsitz: { de: 'Hauptwohnsitz', en: 'Main residence', ru: 'Основное место жительства' }, khRg_vermietung: { de: 'Vermietung', en: 'Letting', ru: 'Аренда' },
+    khRg_standort: { de: 'Standort', en: 'Location', ru: 'Место' }, khRg_transport: { de: 'Übermaß-Transport', en: 'Oversize transport', ru: 'Негабаритная перевозка' }, khRg_laufend: { de: 'Laufende Kosten', en: 'Running costs', ru: 'Текущие расходы' }, khRg_waerme: { de: 'Wärmeschutz', en: 'Insulation', ru: 'Теплозащита' },
+    khMobil: { de: 'Mobil (Anhänger)', en: 'Mobile (trailer)', ru: 'Мобильный (прицеп)' }, khFest: { de: 'Fest', en: 'Fixed', ru: 'Стационарный' },
+    khAmpelTitel: { de: 'Bauantrag in {land}', en: 'Building application in {land}', ru: 'Заявка на строительство: {land}' }, khAmpelLager: { de: 'Als Lager oder Gartenhaus ohne Aufenthaltsraum', en: 'As store or garden house without habitable room', ru: 'Как склад или садовый дом без жилой комнаты' },
+    khAmpelWohnen: { de: 'Zum Wohnen (Aufenthaltsraum)', en: 'For living (habitable room)', ru: 'Для проживания' }, khAmpelWohnenText: { de: 'Wohnen zählt nicht zu den verfahrensfreien Kleinstbauten (Bericht 45, C-19): Bauaufsicht fragen.', en: 'Living is not a permit-free minor structure (report 45, C-19): ask the building authority.', ru: 'Проживание не относится к малым постройкам без разрешения (отчёт 45, C-19): спросите стройнадзор.' },
+    khAmpelFl: { de: 'Gerechnet mit {fl} m² Standfläche und {h} m Höhe, Rechenweg wie bei der Karte Anbau.', en: 'Calculated with {fl} m² footprint and {h} m height, same method as the extension card.', ru: 'Расчёт для {fl} м² и высоты {h} м, как в карте пристройки.' },
+    khWid: { de: 'Widersprüche in den Berichten und was gilt', en: 'Contradictions in the reports and what applies', ru: 'Противоречия в отчётах и что действует' },
+    khAnnahmeStart: { de: 'Startwahl (Annahme): Ausklapp-Container aus China, offen.', en: 'Starting choice (assumption): expanding container from China, open.', ru: 'Начальный выбор (допущение): раздвижной контейнер из Китая, открыт.' },
+    mpKleinhaus: { de: 'Kleinhaus', en: 'Small house', ru: 'Малый дом' }, mpKleinhausZeile: { de: '{typ}, {fl} m² Standfläche, {herk}: {sum}', en: '{typ}, {fl} m² footprint, {herk}: {sum}', ru: '{typ}, {fl} м², {herk}: {sum}' },
+    mpG_kleinhaus: { de: 'Kleinhaus: bis zur Aufstellung, nicht in der Summe', en: 'Small house: up to set-up, not in the total', ru: 'Малый дом: до установки, не в итоге' }
+  };
+  window.TEXTE = window.TEXTE || {};
+  Object.keys(T).forEach(function (k) { window.TEXTE[k] = T[k]; });
+})();
+
 </script>
 <script>/* daten/texte_mappe.js */
 /* Texte „Mappe für den Hausbauer“ (M1): Schlüssel -> [de, en, ru]. Fragen sind Fragen, ohne Paragrafen (R006, R007). Dazu genutzt: Texte der Karten (druck*, hw*, an*, gs*, ab*, ma*, hd*, hl*). */
@@ -11144,11 +11312,11 @@ if (v <= k0.bis) return { v: v, kw: k0.kw, status: 'ok', klasse: k0 };
 return { v: v, kw: k1.kw, status: 'ok', klasse: k1, grenz: v <= o.grenz.bis, wekaAlt: v <= o.grenz.bis ? k0.kw : null };
 }
 function holzPreis(id, einheit) {
-var h = holzInfo(id), z = h ? h[einheit === 'lfm' ? 'lfm' : 'm2'] : [], q = {};
-z.forEach(function (r) { q[r.quelle + r.h] = 1; });
+var h = holzInfo(id), z = h ? h[einheit === 'lfm' ? 'lfm' : 'm2'] : [], q = {}, zs = z.filter(function (r) { return !r.ausser; });
+zs.forEach(function (r) { q[r.quelle + r.h] = 1; });
 var n = Object.keys(q).length;
-if (!z.length) return { id: id, luecke: true, n: 0, zeilen: [] };
-var v = z.map(function (r) { return r.v; });
+if (!zs.length) return { id: id, luecke: true, n: 0, zeilen: z };
+var v = zs.map(function (r) { return r.v; });
 return { id: id, luecke: false, zeilen: z, n: n, einQuelle: n === 1, von: Math.min.apply(null, v), bis: Math.max.apply(null, v) };
 }
 function strompreis() {
@@ -11267,6 +11435,129 @@ betrieb: betrieb, mengen: mengen, material: material, vergleich: vergleich, geom
 root.SAUNA_KERN = API;
 if (typeof module !== 'undefined' && module.exports) module.exports = API;
 })(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>/* kleinhaus_kern.js */
+/* Kern „Kleinhäuser“ (K1), rein, auch in Node (tmp/kleinhaus_kern_test.js). plan.kleinhaus = { ref, typ, herkunft, regler 0 zu .. 1 offen, schnee, wind }. Ampel nur über ANBAU_KERN.verfahrensfrei.
+   Fehlende Teilbeträge bleiben „Keine Angabe“, die Summe heißt „mindestens“. USD / EZB-Kurs; netto + 19 %; Zoll = Satz × (Ware + Fracht); EUSt = 19 % × (Zollwert + Zoll), § 11 UStG. R078. */
+(function (root) {
+  'use strict';
+  var AK = root.ANBAU_KERN || (typeof require === 'function' ? require('./anbau_kern.js') : null);
+  var ANNAHMEN = { typ: 'ausklapp', herkunft: 'cn', regler: 1, schnee: '2', wind: '2' };
+  var HERKUENFTE = ['de', 'pl', 'ua', 'cn', 'ru', 'by'], KOSTEN_ID = ['kauf', 'fracht', 'zoll', 'eust', 'kran', 'fundament', 'strom', 'wasser', 'abwasser', 'daemmung'];
+  function ok(x) { return typeof x === 'number' && isFinite(x); }
+  function r2(x) { return Math.round(x * 100) / 100; }
+  function r3(x) { return Math.round(x * 1000) / 1000; }
+  function KD() { return root.DATEN && root.DATEN.kleinhaus; }
+  function typInfo(id) { var l = KD() ? KD().typen : []; for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i]; return null; }
+  function planKh(plan) {
+    var p = plan && plan.kleinhaus && typeof plan.kleinhaus === 'object' && !Array.isArray(plan.kleinhaus) ? plan.kleinhaus : null, r = { vorhanden: !!p, ref: '', typ: ANNAHMEN.typ, herkunft: ANNAHMEN.herkunft, regler: ANNAHMEN.regler, schnee: ANNAHMEN.schnee, wind: ANNAHMEN.wind, explizit: {}, meldungen: [] }, d = KD();
+    if (!p) return r;
+    if (typeof p.ref === 'string' && /^[a-z0-9_]{1,12}$/.test(p.ref)) r.ref = p.ref;
+    if (p.typ !== undefined) { if (typInfo(p.typ)) { r.typ = p.typ; r.explizit.typ = true; } else r.meldungen.push({ feld: 'typ', wert: String(p.typ) }); }
+    if (p.herkunft !== undefined) { if (HERKUENFTE.indexOf(p.herkunft) >= 0) { r.herkunft = p.herkunft; r.explizit.herkunft = true; } else r.meldungen.push({ feld: 'herkunft', wert: String(p.herkunft) }); }
+    if (ok(p.regler)) { r.regler = Math.min(1, Math.max(0, p.regler)); r.explizit.regler = true; }
+    [['schnee', d && d.eignung.schnee], ['wind', d && d.eignung.wind]].forEach(function (k) {
+      if (p[k[0]] === undefined) return;
+      if (k[1] && k[1].some(function (z) { return z.z === p[k[0]]; })) { r[k[0]] = p[k[0]]; r.explizit[k[0]] = true; } else r.meldungen.push({ feld: k[0], wert: String(p[k[0]]) });
+    });
+    return r;
+  }
+  /* Außenmaß bei Reglerwert r: Faltcontainer ändert die Höhe, Ausklapp-Container die Breite, alle anderen bleiben gleich */
+  function mass(t, r) {
+    var z = t.zu, o = t.offen, f = t.regler ? Math.min(1, Math.max(0, ok(r) ? r : 1)) : 1, m = { l: o[0], b: o[1], h: o[2] };
+    if (t.regler) { m.b = z[1] + f * (o[1] - z[1]); m.h = z[2] + f * (o[2] - z[2]); m.l = z[0] + f * (o[0] - z[0]); }
+    return { l: r3(m.l), b: r3(m.b), h: r3(m.h), f: f };
+  }
+  function flaeche(t) { return r2(t.offen[0] * t.offen[1]); }
+  function wohnflaeche(t) { var w = t.wohn; return w.m2 != null ? { m2: w.m2, art: w.art } : { m2: null, bis: w.bis, von: w.von, art: w.art }; }
+  /* „kleines Gebäude“ (§ 3 Nr. 17 GModG): höchstens 50 m² Nutzfläche. Näherung: Wohn- bzw. Innenfläche, die beheizte Gebäudenutzfläche ist nicht berechnet */
+  function kleinesGebaeude(m2) { return { m2: m2, grenze: 50, klein: ok(m2) && m2 <= 50 }; }
+  function komp(key) { var d = KD(), c = d.komp[key]; return c ? c : null; }
+  /* ein Kostenbaustein -> Zeile in Euro */
+  function zeile(id, c, o) {
+    var d = KD(), z = { id: id, ids: c.ids, q: c.q ? c.q.split(',').map(function (s) { return s.trim(); }) : [], status: c.status, abruf: c.abruf, hinweis: c.hinweis || '', von: null, bis: null, luecke: false, entf: false, grund: '', brutto: !!c.brutto };
+    if (c.luecke) { z.luecke = true; z.grund = c.luecke; return z; }
+    if (c.entf) { z.entf = true; z.grund = c.entf; z.von = 0; z.bis = 0; return z; }
+    var v = c.je_m2 ? [c.je_m2[0] * o.flaeche, c.je_m2[1] * o.flaeche] : [c.von, c.bis], k = 1;
+    if (c.w === 'USD') { k = 1 / d.kurs.usd; z.usd = true; }
+    if (c.netto) { k *= 1 + d.ust.satz; z.nettoZuBrutto = true; }
+    if (o.teiler && id === 'fracht') { k /= o.teiler; z.teiler = o.teiler; }
+    z.von = r2(v[0] * k); z.bis = r2(v[1] * k);
+    return z;
+  }
+  function kosten(typId, herk, opt) {
+    var d = KD(), t = typInfo(typId), k = d && d.kosten[herk];
+    if (!d || !t) return { ok: false, grund: 'keineDaten' };
+    if (herk === 'ru' || herk === 'by') return { ok: true, erlaubt: false, herk: herk, typ: typId, verbot: d.verboten[herk] };
+    if (!k) return { ok: false, grund: 'keineZeile' };
+    var Z = {}, fl = flaeche(t);
+    Z.kauf = zeile('kauf', d.komp[d.kosten.kauf[typId + '|' + herk] || k.kauf], { flaeche: fl });
+    Z.fracht = zeile('fracht', d.komp[k.fracht], { flaeche: fl, teiler: herk === 'cn' ? t.je : 0 });
+    if (herk === 'cn' && t.je > 1) Z.fracht.teilerBeleg = !!t.jeBeleg;
+    var wk = !Z.kauf.luecke && !Z.fracht.luecke;
+    if (k.zoll === 'auto') {
+      if (!t.zoll) Z.zoll = zeile('zoll', d.komp.l_zoll_holz, {});
+      else if (wk) {
+        var zs = d.zoll.satz;
+        Z.zoll = zeile('zoll', { ids: d.zoll.ids, q: d.zoll.q, status: d.zoll.status, abruf: d.zoll.abruf, hinweis: d.zoll.hinweis, von: 0, bis: 0, w: 'EUR' }, {});
+        Z.zoll.von = r2(zs * (Z.kauf.von + Z.fracht.von)); Z.zoll.bis = r2(zs * (Z.kauf.bis + Z.fracht.bis)); Z.zoll.rechnung = 'zollwert';
+      } else Z.zoll = zeile('zoll', d.komp.l_zoll_wert, {});
+    } else Z.zoll = zeile('zoll', d.komp[k.zoll], {});
+    if (k.eust === 'auto') {
+      if (wk && !Z.zoll.luecke && t.zoll) {
+        Z.eust = zeile('eust', { ids: d.ust.ids, q: d.ust.q, status: d.ust.status, abruf: d.ust.abruf, hinweis: d.bemessung.hinweis, von: 0, bis: 0, w: 'EUR' }, {});
+        Z.eust.von = r2(d.ust.satz * (Z.kauf.von + Z.fracht.von + Z.zoll.von)); Z.eust.bis = r2(d.ust.satz * (Z.kauf.bis + Z.fracht.bis + Z.zoll.bis)); Z.eust.rechnung = 'eust';
+      } else Z.eust = zeile('eust', d.komp.l_eust_wert, {});
+    } else Z.eust = zeile('eust', d.komp[k.eust], {});
+    ['kran', 'fundament', 'strom', 'wasser', 'abwasser', 'daemmung'].forEach(function (id) { Z[id] = zeile(id, d.komp[id === 'kran' && typId === 'tiny' ? 'kran_tiny' : id], { flaeche: fl }); });
+    var zl = KOSTEN_ID.map(function (id) { return Z[id]; }), von = 0, bis = 0, lu = 0;
+    zl.forEach(function (z) { if (z.luecke) lu++; else { von += z.von; bis += z.bis; } });
+    return { ok: true, erlaubt: true, herk: herk, typ: typId, zeilen: zl, summe: { von: r2(von), bis: r2(bis), mindestens: lu > 0, luecken: lu, ohneKauf: !!Z.kauf.luecke }, flaeche: fl };
+  }
+  /* Bauantrag-Ampel: nur das vorhandene Modul. „lager“ = Gartenhaus ohne Aufenthaltsraum (kann grün sein), „wohnen“ = Wohnraum (Modul: keinBaustein, grau) */
+  function ampel(typId, land) {
+    var t = typInfo(typId), fl = flaeche(t), h = t.offen[2];
+    return { land: land, flaeche: fl, hoehe: h, lager: AK.verfahrensfrei('gartenhaus', land, fl, h, null), wohnen: AK.verfahrensfrei('anbau', land, fl, h, null) };
+  }
+  function findeBaustein(ctx, ref) {
+    var l = (ctx.items || []).filter(function (x) { return x.art === 'gartenhaus'; });
+    if (ref) return l.filter(function (x) { return x.id === ref; })[0] || { fehlt: true, ref: ref };
+    return null;
+  }
+  function rechne(plan) {
+    var ps = planKh(plan), d = KD(), c = { ps: ps, ok: false, grund: d ? '' : 'keineDaten' };
+    if (!d) return c;
+    var t = typInfo(ps.typ), land = AK.planLand(plan);
+    c.ok = true; c.typ = t; c.land = land; c.landName = AK.aussenInfo ? (root.REGELN ? root.REGELN.landInfo(land).name : land) : land;
+    c.mass = mass(t, ps.regler); c.flaeche = flaeche(t); c.wohn = wohnflaeche(t);
+    c.klein = kleinesGebaeude(c.wohn.m2 != null ? c.wohn.m2 : c.wohn.bis);
+    c.kosten = kosten(ps.typ, ps.herkunft);
+    c.alle = HERKUENFTE.map(function (h) { return kosten(ps.typ, h); });
+    c.ampel = ampel(ps.typ, land);
+    return c;
+  }
+  /* ---------- Bearbeiten (schreibt in den Plan; der Aufrufer ruft danach GRUNDRISS.geaendert()) ---------- */
+  function sicher(plan) { if (!plan.kleinhaus || typeof plan.kleinhaus !== 'object' || Array.isArray(plan.kleinhaus)) plan.kleinhaus = {}; return plan.kleinhaus; }
+  function wahlSetzen(plan, feld, wert) {
+    var d = KD(), p;
+    if (feld === 'typ') { if (!typInfo(wert)) return false; p = sicher(plan); p.typ = wert; return true; }
+    if (feld === 'herkunft') { if (HERKUENFTE.indexOf(wert) < 0) return false; p = sicher(plan); p.herkunft = wert; return true; }
+    if (feld === 'regler') { if (!ok(wert)) return false; p = sicher(plan); p.regler = r2(Math.min(1, Math.max(0, wert))); return true; }
+    if (feld === 'schnee' || feld === 'wind') { if (!d.eignung[feld].some(function (z) { return z.z === wert; })) return false; p = sicher(plan); p[feld] = wert; return true; }
+    return false;
+  }
+  function verknuepfen(plan, id) {
+    var ok2 = (plan.aussen || []).some(function (a) { return a.art === 'gartenhaus' && a.id === id; });
+    if (!ok2) return { ok: false, grund: 'keinGartenhaus' };
+    sicher(plan).ref = id;
+    return { ok: true, id: id };
+  }
+  var API = { ANNAHMEN: ANNAHMEN, HERKUENFTE: HERKUENFTE, KOSTEN_ID: KOSTEN_ID, typInfo: typInfo, planKh: planKh, mass: mass, flaeche: flaeche, wohnflaeche: wohnflaeche, kleinesGebaeude: kleinesGebaeude, kosten: kosten, ampel: ampel, findeBaustein: findeBaustein,
+    rechne: rechne, wahlSetzen: wahlSetzen, verknuepfen: verknuepfen };
+  root.KLEINHAUS_KERN = API;
+  if (typeof module !== 'undefined' && module.exports) module.exports = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
 </script>
 <script>/* autarkie_kern.js */
 /* Kern „Wie autark ist Ihr Haus?“ (Welle E, Teil 2), rein, Node-fähig (tmp/autarkie_kern_test.js). Strom, Wasser und Wärme werden hier nur eingeordnet (Wert, „fehlt“, „Keine Angabe“), nicht gerechnet;
@@ -11478,8 +11769,15 @@ var sm = sk.material;
 m.ausbau.sauna = { id: sk.item.id, art: sk.art, volumen: sk.volumen, ofen: sk.ofen, kw: sk.kw, wand: sk.ps.wand, bank: sk.ps.bank, von: sm.summe.von, bis: sm.summe.bis, luecken: sm.luecken };
 kb.zeilen.push({ gruppe: 'sauna', id: 'material', art: 'sauna', name: 'Sauna', einheit: '€', von: sm.summe.von, bis: sm.summe.bis, luecke: sm.luecken > 0, ohneSumme: true, belege: [{ titel: 'Berichte 43 und 44 (Hersteller- und Händlerangaben)', url: '', abruf: root.DATEN.sauna.stand, status: 'prüfen vor Nutzung' }] });
 }
+var kh = root.KLEINHAUS_KERN && plan.kleinhaus ? root.KLEINHAUS_KERN.rechne(plan) : null;
+if (kh && kh.ok && kh.kosten && kh.kosten.ok) {
+var kc = kh.kosten, ks = kc.summe;
+m.ausbau.kleinhaus = { typ: kh.ps.typ, herkunft: kh.ps.herkunft, flaeche: kh.flaeche, erlaubt: kc.erlaubt, von: ks ? ks.von : 0, bis: ks ? ks.bis : 0, mindestens: ks ? ks.mindestens : false, ohneKauf: ks ? ks.ohneKauf : false, luecken: ks ? ks.luecken : 0, ref: kh.ps.ref };
+if (kc.erlaubt) kb.zeilen.push({ gruppe: 'kleinhaus', id: 'summe', art: kh.ps.typ, name: 'Kleinhaus', einheit: '€', von: ks.von, bis: ks.bis, luecke: ks.mindestens, ohneSumme: true, belege: [{ titel: 'Berichte 45 bis 50 (Hersteller-, Händler- und Behördenangaben)', url: '', abruf: root.DATEN.kleinhaus.stand, status: 'prüfen vor Nutzung' }] });
+}
 gc.items.forEach(function (it) {
 if (sk && sk.ok && it.id === sk.item.id) return;
+if (kh && kh.ok && kh.ps.ref && it.id === kh.ps.ref) return;
 (it.daten.kosten || []).forEach(function (k) {
 kb.zeilen.push({ gruppe: 'grundstueck', id: it.id + ':' + k.id, art: it.art, name: k.name, einheit: k.einheit, von: k.von, bis: k.bis, luecke: !!k.luecke, ohneSumme: true, belege: k.luecke ? [] : belege([k]) });
 if (k.luecke) m.luecken.push({ id: 'k:gs:' + it.id + ':' + k.id, key: 'mLuecke', par: { art: it.art, name: k.name } });
@@ -13777,6 +14075,14 @@ if (idOk(sa0.art)) sa.art = sa0.art;
 if (typeof sa0.stunden === 'number' && isFinite(sa0.stunden)) sa.stunden = klemme(sa0.stunden, 0.25, 4);
 neu.sauna = sa;
 }
+if (p.kleinhaus && typeof p.kleinhaus === 'object' && !Array.isArray(p.kleinhaus)) {
+var kh0 = p.kleinhaus, kh = {};
+if (typeof kh0.ref === 'string' && /^[a-z0-9_]{1,12}$/.test(kh0.ref)) kh.ref = kh0.ref;
+['typ', 'herkunft'].forEach(function (k) { if (idOk(kh0[k])) kh[k] = kh0[k]; });
+['schnee', 'wind'].forEach(function (k) { if (typeof kh0[k] === 'string' && /^[0-9a]{1,2}$/.test(kh0[k])) kh[k] = kh0[k]; });
+if (typeof kh0.regler === 'number' && isFinite(kh0.regler)) kh.regler = klemme(kh0.regler, 0, 1);
+neu.kleinhaus = kh;
+}
 neu.preise = {}; neu.mengen = {};
 Object.keys(p.preise || {}).forEach(function (k) { var v = Number(p.preise[k]); if (isFinite(v) && v >= 0) neu.preise[k] = v; });
 Object.keys(p.mengen || {}).forEach(function (k) { var v = Number(p.mengen[k]); if (isFinite(v) && v >= 0) neu.mengen[k] = v; });
@@ -13833,6 +14139,7 @@ if (window.GRUNDRISS_HUELLE) window.GRUNDRISS_HUELLE.aktualisieren();
 if (window.GRUNDRISS_ANBAU) window.GRUNDRISS_ANBAU.aktualisieren();
 if (window.GRUNDRISS_GRUNDSTUECK) window.GRUNDRISS_GRUNDSTUECK.aktualisieren();
 if (window.GRUNDRISS_SAUNA) window.GRUNDRISS_SAUNA.aktualisieren();
+if (window.GRUNDRISS_KLEINHAUS) window.GRUNDRISS_KLEINHAUS.aktualisieren();
 clearTimeout(speicherTimer);
 speicherTimer = setTimeout(function () {
 try {
@@ -18349,7 +18656,8 @@ var v = it.vf, a = it.ampel, summe = v && v.ok ? v.summe : null, d = it.daten;
 h += '<article class="gs-baustein gs-k-' + a + '" data-gs-item="' + it.id + '" data-art="' + it.art + '" data-ampel="' + a + '">';
 h += '<div class="gs-k-kopf">' + symbol(ICON[it.art]) + '<b>' + esc(artName(it.art)) + '</b> <span class="klein es-zahl" data-gs-groesse="' + it.flaeche + '">' + esc(tr('gsGroesseZeile', { b: m2(it.b), t: m2(it.t), f: m2(it.flaeche) })) + '</span>' +
 ' <button type="button" class="knopf mittel zweit gs-zeigen" data-gs="zeigen" data-wert="' + it.id + '" data-fk="z-' + it.id + '">' + esc(tr('gsZeigen')) + '</button>' +
-(it.art === 'sauna' && window.GRUNDRISS_SAUNA ? ' <button type="button" class="knopf mittel gs-sauna-planen" data-gs="sauna-planen" data-wert="' + it.id + '" data-fk="sp-' + it.id + '">' + symbol('i-gs-sauna') + ' ' + esc(tr('saPlanen')) + '</button>' : '') + '</div>';
+(it.art === 'sauna' && window.GRUNDRISS_SAUNA ? ' <button type="button" class="knopf mittel gs-sauna-planen" data-gs="sauna-planen" data-wert="' + it.id + '" data-fk="sp-' + it.id + '">' + symbol('i-gs-sauna') + ' ' + esc(tr('saPlanen')) + '</button>' : '') +
+(it.art === 'gartenhaus' && window.GRUNDRISS_KLEINHAUS ? ' <button type="button" class="knopf mittel zweit gs-sauna-planen" data-gs="kleinhaus-planen" data-wert="' + it.id + '" data-fk="kp-' + it.id + '">' + symbol('i-kh-modul') + ' ' + esc(tr('khPlanen')) + '</button>' : '') + '</div>';
 if (it.garten) {
 h += '<p class="klein" data-gs-garten="' + it.art + '">' + esc(tr('gsGartenKarte_' + it.art, { f: m2(it.flaeche) })) + '</p><p class="klein">' + annahmeSchild() + ' ' + esc(tr('gsGartenAnnahme')) + '</p></article>';
 return;
@@ -18459,6 +18767,7 @@ if (!t || t.tagName === 'INPUT') return;
 var a = t.getAttribute('data-gs'), w = t.getAttribute('data-wert');
 if (a === 'hilfe') { var id = t.getAttribute('aria-controls'), p = byId(id), auf = t.getAttribute('aria-expanded') !== 'true'; t.setAttribute('aria-expanded', auf ? 'true' : 'false'); hilfeOffen[id] = auf; if (p) p.hidden = !auf; return; }
 if (a === 'sprung') { sprung(w); return; }
+if (a === 'kleinhaus-planen') { if (window.GRUNDRISS_KLEINHAUS) window.GRUNDRISS_KLEINHAUS.planen(w); return; }
 if (a === 'sauna-planen') { if (window.GRUNDRISS_SAUNA) window.GRUNDRISS_SAUNA.planen(w); return; }
 if (a === 'pers+' || a === 'pers-') {
 var pn = HK.personenPlan(G.plan()).n, np = Math.max(1, Math.min(12, pn + (a === 'pers+' ? 1 : -1)));
@@ -18663,7 +18972,7 @@ function wz(key, e, text) { return '<li data-sa-eig="' + key + '"><b>' + T('saEi
 function preisBlock(x, ein) {
 var p = SK.holzPreis(x.id, ein), s = p.luecke ? '<span class="ab-luecke" data-luecke="1">' + T('saKeinPreis') + '</span>' :
 '<b data-von="' + p.von + '" data-bis="' + p.bis + '">' + T(ein === 'lfm' ? 'saPreisLfm' : 'saPreisM2', { p: p.von === p.bis ? eur(p.von) : eur(p.von) + ' – ' + eur(p.bis) }) + '</b>' + (p.einQuelle ? ' <span class="klein">(' + T('saEineQuelle') + ')</span>' : '');
-var l = p.zeilen.map(function (r) { return '<li>' + eur(r.v) + ' €' + (r.ab ? ' (' + T('saAb') + ')' : '') + (r.hinweis ? ' – ' + esc(r.hinweis) : '') + ' ' + beleg(r) + '</li>'; }).join('');
+var l = p.zeilen.map(function (r) { return '<li>' + eur(r.v) + ' €' + (r.ab ? ' (' + T('saAb') + ')' : '') + (r.hinweis ? ' – ' + esc(r.hinweis) : '') + (r.ausser ? ' <b class="klein" data-sa-ausser="1">(' + T('saAusser') + ')</b>' : '') + ' ' + beleg(r) + '</li>'; }).join('');
 return '<div class="sa-preis" data-sa-preis="' + ein + '"><p>' + s + '</p>' + (l ? '<ul class="gs-ul sa-ul">' + l + '</ul>' : '') + '</div>';
 }
 function t2Html(c) {
@@ -18785,9 +19094,7 @@ if (!m) return;
 if (!init3d()) return;
 byId('sa-3d').hidden = false;
 gl.w.children.slice().forEach(function (k) { gl.w.remove(k); k.traverse(function (x) { if (x.geometry) x.geometry.dispose(); if (x.material) x.material.dispose(); }); });
-var wf = new THREE.Color(css('--karte2', '#f7f0e5')), bf = new THREE.Color(css('--linie2', '#d8cdb8')), ln = new THREE.Color(css('--text', '#241d2e')), cc = function (v, fb) { return new THREE.Color(css(v, fb)); };
-if (c.ps.wand === 'thermoespe') wf.offsetHSL(0, 0, -0.3);
-if (c.ps.bank === 'thermoespe') bf.offsetHSL(0, 0, -0.25);
+var wf = new THREE.Color(css('--holz', '#946a3c')), bf = new THREE.Color(css('--holz', '#946a3c')), ln = new THREE.Color(css('--text', '#241d2e')), cc = function (v, fb) { return new THREE.Color(css(v, fb)); };
 var mt = function (col, op) { return new THREE.MeshLambertMaterial({ color: col, transparent: op < 1, opacity: op, side: THREE.DoubleSide, depthWrite: op >= 1 }); };
 var bx = function (x0, y0, z0, x1, y1, z1, mat, kante) {
 var me = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0), mat); me.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); gl.w.add(me);
@@ -18888,6 +19195,326 @@ window.addEventListener('themagewechselt', function () { if (ctx && ctx.ok && gl
 window.GRUNDRISS_SAUNA = { aktualisieren: aktualisieren, jetzt: jetzt, planen: planen, ergebnis: function () { return ctx; } };
 setTimeout(function () { jetzt(false); }, 0);
 })();
+</script>
+<script>/* grundriss_kleinhaus.js */
+/* Oberfläche „Kleinhaus“ (K1): Kern kleinhaus_kern.js, Daten daten/kleinhaus.js. 3D nur bei Änderung gezeichnet, keine Animation (auch nicht bei prefers-reduced-motion). */
+(function () {
+  'use strict';
+  var KK = window.KLEINHAUS_KERN, G = window.GRUNDRISS, D = window.DATEN || {}, WZ = window.GRUNDRISS_ANBAU && window.GRUNDRISS_ANBAU.werkzeug, KD = D.kleinhaus;
+  function byId(i) { return document.getElementById(i); }
+  function tr(k, v) { return window.TXT ? window.TXT.t(k, v) : k; }
+  function melde(t) { var e = byId('g-kleinhaus-fehler'); if (e) { e.textContent = t || ''; e.hidden = !t; } }
+  if (!KK || !G || !WZ || !KD) { melde(tr('khFehler', { grund: (!KK ? 'kleinhaus_kern.js' : !WZ ? 'Karte Anbau' : !G ? 'Zeichnung' : 'Daten') + ' fehlt.' })); return; }
+  var esc = WZ.esc, sym = WZ.symbol, nz = WZ.nz, n0 = WZ.n0, schild = WZ.annahmeSchild;
+  function T(k, v) { return esc(tr(k, v)); }
+  function nf(x, d) { return new Intl.NumberFormat(WZ.lang(), { minimumFractionDigits: d, maximumFractionDigits: d }).format(x); }
+  function eur(x) { return nf(x, 0); }
+  var ctx = null, timer = null, nurErg = false, hilfe = {}, hinweis = true;
+  try { hinweis = localStorage.getItem('immo-kh-hinweis') !== '1'; } catch (e0) { hinweis = true; }
+  var ICON = { cont20: 'i-kh-box', falt: 'i-kh-falt', ausklapp: 'i-kh-aus', tiny: 'i-kh-tiny', modul: 'i-kh-modul' }, GRP = { kauf: 'w', fracht: 't', zoll: 'a', eust: 'a', kran: 'u', fundament: 'u', strom: 'u', wasser: 'u', abwasser: 'u', daemmung: 'u' };
+  var BAL = { w: 'khBal_ware', t: 'khBal_transport', a: 'khBal_abgaben', u: 'khBal_aufstellung' };
+
+  function beleg(c) {
+    return (typeof c.q === 'string' ? c.q.split(',').map(function (s) { return s.trim(); }) : c.q || []).map(function (k, i) { var q = KD.quellen[k] || {}; return WZ.quelleHtml({ id: i ? '' : c.ids, quelle: q.titel || k, url: /^https?:/.test(q.url || '') ? q.url : '', abruf: c.abruf, status: c.status }); }).join(' ') || (c.ids ? '<span class="klein">' + esc(c.ids) + ' · ' + esc(c.status) + '</span>' : '');
+  }
+  function kopfZeile(s, k, t) {
+    var id = 'kh-h-' + t;
+    return '<h4 class="es-h5 sa-h">' + sym(s) + '<span>' + T(k) + '</span> <button type="button" class="hilfe-knopf" data-kh="hilfe" data-wert="' + id + '" aria-expanded="' + !!hilfe[id] + '" aria-controls="' + id + '" aria-label="' + T('hilfeKnopf') + '">?</button></h4><p class="klein" id="' + id + '"' + (hilfe[id] ? '' : ' hidden') + '>' + T('khHilfe_' + t) + '</p>';
+  }
+  function h5(s, k, v) { return '<h5 class="es-h5 sa-h5">' + (s ? sym(s) : '') + T(k, v) + '</h5>'; }
+  function knoepfe(feld, werte, aktiv, label, nameKey, icon, extra) {
+    return '<div class="ab-stufen sa-knoepfe ' + (extra || '') + '" role="group" aria-label="' + T(label) + '">' + werte.map(function (w) {
+      return '<button type="button" class="es-var sa-opt' + (hinweis && feld === 'typ' ? ' gs-puls' : '') + '" data-kh="' + feld + '" data-wert="' + w + '" data-fk="' + feld + '-' + w + '" aria-pressed="' + (w === aktiv) + '"><span class="es-var-kopf">' + sym(icon(w)) + '<b>' + T(nameKey + w) + '</b></span></button>';
+    }).join('') + '</div>';
+  }
+  function td(k, inh, z) { return '<td' + (z ? ' class="z"' : '') + ' data-titel="' + T(k) + '">' + inh + '</td>'; }
+  function tab(sp, zeilen, attr) { return '<div class="tabelle-kasten karten-kasten"><table class="karten sa-tab"' + (attr || '') + '><thead><tr>' + sp.map(function (k) { return '<th scope="col">' + T(k) + '</th>'; }).join('') + '</tr></thead><tbody>' + zeilen + '</tbody></table></div>'; }
+  function spanne(v, b) { return v === b ? eur(v) + ' €' : eur(v) + ' bis ' + eur(b) + ' €'; }
+  function typName(id) { return tr('khTyp_' + id); }
+
+  /* ---------- Teil 1 ---------- */
+  function t1Html(c) {
+    var t = c.typ, h = kopfZeile('i-kh-modul', 'khT1', 't1') + knoepfe('typ', ['cont20', 'falt', 'ausklapp', 'tiny', 'modul'], c.ps.typ, 'khT1', 'khTyp_', function (w) { return ICON[w]; });
+    if (t.regler) h += '<div class="es-feld"><label class="es-label" for="kh-r">' + T('khRegler') + ' <b id="kh-r-wert" class="es-zahl">' + T('khReglerWert', { p: n0(c.ps.regler * 100) }) + '</b></label><input type="range" id="kh-r" min="0" max="1" step="0.05" value="' + c.ps.regler + '" data-kh="regler" data-fk="regler"></div>';
+    return h + (c.ps.explizit.typ ? '' : '<p class="klein" data-kh-annahme="start">' + schild() + ' ' + T('khAnnahmeStart') + '</p>');
+  }
+  function t1eHtml(c) {
+    var t = c.typ, m = c.mass, z = t.zu, o = t.offen, w = c.wohn, h = '';
+    var f3 = function (x) { return new Intl.NumberFormat(WZ.lang(), { minimumFractionDigits: 2, maximumFractionDigits: 3 }).format(x); };
+    var fm = function (a) { return f3(a[0]) + ' × ' + f3(a[1]) + ' × ' + f3(a[2]); };
+    h += '<p class="sa-gross" data-kh-mass="' + m.l + 'x' + m.b + 'x' + m.h + '"><b>' + T('khMasse', { l: f3(m.l), b: f3(m.b), h: f3(m.h) }) + '</b></p>';
+    h += '<p class="klein" data-kh-zo="1">' + T('khMasseZO', { z: fm(z), o: fm(o) }) + '</p>';
+    h += w.m2 != null ? '<p data-kh-wohn="' + w.m2 + '"><b>' + T('khWohn', { m2: nf(w.m2, 2) }) + '</b> <span class="klein">(' + T('khWohnArt_' + w.art) + ')</span></p>' : '<p data-kh-wohn="grenze"><b>' + T('khWohnKein') + '</b> <span class="klein">(' + T('khWohnArt_grenze', { von: nf(w.von, 1), bis: nf(w.bis, 1) }) + ')</span></p>';
+    if (t.gewicht) h += '<p class="klein">' + T('khGew', { art: tr('khGew_' + t.gewichtArt), kg: nf(t.gewicht, 0) }) + '</p>';
+    if (t.mass.annahme) h += '<p class="klein" data-kh-annahme="mass">' + schild() + ' ' + T('khAnnahmeMass') + '</p>';
+    return h + '<p class="klein">' + esc(t.mass.hinweis) + ' ' + beleg(t.mass) + '</p>';
+  }
+
+  /* ---------- Skizzen: 1 m = 75,6 px bei 96 dpi = 20 mm = 1:50; 37,8 px = 1:100 ---------- */
+  var ML = 40, MT = 30;
+  function dim(x1, y1, x2, y2, text, waag) {
+    return '<g class="sa-dim"><path d="M' + x1 + ' ' + y1 + 'L' + x2 + ' ' + y2 + (waag ? 'M' + x1 + ' ' + (y1 - 4) + 'v8M' + x2 + ' ' + (y2 - 4) + 'v8' : 'M' + (x1 - 4) + ' ' + y1 + 'h8M' + (x2 - 4) + ' ' + y2 + 'h8') + '"/><text x="' + ((x1 + x2) / 2 + (waag ? 0 : 6)) + '" y="' + ((y1 + y2) / 2 + (waag ? 15 : 0)) + '"' + (waag ? ' text-anchor="middle"' : '') + '>' + esc(text) + '</text></g>';
+  }
+  function R(kl, x, y, b, h) { return '<rect class="' + kl + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + b.toFixed(1) + '" height="' + h.toFixed(1) + '"/>'; }
+  function fig(k, w, h, s, lab, ms, extra) { return '<figure class="sa-fig"><figcaption><b>' + T(k) + '</b></figcaption><svg class="sa-svg" role="img" aria-label="' + T(k) + ' ' + esc(lab) + '" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" data-massstab="' + ms + '"' + (extra || '') + '>' + s + '</svg></figure>'; }
+  function holzKl(t) { return t.id === 'tiny' || t.id === 'modul' ? 'kh-holz' : 'kh-stahl'; }
+  function skizzenHtml(c) {
+    var P = 75.6, t = c.typ, m = c.mass, o = t.offen, kl = holzKl(t), s, q, zc = o[1] / 2;
+    s = R(kl, ML, MT + (zc - m.b / 2) * P, m.l * P, m.b * P);
+    if (t.id === 'ausklapp' && m.b > t.zu[1] + 0.01) s += R('kh-zu', ML, MT + (zc - t.zu[1] / 2) * P, t.zu[0] * P, t.zu[1] * P);
+    if (t.id === 'tiny') s += '<path class="kh-zu" d="M' + ML + ' ' + (MT + zc * P) + 'h' + (1.5 * P) + '"/><text class="sa-t" x="' + ML + '" y="' + (MT + zc * P - 6) + '">' + T('khDeichsel') + '</text>';
+    s += '<path class="sa-tuer" d="M' + (ML + 0.5 * P) + ' ' + (MT + (zc + m.b / 2) * P) + 'h' + (0.9 * P) + '"/>' + dim(ML, MT + (zc + m.b / 2) * P + 20, ML + m.l * P, MT + (zc + m.b / 2) * P + 20, nf(m.l, 2) + ' m', 1) + dim(ML + m.l * P + 22, MT + (zc - m.b / 2) * P, ML + m.l * P + 22, MT + (zc + m.b / 2) * P, nf(m.b, 2) + ' m', 0);
+    var gy = MT + (o[2] - m.h) * P;
+    q = R(kl, ML, gy, m.l * P, m.h * P);
+    if (t.regler && m.h < o[2] - 0.01) q += R('kh-zu', ML, MT + (o[2] - t.zu[2]) * P, t.zu[0] * P, t.zu[2] * P);
+    if (m.h > 2.2) q += R('kh-glas', ML + 0.5 * P, MT + (o[2] - 2) * P, 0.9 * P, 2 * P) + R('kh-glas', ML + Math.min(m.l - 1.6, m.l * 0.45) * P, MT + (o[2] - 1.9) * P, 1.1 * P, 0.9 * P);
+    if (t.id === 'tiny') q += '<circle class="kh-stahl" cx="' + (ML + m.l * 0.62 * P) + '" cy="' + (MT + (o[2] - 0.35) * P) + '" r="' + (0.35 * P) + '"/>';
+    if (t.id === 'modul') q += '<path class="kh-holz" d="M' + (ML - 6) + ' ' + (MT + 0.5 * P) + 'L' + (ML + m.l * P / 2) + ' ' + MT + 'L' + (ML + m.l * P + 6) + ' ' + (MT + 0.5 * P) + 'z"/>';
+    q += dim(ML, MT + o[2] * P + 20, ML + m.l * P, MT + o[2] * P + 20, nf(m.l, 2) + ' m', 1) + dim(ML + m.l * P + 22, gy, ML + m.l * P + 22, MT + o[2] * P, nf(m.h, 2) + ' m', 0);
+    var w1 = Math.round(ML + m.l * P + 84), w2 = Math.round(MT + o[1] * P + 52), w3 = Math.round(MT + o[2] * P + 44);
+    return kopfZeile('i-mass', 'khT2', 't2') + '<div class="sa-skizzen-box">' + fig('khDrauf', w1, Math.max(w2, 120), s, nf(m.l, 2) + ' × ' + nf(m.b, 2) + ' m', '1:50', ' data-typ="' + t.id + '"') + fig('khSeite', w1, w3, q, nf(m.l, 2) + ' × ' + nf(m.h, 2) + ' m', '1:50', ' data-typ="' + t.id + '"') + '</div><p class="klein">' + T('khM50') + '</p>' + alleHtml(c);
+  }
+  function alleHtml(c) {
+    var P = 37.8, y = 24, s = '';
+    KD.typen.forEach(function (t) {
+      var o = t.offen, kl = holzKl(t), hh = o[2] * P, sel = t.id === c.ps.typ;
+      s += '<g class="' + (sel ? 'kh-wahlt' : '') + '" data-kh-reihe="' + t.id + '"><text class="sa-t" x="10" y="' + (y - 6) + '">' + esc(typName(t.id)) + ', ' + nf(o[0], 2) + ' × ' + nf(o[2], 2) + ' m</text>' + R(kl, 10, y, o[0] * P, hh);
+      if (t.regler) s += R('kh-zu', 10, y + (o[2] - t.zu[2]) * P, t.zu[0] * P, t.zu[2] * P);
+      if (t.id === 'tiny') s += '<circle class="kh-stahl" cx="' + (10 + o[0] * 0.62 * P) + '" cy="' + (y + hh - 0.35 * P) + '" r="' + (0.35 * P) + '"/>';
+      s += '</g>'; y += hh + 34;
+    });
+    return '<figure class="sa-fig" data-kh-alle="1"><figcaption><b>' + T('khAlle') + '</b></figcaption><svg class="sa-svg" role="img" aria-label="' + T('khAlle') + '" width="' + Math.round(10 + 9.37 * P + 30) + '" height="' + Math.round(y) + '" viewBox="0 0 ' + Math.round(10 + 9.37 * P + 30) + ' ' + Math.round(y) + '" data-massstab="1:100">' + s + '</svg></figure><p class="klein">' + T('khM100') + '</p>';
+  }
+
+  /* ---------- Teil 3: Preis bis zur Aufstellung ---------- */
+  function rechenweg(z) {
+    var l = [];
+    if (z.usd) l.push(tr('khUsd', { k: nf(KD.kurs.usd, 4) }));
+    if (z.nettoZuBrutto) l.push(tr('khNetto'));
+    if (z.teiler) l.push(tr('khTeiler', { n: z.teiler }) + (z.teilerBeleg ? '' : ' (' + tr('khTeilerAnn', { n: z.teiler }) + ')'));
+    if (z.rechnung === 'zollwert') l.push(tr('khZollRechnung'));
+    if (z.rechnung === 'eust') l.push(tr('khEustRechnung'));
+    return l.map(function (x) { return esc(x); }).join('; ');
+  }
+  function balkenHtml(k) {
+    var mit = k.zeilen.filter(function (z) { return !z.luecke && !z.entf && z.bis > 0; }), tot = 0, h = '';
+    mit.forEach(function (z) { tot += (z.von + z.bis) / 2; });
+    k.zeilen.forEach(function (z) {
+      if (z.luecke) h += '<span class="kh-seg kh-luecke" style="flex:0 0 28px" data-kh-seg="' + z.id + '" title="' + esc(tr('khK_' + z.id) + ': ' + tr('hdKeineAngabe')) + '">?</span>';
+      else if (!z.entf && z.bis > 0) h += '<span class="kh-seg kh-' + GRP[z.id] + '" style="flex:' + ((z.von + z.bis) / 2 / tot * 100).toFixed(2) + ' 1 0" data-kh-seg="' + z.id + '" title="' + esc(tr('khK_' + z.id) + ': ' + spanne(z.von, z.bis)) + '"></span>';
+    });
+    return '<div class="kh-balken" role="img" aria-label="' + T('khBal') + '" data-kh-balken="1">' + h + '</div><div class="kh-leg">' + Object.keys(BAL).map(function (g) { return '<span><i class="sw kh-' + g + '"></i>' + T(BAL[g]) + '</span>'; }).join('') + '<span><i class="sw kh-luecke"></i>' + T('khBal_luecke') + '</span></div><p class="klein">' + T('khBal') + '</p>';
+  }
+  function kostenZeile(z) {
+    var p = z.luecke ? '<span class="ab-luecke" data-luecke="1">' + T('hdKeineAngabe') + '</span>' : z.entf ? '<span class="klein">' + T('khEntf') + '</span>' : '<span data-von="' + z.von + '" data-bis="' + z.bis + '">' + esc(spanne(z.von, z.bis)) + '</span>';
+    var note = z.luecke || z.entf ? esc(z.grund) : esc(z.hinweis), rw = rechenweg(z);
+    var ann = z.nettoZuBrutto || (z.teiler && !z.teilerBeleg) || z.rechnung;
+    return '<tr data-kh-pos="' + z.id + '"' + (z.luecke ? ' data-luecke="1"' : '') + '>' + td('khThPos', esc(tr('khK_' + z.id)) + (z.brutto ? ' <span class="klein">(brutto)</span>' : ''), 0) + td('abSpPreis', p, 1) + td('khThHinweis', (rw ? '<span class="klein">' + (ann ? schild() + ' ' : '') + rw + '</span><br>' : '') + '<span class="klein">' + note + '</span>') + td('regQuelle', beleg(z)) + '</tr>';
+  }
+  function gruppe(k, ids) {
+    var v = 0, b = 0, lu = 0, n = 0;
+    ids.forEach(function (id) { var z = k.zeilen.filter(function (x) { return x.id === id; })[0]; n++; if (z.luecke) lu++; else { v += z.von; b += z.bis; } });
+    return lu === n ? '<span class="ab-luecke" data-luecke="1">' + T('hdKeineAngabe') + '</span>' : esc(spanne(v, b)) + (lu ? ' <span class="klein">+ ' + T('hdKeineAngabe') + '</span>' : '');
+  }
+  function vergleichHtml(c) {
+    var zl = c.alle.map(function (k, i) {
+      var h = KK.HERKUENFTE[i];
+      if (!k.ok) return '';
+      if (!k.erlaubt) return '<tr data-kh-herk="' + h + '" data-kh-verboten="1"><th scope="row">' + T('khH_' + h) + '</th><td colspan="5"><b>' + T('khNichtErlaubt') + '</b>: ' + esc(k.verbot.gesetz) + ' <span class="klein">(' + esc(k.verbot.stand) + ')</span></td></tr>';
+      var s = k.summe;
+      return '<tr data-kh-herk="' + h + '"' + (h === c.ps.herkunft ? ' class="sa-treffer"' : '') + '><th scope="row">' + T('khH_' + h) + '</th>' + td('khK_kauf', gruppe(k, ['kauf'])) + td('khK_fracht', gruppe(k, ['fracht'])) + td('khThAbg', gruppe(k, ['zoll', 'eust'])) + td('khThAuf', gruppe(k, ['kran', 'fundament', 'strom', 'wasser', 'abwasser'])) +
+        td('khSumme', (s.ohneKauf ? '<span class="ab-luecke" data-luecke="1">' + T('khOhneKauf') + '</span> ' : '') + '<b data-von="' + s.von + '" data-bis="' + s.bis + '" data-mindestens="' + s.mindestens + '">' + (s.mindestens ? T('khMindestens') : '') + esc(spanne(s.von, s.bis)) + '</b>') + '</tr>';
+    }).join('');
+    return h5('i-kh-welt', 'khImport') + '<div class="tabelle-kasten karten-kasten"><table class="karten sa-tab" data-kh-vergleich="1"><thead><tr><th scope="col">' + T('khThHerk') + '</th><th scope="col">' + T('khK_kauf') + '</th><th scope="col">' + T('khK_fracht') + '</th><th scope="col">' + T('khThAbg') + '</th><th scope="col">' + T('khThAuf') + '</th><th scope="col">' + T('khSumme') + '</th></tr></thead><tbody>' + zl + '</tbody></table></div>';
+  }
+  function t3Html(c) {
+    var k = c.kosten, h = kopfZeile('i-rechner', 'khT3', 't3') + h5('i-kh-welt', 'khHerkunft') + knoepfe('herkunft', KK.HERKUENFTE, c.ps.herkunft, 'khHerkunft', 'khH_', function () { return 'i-kh-welt'; }, 'kh-wahl');
+    if (!k.ok) return h + '<p class="ab-meldung fehler" role="alert">' + T('khFehler', { grund: k.grund }) + '</p>';
+    if (!k.erlaubt) {
+      var v = k.verbot;
+      h += '<div class="kh-verbot" role="alert" data-kh-verboten="' + k.herk + '"><p><b>' + T('khNichtErlaubt') + '</b> · ' + esc(v.stufe) + '</p><p>' + T('khRecht', { g: v.gesetz, w: v.ware, s: v.stand, f: v.fund, a: v.abruf }) + '</p><p>' + T('khKeinPreis') + '</p><p>' + beleg(v) + '</p></div>';
+    } else {
+      h += balkenHtml(k) + tab(['khThPos', 'abSpPreis', 'khThHinweis', 'regQuelle'], k.zeilen.map(kostenZeile).join('') +
+        '<tr class="summe" data-kh-summe="1" data-von="' + k.summe.von + '" data-bis="' + k.summe.bis + '" data-mindestens="' + k.summe.mindestens + '" data-luecken="' + k.summe.luecken + '">' + td('khThPos', '<b>' + T('khSumme') + '</b>') + td('abSpPreis', '<b>' + (k.summe.ohneKauf ? T('khOhneKauf') : '') + (k.summe.mindestens ? T('khMindestens') : '') + esc(spanne(k.summe.von, k.summe.bis)) + '</b>', 1) + td('khThHinweis', k.summe.mindestens ? '<span class="klein">' + T('khSummeOhne', { n: k.summe.luecken }) + '</span>' : '') + td('regQuelle', '') + '</tr>');
+      h += '<p class="klein">' + esc(KD.bemessung.hinweis) + ' ' + beleg(KD.bemessung) + '</p>';
+    }
+    return h + vergleichHtml(c);
+  }
+
+  /* ---------- Teil 4: Eignung ---------- */
+  function t4Html(c) {
+    var t = c.typ, e = KD.eignung, h = kopfZeile('i-paragraf', 'khT4', 't4') + h5('i-paragraf', 'khGModG') + '<ul class="gs-ul sa-ul">' + e.gmodg.map(function (g) { return '<li data-kh-gmodg="' + g.id + '">' + esc(g.text) + ' ' + beleg(g) + '</li>'; }).join('') + '</ul>';
+    var m2 = c.wohn.m2 != null ? c.wohn.m2 : c.wohn.bis, kl = c.klein.klein;
+    h += '<p class="' + (kl ? 'sa-ja' : 'ab-meldung') + '" role="status" data-kh-klein="' + (kl ? 'ja' : 'nein') + '">' + T(c.wohn.m2 != null ? (kl ? 'khKlein_ja' : 'khKlein_nein') : 'khKlein_grenze', { m2: nf(m2, 2) }) + '</p>';
+    if (t.gross) h += '<p class="ab-meldung" role="note" data-kh-klein="gross">' + T('khKlein_nein', { m2: nf(t.gross.m2, 1) }) + ' (' + esc(t.gross.ids) + ')</p>';
+    var au = e.aufbau[t.id];
+    h += h5('i-mass', 'khUTitel') + tab(['khThPos', 'khThSoll', 'khThIst'], e.u.filter(function (u) { return u.id === 'wand' || u.id === 'dach' || !au; }).map(function (u) {
+      var a = au && (u.id === 'wand' || u.id === 'dach') ? { txt: au[u.id], u: au[u.id === 'wand' ? 'uWand' : 'uDach'] } : null;
+      return '<tr data-kh-u="' + u.id + '"' + (a ? ' data-kh-ueber="' + (a.u[0] > u.soll ? 1 : 0) + '"' : '') + '>' + td('khThPos', esc(u.name)) + td('khThSoll', nf(u.soll, 2) + ' ' + beleg(u), 1) + td('khThIst', a ? T('khUWert', { a: a.txt, u: nf(a.u[0], 2) + ' bis ' + nf(a.u[1], 2) }) + ' <b>' + T('khUDrueber') + '</b>' : '<span class="ab-luecke" data-luecke="1">' + T('khULuecke') + '</span>') + '</tr>';
+    }).join(''));
+    if (au) h += '<p class="klein">' + schild() + ' ' + esc(au.text) + ' ' + beleg({ ids: au.ids, q: ['BER'], status: 'eigene Einordnung', abruf: KD.stand }) + '</p>';
+    var zk = e.zonenBeleg, ls = e.last[t.id], sk = e.schnee.filter(function (z) { return z.z === c.ps.schnee; })[0], wi = e.wind.filter(function (z) { return z.z === c.ps.wind; })[0];
+    h += h5('i-gs-kleinwind', 'khZonen') + '<p class="klein" id="kh-zonenuns" data-kh-zonen="unsicher">' + schild() + ' ' + T('khZonenUns') + ' ' + beleg(zk) + '</p>';
+    var zb = function (f, l) { return '<p class="es-label">' + T(f === 'schnee' ? 'khSchnee' : 'khWind') + '</p><div class="ab-stufen sa-knoepfe kh-zone-wahl" role="group" aria-label="' + T(f === 'schnee' ? 'khSchnee' : 'khWind') + '">' + l.map(function (z) { return '<button type="button" class="es-var sa-opt" data-kh="' + f + '" data-wert="' + z.z + '" data-fk="' + f + '-' + z.z + '" aria-pressed="' + (z.z === c.ps[f]) + '"><span class="es-var-kopf"><b>' + z.z + '</b></span></button>'; }).join('') + '</div>'; };
+    h += zb('schnee', e.schnee) + '<p data-kh-sk="' + sk.sk + '">' + T('khZoneSk', { z: sk.z, v: nf(sk.sk, 2) }) + '</p>' + zb('wind', e.wind) + '<p data-kh-wind="' + wi.q + '">' + T('khZoneWind', { z: wi.z, v: nf(wi.v, 1), q: nf(wi.q, 2) }) + '</p>';
+    h += '<p class="klein" data-kh-last="1">' + (ls ? esc(ls.text + '; ' + ls.wind) + ' ' + beleg({ ids: ls.ids, q: ['HIG'], status: 'prüfen vor Nutzung', abruf: KD.stand }) : T('khLastLuecke')) + '</p><p class="ab-meldung" role="note" data-kh-vergleich-luecke="1">' + T('khKeinVergleich') + '</p>';
+    h += h5('i-paragraf', 'khFaelle') + '<ul class="gs-ul sa-ul">' + KD.faelle.map(function (f) { return '<li data-kh-fall="' + f.id + '"><b>' + esc(f.titel) + '</b>: ' + esc(f.text) + ' ' + beleg({ ids: f.id, q: [f.q], status: f.status, abruf: f.abruf }) + '</li>'; }).join('') + '</ul><p class="klein">' + esc(KD.faelle_hinweis) + '</p>';
+    return h;
+  }
+
+  /* ---------- Teil 5: Regeln ---------- */
+  function ampelBlock(titel, v, text) {
+    var s = v && v.ok ? v.summe : null;
+    if (!s) return '<p class="ab-meldung fehler" role="alert">' + T('anKeineDaten', { grund: v ? v.grund : '' }) + '</p>';
+    return '<h5 class="es-h5 sa-h5">' + T(titel) + '</h5><div class="an-satz an-f ' + s.ampel + '" role="status" data-an-ampel="' + s.ampel + '" data-kh-ampel="' + titel + '">' + WZ.ampelChip(s.ampel, false) + '<span class="an-satz-text">' + esc(WZ.satzFuer(s)) + '</span></div>' + (text ? '<p class="klein">' + T(text) + '</p>' : '');
+  }
+  function t5Html(c) {
+    var a = c.ampel, h = kopfZeile('i-paragraf', 'khT5', 't5') + '<p class="klein" data-kh-regeln="1">' + schild() + ' ' + T('khRegelnHinweis') + '</p><h5 class="es-h5 sa-h5">' + sym('i-paragraf') + T('khAmpelTitel', { land: c.landName }) + '</h5><p class="klein" data-kh-land="' + esc(c.land) + '">' + T('khAmpelFl', { fl: nf(a.flaeche, 1), h: nf(a.hoehe, 2) }) + '</p>' + ampelBlock('khAmpelLager', a.lager, null) + ampelBlock('khAmpelWohnen', a.wohnen, 'khAmpelWohnenText');
+    h += KD.regeln.map(function (r) {
+      return '<article class="kh-regel" data-kh-regel="' + r.id + '"><b>' + T('khRg_' + r.id) + '</b><div class="kh-regel-spalten"><p><b>' + T('khMobil') + ':</b> ' + esc(r.mobil) + '</p><p><b>' + T('khFest') + ':</b> ' + esc(r.fest) + '</p></div><p class="klein">' + esc(r.ids) + ' ' + beleg({ ids: '', q: r.q.split(',').map(function (s) { return s.trim(); }), status: r.status, abruf: KD.stand }) + '</p></article>';
+    }).join('');
+    return h + '<details class="an-bed" data-kh-wid="1"><summary>' + T('khWid') + ' (' + KD.widersprueche.length + ')</summary><ul class="gs-ul sa-ul">' + KD.widersprueche.map(function (w) { return '<li data-kh-w="' + w.id + '">' + esc(w.text) + '<br><b>' + esc(w.entscheidung) + '</b> <span class="klein">(' + esc(w.ids) + ')</span></li>'; }).join('') + '</ul></details>';
+  }
+
+  /* ---------- 3D (three.js) ---------- */
+  var gl = { ok: null, yaw: 0.65, pitch: 0.4, dist: 8, zoom: 1 };
+  function css(n, fb) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || fb; }
+  function ersatz(grund) {
+    var cv = byId('kh-3d'), e = byId('kh-3d-ersatz'), m = byId('kh-modell');
+    gl.ok = false; if (cv) cv.hidden = true; if (e) { e.hidden = false; e.textContent = tr('khModellKein') + ' (' + grund + ')'; } if (m) m.setAttribute('data-render', 'ersatz');
+  }
+  function init3d() {
+    if (gl.ok !== null) return gl.ok;
+    var cv = byId('kh-3d'), z = null;
+    if (!cv || typeof THREE === 'undefined') return ersatz('three.js');
+    try { gl.r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, powerPreference: 'low-power' }); } catch (e) { return ersatz('WebGL'); }
+    gl.r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    gl.s = new THREE.Scene(); gl.ka = new THREE.PerspectiveCamera(35, 1, 0.05, 300); gl.ziel = new THREE.Vector3();
+    var sun = new THREE.DirectionalLight(0xffffff, 0.9); sun.position.set(3, 6, 4); gl.s.add(new THREE.HemisphereLight(0xffffff, 0x666666, 0.9), sun);
+    gl.w = new THREE.Group(); gl.s.add(gl.w);
+    cv.addEventListener('pointerdown', function (ev) { z = { x: ev.clientX, y: ev.clientY, a: gl.yaw, p: gl.pitch }; try { cv.setPointerCapture(ev.pointerId); } catch (e) { z = z; } });
+    cv.addEventListener('pointermove', function (ev) { if (z) { gl.yaw = z.a - (ev.clientX - z.x) * 0.008; gl.pitch = Math.max(0.02, Math.min(1.45, z.p + (ev.clientY - z.y) * 0.006)); zeichnen(); } });
+    cv.addEventListener('pointerup', function () { z = null; }); cv.addEventListener('pointercancel', function () { z = null; });
+    cv.addEventListener('keydown', function (ev) {
+      var k = ev.key, ok = true;
+      if (k === 'ArrowLeft') gl.yaw += 0.12; else if (k === 'ArrowRight') gl.yaw -= 0.12; else if (k === 'ArrowUp') gl.pitch = Math.min(1.45, gl.pitch + 0.06); else if (k === 'ArrowDown') gl.pitch = Math.max(0.02, gl.pitch - 0.06);
+      else if (k === '+' || k === '=') gl.zoom = Math.min(2.5, gl.zoom * 1.15); else if (k === '-' || k === '_') gl.zoom = Math.max(0.5, gl.zoom / 1.15); else ok = false;
+      if (ok) { ev.preventDefault(); zeichnen(); }
+    });
+    if ('ResizeObserver' in window) new ResizeObserver(groesse).observe(cv);
+    return (gl.ok = true);
+  }
+  function groesse() { var cv = byId('kh-3d'); if (!gl.ok || !cv || !cv.clientWidth || !cv.clientHeight) return; gl.r.setSize(cv.clientWidth, cv.clientHeight, false); gl.ka.aspect = cv.clientWidth / cv.clientHeight; gl.ka.updateProjectionMatrix(); zeichnen(); }
+  function zeichnen() {
+    if (!gl.ok || !gl.w) return;
+    var d = gl.dist / gl.zoom, p = gl.pitch;
+    gl.ka.position.set(gl.ziel.x + d * Math.cos(p) * Math.sin(gl.yaw), gl.ziel.y + d * Math.sin(p), gl.ziel.z + d * Math.cos(p) * Math.cos(gl.yaw));
+    gl.ka.lookAt(gl.ziel); gl.r.render(gl.s, gl.ka);
+    var mo = byId('kh-modell'); if (mo) mo.setAttribute('data-yaw', gl.yaw.toFixed(2));
+  }
+  function bau3d(c) {
+    var m = byId('kh-modell'), t = c.typ, ms = c.mass, L = ms.l, B = ms.b, H = ms.h, o = t.offen, zc = o[1] / 2, z0 = zc - B / 2, z1 = zc + B / 2;
+    if (!m) return;
+    [['typ', t.id], ['l', L], ['b', B], ['h', H], ['regler', c.ps.regler], ['flaeche', c.flaeche]].forEach(function (a) { m.setAttribute('data-' + a[0], a[1]); });
+    if (!init3d()) return;
+    byId('kh-3d').hidden = false;
+    gl.w.children.slice().forEach(function (k) { gl.w.remove(k); k.traverse(function (x) { if (x.geometry) x.geometry.dispose(); if (x.material) x.material.dispose(); }); });
+    var holz = t.id === 'tiny' || t.id === 'modul', cc = function (v, fb) { return new THREE.Color(css(v, fb)); }, ln = cc('--text', '#241d2e');
+    var mt = function (col, op) { return new THREE.MeshLambertMaterial({ color: col, transparent: op < 1, opacity: op, side: THREE.DoubleSide, depthWrite: op >= 1 }); };
+    var haut = mt(holz ? cc('--holz', '#946a3c') : cc('--leise', '#5c5666'), holz ? 0.9 : 0.75), glas = mt(cc('--c2', '#1f9bd1'), 0.5), dunkel = mt(cc('--text', '#241d2e'), 1);
+    var bx = function (x0, y0, zz0, x1, y1, zz1, mat, kante) {
+      var me = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, zz1 - zz0), mat); me.position.set((x0 + x1) / 2, (y0 + y1) / 2, (zz0 + zz1) / 2); gl.w.add(me);
+      if (kante) { var l = new THREE.LineSegments(new THREE.EdgesGeometry(me.geometry), new THREE.LineBasicMaterial({ color: ln, transparent: true, opacity: 0.45 })); l.position.copy(me.position); gl.w.add(l); }
+    };
+    var gr = new THREE.Mesh(new THREE.PlaneGeometry(o[0] + 4, o[1] + 4), mt(cc('--linie', '#e8dfd1'), 1)); gr.rotation.x = -Math.PI / 2; gr.position.set(o[0] / 2, -0.01, zc); gl.w.add(gr);
+    var y0 = t.id === 'tiny' ? 0.5 : 0, x0 = t.id === 'tiny' ? 1.5 : 0, hw = t.id === 'modul' ? 2.5 : H;
+    if (t.id === 'ausklapp') {
+      var kb = Math.min(B, t.zu[1]) / 2; bx(0, 0, zc - kb, L, H, zc + kb, haut, 1);
+      if (B > t.zu[1] + 0.01) { bx(0, 0, z0, L, H * 0.96, zc - kb, mt(cc('--leise', '#5c5666'), 0.45), 1); bx(0, 0, zc + kb, L, H * 0.96, z1, mt(cc('--leise', '#5c5666'), 0.45), 1); }
+    } else {
+      if (t.id === 'tiny') { bx(0, 0.3, z0, L, 0.5, z1, dunkel, 1); bx(0, 0.35, zc - 0.06, 1.5, 0.45, zc + 0.06, dunkel, 0); [0.55, 0.75].forEach(function (f) { [z0 - 0.1, z1 + 0.1].forEach(function (zz) { var w = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.2, 24), dunkel); w.rotation.x = Math.PI / 2; w.position.set(L * f + 0.4, 0.35, zz); gl.w.add(w); }); }); }
+      bx(x0, y0, z0, L, hw, z1, haut, 1);
+    }
+    if (t.id === 'modul') {
+      var rise = H - 2.5, half = B / 2, s = Math.sqrt(half * half + rise * rise), al = Math.atan2(rise, half);
+      [-1, 1].forEach(function (sg) { var sl = new THREE.Mesh(new THREE.BoxGeometry(L + 0.3, 0.08, s), mt(cc('--leise', '#5c5666'), 0.9)); sl.rotation.x = sg * al; sl.position.set(L / 2, 2.5 + rise / 2, zc + sg * half / 2); gl.w.add(sl); });
+    }
+    if (t.id === 'tiny') bx(x0 - 0.1, H - 0.08, z0 - 0.1, L + 0.1, H, z1 + 0.1, mt(cc('--leise', '#5c5666'), 0.9), 1);
+    if (H > 2.2) {
+      var zf = z1 + (t.id === 'ausklapp' ? -(B / 2 - Math.min(B, t.zu[1]) / 2) : 0);
+      bx(x0 + 0.5, y0, zf - 0.01, x0 + 1.4, y0 + Math.min(2, hw - y0 - 0.1), zf + 0.04, dunkel, 0);
+      [[0.45, 0.4], [0.65, 0.3]].forEach(function (f, i) { if (L > 5 || i === 0) bx(x0 + (L - x0) * f[0], y0 + 0.9, zf - 0.01, x0 + (L - x0) * f[0] + 1.1, y0 + 1.8, zf + 0.04, glas, 1); });
+    }
+    gl.ziel.set(o[0] / 2, o[2] / 2, zc); gl.dist = Math.max(o[0], o[1], o[2]) * 3.1; gl.zoom = 1;
+    m.setAttribute('data-render', 'ok'); m.setAttribute('data-teile', gl.w.children.length);
+    groesse(); zeichnen();
+  }
+
+  /* ---------- Zusammenspiel ---------- */
+  function summeKurz(k) {
+    if (!k.ok) return '–';
+    if (!k.erlaubt) return tr('khNichtErlaubtKurz');
+    return (k.summe.ohneKauf ? tr('khOhneKauf') : '') + tr('khKopfSumme', { m: k.summe.mindestens ? tr('khMindestens') : '', von: eur(k.summe.von), bis: eur(k.summe.bis) });
+  }
+  function kopf(c) {
+    var e = byId('g-kleinhaus-kopfzeile'); if (!e) return;
+    e.textContent = tr('khKopf', { typ: typName(c.ps.typ), herk: tr('khH_' + c.ps.herkunft), sum: summeKurz(c.kosten) });
+  }
+  function teil(id, fn, c) { var w = byId(id); if (w) { var neu = fn(c); WZ.mitFokus(w, function () { w.innerHTML = neu; }); } }
+  function jetzt(nurErgebnis) {
+    clearTimeout(timer);
+    var c;
+    try { c = ctx = KK.rechne(G.plan()); } catch (e) { melde(tr('khFehler', { grund: e && e.message ? e.message : e })); return; }
+    if (!c.ok) { melde(tr('khFehler', { grund: c.grund })); return; }
+    melde(''); kopf(c);
+    var d = byId('g-kleinhaus-details');
+    if (!d || !d.open) return;
+    try {
+      var mm = c.ps.meldungen.map(function (x) { return '<p class="ab-meldung" role="status" data-kh-meldung="' + x.feld + '">' + T('khMeld', { w: x.wert, feld: x.feld }) + '</p>'; }).join('');
+      if (!nurErgebnis) teil('kh-t1', function (cc) { return mm + t1Html(cc); }, c);
+      teil('kh-t1e', t1eHtml, c); teil('kh-skizzen', skizzenHtml, c); teil('kh-t3', t3Html, c); teil('kh-t4', t4Html, c); teil('kh-t5', t5Html, c);
+      byId('kh-legende').textContent = tr('khLegende');
+      bau3d(c);
+    } catch (e2) { melde(tr('khFehler', { grund: e2 && e2.message ? e2.message : e2 })); }
+    nurErg = false;
+  }
+  function aktualisieren() { clearTimeout(timer); var n = nurErg; timer = setTimeout(function () { jetzt(n); }, 150); }
+  function geaendert(nur) { nurErg = !!nur; G.geaendert(); }
+  function bei(ev) {
+    var t = ev.target;
+    if (ev.type !== 'input' || t.type !== 'range' || t.getAttribute('data-kh') !== 'regler') return;
+    erstesMal();
+    var x = Math.round(+t.value * 100) / 100, lab = byId('kh-r-wert');
+    if (lab) lab.textContent = tr('khReglerWert', { p: n0(x * 100) });
+    if (KK.wahlSetzen(G.plan(), 'regler', x)) geaendert(true);
+  }
+  function erstesMal() { if (hinweis) { hinweis = false; try { localStorage.setItem('immo-kh-hinweis', '1'); } catch (e1) { hinweis = false; } } }
+  function klick(ev) {
+    var t = ev.target.closest('[data-kh]'), plan = G.plan();
+    if (!t || t.tagName === 'INPUT') return;
+    erstesMal();
+    var a = t.getAttribute('data-kh'), w = t.getAttribute('data-wert');
+    if (a === 'hilfe') { var p = byId(w), auf = t.getAttribute('aria-expanded') !== 'true'; t.setAttribute('aria-expanded', auf); hilfe[w] = auf; if (p) p.hidden = !auf; }
+    else if (KK.wahlSetzen(plan, a, w)) geaendert(false);
+  }
+  function planen(id) {
+    var r = KK.verknuepfen(G.plan(), id);
+    if (!r.ok) return false;
+    var d = byId('g-kleinhaus-details'); if (d) d.open = true;
+    G.geaendert(); jetzt(false);
+    byId('g-kleinhaus-karte').scrollIntoView({ block: 'start', behavior: 'auto' });
+    var f = document.querySelector('#kh-t1 [data-fk="typ-' + (ctx && ctx.ps.typ) + '"]'); if (f) f.focus({ preventScroll: true });
+    return true;
+  }
+  var wurzel = byId('g-kleinhaus-inhalt'), det = byId('g-kleinhaus-details');
+  if (wurzel) { wurzel.addEventListener('click', klick); wurzel.addEventListener('input', bei); }
+  if (det) det.addEventListener('toggle', function () { if (det.open) jetzt(false); });
+  window.addEventListener('sprachegewechselt', function () { jetzt(false); });
+  window.addEventListener('themagewechselt', function () { if (ctx && ctx.ok && gl.ok) bau3d(ctx); });
+  window.GRUNDRISS_KLEINHAUS = { aktualisieren: aktualisieren, jetzt: jetzt, planen: planen, ergebnis: function () { return ctx; } };
+  setTimeout(function () { jetzt(false); }, 0);
+})();
+
 </script>
 <script>/* grundriss_mappe.js */
 (function () {
@@ -18990,6 +19617,10 @@ if (a.sauna) {
 var sa = a.sauna, so = sa.ofen === 'holz' ? tr('saOfenKurz_holz') : (sa.kw ? tr('saOfenKurz', { kw: nz(sa.kw) }) : tr('saOfenKurz_0'));
 zeile('gsArt_sauna', '<span data-sauna="1" data-von="' + sa.von + '" data-bis="' + sa.bis + '">' + esc(tr('mpSaunaZeile', { art: tr('saArt_' + sa.art), v: nz(sa.volumen), ofen: so, w: SK_holz(sa.wand), b: SK_holz(sa.bank) })) + '</span>');
 }
+if (a.kleinhaus) {
+var kl = a.kleinhaus;
+zeile('mpKleinhaus', '<span data-kleinhaus="1" data-typ="' + esc(kl.typ) + '" data-von="' + kl.von + '" data-bis="' + kl.bis + '">' + esc(tr('mpKleinhausZeile', { typ: tr('khTyp_' + kl.typ), fl: nz(kl.flaeche), herk: tr('khH_' + kl.herkunft), sum: kl.erlaubt ? (kl.ohneKauf ? tr('khOhneKauf') : '') + (kl.mindestens ? tr('khMindestens') : '') + n0(kl.von) + ' bis ' + n0(kl.bis) + ' €' : tr('khNichtErlaubtKurz') })) + '</span>');
+}
 return sect('ausbau', false, 'mpAusbau', '<dl class="mh-dl">' + h + '</dl>');
 }
 function kosten(m) {
@@ -18998,7 +19629,7 @@ var summe = function () { fertig = true; return '<tr class="summe" data-summe="k
 k.zeilen.forEach(function (z) {
 if (z.ohneSumme && !fertig) h += summe();
 if (z.gruppe !== gruppe) { gruppe = z.gruppe; h += '<tr class="gruppe"><th colspan="3">' + T(gruppe === 'anbau' ? 'mpAnbau' : 'mpG_' + gruppe) + '</th></tr>'; }
-var name = z.gruppe === 'innenausbau' ? tr('abGew_' + z.id) : z.gruppe === 'material' ? tr('maBt_' + z.id) + (z.material ? ': ' + z.material : '') : z.gruppe === 'daemmung' ? tr('hdStd_' + z.id) : z.gruppe === 'lueftung' ? tr('hlArt_' + z.id) : z.gruppe === 'grundstueck' ? gsName(z.art, z.name) : z.gruppe === 'sauna' ? tr('gsArt_sauna') + ': ' + tr('saT3') : artName(z.id);
+var name = z.gruppe === 'innenausbau' ? tr('abGew_' + z.id) : z.gruppe === 'material' ? tr('maBt_' + z.id) + (z.material ? ': ' + z.material : '') : z.gruppe === 'daemmung' ? tr('hdStd_' + z.id) : z.gruppe === 'lueftung' ? tr('hlArt_' + z.id) : z.gruppe === 'grundstueck' ? gsName(z.art, z.name) : z.gruppe === 'sauna' ? tr('gsArt_sauna') + ': ' + tr('saT3') : z.gruppe === 'kleinhaus' ? tr('mpKleinhaus') + ': ' + tr('khTyp_' + z.art) : artName(z.id);
 var leer = z.luecke && !(z.von > 0 || z.bis > 0), no = '<span class="mh-luecke">' + T('mpKeineAngabe') + '</span>';
 var aus = z.inSumme === false, vermerk = aus ? '<span class="mh-enth" data-enthalten-in="' + esc(z.enthaltenIn) + '">' + T('mpEnthalten', { wo: tr('mpZ_' + z.enthaltenIn.replace('/', '_')) }) + (z.sicher ? '' : ' · ' + T('mpEnthaltenUnsicher')) + '</span>' : '';
 h += '<tr data-k="' + z.gruppe + '/' + esc(z.id) + '"' + (aus ? ' class="mh-aus" data-nicht-summe="1"' : '') + (leer ? ' data-luecke="1"' : ' data-von="' + z.von + '" data-bis="' + z.bis + '"') + '><td>' + esc(name) + vermerk + '</td><td class="z">' +

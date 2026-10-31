@@ -224,6 +224,15 @@
       if (typeof sa0.stunden === 'number' && isFinite(sa0.stunden)) sa.stunden = klemme(sa0.stunden, 0.25, 4);
       neu.sauna = sa;
     }
+    /* Auftrag K1: plan.kleinhaus = { ref, typ, herkunft, regler 0..1, schnee, wind }, optional; unbekannte Werte bleiben stehen, die Karte meldet sie sichtbar. */
+    if (p.kleinhaus && typeof p.kleinhaus === 'object' && !Array.isArray(p.kleinhaus)) {
+      var kh0 = p.kleinhaus, kh = {};
+      if (typeof kh0.ref === 'string' && /^[a-z0-9_]{1,12}$/.test(kh0.ref)) kh.ref = kh0.ref;
+      ['typ', 'herkunft'].forEach(function (k) { if (idOk(kh0[k])) kh[k] = kh0[k]; });
+      ['schnee', 'wind'].forEach(function (k) { if (typeof kh0[k] === 'string' && /^[0-9a]{1,2}$/.test(kh0[k])) kh[k] = kh0[k]; });
+      if (typeof kh0.regler === 'number' && isFinite(kh0.regler)) kh.regler = klemme(kh0.regler, 0, 1);
+      neu.kleinhaus = kh;
+    }
     neu.preise = {}; neu.mengen = {};
     Object.keys(p.preise || {}).forEach(function (k) { var v = Number(p.preise[k]); if (isFinite(v) && v >= 0) neu.preise[k] = v; });
     Object.keys(p.mengen || {}).forEach(function (k) { var v = Number(p.mengen[k]); if (isFinite(v) && v >= 0) neu.mengen[k] = v; });
@@ -283,6 +292,7 @@
     if (window.GRUNDRISS_ANBAU) window.GRUNDRISS_ANBAU.aktualisieren();     /* Welle D, Teil 3: Anbau */
     if (window.GRUNDRISS_GRUNDSTUECK) window.GRUNDRISS_GRUNDSTUECK.aktualisieren();   /* Welle E, Teil 1: Grundstück */
     if (window.GRUNDRISS_SAUNA) window.GRUNDRISS_SAUNA.aktualisieren();               /* Auftrag S1: Sauna */
+    if (window.GRUNDRISS_KLEINHAUS) window.GRUNDRISS_KLEINHAUS.aktualisieren();       /* Auftrag K1: Kleinhaus */
     clearTimeout(speicherTimer);
     speicherTimer = setTimeout(function () {
       try {

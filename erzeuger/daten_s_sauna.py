@@ -100,7 +100,7 @@ def e(wert, i, q, s):
 # Holz: Eigenschaften nur aus S2-01/01a/02/03/04/05 (die Tabelle in 43 hat keine Ids), Preise aus S2-3x
 HOLZ = [
     {'id': 'fichte', 'name': 'Fichte', 'wand': e('ja', 'S2-05', 'KINFO', G), 'bank': None, 'harz': e('Harzausfluss unvermeidbar, gering (Karibu, Weka)', 'S2-03', 'WKAAPI', G), 'splitter': None, 'rho': e(470, 'S2-01', 'LWG', P),
-     'm2': [p(17.85, 'Holz-Hohmann', 'S2-30', 'HOHMANN'), p(18.90, 'Hornbach', 'S2-30a', 'HBFICHTE', hinweis='nicht als Sauna ausgewiesen')], 'lfm': []},
+     'm2': [p(17.85, 'Holz-Hohmann', 'S2-30', 'HOHMANN'), p(18.90, 'Hornbach', 'S2-30a', 'HBFICHTE', hinweis='nicht als Sauna ausgewiesen', ausser=True)], 'lfm': []},
     {'id': 'espe', 'name': 'Espe', 'wand': e('ja', 'S2-31', 'HOHMANN', P), 'bank': e('ja', 'S2-05', 'KINFO', G), 'harz': e('kein Harz (Thermory)', 'S2-02', 'THERMORY', G), 'splitter': e('keine Splitter, schlecht wärmeleitend', 'S2-02', 'THERMORY', G),
      'rho': e(490, 'S2-01', 'LWG', P), 'm2': [p(92.53, 'Holz-Hohmann', 'S2-31', 'HOHMANN')], 'lfm': [],
      },

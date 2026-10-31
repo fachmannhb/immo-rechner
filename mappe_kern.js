@@ -149,9 +149,17 @@
       m.ausbau.sauna = { id: sk.item.id, art: sk.art, volumen: sk.volumen, ofen: sk.ofen, kw: sk.kw, wand: sk.ps.wand, bank: sk.ps.bank, von: sm.summe.von, bis: sm.summe.bis, luecken: sm.luecken };
       kb.zeilen.push({ gruppe: 'sauna', id: 'material', art: 'sauna', name: 'Sauna', einheit: '€', von: sm.summe.von, bis: sm.summe.bis, luecke: sm.luecken > 0, ohneSumme: true, belege: [{ titel: 'Berichte 43 und 44 (Hersteller- und Händlerangaben)', url: '', abruf: root.DATEN.sauna.stand, status: 'prüfen vor Nutzung' }] });
     }
+    /* Auftrag K1: geplantes Kleinhaus (plan.kleinhaus): Typ, Standfläche, Herkunft, Summe bis zur Aufstellung (Spanne, ggf. „mindestens“); eine Zeile ohne Summe (Herkünfte sind Alternativen). Sie ersetzt die Preis-Zeilen des verknüpften Gartenhaus-Bausteins, damit keine Leistung doppelt erscheint (Zuordnung hier statt in ZUORDNUNG, weil beide Zeilen nie in der Summe stehen). RU/BY: „nicht erlaubt“, keine Zeile. */
+    var kh = root.KLEINHAUS_KERN && plan.kleinhaus ? root.KLEINHAUS_KERN.rechne(plan) : null;
+    if (kh && kh.ok && kh.kosten && kh.kosten.ok) {
+      var kc = kh.kosten, ks = kc.summe;
+      m.ausbau.kleinhaus = { typ: kh.ps.typ, herkunft: kh.ps.herkunft, flaeche: kh.flaeche, erlaubt: kc.erlaubt, von: ks ? ks.von : 0, bis: ks ? ks.bis : 0, mindestens: ks ? ks.mindestens : false, ohneKauf: ks ? ks.ohneKauf : false, luecken: ks ? ks.luecken : 0, ref: kh.ps.ref };
+      if (kc.erlaubt) kb.zeilen.push({ gruppe: 'kleinhaus', id: 'summe', art: kh.ps.typ, name: 'Kleinhaus', einheit: '€', von: ks.von, bis: ks.bis, luecke: ks.mindestens, ohneSumme: true, belege: [{ titel: 'Berichte 45 bis 50 (Hersteller-, Händler- und Behördenangaben)', url: '', abruf: root.DATEN.kleinhaus.stand, status: 'prüfen vor Nutzung' }] });
+    }
     /* Grundstücks-Preise nicht addierbar (Alternativen, €/Jahr, €/kW): Zeilen mit ohneSumme */
     gc.items.forEach(function (it) {
       if (sk && sk.ok && it.id === sk.item.id) return;
+      if (kh && kh.ok && kh.ps.ref && it.id === kh.ps.ref) return;
       (it.daten.kosten || []).forEach(function (k) {
         kb.zeilen.push({ gruppe: 'grundstueck', id: it.id + ':' + k.id, art: it.art, name: k.name, einheit: k.einheit, von: k.von, bis: k.bis, luecke: !!k.luecke, ohneSumme: true, belege: k.luecke ? [] : belege([k]) });
         if (k.luecke) m.luecken.push({ id: 'k:gs:' + it.id + ':' + k.id, key: 'mLuecke', par: { art: it.art, name: k.name } });

@@ -92,7 +92,7 @@
   function preisBlock(x, ein) {
     var p = SK.holzPreis(x.id, ein), s = p.luecke ? '<span class="ab-luecke" data-luecke="1">' + T('saKeinPreis') + '</span>' :
       '<b data-von="' + p.von + '" data-bis="' + p.bis + '">' + T(ein === 'lfm' ? 'saPreisLfm' : 'saPreisM2', { p: p.von === p.bis ? eur(p.von) : eur(p.von) + ' – ' + eur(p.bis) }) + '</b>' + (p.einQuelle ? ' <span class="klein">(' + T('saEineQuelle') + ')</span>' : '');
-    var l = p.zeilen.map(function (r) { return '<li>' + eur(r.v) + ' €' + (r.ab ? ' (' + T('saAb') + ')' : '') + (r.hinweis ? ' – ' + esc(r.hinweis) : '') + ' ' + beleg(r) + '</li>'; }).join('');
+    var l = p.zeilen.map(function (r) { return '<li>' + eur(r.v) + ' €' + (r.ab ? ' (' + T('saAb') + ')' : '') + (r.hinweis ? ' – ' + esc(r.hinweis) : '') + (r.ausser ? ' <b class="klein" data-sa-ausser="1">(' + T('saAusser') + ')</b>' : '') + ' ' + beleg(r) + '</li>'; }).join('');
     return '<div class="sa-preis" data-sa-preis="' + ein + '"><p>' + s + '</p>' + (l ? '<ul class="gs-ul sa-ul">' + l + '</ul>' : '') + '</div>';
   }
   function t2Html(c) {
@@ -222,9 +222,7 @@
     if (!init3d()) return;
     byId('sa-3d').hidden = false;
     gl.w.children.slice().forEach(function (k) { gl.w.remove(k); k.traverse(function (x) { if (x.geometry) x.geometry.dispose(); if (x.material) x.material.dispose(); }); });
-    var wf = new THREE.Color(css('--karte2', '#f7f0e5')), bf = new THREE.Color(css('--linie2', '#d8cdb8')), ln = new THREE.Color(css('--text', '#241d2e')), cc = function (v, fb) { return new THREE.Color(css(v, fb)); };
-    if (c.ps.wand === 'thermoespe') wf.offsetHSL(0, 0, -0.3);
-    if (c.ps.bank === 'thermoespe') bf.offsetHSL(0, 0, -0.25);
+    var wf = new THREE.Color(css('--holz', '#946a3c')), bf = new THREE.Color(css('--holz', '#946a3c')), ln = new THREE.Color(css('--text', '#241d2e')), cc = function (v, fb) { return new THREE.Color(css(v, fb)); };
     var mt = function (col, op) { return new THREE.MeshLambertMaterial({ color: col, transparent: op < 1, opacity: op, side: THREE.DoubleSide, depthWrite: op >= 1 }); };
     var bx = function (x0, y0, z0, x1, y1, z1, mat, kante) {
       var me = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0), mat); me.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); gl.w.add(me);

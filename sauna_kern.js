@@ -43,11 +43,11 @@
   }
   /* Spanne eines Holzes; „Quellen“ zählt verschiedene Händler, nicht Zeilen */
   function holzPreis(id, einheit) {
-    var h = holzInfo(id), z = h ? h[einheit === 'lfm' ? 'lfm' : 'm2'] : [], q = {};
-    z.forEach(function (r) { q[r.quelle + r.h] = 1; });
+    var h = holzInfo(id), z = h ? h[einheit === 'lfm' ? 'lfm' : 'm2'] : [], q = {}, zs = z.filter(function (r) { return !r.ausser; });   /* K1: Zeilen mit ausser (Hinweis „nicht als Sauna ausgewiesen“) bleiben sichtbar, zählen aber nicht zur Spanne und nicht zur Quellenzahl */
+    zs.forEach(function (r) { q[r.quelle + r.h] = 1; });
     var n = Object.keys(q).length;
-    if (!z.length) return { id: id, luecke: true, n: 0, zeilen: [] };
-    var v = z.map(function (r) { return r.v; });
+    if (!zs.length) return { id: id, luecke: true, n: 0, zeilen: z };
+    var v = zs.map(function (r) { return r.v; });
     return { id: id, luecke: false, zeilen: z, n: n, einQuelle: n === 1, von: Math.min.apply(null, v), bis: Math.max.apply(null, v) };
   }
   function strompreis() {

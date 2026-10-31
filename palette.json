@@ -1,5 +1,5 @@
 {
-  "_hinweis": "Einzige Stelle für Diagramm- und Statusfarben (Regel R024). bau.py erzeugt daraus die CSS-Variablen für hell und dunkel. c1 bis c3 sind die Diagrammfarben in fester Reihenfolge (Violett, Himmelblau, Himbeere; Nutzerwunsch 08.10.2026: kein Grün, kein Orange, außer Ampel 'gut'); nach jeder Änderung mit dem dataviz-Prüfskript (validate_palette.js --pairs all) gegen die Kartenfläche prüfen. Geprüft 08.10.2026: hell gegen #ffffff, dunkel gegen #241f2e, alle Prüfungen bestanden. Vorher (07.10.2026): Petrol #008b7f, Gold #b07d16, Blau #4a6fd1. Welle 1 (09.10.2026): info/info-fl/info-fl2 = Blau fuer Information (Hinweise, Erklaerungen, (?), Beispielband, Annahme-Schild); viol-fl/viol-fl2 = Violett-Flaechen. Bedeutung: Violett = Handlung, Blau = Information, Gruen/Gelb/Rot nur fuer Ergebnisse.",
+  "_hinweis": "Einzige Stelle für Diagramm- und Statusfarben (Regel R024). bau.py erzeugt daraus die CSS-Variablen für hell und dunkel. c1 bis c3 sind die Diagrammfarben in fester Reihenfolge (Violett, Himmelblau, Himbeere; Nutzerwunsch 08.10.2026: kein Grün, kein Orange, außer Ampel 'gut'); nach jeder Änderung mit dem dataviz-Prüfskript (validate_palette.js --pairs all) gegen die Kartenfläche prüfen. Geprüft 08.10.2026: hell gegen #ffffff, dunkel gegen #241f2e, alle Prüfungen bestanden. Vorher (07.10.2026): Petrol #008b7f, Gold #b07d16, Blau #4a6fd1. Welle 1 (09.10.2026): info/info-fl/info-fl2 = Blau fuer Information (Hinweise, Erklaerungen, (?), Beispielband, Annahme-Schild); viol-fl/viol-fl2 = Violett-Flaechen. Bedeutung: Violett = Handlung, Blau = Information, Gruen/Gelb/Rot nur fuer Ergebnisse. K1 (31.10.2026): holz = ein einziger neutraler Holzton (gedecktes Braun) fuer die 3D-Modelle Sauna und Kleinhaus (keine Farbe je Holzart, kein Orange); Kontrast Nicht-Text mind. 3:1 gegen karte, karte2 und die Bodenflaeche im 3D (hell 3,63 bis 4,79; dunkel 4,67 bis 6,21; Skript tmp/k1_kontrast.py, das dataviz-Skript validate_palette.js ist auf diesem Rechner nicht vorhanden).",
   "hell": {
     "c1": "#6332a8",
     "c2": "#1f9bd1",
@@ -11,7 +11,8 @@
     "info-fl": "#e4edfa",
     "info-fl2": "#d3e2f7",
     "viol-fl": "#eee6f9",
-    "viol-fl2": "#e6dbf5"
+    "viol-fl2": "#e6dbf5",
+    "holz": "#946a3c"
   },
   "dunkel": {
     "c1": "#8a5cd6",
@@ -24,6 +25,7 @@
     "info-fl": "#212c44",
     "info-fl2": "#2a3a5c",
     "viol-fl": "#2f2740",
-    "viol-fl2": "#3b2f55"
+    "viol-fl2": "#3b2f55",
+    "holz": "#c39a66"
   }
 }
