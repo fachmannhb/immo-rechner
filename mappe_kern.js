@@ -142,8 +142,16 @@
       grundstueck: plus ? { breite: gc.g.breite, tiefe: gc.g.tiefe, flaechen: gc.flaechen, zaehlung: gc.zaehlung,
         items: gc.items.map(function (it) { return { id: it.id, art: it.art, b: it.b, t: it.t, flaeche: it.flaeche, ampel: it.ampel, garten: !!it.garten }; }) } : null
     };
+    /* Auftrag S1: geplante Sauna (plan.sauna): Holz, Ofen und Material-Spanne; eine Zeile ohne Summe (Selbstbau und Bausatz sind Alternativen). Sie ersetzt die Lücke „Preis Sauna“ des Bausteins, damit keine Leistung doppelt erscheint. */
+    var sk = root.SAUNA_KERN && plan.sauna ? root.SAUNA_KERN.rechne(plan) : null;
+    if (sk && sk.ok) {
+      var sm = sk.material;
+      m.ausbau.sauna = { id: sk.item.id, art: sk.art, volumen: sk.volumen, ofen: sk.ofen, kw: sk.kw, wand: sk.ps.wand, bank: sk.ps.bank, von: sm.summe.von, bis: sm.summe.bis, luecken: sm.luecken };
+      kb.zeilen.push({ gruppe: 'sauna', id: 'material', art: 'sauna', name: 'Sauna', einheit: '€', von: sm.summe.von, bis: sm.summe.bis, luecke: sm.luecken > 0, ohneSumme: true, belege: [{ titel: 'Berichte 43 und 44 (Hersteller- und Händlerangaben)', url: '', abruf: root.DATEN.sauna.stand, status: 'prüfen vor Nutzung' }] });
+    }
     /* Grundstücks-Preise nicht addierbar (Alternativen, €/Jahr, €/kW): Zeilen mit ohneSumme */
     gc.items.forEach(function (it) {
+      if (sk && sk.ok && it.id === sk.item.id) return;
       (it.daten.kosten || []).forEach(function (k) {
         kb.zeilen.push({ gruppe: 'grundstueck', id: it.id + ':' + k.id, art: it.art, name: k.name, einheit: k.einheit, von: k.von, bis: k.bis, luecke: !!k.luecke, ohneSumme: true, belege: k.luecke ? [] : belege([k]) });
         if (k.luecke) m.luecken.push({ id: 'k:gs:' + it.id + ':' + k.id, key: 'mLuecke', par: { art: it.art, name: k.name } });

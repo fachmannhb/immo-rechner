@@ -215,6 +215,15 @@
       });
       if (au.length) neu.aussen = au;
     }
+    /* Auftrag S1: plan.sauna = { ref, art, holz_wand, holz_bank, stunden }, optional; Größe und Ofen stehen am Baustein in plan.aussen. Unbekannte Werte bleiben stehen, die Karte meldet sie sichtbar. */
+    if (p.sauna && typeof p.sauna === 'object' && !Array.isArray(p.sauna)) {
+      var sa0 = p.sauna, sa = {};
+      if (typeof sa0.ref === 'string' && /^[a-z0-9_]{1,12}$/.test(sa0.ref)) sa.ref = sa0.ref;
+      if (idOk(sa0.art)) sa.art = sa0.art;
+      ['holz_wand', 'holz_bank'].forEach(function (k) { if (idOk(sa0[k])) sa[k] = sa0[k]; });
+      if (typeof sa0.stunden === 'number' && isFinite(sa0.stunden)) sa.stunden = klemme(sa0.stunden, 0.25, 4);
+      neu.sauna = sa;
+    }
     neu.preise = {}; neu.mengen = {};
     Object.keys(p.preise || {}).forEach(function (k) { var v = Number(p.preise[k]); if (isFinite(v) && v >= 0) neu.preise[k] = v; });
     Object.keys(p.mengen || {}).forEach(function (k) { var v = Number(p.mengen[k]); if (isFinite(v) && v >= 0) neu.mengen[k] = v; });
@@ -273,6 +282,7 @@
     if (window.GRUNDRISS_HUELLE) window.GRUNDRISS_HUELLE.aktualisieren();   /* Welle D, Teil 2b: Dämmstandard, Lüftung, Wasser */
     if (window.GRUNDRISS_ANBAU) window.GRUNDRISS_ANBAU.aktualisieren();     /* Welle D, Teil 3: Anbau */
     if (window.GRUNDRISS_GRUNDSTUECK) window.GRUNDRISS_GRUNDSTUECK.aktualisieren();   /* Welle E, Teil 1: Grundstück */
+    if (window.GRUNDRISS_SAUNA) window.GRUNDRISS_SAUNA.aktualisieren();               /* Auftrag S1: Sauna */
     clearTimeout(speicherTimer);
     speicherTimer = setTimeout(function () {
       try {

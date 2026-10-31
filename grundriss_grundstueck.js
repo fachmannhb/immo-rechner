@@ -388,7 +388,8 @@
       var v = it.vf, a = it.ampel, summe = v && v.ok ? v.summe : null, d = it.daten;
       h += '<article class="gs-baustein gs-k-' + a + '" data-gs-item="' + it.id + '" data-art="' + it.art + '" data-ampel="' + a + '">';
       h += '<div class="gs-k-kopf">' + symbol(ICON[it.art]) + '<b>' + esc(artName(it.art)) + '</b> <span class="klein es-zahl" data-gs-groesse="' + it.flaeche + '">' + esc(tr('gsGroesseZeile', { b: m2(it.b), t: m2(it.t), f: m2(it.flaeche) })) + '</span>' +
-        ' <button type="button" class="knopf mittel zweit gs-zeigen" data-gs="zeigen" data-wert="' + it.id + '" data-fk="z-' + it.id + '">' + esc(tr('gsZeigen')) + '</button></div>';
+        ' <button type="button" class="knopf mittel zweit gs-zeigen" data-gs="zeigen" data-wert="' + it.id + '" data-fk="z-' + it.id + '">' + esc(tr('gsZeigen')) + '</button>' +
+        (it.art === 'sauna' && window.GRUNDRISS_SAUNA ? ' <button type="button" class="knopf mittel gs-sauna-planen" data-gs="sauna-planen" data-wert="' + it.id + '" data-fk="sp-' + it.id + '">' + symbol('i-gs-sauna') + ' ' + esc(tr('saPlanen')) + '</button>' : '') + '</div>';
       if (it.garten) {   /* Welle E, Teil 2: Beet und Obstbaum sind kein Gebäude: keine Ampel, keine Kosten, keine Pflichten */
         h += '<p class="klein" data-gs-garten="' + it.art + '">' + esc(tr('gsGartenKarte_' + it.art, { f: m2(it.flaeche) })) + '</p><p class="klein">' + annahmeSchild() + ' ' + esc(tr('gsGartenAnnahme')) + '</p></article>';
         return;
@@ -505,6 +506,7 @@
     var a = t.getAttribute('data-gs'), w = t.getAttribute('data-wert');
     if (a === 'hilfe') { var id = t.getAttribute('aria-controls'), p = byId(id), auf = t.getAttribute('aria-expanded') !== 'true'; t.setAttribute('aria-expanded', auf ? 'true' : 'false'); hilfeOffen[id] = auf; if (p) p.hidden = !auf; return; }
     if (a === 'sprung') { sprung(w); return; }
+    if (a === 'sauna-planen') { if (window.GRUNDRISS_SAUNA) window.GRUNDRISS_SAUNA.planen(w); return; }   /* Auftrag S1: öffnet die Karte Sauna für diesen Baustein */
     if (a === 'pers+' || a === 'pers-') {
       var pn = HK.personenPlan(G.plan()).n, np = Math.max(1, Math.min(12, pn + (a === 'pers+' ? 1 : -1)));
       if (np !== pn) { G.plan().personen = np; geaendert(false); sage(tr('auPersGesetzt', { n: np })); }

@@ -61,6 +61,16 @@ text = einmal(text, '__PALETTE_CSS__', palette_css)
 text = einmal(text, '<script>__THREE_JS__</script>',
               '<script>/* three.js r160, MIT-Lizenz */\n' + skript_sicher('three.min.js', lesen(BASIS / 'libs' / 'three.min.js')) + '\n</script>')
 
+# Auftrag S1 (31.10.2026): die vier neuen Sauna-Dateien und die vier Dateien, die dieser Auftrag ohnehin ändert, werden ohne Kommentare und Einrückung eingebettet
+# (spart Platz; die Quellen bleiben lesbar, Zeilenumbrüche bleiben). Sie enthalten keine Zeilenkommentare, keine Backticks und keine Zeilen, die auf "\" enden;
+# bau.py bricht ab, falls "//" am Zeilenanfang oder "`" vorkommt. Weitere Dateien nur aufnehmen, wenn tmp/s1_probe8.py und alle Tests grün sind.
+SCHLANK = {'sauna_kern.js', 'grundriss_sauna.js', 'daten/texte_sauna.js', 'daten/sauna.js', 'grundriss.js', 'grundriss_grundstueck.js', 'grundriss_mappe.js', 'mappe_kern.js'}
+def schlank(name, text):
+    if '`' in text or re.search(r'^\s*//', text, flags=re.M):
+        raise SystemExit(f'{name}: Zeilenkommentar oder Backtick, kann nicht schlank eingebettet werden.')
+    t = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
+    return '\n'.join(z.strip() for z in t.split('\n') if z.strip())
+
 eingebettet = []
 def ersetze(m):
     name = m.group(1)
@@ -68,7 +78,10 @@ def ersetze(m):
     if BASIS not in pfad.parents:
         raise SystemExit(f'{name} liegt außerhalb des Ordners.')
     eingebettet.append(name)
-    return f'<script>/* {name} */\n' + skript_sicher(name, lesen(pfad)) + '\n</script>'
+    inhalt = lesen(pfad)
+    if name in SCHLANK:
+        inhalt = schlank(name, inhalt)
+    return f'<script>/* {name} */\n' + skript_sicher(name, inhalt) + '\n</script>'
 text = re.sub(r'<script src="([^"]+\.js)"></script>', ersetze, text)
 text = text.replace('<!-- VORLAGE: hier ändern, dann "python -I -X utf8 bau.py" ausführen. index.html wird erzeugt, nie direkt bearbeiten. -->',
                     '<!-- ERZEUGT von bau.py aus vorlage.html. Nicht direkt bearbeiten. -->')

@@ -85,6 +85,7 @@
     }).join('') + '<tr class="summe" data-summe="raeume" data-grund="' + r.grund + '" data-wohn="' + r.wohn + '"><th colspan="3">' + T('druckSumme') + '</th>' + f(r.grund) + f(r.wohn) + '</tr>';
     return sect('raumliste', true, 'mpRaumliste', tab('<th>' + T('mpEtage') + '</th><th>' + T('druckRaum') + '</th><th>' + T('mpNutzung') + '</th><th class="z">' + T('druckGrund') + '</th><th class="z">' + T('druckWohn') + '</th>', h));
   }
+  function SK_holz(id) { var x = window.SAUNA_KERN && window.SAUNA_KERN.holzInfo(id); return x ? x.name : id; }
   function ausbau(m) {
     var a = m.ausbau, g = a.grundstueck, h = '';
     var zeile = function (k, w) { h += '<dt>' + T(k) + '</dt><dd>' + w + '</dd>'; };
@@ -98,6 +99,10 @@
     if (a.anbau) zeile('mpAnbau', T('anKopf', { art: artName(a.anbau.art), fl: nz(a.anbau.flaeche), ampel: tr('anA_' + m.anbauAmpel.ampel) }));
     if (g) zeile('mpGrundstueck', esc(nz(g.breite) + ' × ' + nz(g.tiefe) + ' m: ') + T('gsKopf', { g: n0(g.flaechen.grund), p: n0(Math.round(g.flaechen.prozent)), n: g.items.length, grau: g.zaehlung.grau, rot: g.zaehlung.rot }) + (g.items.length ? '<ul class="mp-annahmen">' +
       g.items.map(function (it) { return '<li data-baustein="' + esc(it.id) + '">' + esc(artName(it.art) + ': ' + nz(it.b) + ' × ' + nz(it.t) + ' m') + '</li>'; }).join('') + '</ul>' : ''));
+    if (a.sauna) {   /* Auftrag S1: Art, Größe, Ofen, Holz und Material-Spanne der geplanten Sauna */
+      var sa = a.sauna, so = sa.ofen === 'holz' ? tr('saOfenKurz_holz') : (sa.kw ? tr('saOfenKurz', { kw: nz(sa.kw) }) : tr('saOfenKurz_0'));
+      zeile('gsArt_sauna', '<span data-sauna="1" data-von="' + sa.von + '" data-bis="' + sa.bis + '">' + esc(tr('mpSaunaZeile', { art: tr('saArt_' + sa.art), v: nz(sa.volumen), ofen: so, w: SK_holz(sa.wand), b: SK_holz(sa.bank) })) + '</span>');
+    }
     return sect('ausbau', false, 'mpAusbau', '<dl class="mh-dl">' + h + '</dl>');
   }
   function kosten(m) {
@@ -106,7 +111,7 @@
     k.zeilen.forEach(function (z) {
       if (z.ohneSumme && !fertig) h += summe();
       if (z.gruppe !== gruppe) { gruppe = z.gruppe; h += '<tr class="gruppe"><th colspan="3">' + T(gruppe === 'anbau' ? 'mpAnbau' : 'mpG_' + gruppe) + '</th></tr>'; }
-      var name = z.gruppe === 'innenausbau' ? tr('abGew_' + z.id) : z.gruppe === 'material' ? tr('maBt_' + z.id) + (z.material ? ': ' + z.material : '') : z.gruppe === 'daemmung' ? tr('hdStd_' + z.id) : z.gruppe === 'lueftung' ? tr('hlArt_' + z.id) : z.gruppe === 'grundstueck' ? gsName(z.art, z.name) : artName(z.id);
+      var name = z.gruppe === 'innenausbau' ? tr('abGew_' + z.id) : z.gruppe === 'material' ? tr('maBt_' + z.id) + (z.material ? ': ' + z.material : '') : z.gruppe === 'daemmung' ? tr('hdStd_' + z.id) : z.gruppe === 'lueftung' ? tr('hlArt_' + z.id) : z.gruppe === 'grundstueck' ? gsName(z.art, z.name) : z.gruppe === 'sauna' ? tr('gsArt_sauna') + ': ' + tr('saT3') : artName(z.id);
       var leer = z.luecke && !(z.von > 0 || z.bis > 0), no = '<span class="mh-luecke">' + T('mpKeineAngabe') + '</span>';
       var aus = z.inSumme === false, vermerk = aus ? '<span class="mh-enth" data-enthalten-in="' + esc(z.enthaltenIn) + '">' + T('mpEnthalten', { wo: tr('mpZ_' + z.enthaltenIn.replace('/', '_')) }) + (z.sicher ? '' : ' · ' + T('mpEnthaltenUnsicher')) + '</span>' : '';
       h += '<tr data-k="' + z.gruppe + '/' + esc(z.id) + '"' + (aus ? ' class="mh-aus" data-nicht-summe="1"' : '') + (leer ? ' data-luecke="1"' : ' data-von="' + z.von + '" data-bis="' + z.bis + '"') + '><td>' + esc(name) + vermerk + '</td><td class="z">' +

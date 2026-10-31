@@ -1351,7 +1351,7 @@ __PALETTE_CSS__
     .hu-d { grid-template-columns: minmax(0, 1fr); }
   }
   /* Welle D, Teil 3: Anbau. Farben nur aus der Palette; Ampel immer mit Form und Wort. */
-  symbol[id^="i-an-"], symbol[id^="i-gs-"] { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  symbol[id^="i-an-"], symbol[id^="i-gs-"], symbol[id^="i-sa-"] { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   #i-an-ok, #i-an-achtung, #i-an-stopp, #i-an-frage { stroke-width: 2.6; }
   .an-arten { grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); }
   .an-art .es-var-kopf svg.sym { width: 2.2em; height: 2.2em; }
@@ -1458,6 +1458,45 @@ __PALETTE_CSS__
   .gs-k-keine { border-left-color: var(--c3); }
   .gs-gart { min-height: 64px; }
   .gs-gart .es-var-kopf svg.sym { width: 2em; height: 2em; }
+  /* Auftrag S1: Sauna. Farben nur aus der Palette und den Seitenfarben; Holz ohne Palettenton bleibt neutral. */
+  .sa-eins { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 28px; align-items: start; }
+  .sa-h { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; margin: 20px 0 6px; }
+  .sa-h svg.sym { width: 1.5em; height: 1.5em; color: var(--akzent-text); }
+  .sa-h5 { display: flex; align-items: center; gap: 6px; margin: 14px 0 4px; font-size: 1rem; }
+  .sa-h5 svg.sym { width: 1.2em; height: 1.2em; }
+  .sa-knoepfe { grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+  .sa-opt { min-height: 56px; }
+  .sa-opt .es-var-kopf svg.sym { width: 1.8em; height: 1.8em; }
+  .sa-gross { font-size: 1.15rem; margin: 8px 0 2px; }
+  .sa-reihe input[type="range"] { width: 100%; min-height: 44px; accent-color: var(--c1); }
+  .sa-reihe input[type="text"] { min-height: 44px; max-width: 220px; }
+  .sa-modell .szene { aspect-ratio: 4 / 3.2; margin-top: 8px; }
+  .sa-skizzen-box { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+  .sa-fig { margin: 0; max-width: 100%; overflow-x: auto; }
+  .sa-svg { display: block; max-width: none; background: var(--karte); border: 1px solid var(--linie); border-radius: 12px; }
+  .sa-aussen { fill: var(--leer-fl); stroke: var(--text); stroke-width: 1.5; }
+  .sa-innen { fill: var(--karte); stroke: var(--text); stroke-width: 1; }
+  .sa-bank { fill: var(--linie); stroke: var(--leise); stroke-width: 1; }
+  .sa-zone { fill: var(--c3); fill-opacity: .18; stroke: var(--c3); stroke-dasharray: 4 3; }
+  .sa-ofen { fill: var(--c3); stroke: var(--text); }
+  .sa-tuer { stroke: var(--c2); stroke-width: 4; fill: none; }
+  .sa-t, .sa-dim text { font: 600 12px var(--display); fill: var(--text); }
+  .sa-dim path { stroke: var(--c1); stroke-width: 1.2; fill: none; }
+  .sa-holzliste { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; margin: 8px 0; }
+  .sa-holz { border: 2px solid var(--linie); border-radius: 14px; padding: 12px 14px; background: var(--karte); min-width: 0; overflow-wrap: anywhere; }
+  .sa-holz.sa-gewaehlt { border-color: var(--akzent); }
+  .sa-ja { font-weight: 700; } .sa-offen { color: var(--leise); } .sa-ja, .sa-offen { margin-right: 12px; }
+  #g-sauna-karte .tabelle-kasten { max-height: none; }
+  @media (min-width: 761px) { .sa-tab td.z { white-space: nowrap; text-align: right; } }
+  .sa-wahl { grid-template-columns: minmax(0, 1fr); margin: 8px 0 0; }
+  .sa-ul { padding-left: 18px; }
+  .sa-preis p { margin: 2px 0; }
+  .sa-treffer { background: var(--akzent-flaeche); }
+  .sa-ablauf { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 8px; }
+  .sa-schritt { padding: 10px 14px; border: 1px solid var(--linie); border-left: 6px solid var(--c1); border-radius: 12px; background: var(--karte); overflow-wrap: anywhere; }
+  .sa-schritt.sa-luecke { border-left-color: var(--leise); border-style: dashed; border-left-width: 6px; }
+  .sa-nr svg.sym { width: 1.4em; height: 1.4em; vertical-align: -4px; margin-right: 6px; color: var(--akzent-text); }
+  @media (max-width: 900px) { .sa-eins { grid-template-columns: minmax(0, 1fr); } }
   @media (max-width: 760px) { .au-zeile { grid-template-columns: minmax(0, 1fr) auto; } .au-name { grid-column: 1 / -1; } .au-spur { grid-column: 1; } }
   @media (max-width: 760px) { .an-reihe { grid-template-columns: minmax(0, 1fr); } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
@@ -1577,6 +1616,8 @@ __PALETTE_CSS__
   <symbol id="i-gs-huhn" viewBox="0 0 24 24"><path d="M5 14c0-4 3-6 6-6 2 0 3 1 3 3 0 2-1 3-1 5 0 2 2 4 4 4H9c-2 0-4-2-4-4zM11 8c0-2 1-3 3-3 1 0 2 1 2 2M16 7l3 1-3 1"/></symbol>
   <symbol id="i-gs-biene" viewBox="0 0 24 24"><path d="M7 14a5 4 0 1 0 10 0 5 4 0 1 0-10 0M10 11v6M14 11v6M9 10C6 8 6 5 8 5.5s2.5 3 1.5 4.5M15 10c3-2 3-5 1-4.5s-2.5 3-1.5 4.5"/></symbol>
   <symbol id="i-gs-fisch" viewBox="0 0 24 24"><path d="M3 12c3-5 9-6 13-2l5-2v8l-5-2c-4 4-10 3-13-2zM17 11.5h.01"/></symbol>
+  <symbol id="i-sa-fass" viewBox="0 0 24 24"><path d="M5 6c0-1.5 3-2 7-2s7 .5 7 2v12c0 1.5-3 2-7 2s-7-.5-7-2zM5 9c0 1.5 3 2 7 2s7-.5 7-2M5 15c0 1.5 3 2 7 2s7-.5 7-2"/></symbol>
+  <symbol id="i-sa-holz" viewBox="0 0 24 24"><path d="M3 6h18v4H3zM3 14h18v4H3zM7 6v4M14 6v4M10 14v4M17 14v4"/></symbol>
   <symbol id="i-an-frage" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.8.5-1.1 1-1.1 2M12 17v.5"/></symbol>
 </svg>
 
@@ -2876,6 +2917,34 @@ __PALETTE_CSS__
     <p class="fehler" id="g-grund-fehler" role="alert" hidden></p>
   </div>
 
+  <!-- Auftrag S1: Sauna (Holz, Material, Regeln, Ablauf, Preise) -->
+  <div class="karte g-sauna" id="g-sauna-karte">
+    <details id="g-sauna-details">
+      <summary class="es-karte-summary"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-gs-sauna"/></svg><span class="es-karte-frage" data-t="saTitel">Sauna bauen: Holz, Material, Regeln</span><b class="es-karte-kopf" id="g-sauna-kopfzeile"></b><span class="es-karte-auf" data-t="esAufklappen">Ansehen</span></summary>
+      <div class="es-karte-koerper">
+        <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="saKeineBeratung">Planungshilfe nach Hersteller- und Händlerangaben, keine Bauberatung, keine Kaufempfehlung.</span></p>
+        <div id="g-sauna-inhalt">
+          <div id="sa-meldung" aria-live="polite"></div>
+          <div id="sa-box" hidden>
+            <div class="sa-eins">
+              <div><div id="sa-t1"></div><div id="sa-t1e" aria-live="polite"></div></div>
+              <div class="sa-modell" id="sa-modell" data-render="">
+                <div class="szene"><canvas id="sa-3d" tabindex="0" aria-label="3D-Modell der Sauna. Mit Ziehen oder Pfeiltasten drehen." data-t-aria="saModellAria"></canvas><p class="ersatz" id="sa-3d-ersatz" role="status" hidden></p></div>
+                <p class="klein" id="sa-legende"></p>
+              </div>
+            </div>
+            <div id="sa-skizzen"></div>
+            <div id="sa-t2"></div>
+            <div id="sa-t3"></div>
+            <div id="sa-t4k"></div><div id="sa-t4" aria-live="polite"></div>
+            <div id="sa-t5"></div>
+          </div>
+        </div>
+      </div>
+    </details>
+    <p class="fehler" id="g-sauna-fehler" role="alert" hidden></p>
+  </div>
+
   <div class="karte" id="g-kosten-karte">
     <h3>Was kostet die Einrichtung?</h3>
     <p class="klein" id="g-preis-hinweis"></p>
@@ -3693,6 +3762,7 @@ __PALETTE_CSS__
 <script src="daten/energiepreise.js"></script>
 <script src="daten/ausbau_entscheidungen.js"></script>
 <script src="daten/grundstueck.js"></script>
+<script src="daten/sauna.js"></script>
 <div class="g-druck" id="g-druck" aria-hidden="true"></div>
 <div class="overlay" id="g-mappe-ov" role="dialog" aria-modal="true" aria-labelledby="mh-h" hidden>
   <div class="overlay-kopf">
@@ -3711,6 +3781,7 @@ __PALETTE_CSS__
 <script src="daten/texte_huelle.js"></script>
 <script src="daten/texte_anbau.js"></script>
 <script src="daten/texte_grundstueck.js"></script>
+<script src="daten/texte_sauna.js"></script>
 <script src="daten/texte_mappe.js"></script>
 <script src="sprache.js"></script>
 <script src="grundriss_geo.js"></script>
@@ -3721,6 +3792,7 @@ __PALETTE_CSS__
 <script src="huelle_kern.js"></script>
 <script src="anbau_kern.js"></script>
 <script src="grundstueck_kern.js"></script>
+<script src="sauna_kern.js"></script>
 <script src="autarkie_kern.js"></script>
 <script src="mappe_kern.js"></script>
 <script src="rechner.js"></script>
@@ -3735,6 +3807,7 @@ __PALETTE_CSS__
 <script src="grundriss_huelle.js"></script>
 <script src="grundriss_anbau.js"></script>
 <script src="grundriss_grundstueck.js"></script>
+<script src="grundriss_sauna.js"></script>
 <script src="grundriss_mappe.js"></script>
 <script src="karte3d.js"></script>
 <script src="karte.js"></script>

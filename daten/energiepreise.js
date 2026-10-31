@@ -15,6 +15,8 @@ window.DATEN.energiepreise = {
       hinweis: 'Grund-, Arbeitspreis, Netzentgelte, Steuern, Abgaben; 5,3 % weniger als im 2. Halbjahr 2025. Ob die MwSt. enthalten ist, steht in der Mitteilung nicht ausdrücklich.' },
     { id: 'oel_tecson', name: 'Heizöl EL, Tagespreis Deutschland-Durchschnitt', wert: 180, einheit: '€/100 l', quelle: 'Q3', abruf: '2026-10-27', status: 'prüfen vor Nutzung',
       hinweis: 'Portal, 3.000 l, inkl. MwSt.; schwankt täglich und mit Menge und Region.' },
+    { id: 'strom_destatis_alle', name: 'Strom, private Haushalte, 1. Halbjahr 2026', wert: 37.97, einheit: 'ct/kWh', quelle: 'Q1', abruf: '2026-10-31', status: 'geprüft',
+      hinweis: 'Destatis nennt den Wert für alle Haushalte; ob Steuern und Abgaben eingerechnet sind, steht im Text nicht ausdrücklich (nach der Methodik vermutlich ja). Für die Sauna-Betriebskosten (Bericht 43, S-90).' },
     { id: 'oel_heizwert_kwh', name: 'Heizöl EL, Heizwert', wert: 10.05, einheit: 'kWh/l', quelle: 'Q6', abruf: '2026-10-27', status: 'geprüft',
       hinweis: 'Eigene Rechnung aus Q6: 42,8 GJ/t mal 0,845 t/1000 l = 36,17 MJ/l, geteilt durch 3,6.' },
     { id: 'oel_brennwert', name: 'Heizöl EL, Brennwert (nur zum Vergleich)', wert: 10.6, einheit: 'kWh/l', quelle: 'Q7', abruf: '2026-10-27', status: 'prüfen vor Nutzung',
