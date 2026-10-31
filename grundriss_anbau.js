@@ -1,6 +1,6 @@
 /* Oberfläche „Anbau und Nebengebäude“ (Welle D, Teil 3): Karte #g-anbau-karte unter „Wasser“. Rechnung in anbau_kern.js, Texte in daten/texte_anbau.js (de/en/ru).
    Acht Bildknöpfe, Größe per Regler (Zahlenfeld als genaue Alternative), Höhe nur bei Grenzen in m³; Ergebnis: Kosten (nur Wintergarten) und Bauantrag-Ampel für plan.land.
-   Plan-Feld: plan.anbau { art, flaeche_m2, hoehe_m } (optional, alte Pläne laden unverändert). Das Bauwerk wird nicht gezeichnet und ändert Wohnfläche und Heizwärme nicht. */
+   Plan-Feld: plan.anbau { art, flaeche_m2, hoehe_m, tiefe_m } (optional, alte Pläne laden unverändert). Das Bauwerk wird nicht gezeichnet und ändert Wohnfläche und Heizwärme nicht. */
 (function () {
   'use strict';
   var AK = window.ANBAU_KERN, G = window.GRUNDRISS, D = window.DATEN || {};
@@ -89,6 +89,10 @@
         h += '<div class="an-reihe an-hoehe">' + reglerHtml('an-hoehe', tr('anHoehe'), pa.hoehe, 1, 8, 0.1, 'm', 'anHoeheText', 'anHoeheZahl', 1) + '</div>';
         h += '<p class="klein"' + (pa.hoeheExplizit ? '' : ' data-an-annahme="hoehe"') + '>' + (pa.hoeheExplizit ? '' : annahmeSchild() + ' ') + esc(tr('anHoeheWarum', { h: nz(AK.ANNAHMEN.hoehe) })) + '</p>';
       }
+      if (c.vf && c.vf.ok && c.vf.brauchtTiefe) {   /* Bremen: Wintergarten und Terrassendach auch bis 3,50 m Tiefe */
+        h += '<div class="an-reihe an-tiefe">' + reglerHtml('an-tiefe', tr('anTiefe'), pa.tiefe, AK.TIEFE_MIN, AK.TIEFE_MAX, 0.1, 'm', 'anTiefeText', 'anTiefeZahl', 1) + '</div>';
+        h += '<p class="klein"' + (pa.tiefeExplizit ? '' : ' data-an-annahme="tiefe"') + '>' + (pa.tiefeExplizit ? '' : annahmeSchild() + ' ') + esc(tr('anTiefeWarum', { t: nz(AK.ANNAHMEN.tiefe) })) + '</p>';
+      }
     }
     return h;
   }
@@ -117,6 +121,7 @@
   function satzFuer(summe) {
     var z = summe.zeile, a = summe.ampel;
     if (a === 'gruen') return z && z.art === 'ohne_grenze' ? tr('anS_gruenOhne') : tr('anS_gruen', { wert: nz(z.wert), einheit: z.einheit });
+    if (z && z.massgebend === 'tiefe' && (a === 'gelb' || a === 'rot')) return tr('anS_tiefe_' + a, { t: nz(z.tiefe), wert: nz(z.tiefeMax), p: n0(Math.round(z.tiefeAnteil * 100)) });
     if (a === 'gelb') return tr('anS_gelb', { p: n0(Math.round(z.anteil * 100)), wert: nz(z.wert), einheit: z.einheit });
     if (a === 'rot') return z && z.art === 'nicht_frei' ? tr('anS_rotNicht') : tr('anS_rot', { wert: nz(z.wert), einheit: z.einheit });
     var u = summe.ursache, key = 'anS_grau_' + u;
@@ -134,7 +139,7 @@
       h += '<p class="an-z-grenze es-zahl" data-an-grenze="' + z.wert + '">' + esc(tr('anZeileGrenze', { wert: nz(z.wert), einheit: z.einheit })) + '</p>';
       if (z.ampel !== 'grau') {
         var p = Math.round(z.anteil * 100);
-        h += '<div class="an-balken" role="img" aria-label="' + esc(tr('anBalkenAria', { p: p })) + '"><span class="an-fuell ' + z.ampel + '" style="width:' + Math.min(100, p).toFixed(0) + '%"></span><span class="an-marke" style="left:' + (AK.ANNAHMEN.gelbAb * 100) + '%"></span></div>';
+        h += '<div class="an-balken" role="img" aria-label="' + esc(tr('anBalkenAria', { p: p })) + '"><span class="an-fuell ' + (z.ampelFlaeche || z.ampel) + '" style="width:' + Math.min(100, p).toFixed(0) + '%"></span><span class="an-marke" style="left:' + (AK.ANNAHMEN.gelbAb * 100) + '%"></span></div>';
       }
       h += '<p class="klein es-zahl" data-an-mass="' + z.mass + '" data-an-anteil="' + z.anteil.toFixed(4) + '">' + esc(massText(z)) + '</p>';
     } else if (z.art === 'ohne_grenze') h += '<p class="an-z-grenze">' + esc(tr('anZeileOhne')) + '</p>';
@@ -142,11 +147,12 @@
     else {
       h += '<p class="an-z-grenze">' + esc(tr('anZeileGrau')) + '</p>';
       if (z.ursache === 'nurUnbeheizt') h += '<p class="klein">' + esc(tr('anS_grau_nurUnbeheizt')) + '</p>';
+      else if (z.ursache === 'nurVorueber') h += '<p class="klein" data-an-nur-vorueber="1">' + esc(tr('anS_grau_nurVorueber')) + '</p>';
       else if (z.ursache === 'text') h += '<p class="klein" data-an-roh="1">„' + esc(z.wertRoh) + '“</p>';
       else if (z.ursache === 'luecke') h += '<p class="klein" data-an-luecke="1">' + luecke() + ' ' + esc(z.grund) + '</p>';
     }
     if (z.ursache === 'nurUnbeheizt' && z.mass != null) h += '<p class="klein es-zahl">' + esc(massText(z)) + '</p>';
-    if (z.aussenbereich === 'nicht_im_aussenbereich') h += '<p class="klein" data-an-aussen="nicht">' + esc(tr('anAussenNicht')) + '</p>';
+    if (z.tiefeMax != null && z.tiefe != null) h += '<p class="klein es-zahl" data-an-tiefe="' + z.tiefe + '" data-an-tiefe-max="' + z.tiefeMax + '" data-an-tiefe-ampel="' + z.tiefeAmpel + '">' + esc(tr('anMassTiefe', { t: nz(z.tiefe), wert: nz(z.tiefeMax), p: n0(Math.round(z.tiefeAnteil * 100)) })) + '</p>';    if (z.aussenbereich === 'nicht_im_aussenbereich') h += '<p class="klein" data-an-aussen="nicht">' + esc(tr('anAussenNicht')) + '</p>';
     if (z.aussenbereich === 'nur_innenbereich') h += '<p class="klein" data-an-aussen="nur">' + esc(tr('anAussenNur')) + '</p>';
     if (z.aussenWert != null) h += '<p class="klein es-zahl" data-an-aussen-wert="' + z.aussenWert + '">' + esc(tr('anAussenWert', { wert: nz(z.aussenWert), einheit: z.einheit })) + '</p>';
     if (z.bedingungVoll) h += '<details class="an-bed" data-an-bedingung="voll"><summary>' + esc(tr('anBedingungGanz')) + '</summary><p class="klein">' + esc(z.bedingungVoll) + '</p></details>';
@@ -234,7 +240,7 @@
     if (lab) lab.textContent = fmt(x) + ' ' + einheit;
     if (zahl) { zahl.value = nz(x); feldFehler(zahl.id + '-fehler', ''); }
     t.setAttribute('aria-valuetext', tr(textKey, { n: fmt(x) }));
-    var an = schluessel === 'hoehe_m' ? document.querySelector('[data-an-annahme=hoehe]') : null;   /* eigene Höhe: das Annahme-Schild entfällt sofort */
+    var an = schluessel === 'hoehe_m' ? document.querySelector('[data-an-annahme=hoehe]') : (schluessel === 'tiefe_m' ? document.querySelector('[data-an-annahme=tiefe]') : null);   /* eigene Höhe oder Tiefe: das Annahme-Schild entfällt sofort */
     if (an) { an.removeAttribute('data-an-annahme'); var sp = an.querySelector('.annahme'); if (sp) sp.remove(); }
     teilweise = true; planFeld(schluessel, x);
   }
@@ -245,6 +251,7 @@
     if (ev.type === 'input') {
       if (a === 'flaeche') reglerBei(t, 'flaeche_m2', 'anFlaecheZahl', 'anFlaecheText', 'm²', 0);
       else if (a === 'hoehe') reglerBei(t, 'hoehe_m', 'anHoeheZahl', 'anHoeheText', 'm', 1);
+      else if (a === 'tiefe') reglerBei(t, 'tiefe_m', 'anTiefeZahl', 'anTiefeText', 'm', 1);
       return;
     }
     if (ev.type !== 'change') return;
@@ -259,6 +266,12 @@
       if (r2.fehler) return;
       if (r2.leer) { t.value = nz(ctx ? ctx.pa.hoehe : AK.ANNAHMEN.hoehe); return; }
       planFeld('hoehe_m', r2.wert); return;
+    }
+    if (a === 'tiefe-zahl') {
+      var r3 = zahlFeld(t, AK.TIEFE_MIN, AK.TIEFE_MAX, 'an-tiefe-zahl-fehler', 'anTiefeZahl');
+      if (r3.fehler) return;
+      if (r3.leer) { t.value = nz(ctx ? ctx.pa.tiefe : AK.ANNAHMEN.tiefe); return; }
+      planFeld('tiefe_m', r3.wert); return;
     }
   }
   function klick(ev) {

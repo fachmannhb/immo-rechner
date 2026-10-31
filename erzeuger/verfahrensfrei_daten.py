@@ -206,7 +206,7 @@ def schlank_eintrag(e, st=None):
             o['bedingung'] = kuerzen(e['bedingung'], 30)
             if (VOLL_BEDINGUNG is None or st in VOLL_BEDINGUNG) and o['bedingung'] != e['bedingung']:
                 o['bedingung_voll'] = e['bedingung']
-        for k in ('aussenbereich', 'ausserbereich_wert', 'mehrere_bauwerke'):
+        for k in ('aussenbereich', 'ausserbereich_wert', 'mehrere_bauwerke', 'tiefe_max', 'nur_vorueber'):
             if e.get(k) not in (None, False):
                 o[k] = e[k]
         if e.get('paragraf'):
@@ -337,6 +337,34 @@ def main():
                 continue
             add_entry(daten, code, ent, bau)
 
+    # --- Bericht 41: Bremen Wintergarten und Terrassenüberdachung (ersetzt HB-V04 aus Bericht 35, kein zweiter Eintrag) ---
+    QUELLEN['HB-41'] = {'titel': 'GBl. Bremen Nr. 60 v. 25.06.2024, S. 437', 'url': 'https://gesetzblatt.bremen.de/fastmedia/218/2024_06_25_GBl_Nr_0060_signed.pdf'}
+    hb_neu = collections.OrderedDict()
+    hb_neu['id'] = 'HB-41-W01'
+    hb_neu['bauwerk'] = 'Terrasse, Veranda, Wintergarten (Vorbau)'   # muss „Terrasse“ und „Wintergarten“ innerhalb von 42 Zeichen enthalten (Muster der Karten)
+    hb_neu['art'] = 'grenze'
+    hb_neu['wert'] = 30
+    hb_neu['einheit'] = 'm²'
+    hb_neu['tiefe_max'] = 3.5            # zweite Bedingung „und“ (beide Grenzen gelten), Einheit m Tiefe
+    hb_neu['nur_vorueber'] = True        # Wortlaut: „nur zum vorübergehenden Aufenthalt bestimmte Vorbauten“ → beheizter Wintergarten bleibt grau
+    hb_neu['wert_roh'] = '30 m² Grundfläche und 3,50 m Tiefe'
+    hb_neu['einheit_roh'] = 'm² / m'
+    hb_neu['bedingung'] = ('vor die Außenwand vortretende eingeschossige Gebäudeteile ohne Feuerstätten; Wintergärten und Veranden nur überwiegend verglast und nur zum vorübergehenden Aufenthalt; '
+                           'nicht im Geltungsbereich örtlicher Bauvorschriften nach § 86 Abs. 1 Nr. 1')
+    hb_neu['paragraf'] = '§ 61 Abs.1 Nr.1 h bb BremLBO'   # höchstens 28 Zeichen (sonst kürzt schlank_eintrag); voll: § 61 Abs. 1 Nr. 1 Buchst. h Doppelbuchst. bb
+    hb_neu['wortlaut'] = ('Terrassen einschließlich möglicher Überdachungen sowie überwiegend verglaste, nur zum vorübergehenden Aufenthalt bestimmte Vorbauten (Veranden, Wintergärten) '
+                          'bis zu einer Grundfläche von 30 Quadratmeter und einer Tiefe bis 3,50 Meter; Einleitung Buchst. h: vor die Außenwand eines Gebäudes vortretende eingeschossige Gebäudeteile ohne Feuerstätten, '
+                          'außer im Geltungsbereich örtlicher Bauvorschriften nach § 86 Absatz 1 Nummer 1')
+    hb_neu['quelle'] = ['HB-41']
+    hb_neu['abruf'] = '2026-10-31'
+    hb_neu['status'] = 'geprüft'
+    hb_liste = daten['HB'].get('terrassendach_wintergarten', [])
+    hb_stellen = [i for i, e in enumerate(hb_liste) if e.get('id') == 'HB-V04']
+    if len(hb_stellen) != 1:
+        print('FEHLER: HB-V04 nicht genau einmal gefunden:', hb_stellen)
+        raise SystemExit(1)
+    hb_liste[hb_stellen[0]] = hb_neu
+
     # --- Bericht 34: Bayern G01-G10 ---
     QUELLEN['BY-34'] = {'titel': 'BayBO Art. 57 (Verfahrensfreie Bauvorhaben, Beseitigung von Anlagen), BAYERN.RECHT', 'url': 'https://www.gesetze-bayern.de/Content/Document/BayBO-57'}
     for kopf, rows, _ in L.tabellen('34_grundstueck_autark.md'):
@@ -412,7 +440,7 @@ def main():
 
     obj = collections.OrderedDict()
     obj['stand'] = '2026-10-27'
-    obj['hinweis'] = ('Verfahrensfreie Garten- und Grundstücksbauten je Bundesland, aus den Berichten 34 (Bayern), 35 und 36 (Abrufe am 27.10.2026) übernommen, nicht von Hand ändern. '
+    obj['hinweis'] = ('Verfahrensfreie Garten- und Grundstücksbauten je Bundesland, aus den Berichten 34 (Bayern), 35 und 36 (Abrufe am 27.10.2026) übernommen, Bremen Terrasse/Wintergarten aus Bericht 41 (Abruf 31.10.2026), nicht von Hand ändern. '
                       'Verfahrensfrei heißt nicht regelfrei: Abstandsflächen, Bebauungsplan, Gestaltungs- und Denkmalschutzsatzungen und Naturschutz gelten weiter. '
                       'Einheiten werden nie umgerechnet: m³ (Brutto-Rauminhalt) und m² (Grundfläche) sind verschiedene Maße; die Einheit steht an jedem Wert. '
                       '"Außenbereich" ist meist die Ausnahme (Feld aussenbereich bzw. ausserbereich_wert). Keine Rechtsberatung; vor einem Bau die untere Bauaufsicht fragen.')

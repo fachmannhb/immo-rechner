@@ -1,5 +1,6 @@
 /* Rechenkern „Grundstück“ (Welle E, Teil 1), rein, läuft auch in Node (tmp/grundstueck_kern_test.js); Oberfläche: grundriss_grundstueck.js.
-   Hausumriss = Hüllrechteck der Räume des untersten Geschosses (plan.etagen[0]), Raummaße ohne Außenwand (Annahme). Grundstück = Rechteck.
+   Hausumriss = Hüllrechteck der Räume des untersten Geschosses (plan.etagen[0]) einschließlich Außenwand (etagen[0].aussenwand; fehlt der Wert, gilt 0,30 m wie in der Zeichnung, als sichtbare Annahme). Grundstück = Rechteck.
+   Neue Bausteine bekommen den ersten freien Platz (Raster 0,5 m, mindestens 0,5 m Abstand zu Haus, Grundstücksgrenze und anderen Bausteinen), zuerst im Garten unterhalb des Hauses (es gibt kein Straßenfeld: unterer Bereich des Bildes).
    Plan-Felder (optional, alte Pläne laden unverändert): plan.grundstueck { breite_m, tiefe_m, haus_x_m, haus_y_m } und plan.aussen [ { id, art, x_m, y_m, breite_m, tiefe_m, hoehe_m } ].
    Die Genehmigungs-Ampel kommt aus anbau_kern.js (AK.verfahrensfrei, dieselbe Rechnung und dieselben Texte wie in der Karte Anbau); Preise, Pflichten und Kennzahlen aus daten/grundstueck.js.
    Es werden nur gemessene Abstände in Metern gezeigt, nie ein Urteil über Abstandsflächen (R078). */
@@ -8,7 +9,9 @@
   var AK = root.ANBAU_KERN || (typeof require === 'function' ? require('./anbau_kern.js') : null);
 
   /* Annahmen (in der Seite als Annahme gekennzeichnet) */
-  var ANNAHMEN = { rand: 3, minBreite: 15, minTiefe: 20 };
+  /* aussenwand: Standarddicke der Zeichnung (grundriss.js, neueEtage); abstand: Mindestabstand beim Setzen neuer Bausteine; platzMin: kleine Bausteine brauchen im Bild mindestens so viel Platz (Symbol und Fokus erkennbar) */
+  var ANNAHMEN = { rand: 3, minBreite: 15, minTiefe: 20, aussenwand: 0.3, abstand: 0.5, platzMin: 1.5 };
+  var RASTER = 0.5;
   var GRUND_MIN = 5, GRUND_MAX = 300, MASS_MIN = 0.3, HOEHE_MAX = 30, MAX_BAUSTEINE = 40;
   /* Startgrößen je Baustein in Metern (Annahme, eigene Wahl): b = Breite, t = Tiefe, h = Höhe (Pool: Wassertiefe; Kleinwind: freie Höhe), max = größte Breite und Tiefe am Regler */
   var ARTEN = [
@@ -45,7 +48,10 @@
       });
     });
     if (!n || !(x1 > x0) || !(y1 > y0)) return null;
-    return { x0: x0, y0: y0, b: r2(x1 - x0), t: r2(y1 - y0), flaeche: r2((x1 - x0) * (y1 - y0)), etage: e.name || '' };
+    /* Außenwand liegt außen am Umriss (grundriss_geo.js): das Hüllrechteck wächst auf jeder Seite um die Wanddicke */
+    var wandPlan = zahlOk(e.aussenwand), d = wandPlan ? klemme(e.aussenwand, 0.05, 0.8) : ANNAHMEN.aussenwand;
+    var bb = x1 - x0 + 2 * d, tt = y1 - y0 + 2 * d;
+    return { x0: x0 - d, y0: y0 - d, b: r2(bb), t: r2(tt), flaeche: r2(bb * tt), etage: e.name || '', wand: d, wandAnnahme: !wandPlan, raumB: r2(x1 - x0), raumT: r2(y1 - y0) };
   }
   /* Start: Grundstück so groß, dass das Haus mit je 3 m Rand passt (mindestens 15 × 20 m), Haus in der Mitte */
   function startGrund(haus) {
@@ -137,7 +143,8 @@
     s.zaehlung = { gruen: 0, gelb: 0, rot: 0, grau: 0 };
     s.items.forEach(function (it) {
       it.flaeche = r2(it.b * it.t);
-      it.vf = AK.verfahrensfrei(it.art, land, it.flaeche, it.h);
+      /* Tiefe nur für das Terrassendach (Bremen: Vorbau bis 3,50 m Tiefe); Annahme: die Tiefe des Bausteins (t) ist die Tiefe senkrecht zur Außenwand, der Text legt die Bezugsgröße nicht fest */
+      it.vf = AK.verfahrensfrei(it.art, land, it.flaeche, it.h, it.art === 'terrassendach' ? it.t : null);
       it.ampel = it.vf && it.vf.ok ? it.vf.summe.ampel : 'grau';
       s.zaehlung[it.ampel]++;
       it.daten = datenZu(it.art);
@@ -152,18 +159,34 @@
     return 'a' + (n + 1);
   }
   function ueberlappt(a, b) { return a.x < b.x + b.b && b.x < a.x + a.b && a.y < b.y + b.t && b.y < a.y + a.t; }
-  /* erster freier Platz (Raster 1 m, zeilenweise von oben links); sonst die Mitte */
+  /* Platzbedarf im Bild: kleine Bausteine werden mindestens platzMin groß gezeichnet; der Kasten liegt um die echte Lage zentriert */
+  function platzKasten(o) {
+    var eb = Math.max(o.b, ANNAHMEN.platzMin), et = Math.max(o.t, ANNAHMEN.platzMin);
+    return { x: o.x - (eb - o.b) / 2, y: o.y - (et - o.t) / 2, b: eb, t: et };
+  }
+  /* erster freier Platz: Raster 0,5 m, mindestens 0,5 m Abstand zu Haus, Grundstücksgrenze und anderen Bausteinen.
+     Zuerst der Garten unterhalb des Hauses (Zeilen von oben nach unten, von links nach rechts), dann der ganze Rest; sonst die Mitte (frei: false). */
   function freiePosition(s, art) {
-    var w = Math.min(art.b, s.g.breite), t = Math.min(art.t, s.g.tiefe), kasten = [];
-    if (s.haus) kasten.push({ x: s.g.hausX, y: s.g.hausY, b: s.haus.b, t: s.haus.t });
-    s.items.forEach(function (it) { kasten.push(it); });
-    for (var y = 0; y + t <= s.g.tiefe + 1e-9; y += 1) {
-      for (var x = 0; x + w <= s.g.breite + 1e-9; x += 1) {
-        var k = { x: x, y: y, b: w, t: t };
-        if (!kasten.some(function (o) { return ueberlappt(k, o); })) return { x: x, y: y, frei: true };
+    var w = Math.min(art.b, s.g.breite), t = Math.min(art.t, s.g.tiefe), ab = ANNAHMEN.abstand;
+    var eb = Math.max(w, ANNAHMEN.platzMin), et = Math.max(t, ANNAHMEN.platzMin), dx = (eb - w) / 2, dy = (et - t) / 2;
+    var sperr = [];
+    if (s.haus) sperr.push({ x: s.g.hausX, y: s.g.hausY, b: s.haus.b, t: s.haus.t });
+    s.items.forEach(function (it) { sperr.push(platzKasten(it)); });
+    sperr = sperr.map(function (o) { return { x: o.x - ab, y: o.y - ab, b: o.b + 2 * ab, t: o.t + 2 * ab }; });
+    var untenAb = s.haus ? s.g.hausY + s.haus.t + ab : 0;
+    function suche(nurUnten) {
+      var nx = Math.floor((s.g.breite - eb - 2 * ab) / RASTER + 1e-9), ny = Math.floor((s.g.tiefe - et - 2 * ab) / RASTER + 1e-9);
+      for (var j = 0; j <= ny; j++) {
+        var y = ab + j * RASTER;
+        if (nurUnten && y < untenAb - 1e-9) continue;
+        for (var i = 0; i <= nx; i++) {
+          var x = ab + i * RASTER, k = { x: x, y: y, b: eb, t: et };
+          if (!sperr.some(function (o) { return ueberlappt(k, o); })) return { x: r2(x + dx), y: r2(y + dy), frei: true };
+        }
       }
+      return null;
     }
-    return { x: r2((s.g.breite - w) / 2), y: r2((s.g.tiefe - t) / 2), frei: false };
+    return (s.haus ? suche(true) : null) || suche(false) || { x: r2((s.g.breite - w) / 2), y: r2((s.g.tiefe - t) / 2), frei: false };
   }
   function schreibeGrundstueck(plan, s) {
     plan.grundstueck = { breite_m: r2(s.g.breite), tiefe_m: r2(s.g.tiefe), haus_x_m: r2(s.g.hausX), haus_y_m: r2(s.g.hausY) };
@@ -221,7 +244,8 @@
   var API = {
     ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, GRUND_MIN: GRUND_MIN, GRUND_MAX: GRUND_MAX, MASS_MIN: MASS_MIN, HOEHE_MAX: HOEHE_MAX, MAX_BAUSTEINE: MAX_BAUSTEINE,
     artInfo: artInfo, hausUmriss: hausUmriss, startGrund: startGrund, normalisiere: normalisiere, abstaende: abstaende, flaechen: flaechen, datenZu: datenZu, rechne: rechne,
-    bausteinHinzu: bausteinHinzu, bausteinEntfernen: bausteinEntfernen, bausteinSetzen: bausteinSetzen, grundstueckSetzen: grundstueckSetzen, festschreiben: festschreiben, ueberlappt: ueberlappt
+    bausteinHinzu: bausteinHinzu, bausteinEntfernen: bausteinEntfernen, bausteinSetzen: bausteinSetzen, grundstueckSetzen: grundstueckSetzen, festschreiben: festschreiben, ueberlappt: ueberlappt,
+    platzKasten: platzKasten
   };
   root.GRUNDSTUECK_KERN = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;

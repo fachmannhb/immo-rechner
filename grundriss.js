@@ -184,12 +184,13 @@
       if (typeof ep0.oel_eur100l === 'number' && isFinite(ep0.oel_eur100l) && ep0.oel_eur100l > 0) ep.oel_eur100l = klemme(ep0.oel_eur100l, 0.01, 999.99);
       if (Object.keys(ep).length) neu.energiepreise = ep;
     }
-    /* Welle D, Teil 3: plan.anbau = { art, flaeche_m2, hoehe_m }, optional (eine unbekannte art bleibt stehen, die Karte meldet sie) */
+    /* Welle D, Teil 3: plan.anbau = { art, flaeche_m2, hoehe_m, tiefe_m }, optional (eine unbekannte art bleibt stehen, die Karte meldet sie) */
     if (p.anbau && typeof p.anbau === 'object' && !Array.isArray(p.anbau)) {
       var ab0 = p.anbau, ab = {};
       if (idOk(ab0.art)) ab.art = ab0.art;
       if (typeof ab0.flaeche_m2 === 'number' && isFinite(ab0.flaeche_m2) && ab0.flaeche_m2 > 0) ab.flaeche_m2 = klemme(ab0.flaeche_m2, 1, 500);
       if (typeof ab0.hoehe_m === 'number' && isFinite(ab0.hoehe_m) && ab0.hoehe_m > 0) ab.hoehe_m = klemme(ab0.hoehe_m, 1, 10);
+      if (typeof ab0.tiefe_m === 'number' && isFinite(ab0.tiefe_m) && ab0.tiefe_m > 0) ab.tiefe_m = klemme(ab0.tiefe_m, 1, 8);   /* Welle E, Teil 1b: Tiefe für Grenzen mit Tiefe (Bremen) */
       if (Object.keys(ab).length) neu.anbau = ab;
     }
     /* Welle E, Teil 1: plan.grundstueck = { breite_m, tiefe_m, haus_x_m, haus_y_m } und plan.aussen = [ { id, art, x_m, y_m, breite_m, tiefe_m, hoehe_m } ], beide optional.

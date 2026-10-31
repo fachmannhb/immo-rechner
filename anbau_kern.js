@@ -7,7 +7,7 @@
   var RK = root.REGELN || (typeof require === 'function' ? require('./regeln_kern.js') : null);
 
   /* Annahmen (eigene Wahl, in der Seite als Annahme gekennzeichnet): Gelb-Schwelle und Starthöhe für Grenzen in m³ */
-  var ANNAHMEN = { gelbAb: 0.9, hoehe: 2.5 };
+  var ANNAHMEN = { gelbAb: 0.9, hoehe: 2.5, tiefe: 3.0 };   /* tiefe: Starttiefe (m) für Grenzen mit Tiefe, z. B. Bremen Wintergarten bis 3,50 m (Bericht 41) */
   var TW = 'terrassendach_wintergarten', GC = 'garage_carport';
   /* min/max/start: Reglerbereich und Startwert in m²; passt: Muster für den Namen im Eintrag (null = alle Einträge); wohnraum: kein Baustein in den Daten */
   var ARTEN = [
@@ -40,7 +40,8 @@
     { id: 'fischteich', baustein: [], keinBaustein: true }
   ];
   function aussenInfo(id) { for (var i = 0; i < AUSSEN.length; i++) if (AUSSEN[i].id === id) return AUSSEN[i]; return null; }
-  var FLAECHE_MIN = 1, FLAECHE_MAX = 500, HOEHE_MIN = 1, HOEHE_MAX = 10;
+  var FLAECHE_MIN = 1, FLAECHE_MAX = 500, HOEHE_MIN = 1, HOEHE_MAX = 10, TIEFE_MIN = 1, TIEFE_MAX = 8;
+  var TIEFE_ARTEN = { wg_kalt: 1, wg_warm: 1, terrassendach: 1 };   /* Arten der Karte Anbau, für die der Tiefe-Regler gilt */
   var RANG = { gruen: 0, grau: 1, gelb: 2, rot: 3 };
 
   function DL() { return root.DATEN && root.DATEN.daemmung_seite; }
@@ -68,7 +69,7 @@
   /* Plan-Feld (tolerant: fehlt es, gilt der Startzustand) */
   function planAnbau(plan) {
     var pa = plan && plan.anbau && typeof plan.anbau === 'object' && !Array.isArray(plan.anbau) ? plan.anbau : null;
-    var res = { art: null, info: null, flaeche: null, hoehe: ANNAHMEN.hoehe, flaecheExplizit: false, hoeheExplizit: false, meldung: null };
+    var res = { art: null, info: null, flaeche: null, hoehe: ANNAHMEN.hoehe, tiefe: ANNAHMEN.tiefe, flaecheExplizit: false, hoeheExplizit: false, tiefeExplizit: false, meldung: null };
     if (!pa) return res;
     if (typeof pa.art === 'string' && pa.art !== '') {
       var info = artInfo(pa.art);
@@ -78,6 +79,7 @@
     res.flaeche = res.info.start;
     if (zahlOk(pa.flaeche_m2)) { res.flaeche = klemme(pa.flaeche_m2, FLAECHE_MIN, FLAECHE_MAX); res.flaecheExplizit = true; }
     if (zahlOk(pa.hoehe_m)) { res.hoehe = klemme(pa.hoehe_m, HOEHE_MIN, HOEHE_MAX); res.hoeheExplizit = true; }
+    if (zahlOk(pa.tiefe_m)) { res.tiefe = klemme(pa.tiefe_m, TIEFE_MIN, TIEFE_MAX); res.tiefeExplizit = true; }
     return res;
   }
   function planLand(plan) { return plan && RK && RK.landOk(plan.land) ? plan.land : 'HB'; }
@@ -104,7 +106,7 @@
     return out;
   }
   /* Bauantrag-Ampel */
-  function bewerte(e, a, flaeche, hoehe, vf) {
+  function bewerte(e, a, flaeche, hoehe, vf, tiefe) {
     var z = {
       bauwerk: e.bauwerk || '', baustein: e.baustein, art: e.art || 'luecke', wert: zahlOk(e.wert) ? e.wert : null, einheit: e.einheit || '', wertRoh: e.wert_roh || '',
       bedingung: e.bedingung && !/^[–—-]$/.test(String(e.bedingung).trim()) ? e.bedingung : '', bedingungVoll: typeof e.bedingung_voll === 'string' ? e.bedingung_voll : '', aussenbereich: e.aussenbereich || '',
@@ -121,6 +123,15 @@
         else { z.mass = flaeche * hoehe; z.rechnung = { typ: 'volumen', flaeche: flaeche, hoehe: hoehe }; }
         z.anteil = z.mass / z.wert;
         z.ampel = z.mass > z.wert ? 'rot' : (z.mass >= ANNAHMEN.gelbAb * z.wert ? 'gelb' : 'gruen');
+        /* zweite Bedingung „und Tiefe bis …“ (Bremen, Bericht 41): beide Grenzen gelten; die schlechtere Ampel zählt. Ohne Tiefe des Bauwerks wird sie nicht geprüft. */
+        if (zahlOk(e.tiefe_max)) {
+          z.tiefeMax = e.tiefe_max; z.massgebend = 'flaeche'; z.ampelFlaeche = z.ampel;
+          if (zahlOk(tiefe)) {
+            z.tiefe = tiefe; z.tiefeAnteil = tiefe / e.tiefe_max;
+            z.tiefeAmpel = tiefe > e.tiefe_max ? 'rot' : (tiefe >= ANNAHMEN.gelbAb * e.tiefe_max ? 'gelb' : 'gruen');
+            if (RANG[z.tiefeAmpel] > RANG[z.ampel]) { z.ampel = z.tiefeAmpel; z.massgebend = 'tiefe'; }
+          }
+        }
         break;
       case 'ohne_grenze': z.ampel = 'gruen'; z.ursache = 'ohneGrenze'; break;
       case 'nicht_frei': z.ampel = 'rot'; z.ursache = 'nichtFrei'; break;
@@ -130,13 +141,15 @@
     }
     /* Eintrag nur für „unbeheizt“: sagt nichts über den beheizten Wintergarten (grau) */
     if (a.beheizt && /unbeheizt/i.test(z.bedingung) && z.ampel !== 'grau') { z.ampelOhneBeheizt = z.ampel; z.ampel = 'grau'; z.ursache = 'nurUnbeheizt'; }
+    /* Eintrag nur für Vorbauten „zum vorübergehenden Aufenthalt“ (Bremen, Bericht 41): sagt nichts über den dauernd beheizten Wintergarten (grau) */
+    if (a.beheizt && e.nur_vorueber && z.ampel !== 'grau') { z.ampelOhneBeheizt = z.ampel; z.ampel = 'grau'; z.ursache = 'nurVorueber'; }
     /* Welle E, Teil 1: Bedingungen, die die Ampel nicht tragen können (Betrieb, Baugebiet): grau statt falsch grün */
     var bed = z.bedingungVoll || z.bedingung;
     if (a.betriebGrau && z.ampel !== 'grau' && /betrieb|landwirtschaft|^nur\b/i.test(bed)) { z.ampelOhneBedingung = z.ampel; z.ampel = 'grau'; z.ursache = 'nurBetrieb'; z.sonder = true; }
     if (a.gebietGrau && z.ampel !== 'grau' && /^(nur|nicht|außer)\b/i.test(bed)) { z.ampelOhneBedingung = z.ampel; z.ampel = 'grau'; z.ursache = 'bedingt'; }
     return z;
   }
-  function verfahrensfrei(artId, land, flaeche, hoehe) {
+  function verfahrensfrei(artId, land, flaeche, hoehe, tiefe) {
     var a = artInfo(artId) || aussenInfo(artId), vf = VF();
     if (!a || !zahlOk(flaeche)) return { ok: false, grund: 'eingabe' };
     if (!vf || !vf.laender) return { ok: false, grund: 'keineDaten' };
@@ -150,7 +163,8 @@
     res.gefunden = alle.filter(function (e) { return e.bauwerk; }).map(function (e) { return e.bauwerk; });
     var treffer = alle.filter(function (e) { return !a.passt || !e.bauwerk || a.passt.test(e.bauwerk); });
     if (!treffer.length) { res.summe = { ampel: 'grau', mehrere: false, ursache: 'nichtGenannt' }; return res; }
-    res.zeilen = treffer.map(function (e) { return bewerte(e, a, flaeche, hoehe, vf); });
+    res.zeilen = treffer.map(function (e) { return bewerte(e, a, flaeche, hoehe, vf, zahlOk(tiefe) ? tiefe : null); });
+    res.brauchtTiefe = res.zeilen.some(function (z) { return z.tiefeMax != null && z.ampel !== 'grau'; });
     res.brauchtHoehe = res.zeilen.some(function (z) { return z.art === 'grenze' && (z.einheit === 'm³' || (z.einheit === 'm' && a.hoeheMass)); });
     var haupt = res.zeilen.filter(function (z) { return !z.sonder; });
     if (!haupt.length) haupt = res.zeilen;
@@ -182,14 +196,14 @@
     var pa = planAnbau(plan), land = planLand(plan), c = { pa: pa, land: land, landName: landName(land), leer: !pa.art };
     if (c.leer) return c;
     c.kosten = kosten(pa.art, pa.flaeche);
-    c.vf = verfahrensfrei(pa.art, land, pa.flaeche, pa.hoehe);
+    c.vf = verfahrensfrei(pa.art, land, pa.flaeche, pa.hoehe, TIEFE_ARTEN[pa.art] ? pa.tiefe : null);
     c.abstand = abstand(land);
     c.sachsen = sachsen(pa.art, land, c.vf);
     return c;
   }
 
   var API = {
-    ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, AUSSEN: AUSSEN, aussenInfo: aussenInfo, RANG: RANG, FLAECHE_MIN: FLAECHE_MIN, FLAECHE_MAX: FLAECHE_MAX, HOEHE_MIN: HOEHE_MIN, HOEHE_MAX: HOEHE_MAX,
+    ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, AUSSEN: AUSSEN, aussenInfo: aussenInfo, RANG: RANG, FLAECHE_MIN: FLAECHE_MIN, FLAECHE_MAX: FLAECHE_MAX, HOEHE_MIN: HOEHE_MIN, HOEHE_MAX: HOEHE_MAX, TIEFE_MIN: TIEFE_MIN, TIEFE_MAX: TIEFE_MAX, TIEFE_ARTEN: TIEFE_ARTEN,
     artInfo: artInfo, planAnbau: planAnbau, planLand: planLand, kosten: kosten, verfahrensfrei: verfahrensfrei, abstand: abstand, sachsen: sachsen, rechne: rechne
   };
   root.ANBAU_KERN = API;

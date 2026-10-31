@@ -1345,12 +1345,17 @@ __PALETTE_CSS__
   .gs-reihe input[type="range"] { width: 100%; min-height: 44px; accent-color: var(--c1); }
   .gs-reihe input[type="text"] { min-height: 44px; max-width: 220px; }
   .gs-plan-box { overflow-x: auto; padding: 4px 0; }
-  .gs-svg { display: block; margin: 0 auto; touch-action: none; user-select: none; border-radius: 12px; background: var(--karte); }
+  .gs-svg { display: block; margin: 0 auto; touch-action: pan-y; user-select: none; border-radius: 12px; background: var(--karte); }   /* Wischen auf freier Fläche scrollt die Seite; nur Haus und Bausteine fangen den Finger (.gs-obj, .gs-griff) */
   .gs-grund { fill: var(--leer-fl); stroke: var(--text); stroke-width: .12; }
   .gs-raster { stroke: var(--linie2); stroke-width: .05; fill: none; }
   .gs-fuehr path { stroke: var(--leise); stroke-width: .06; stroke-dasharray: .25 .2; fill: none; }
   .gs-abst { fill: var(--text); font-weight: 700; paint-order: stroke; stroke: var(--karte); stroke-width: .3em; stroke-linejoin: round; }
-  .gs-obj { color: var(--text); cursor: grab; }
+  .gs-obj { color: var(--text); cursor: grab; touch-action: none; }
+  .gs-marke { fill: var(--karte); stroke: var(--leise); stroke-width: .1; }
+  .gs-a-gruen .gs-marke { stroke: var(--gut); }
+  .gs-a-gelb .gs-marke { stroke: var(--warn); stroke-dasharray: .35 .2; }
+  .gs-a-rot .gs-marke { stroke: var(--schlecht); stroke-width: .18; }
+  .gs-gewaehlt .gs-marke { fill: var(--info-fl); }
   .gs-obj:focus { outline: none; }
   .gs-treffer { fill: transparent; }
   .gs-form { fill: var(--karte); stroke-width: .14; }
@@ -1364,7 +1369,7 @@ __PALETTE_CSS__
   .gs-sym { color: inherit; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
   .gs-fokus { fill: none; stroke: var(--info); stroke-width: .2; stroke-dasharray: .3 .2; display: none; pointer-events: none; }
   .gs-obj:focus-visible .gs-fokus { display: block; }
-  .gs-griff { fill: var(--c2); stroke: var(--karte); stroke-width: .08; cursor: nwse-resize; }
+  .gs-griff { fill: var(--c2); stroke: var(--karte); stroke-width: .08; cursor: nwse-resize; touch-action: none; }
   .gs-kompass { pointer-events: none; }
   .gs-kompass circle { fill: var(--karte); stroke: var(--leise); stroke-width: .06; }
   .gs-kompass path { fill: var(--c3); }

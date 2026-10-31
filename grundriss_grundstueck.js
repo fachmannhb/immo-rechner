@@ -41,7 +41,8 @@
     h += '<div class="gs-zwei"><div class="an-reihe gs-reihe">' + reglerHtml('gs-gb', tr('gsBreite'), g.breite, GK.GRUND_MIN, 100, 0.5, 'gsBreiteText', 'gsBreiteZahl') + '</div>';
     h += '<div class="an-reihe gs-reihe">' + reglerHtml('gs-gt', tr('gsTiefe'), g.tiefe, GK.GRUND_MIN, 100, 0.5, 'gsTiefeText', 'gsTiefeZahl') + '</div></div>';
     if (!g.explizit.groesse) h += '<p class="klein" data-gs-annahme="start">' + annahmeSchild() + ' ' + esc(tr('gsStartAnnahme')) + '</p>';
-    h += c.haus ? '<p class="klein" data-gs-haus="1">' + esc(tr('gsHausInfo', { b: m2(c.haus.b), t: m2(c.haus.t), f: m2(c.haus.flaeche) })) + '</p>'
+    h += c.haus ? '<p class="klein" data-gs-haus="1" data-wand="' + c.haus.wand + '">' + esc(tr('gsHausInfo', { b: m2(c.haus.b), t: m2(c.haus.t), f: m2(c.haus.flaeche), w: m2(Math.round(c.haus.wand * 1000) / 10) })) + '</p>' +
+        (c.haus.wandAnnahme ? '<p class="klein" data-gs-annahme="wand">' + annahmeSchild() + ' ' + esc(tr('gsWandAnnahme', { w: m2(Math.round(c.haus.wand * 1000) / 10) })) + '</p>' : '')
       : '<p class="ab-meldung" role="status" data-gs-haus="keins">' + esc(tr('gsKeinHaus')) + '</p>';
     h += '<h4 class="es-h5">' + symbol('i-gs-hand') + esc(tr('gsWahl')) + '</h4>';
     if (!c.items.length) h += '<p class="klein" data-gs-erst="1">' + esc(tr('gsHinweisErst')) + '</p>';
@@ -55,9 +56,11 @@
 
   /* ---------- Plan (SVG) ---------- */
   var PAD = 0.9;
+  var OBEN_PX = 80;   /* Rand über dem Grundstück für die Kompassrose, in Bildpunkten: so bleibt sie außerhalb der Grundstücksfläche und über keinem Baustein */
+  var MIN_PX = 30;   /* kleine Bausteine (Wallbox, Bienenstock, Brunnen) werden mindestens so groß gezeichnet; Maße und Rechnung bleiben die echten */
   function ppmBerechnen(c) {
-    var box = byId('gs-plan'), wpx = Math.max(240, (box && box.clientWidth) || 600), vbw = c.g.breite + 2 * PAD, vbh = c.g.tiefe + 2 * PAD;
-    return Math.max(2, Math.min(wpx / vbw, (Math.max(360, window.innerHeight * 0.8)) / vbh));
+    var box = byId('gs-plan'), wpx = Math.max(240, (box && box.clientWidth) || 600), vbw = c.g.breite + 2 * PAD, vbh = c.g.tiefe + PAD;
+    return Math.max(2, Math.min(wpx / vbw, (Math.max(360, window.innerHeight * 0.8) - OBEN_PX) / vbh));
   }
   function rasterPfad(g) {
     var d = '';
@@ -67,24 +70,26 @@
   }
   function objHtml(o, ppm, sel) {
     /* o: { id, ampel, name, icon, x, y, b, t, aria, haus } */
-    var mind = 26 / ppm, bx = Math.min(o.b, 9999), tx = o.t;
-    var tw = Math.max(o.b, mind), tt = Math.max(o.t, mind), tx0 = o.x - (tw - o.b) / 2, ty0 = o.y - (tt - o.t) / 2;
-    var ik = Math.max(Math.min(Math.min(o.b, o.t) * 0.72, 3), Math.min(0.9, Math.min(o.b, o.t)));
+    /* Anzeigekasten: mindestens MIN_PX groß und um die echte Lage zentriert; Treffer, Symbol und Fokus richten sich danach, die echte Fläche (gs-form) bleibt wie gemessen */
+    var mind = MIN_PX / ppm, bx = Math.min(o.b, 9999), tx = o.t;
+    var tw = Math.max(o.b, mind), tt = Math.max(o.t, mind), tx0 = o.x - (tw - o.b) / 2, ty0 = o.y - (tt - o.t) / 2, klein = tw > o.b + 1e-6 || tt > o.t + 1e-6;
+    var ik = Math.max(Math.min(Math.min(tw, tt) * (klein ? 0.86 : 0.72), 3), Math.min(0.9, Math.min(tw, tt)));
     var gewaehlt = sel === o.id;
     var s = '<g class="gs-obj ' + (o.haus ? 'gs-haus' : 'gs-a-' + o.ampel) + (gewaehlt ? ' gs-gewaehlt' : '') + '" data-sel="' + o.id + '" data-fk="o-' + o.id + '" tabindex="0" role="button" aria-pressed="' + gewaehlt + '" aria-label="' + esc(o.aria) + '">';
     s += '<rect class="gs-treffer" x="' + tx0 + '" y="' + ty0 + '" width="' + tw + '" height="' + tt + '"/>';
+    if (klein) s += '<rect class="gs-marke" x="' + tx0 + '" y="' + ty0 + '" width="' + tw + '" height="' + tt + '" rx="' + (4 / ppm) + '"/>';
     s += '<rect class="gs-form" x="' + o.x + '" y="' + o.y + '" width="' + bx + '" height="' + tx + '"/>';
-    s += '<svg class="gs-sym" x="' + (o.x + (o.b - ik) / 2) + '" y="' + (o.y + (o.t - ik) / 2) + '" width="' + ik + '" height="' + ik + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#' + o.icon + '"/></svg>';
-    s += '<rect class="gs-fokus" x="' + (o.x - 0.15) + '" y="' + (o.y - 0.15) + '" width="' + (o.b + 0.3) + '" height="' + (o.t + 0.3) + '"/>';
+    s += '<svg class="gs-sym" x="' + (tx0 + (tw - ik) / 2) + '" y="' + (ty0 + (tt - ik) / 2) + '" width="' + ik + '" height="' + ik + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#' + o.icon + '"/></svg>';
+    s += '<rect class="gs-fokus" x="' + (tx0 - 0.15) + '" y="' + (ty0 - 0.15) + '" width="' + (tw + 0.3) + '" height="' + (tt + 0.3) + '"/>';
     return s + '</g>';
   }
   function abstTxt(x, y, wert, fs, anchor) {
     return '<text class="gs-abst" x="' + x + '" y="' + y + '" font-size="' + fs + '" text-anchor="' + (anchor || 'middle') + '" data-abstand="' + wert + '">' + esc(m(wert)) + ' m</text>';
   }
   function svgHtml(c) {
-    var g = c.g, ppm = ppmBerechnen(c), fs = 15 / ppm, vbw = g.breite + 2 * PAD, vbh = g.tiefe + 2 * PAD, px = Math.floor(vbw * ppm);
-    var h = '<svg id="gs-svg" class="gs-svg" viewBox="' + (-PAD) + ' ' + (-PAD) + ' ' + vbw + ' ' + vbh + '" style="width:' + px + 'px;max-width:100%" role="group" aria-label="' +
-      esc(tr('gsPlanAria', { b: m2(g.breite), t: m2(g.tiefe), n: c.items.length })) + '" data-ppm="' + ppm.toFixed(3) + '">';
+    var g = c.g, ppm = ppmBerechnen(c), fs = 15 / ppm, oben = OBEN_PX / ppm, vbw = g.breite + 2 * PAD, vbh = g.tiefe + PAD + oben, px = Math.floor(vbw * ppm);
+    var h = '<svg id="gs-svg" class="gs-svg" viewBox="' + (-PAD) + ' ' + (-oben) + ' ' + vbw + ' ' + vbh + '" style="width:' + px + 'px;max-width:100%" role="group" aria-label="' +
+      esc(tr('gsPlanAria', { b: m2(g.breite), t: m2(g.tiefe), n: c.items.length })) + '" data-ppm="' + ppm.toFixed(3) + '" data-pad="' + PAD + '" data-pad-oben="' + oben.toFixed(3) + '">';
     h += '<rect class="gs-grund" x="0" y="0" width="' + g.breite + '" height="' + g.tiefe + '"/><path class="gs-raster" d="' + rasterPfad(g) + '"/>' + kompassHtml(g, ppm);
     var ab = c.abstaende, zahlen = '';
     if (c.haus && ab) {
@@ -108,8 +113,9 @@
   }
   function kompassHtml(g, ppm) {
     /* Kompassrose: Norden zeigt in die Richtung von plan.nord (Grad, im Uhrzeigersinn, 0 = nach oben); sie liegt unter den Bausteinen und fängt keine Eingabe ab */
-    var nord = (G.plan().nord || 0), kr = Math.max(1.1, 28 / ppm);
-    return '<g class="gs-kompass" transform="translate(' + (g.breite - kr - 0.2) + ' ' + (kr + 0.2) + ')" role="img" aria-label="' + esc(tr('gsKompass')) + ' ' + nord + '°"><circle r="' + kr + '"/><g transform="rotate(' + nord + ')"><path d="M0 ' + (-kr * 0.85) + 'L' + (kr * 0.35) + ' ' + (kr * 0.2) + 'H' + (-kr * 0.35) + 'z"/></g><text x="' + ((kr + 9 / ppm) * Math.sin(nord * Math.PI / 180)).toFixed(3) + '" y="' + (-(kr + 9 / ppm) * Math.cos(nord * Math.PI / 180) + 5 / ppm).toFixed(3) + '" font-size="' + (14 / ppm) + '" text-anchor="middle">N</text></g>';
+    var nord = (G.plan().nord || 0), kr = 18 / ppm;
+    /* Mitte im oberen Rand des Bildes (OBEN_PX hoch), rechts: außerhalb der Grundstücksfläche */
+    return '<g class="gs-kompass" transform="translate(' + (g.breite - 40 / ppm) + ' ' + (-40 / ppm) + ')" role="img" aria-label="' + esc(tr('gsKompass')) + ' ' + nord + '°"><circle r="' + kr + '"/><g transform="rotate(' + nord + ')"><path d="M0 ' + (-kr * 0.85) + 'L' + (kr * 0.35) + ' ' + (kr * 0.2) + 'H' + (-kr * 0.35) + 'z"/></g><text x="' + ((kr + 9 / ppm) * Math.sin(nord * Math.PI / 180)).toFixed(3) + '" y="' + (-(kr + 9 / ppm) * Math.cos(nord * Math.PI / 180) + 5 / ppm).toFixed(3) + '" font-size="' + (14 / ppm) + '" text-anchor="middle">N</text></g>';
   }
   function abstaendeHtml(c) {
     var ab = c.abstaende;
@@ -216,6 +222,7 @@
         var satz = summe.ursache === 'keinBaustein' ? tr('gsKeinBaustein') : W.satzFuer(summe);
         h += '<div class="an-satz an-f ' + a + '" role="status" data-an-ampel="' + a + '">' + ampelChip(a, false) + '<span class="an-satz-text" data-an-satz="antrag">' + esc(satz) + '</span></div>';
         if (summe.mehrere) h += '<p class="klein">' + esc(tr('anMehrere')) + '</p>';
+        if (v.zeilen.some(function (z) { return z.tiefeMax != null; })) h += '<p class="klein" data-gs-tiefe-annahme="1">' + annahmeSchild() + ' ' + esc(tr('gsTiefeAnnahme')) + '</p>';
         if (v.zeilen.length) h += '<details class="an-bed gs-einzel"><summary>' + esc(tr('gsEinzel')) + '</summary>' + v.zeilen.map(W.zeileHtml).join('') + '</details>';
       }
       h += '<h5 class="es-h5 gs-h5">' + symbol('i-rechner') + esc(tr('gsKostenTitel')) + '</h5><ul class="gs-ul">' + d.kosten.map(function (z) { return zeileDaten(z, 'kosten'); }).join('') + '</ul>';
@@ -323,7 +330,7 @@
       auswahl = r.id; loeschFrage = null;
       geaendert(false);
       var c = rechne(), it = itemById(r.id);
-      sage((r.frei ? '' : tr('gsStatusVoll', { name: artName(w) }) + ' ') + tr('gsStatusGesetzt', { name: artName(w), ampel: it ? tr('anA_' + it.ampel) : '' }));
+      sage((r.frei ? '' : tr('gsStatusVoll') + '. ') + tr('gsStatusGesetzt', { name: artName(w), ampel: it ? tr('anA_' + it.ampel) : '' }));
       /* liegt der Plan außerhalb des Bildes, zeigt die Seite ihn (ohne Animation); der Fokus bleibt auf dem Bildknopf */
       var sv = byId('gs-plan') ? byId('gs-plan').getBoundingClientRect() : null;
       if (sv && (sv.top > window.innerHeight - 140 || sv.bottom < 120)) byId('gs-plan').scrollIntoView({ block: 'start', behavior: 'auto' });
@@ -413,6 +420,8 @@
   if (wurzel) {
     wurzel.addEventListener('click', klick); wurzel.addEventListener('input', bei); wurzel.addEventListener('change', bei);
     wurzel.addEventListener('pointerdown', aufDown); wurzel.addEventListener('keydown', aufTaste);
+    /* Finger auf Haus, Baustein oder Größe-Griff: ziehen statt scrollen (Browser, die touch-action an SVG-Teilen nicht beachten, bekommen dasselbe über touchstart); sonst scrollt die Seite */
+    wurzel.addEventListener('touchstart', function (ev) { var o = ev.target.closest && ev.target.closest('[data-sel],[data-griff]'); if (o && ev.cancelable) ev.preventDefault(); }, { passive: false });
     window.addEventListener('pointermove', aufMove); window.addEventListener('pointerup', aufUp); window.addEventListener('pointercancel', aufUp);
   }
   var det = byId('g-grund-details');
