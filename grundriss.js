@@ -206,6 +206,9 @@
         if (!a0 || typeof a0 !== 'object' || !idOk(a0.art)) return;
         var a = { id: typeof a0.id === 'string' && /^[a-z0-9_]{1,12}$/.test(a0.id) ? a0.id : 'a' + (au.length + 1), art: a0.art };
         ['x_m', 'y_m', 'breite_m', 'tiefe_m', 'hoehe_m'].forEach(function (k) { if (typeof a0[k] === 'number' && isFinite(a0[k])) a[k] = klemme(a0[k], -1000, 1000); });
+        /* Ofen (Sauna) und Baugebiet (Kleinwind); anderes fällt weg */
+        if (a0.art === 'sauna' && (a0.ofen === 'elektro' || a0.ofen === 'holz')) a.ofen = a0.ofen;
+        if (a0.art === 'kleinwind' && (a0.gebiet === 'wr' || a0.gebiet === 'wa' || a0.gebiet === 'gw')) a.gebiet = a0.gebiet;
         au.push(a);
       });
       if (au.length) neu.aussen = au;

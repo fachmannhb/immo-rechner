@@ -122,6 +122,9 @@
     var z = summe.zeile, a = summe.ampel;
     if (a === 'gruen') return z && z.art === 'ohne_grenze' ? tr('anS_gruenOhne') : tr('anS_gruen', { wert: nz(z.wert), einheit: z.einheit });
     if (z && z.massgebend === 'tiefe' && (a === 'gelb' || a === 'rot')) return tr('anS_tiefe_' + a, { t: nz(z.tiefe), wert: nz(z.tiefeMax), p: n0(Math.round(z.tiefeAnteil * 100)) });
+    if (a === 'gelb' && z && z.auslegungGelb) return tr('anS_auslegungGelb', { p: n0(Math.round(z.anteil * 100)), wert: nz(z.wert), einheit: z.einheit });
+    if (a === 'rot' && z && z.ursache === 'feuerstaette') return tr('anS_rotFeuer');
+    if (a === 'rot' && z && z.ursache === 'gebietAus') return tr('anS_rotGebiet');
     if (a === 'gelb') return tr('anS_gelb', { p: n0(Math.round(z.anteil * 100)), wert: nz(z.wert), einheit: z.einheit });
     if (a === 'rot') return z && z.art === 'nicht_frei' ? tr('anS_rotNicht') : tr('anS_rot', { wert: nz(z.wert), einheit: z.einheit });
     var u = summe.ursache, key = 'anS_grau_' + u;
@@ -131,6 +134,10 @@
     var r = z.rechnung, p = n0(Math.round(z.anteil * 100));
     if (r.typ === 'hoehe') return tr('anMassHoehe', { h: nz(r.hoehe), wert: nz(z.wert), p: p });
     return r.typ === 'volumen' ? tr('anMassVolumen', { fl: nz(r.flaeche), h: nz(r.hoehe), v: nz(Math.round(z.mass * 10) / 10), wert: nz(z.wert), p: p }) : tr('anMassFlaeche', { fl: nz(r.flaeche), wert: nz(z.wert), p: p });
+  }
+  /* Schild „Auslegung“: nicht ausdrücklich genannt, nur über die allgemeine Gebäude-Nummer */
+  function auslegungHtml(z) {
+    return '<p class="klein an-auslegung" data-an-auslegung="' + esc(z.auslegung) + '"><span class="annahme es-an">' + esc(tr('anAuslegung')) + '</span> ' + esc(tr('anAusleg_' + z.auslegung)) + ' ' + badge('prüfen vor Nutzung') + '</p>';
   }
   function zeileHtml(z) {
     var h = '<div class="an-zeile an-z-' + z.ampel + (z.sonder ? ' an-sonder' : '') + '" data-an-zeile="' + z.ampel + '" data-wert="' + (z.wert == null ? '' : z.wert) + '" data-einheit="' + esc(z.einheit) + '">';
@@ -144,6 +151,7 @@
       h += '<p class="klein es-zahl" data-an-mass="' + z.mass + '" data-an-anteil="' + z.anteil.toFixed(4) + '">' + esc(massText(z)) + '</p>';
     } else if (z.art === 'ohne_grenze') h += '<p class="an-z-grenze">' + esc(tr('anZeileOhne')) + '</p>';
     else if (z.art === 'nicht_frei') h += '<p class="an-z-grenze">' + esc(tr('anZeileNicht')) + '</p>';
+    else if (z.ursache === 'feuerstaette' || z.ursache === 'gebietAus' || z.ursache === 'gebietNicht') h += '<p class="an-z-grenze" data-an-ursache="' + z.ursache + '">' + esc(tr({ feuerstaette: 'anS_rotFeuer', gebietAus: 'anS_rotGebiet', gebietNicht: 'anS_grau_gebietNicht' }[z.ursache])) + '</p>';
     else {
       h += '<p class="an-z-grenze">' + esc(tr('anZeileGrau')) + '</p>';
       if (z.ursache === 'nurUnbeheizt') h += '<p class="klein">' + esc(tr('anS_grau_nurUnbeheizt')) + '</p>';
@@ -155,6 +163,9 @@
     if (z.tiefeMax != null && z.tiefe != null) h += '<p class="klein es-zahl" data-an-tiefe="' + z.tiefe + '" data-an-tiefe-max="' + z.tiefeMax + '" data-an-tiefe-ampel="' + z.tiefeAmpel + '">' + esc(tr('anMassTiefe', { t: nz(z.tiefe), wert: nz(z.tiefeMax), p: n0(Math.round(z.tiefeAnteil * 100)) })) + '</p>';    if (z.aussenbereich === 'nicht_im_aussenbereich') h += '<p class="klein" data-an-aussen="nicht">' + esc(tr('anAussenNicht')) + '</p>';
     if (z.aussenbereich === 'nur_innenbereich') h += '<p class="klein" data-an-aussen="nur">' + esc(tr('anAussenNur')) + '</p>';
     if (z.aussenWert != null) h += '<p class="klein es-zahl" data-an-aussen-wert="' + z.aussenWert + '">' + esc(tr('anAussenWert', { wert: nz(z.aussenWert), einheit: z.einheit })) + '</p>';
+    if (z.auslegung) h += auslegungHtml(z);
+    if (z.gebietHinweis) h += '<p class="klein" data-an-gebiet-hinweis="' + esc(z.gebietHinweis) + '">' + esc(tr('anGebietHinweis_' + z.gebietHinweis)) + '</p>';
+    if (z.rotorMax != null) h += '<p class="klein es-zahl" data-an-rotor="' + z.rotorMax + '">' + esc(tr('anRotor', { n: nz(z.rotorMax) })) + '</p>';
     if (z.bedingungVoll) h += '<details class="an-bed" data-an-bedingung="voll"><summary>' + esc(tr('anBedingungGanz')) + '</summary><p class="klein">' + esc(z.bedingungVoll) + '</p></details>';
     else if (z.bedingung) h += '<p class="klein" data-an-bedingung="1">' + esc(tr('anBedingung', { text: z.bedingung })) + '</p>';
     h += '<p class="klein" data-an-fundstelle="1">' + (z.paragraf ? esc(tr('anFundstelle', { p: z.paragraf })) + ' · ' : '') + z.quellen.map(function (q) {
@@ -292,6 +303,6 @@
   /* werkzeug: dieselben Bausteine für die Karte Grundstück (Welle E, Teil 1), damit Ampel, Sätze und Quellen nur einmal gebaut werden */
   window.GRUNDRISS_ANBAU = { aktualisieren: aktualisieren, jetzt: jetzt, ergebnis: function () { return ctx; },
     werkzeug: { zeileHtml: zeileHtml, satzFuer: satzFuer, quelleHtml: quelleHtml, ampelChip: ampelChip, badge: badge, symbol: symbol, esc: esc, n0: n0, n1: n1, nz: nz, lang: lang, luecke: luecke,
-      annahmeSchild: annahmeSchild, mitFokus: mitFokus, zahlLesen: zahlLesen, meldeFehler: meldeFehler, tr: tr } };
+      auslegungHtml: auslegungHtml, annahmeSchild: annahmeSchild, mitFokus: mitFokus, zahlLesen: zahlLesen, meldeFehler: meldeFehler, tr: tr } };
   setTimeout(function () { jetzt(); }, 0);
 })();

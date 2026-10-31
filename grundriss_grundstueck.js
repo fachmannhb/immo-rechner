@@ -86,6 +86,25 @@
   function abstTxt(x, y, wert, fs, anchor) {
     return '<text class="gs-abst" x="' + x + '" y="' + y + '" font-size="' + fs + '" text-anchor="' + (anchor || 'middle') + '" data-abstand="' + wert + '">' + esc(m(wert)) + ' m</text>';
   }
+  /* Anzeigekasten eines Bausteins im Bild (mindestens MIN_PX groß, um die echte Lage zentriert), wie in objHtml */
+  function bausteinBox(o, ppm) {
+    var mind = MIN_PX / ppm, tw = Math.max(o.b, mind), tt = Math.max(o.t, mind);
+    return { x: o.x - (tw - o.b) / 2, y: o.y - (tt - o.t) / 2, b: tw, t: tt };
+  }
+  /* Maßzahl eines Abstands: Kandidaten entlang der Linie (Mitte, dann zu den Enden) und auf beiden Seiten; die erste, die auf keinem Baustein liegt, gewinnt (sonst die Mitte).
+     richtung h: Linie waagerecht von von bis bis bei y = pos; v: senkrecht bei x = pos. Textbreite geschätzt (0,62 × Schrift je Zeichen). */
+  function zahlWaehlen(wert, fs, boxen, richtung, von, bis, pos) {
+    var w = (m(wert).length + 2) * fs * 0.62, hor = richtung === 'h', k = [];
+    [0.5, 0.25, 0.75, 0.12, 0.88].forEach(function (f) {
+      var t = von + (bis - von) * f;
+      [0, 1].forEach(function (s) {
+        var x = hor ? t : pos + (s ? -0.3 : 0.3) * fs, y = hor ? pos + (s ? 1.1 : -0.3) * fs : t + fs * 0.35, a = hor ? 'middle' : (s ? 'end' : 'start');
+        k.push({ x: x, y: y, a: a, b: { x: a === 'middle' ? x - w / 2 : (a === 'end' ? x - w : x), y: y - fs * 0.85, b: w, t: fs } });
+      });
+    });
+    var c = k.filter(function (z) { return !boxen.some(function (b) { return GK.ueberlappt(z.b, b); }); })[0] || k[0];
+    return abstTxt(c.x, c.y, wert, fs, c.a);
+  }
   function svgHtml(c) {
     var g = c.g, ppm = ppmBerechnen(c), fs = 15 / ppm, oben = OBEN_PX / ppm, vbw = g.breite + 2 * PAD, vbh = g.tiefe + PAD + oben, px = Math.floor(vbw * ppm);
     var h = '<svg id="gs-svg" class="gs-svg" viewBox="' + (-PAD) + ' ' + (-oben) + ' ' + vbw + ' ' + vbh + '" style="width:' + px + 'px;max-width:100%" role="group" aria-label="' +
@@ -96,8 +115,11 @@
       var cx = g.hausX + c.haus.b / 2, cy = g.hausY + c.haus.t / 2;
       h += '<g class="gs-fuehr" aria-hidden="true"><path d="M0 ' + cy + 'H' + g.hausX + 'M' + (g.hausX + c.haus.b) + ' ' + cy + 'H' + g.breite + 'M' + cx + ' 0V' + g.hausY + 'M' + cx + ' ' + (g.hausY + c.haus.t) + 'V' + g.tiefe + '"/>';
       h += '</g>';
-      zahlen = '<g class="gs-fuehr-z" aria-hidden="true">' + abstTxt(g.hausX / 2, cy - fs * 0.3, ab.links, fs) + abstTxt(g.hausX + c.haus.b + ab.rechts / 2, cy - fs * 0.3, ab.rechts, fs) +
-        abstTxt(cx + fs * 0.3, g.hausY / 2 + fs * 0.35, ab.oben, fs, 'start') + abstTxt(cx + fs * 0.3, g.hausY + c.haus.t + ab.unten / 2 + fs * 0.35, ab.unten, fs, 'start') + '</g>';
+      /* Maßzahl weicht aus, wenn sie auf einem Baustein läge */
+      var boxen = c.items.map(function (it) { return bausteinBox(it, ppm); });
+      zahlen = '<g class="gs-fuehr-z" aria-hidden="true">' +
+        zahlWaehlen(ab.links, fs, boxen, 'h', 0, g.hausX, cy) + zahlWaehlen(ab.rechts, fs, boxen, 'h', g.hausX + c.haus.b, g.breite, cy) +
+        zahlWaehlen(ab.oben, fs, boxen, 'v', 0, g.hausY, cx) + zahlWaehlen(ab.unten, fs, boxen, 'v', g.hausY + c.haus.t, g.tiefe, cx) + '</g>';
       h += objHtml({ id: 'haus', haus: true, icon: 'i-haus', x: g.hausX, y: g.hausY, b: c.haus.b, t: c.haus.t,
         aria: tr('gsHausAria', { b: m2(c.haus.b), t: m2(c.haus.t), l: m(ab.links), r: m(ab.rechts), o: m(ab.oben), u: m(ab.unten) }) }, ppm, auswahl);
     }
@@ -152,6 +174,27 @@
     return '<button type="button" class="hilfe-knopf" data-gs="hilfe" aria-expanded="' + (!!hilfeOffen[id]) + '" aria-controls="' + id + '" aria-label="' + esc(tr('hilfeKnopf')) + '">?</button>';
   }
 
+  /* ---------- Ofen der Sauna, Baugebiet der Kleinwindanlage ---------- */
+  var OPT_ICON = { elektro: 'i-blitz', holz: 'i-flamme', wr: 'i-gs-wr', wa: 'i-gs-wa', gw: 'i-gs-gewerbe' };
+  function optionKnoepfe(feld, werte, aktiv, titelKey) {
+    return '<h5 class="es-h5 gs-h5">' + esc(tr(titelKey)) + '</h5><div class="ab-stufen gs-optionen" role="group" aria-label="' + esc(tr(titelKey)) + '">' + werte.map(function (w) {
+      var an = w === aktiv;
+      return '<button type="button" class="es-var gs-opt' + (an ? ' gs-opt-an' : '') + '" data-gs="' + feld + '" data-wert="' + w + '" data-fk="' + feld + '-' + w + '" aria-pressed="' + an + '"><span class="es-var-kopf">' + symbol(OPT_ICON[w]) + '<b>' + esc(tr('gs_' + feld + '_' + w)) + '</b></span></button>';
+    }).join('') + '</div>';
+  }
+  function optionHtml(it) {
+    var h = '';
+    if (it.art === 'sauna') {
+      h += optionKnoepfe('ofen', ['elektro', 'holz'], it.ofen, 'gsOfenTitel');
+      if (!it.ofenEigen) h += '<p class="klein" data-gs-annahme="ofen">' + annahmeSchild() + ' ' + esc(tr('gsOfenAnnahme')) + '</p>';
+    } else if (it.art === 'kleinwind') {
+      h += optionKnoepfe('gebiet', ['wr', 'wa', 'gw'], it.gebiet, 'gsGebietTitel');
+      if (!it.gebietEigen) h += '<p class="klein" data-gs-annahme="gebiet">' + annahmeSchild() + ' ' + esc(tr('gsGebietAnnahme')) + '</p>';
+      h += '<p class="klein" data-gs-hinweis="gebiet">' + esc(tr('gsGebietWo')) + '</p>';
+    }
+    return h;
+  }
+
   /* ---------- Auswahl: Größe genau einstellen ---------- */
   function auswahlHtml(c) {
     if (!auswahl) return '<p class="klein" data-gs-auswahl="keine">' + esc(tr('gsAuswahlKeine')) + '</p>';
@@ -170,9 +213,10 @@
     h += '<div class="an-reihe gs-reihe">' + reglerHtml('gs-ub', tr('gsBauBreite'), it.b, GK.MASS_MIN, Math.min(a.max, c.g.breite), 0.1, 'gsBauBreiteText', 'gsBauBreiteZahl') + '</div>';
     h += '<div class="an-reihe gs-reihe">' + reglerHtml('gs-ut', tr('gsBauTiefe'), it.t, GK.MASS_MIN, Math.min(a.max, c.g.tiefe), 0.1, 'gsBauTiefeText', 'gsBauTiefeZahl') + '</div>';
     if (it.vf && it.vf.ok && it.vf.brauchtHoehe) {
-      h += '<div class="an-reihe gs-reihe">' + reglerHtml('gs-uh', tr('gsBauHoehe'), it.h, 0.5, 20, 0.1, 'gsBauHoeheText', 'gsBauHoeheZahl') + '</div>';
+      h += '<div class="an-reihe gs-reihe">' + reglerHtml('gs-uh', (it.art === 'pool' || it.art === 'fischteich' ? tr('gsBauWassertiefe') : tr('gsBauHoehe')), it.h, 0.5, 20, 0.1, 'gsBauHoeheText', 'gsBauHoeheZahl') + '</div>';
       if (!it.hoeheEigen) h += '<p class="klein" data-gs-annahme="hoehe">' + annahmeSchild() + ' ' + esc(tr('gsHoeheWarum', { h: m2(a.h) })) + '</p>';
     }
+    h += optionHtml(it);
     if (loeschFrage === it.id) {
       h += '<div class="ab-meldung" role="alertdialog" aria-label="' + esc(tr('gsEntfernenFrage', { name: artName(it.art) })) + '" data-gs-frage="1"><p>' + esc(tr('gsEntfernenFrage', { name: artName(it.art) })) +
         '</p><div class="knopfreihe"><button type="button" class="knopf mittel" data-gs="entfernen-ja" data-fk="ja">' + esc(tr('gsEntfernenJa')) + '</button> <button type="button" class="knopf mittel zweit" data-gs="entfernen-nein" data-fk="nein">' + esc(tr('gsEntfernenNein')) + '</button></div></div>';
@@ -221,6 +265,9 @@
       else {
         var satz = summe.ursache === 'keinBaustein' ? tr('gsKeinBaustein') : W.satzFuer(summe);
         h += '<div class="an-satz an-f ' + a + '" role="status" data-an-ampel="' + a + '">' + ampelChip(a, false) + '<span class="an-satz-text" data-an-satz="antrag">' + esc(satz) + '</span></div>';
+        if (summe.zeile && summe.zeile.auslegung) h += W.auslegungHtml(summe.zeile);
+        if (summe.alternativen) h += '<p class="klein" data-gs-alternativen="1">' + esc(tr('anAlternativen')) + '</p>';
+        if (v.holzHinweis) h += '<p class="ab-meldung" role="note" data-gs-holz="hinweis">' + esc(tr('gsHolzHinweis')) + '</p>';
         if (summe.mehrere) h += '<p class="klein">' + esc(tr('anMehrere')) + '</p>';
         if (v.zeilen.some(function (z) { return z.tiefeMax != null; })) h += '<p class="klein" data-gs-tiefe-annahme="1">' + annahmeSchild() + ' ' + esc(tr('gsTiefeAnnahme')) + '</p>';
         if (v.zeilen.length) h += '<details class="an-bed gs-einzel"><summary>' + esc(tr('gsEinzel')) + '</summary>' + v.zeilen.map(W.zeileHtml).join('') + '</details>';
@@ -334,6 +381,11 @@
       /* liegt der Plan außerhalb des Bildes, zeigt die Seite ihn (ohne Animation); der Fokus bleibt auf dem Bildknopf */
       var sv = byId('gs-plan') ? byId('gs-plan').getBoundingClientRect() : null;
       if (sv && (sv.top > window.innerHeight - 140 || sv.bottom < 120)) byId('gs-plan').scrollIntoView({ block: 'start', behavior: 'auto' });
+      return;
+    }
+    if ((a === 'ofen' || a === 'gebiet') && auswahl) {
+      GK.festschreiben(G.plan());
+      if (GK.bausteinOption(G.plan(), auswahl, a, w)) geaendert(false);
       return;
     }
     if (a === 'zeigen') { auswahl = w; loeschFrage = null; jetzt(false); var o = document.querySelector('#gs-svg [data-sel="' + w + '"]'); if (o) { try { o.focus(); } catch (e3) { /* ohne Fokus */ } } return; }

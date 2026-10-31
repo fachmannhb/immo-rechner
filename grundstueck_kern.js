@@ -1,5 +1,5 @@
 /* Rechenkern „Grundstück“ (Welle E, Teil 1), rein, läuft auch in Node (tmp/grundstueck_kern_test.js); Oberfläche: grundriss_grundstueck.js.
-   Hausumriss = Hüllrechteck der Räume des untersten Geschosses (plan.etagen[0]) einschließlich Außenwand (etagen[0].aussenwand; fehlt der Wert, gilt 0,30 m wie in der Zeichnung, als sichtbare Annahme). Grundstück = Rechteck.
+   Hausumriss = Hüllrechteck der Räume des untersten Geschosses (plan.etagen[0], Räume der Art „balkon“ ausgenommen) einschließlich Außenwand (etagen[0].aussenwand; fehlt der Wert, gilt 0,30 m wie in der Zeichnung, als sichtbare Annahme). Grundstück = Rechteck.
    Neue Bausteine bekommen den ersten freien Platz (Raster 0,5 m, mindestens 0,5 m Abstand zu Haus, Grundstücksgrenze und anderen Bausteinen), zuerst im Garten unterhalb des Hauses (es gibt kein Straßenfeld: unterer Bereich des Bildes).
    Plan-Felder (optional, alte Pläne laden unverändert): plan.grundstueck { breite_m, tiefe_m, haus_x_m, haus_y_m } und plan.aussen [ { id, art, x_m, y_m, breite_m, tiefe_m, hoehe_m } ].
    Die Genehmigungs-Ampel kommt aus anbau_kern.js (AK.verfahrensfrei, dieselbe Rechnung und dieselben Texte wie in der Karte Anbau); Preise, Pflichten und Kennzahlen aus daten/grundstueck.js.
@@ -42,6 +42,7 @@
     if (!e || !Array.isArray(e.raeume)) return null;
     var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, n = 0;
     e.raeume.forEach(function (r) {
+      if (r && r.art === 'balkon') return;   /* Balkon, Loggia, Terrasse (art „balkon“) zählen nicht ins Hüllrechteck */
       (r.punkte || []).forEach(function (p) {
         if (!zahlOk(p[0]) || !zahlOk(p[1])) return;
         n++; x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]);
@@ -96,6 +97,9 @@
       var x0 = zahlOk(it.x_m) ? it.x_m : (g.breite - w) / 2, y0 = zahlOk(it.y_m) ? it.y_m : (g.tiefe - t) / 2;
       var x = klemme(x0, 0, g.breite - w), y = klemme(y0, 0, g.tiefe - t);
       var o = { id: id, art: a.id, x: r2(x), y: r2(y), b: r2(w), t: r2(t), h: r2(h), hoeheEigen: zahlOk(it.hoehe_m) };
+      /* Welle E, Teil 1c: Ofen der Sauna und Baugebiet der Kleinwindanlage (Start: Elektro-Ofen, allgemeines Wohngebiet; *Eigen = der Nutzer hat gewählt, sonst gilt die Annahme) */
+      if (a.id === 'sauna') { o.ofenEigen = it.ofen === 'holz' || it.ofen === 'elektro'; o.ofen = it.ofen === 'holz' ? 'holz' : AK.ANNAHMEN.ofen; }
+      if (a.id === 'kleinwind') { o.gebietEigen = it.gebiet === 'wr' || it.gebiet === 'wa' || it.gebiet === 'gw'; o.gebiet = it.gebiet === 'wr' || it.gebiet === 'gw' ? it.gebiet : AK.ANNAHMEN.gebiet; }
       if (Math.abs(o.x - x0) > 0.005 || Math.abs(o.y - y0) > 0.005) { o.verschoben = true; meld.push({ typ: 'verschoben', id: id, art: a.id }); }
       items.push(o);
     });
@@ -144,7 +148,7 @@
     s.items.forEach(function (it) {
       it.flaeche = r2(it.b * it.t);
       /* Tiefe nur für das Terrassendach (Bremen: Vorbau bis 3,50 m Tiefe); Annahme: die Tiefe des Bausteins (t) ist die Tiefe senkrecht zur Außenwand, der Text legt die Bezugsgröße nicht fest */
-      it.vf = AK.verfahrensfrei(it.art, land, it.flaeche, it.h, it.art === 'terrassendach' ? it.t : null);
+      it.vf = AK.verfahrensfrei(it.art, land, it.flaeche, it.h, it.art === 'terrassendach' ? it.t : null, { ofen: it.ofen, gebiet: it.gebiet });
       it.ampel = it.vf && it.vf.ok ? it.vf.summe.ampel : 'grau';
       s.zaehlung[it.ampel]++;
       it.daten = datenZu(it.art);
@@ -217,6 +221,14 @@
     it[feld] = r2(wert);
     return true;
   }
+  /* Auswahlfeld eines Bausteins setzen (Sauna: ofen = elektro | holz; Kleinwind: gebiet = wr | wa | gw); andere Werte werden abgelehnt */
+  var OPTIONEN = { ofen: { art: 'sauna', werte: ['elektro', 'holz'] }, gebiet: { art: 'kleinwind', werte: ['wr', 'wa', 'gw'] } };
+  function bausteinOption(plan, id, feld, wert) {
+    var o = OPTIONEN[feld], it = (plan.aussen || []).filter(function (x) { return x && x.id === id; })[0];
+    if (!o || !it || it.art !== o.art || o.werte.indexOf(wert) < 0) return false;
+    it[feld] = wert;
+    return true;
+  }
   /* Rohwerte (auch nach dem Lesen unvollständige Bausteine) vollständig in den Plan schreiben, damit Ziehen und Tasten nur ein Feld ändern */
   function festschreiben(plan) {
     var s = normalisiere(plan);
@@ -225,6 +237,8 @@
       plan.aussen = s.items.map(function (it) {
         var o = { id: it.id, art: it.art, x_m: it.x, y_m: it.y, breite_m: it.b, tiefe_m: it.t };
         if (it.hoeheEigen) o.hoehe_m = it.h;
+        if (it.ofenEigen) o.ofen = it.ofen;
+        if (it.gebietEigen) o.gebiet = it.gebiet;
         return o;
       });
       if (!plan.aussen.length) delete plan.aussen;
@@ -244,7 +258,7 @@
   var API = {
     ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, GRUND_MIN: GRUND_MIN, GRUND_MAX: GRUND_MAX, MASS_MIN: MASS_MIN, HOEHE_MAX: HOEHE_MAX, MAX_BAUSTEINE: MAX_BAUSTEINE,
     artInfo: artInfo, hausUmriss: hausUmriss, startGrund: startGrund, normalisiere: normalisiere, abstaende: abstaende, flaechen: flaechen, datenZu: datenZu, rechne: rechne,
-    bausteinHinzu: bausteinHinzu, bausteinEntfernen: bausteinEntfernen, bausteinSetzen: bausteinSetzen, grundstueckSetzen: grundstueckSetzen, festschreiben: festschreiben, ueberlappt: ueberlappt,
+    bausteinHinzu: bausteinHinzu, bausteinEntfernen: bausteinEntfernen, bausteinSetzen: bausteinSetzen, bausteinOption: bausteinOption, grundstueckSetzen: grundstueckSetzen, festschreiben: festschreiben, ueberlappt: ueberlappt,
     platzKasten: platzKasten
   };
   root.GRUNDSTUECK_KERN = API;

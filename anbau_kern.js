@@ -7,7 +7,7 @@
   var RK = root.REGELN || (typeof require === 'function' ? require('./regeln_kern.js') : null);
 
   /* Annahmen (eigene Wahl, in der Seite als Annahme gekennzeichnet): Gelb-Schwelle und Starthöhe für Grenzen in m³ */
-  var ANNAHMEN = { gelbAb: 0.9, hoehe: 2.5, tiefe: 3.0 };   /* tiefe: Starttiefe (m) für Grenzen mit Tiefe, z. B. Bremen Wintergarten bis 3,50 m (Bericht 41) */
+  var ANNAHMEN = { gelbAb: 0.9, hoehe: 2.5, tiefe: 3.0, ofen: 'elektro', gebiet: 'wa' };   /* tiefe: Starttiefe (m) für Grenzen mit Tiefe, z. B. Bremen Wintergarten bis 3,50 m (Bericht 41) */
   var TW = 'terrassendach_wintergarten', GC = 'garage_carport';
   /* min/max/start: Reglerbereich und Startwert in m²; passt: Muster für den Namen im Eintrag (null = alle Einträge); wohnraum: kein Baustein in den Daten */
   var ARTEN = [
@@ -22,17 +22,17 @@
   ];
   /* Welle E, Teil 1: Außen-Bausteine der Karte Grundstück. Gleiche Rechnung (verfahrensfrei), eigene Liste, damit die Karte Anbau bei acht Bildern bleibt.
      keinBaustein: in daten/verfahrensfrei.js gibt es keinen Baustein dazu (grau, „bei der Bauaufsicht fragen“). hoeheMass: Einheit m gilt für die Höhe (Kleinwind: freie Höhe; Gewächshaus: Firsthöhe).
-     betriebGrau: Eintrag, der laut Bedingung nur für Betriebe gilt, färbt die Ampel nicht (grau, nebensächlich). gebietGrau: Bedingung „nur/nicht/außer in … gebieten“ hängt vom Baugebiet ab (grau). */
+     betriebGrau: Eintrag, der laut Bedingung nur für Betriebe gilt, färbt die Ampel nicht (grau, nebensächlich); Einträge mit Marke privat sind ausgenommen. gebietGrau: Bedingung hängt vom Baugebiet ab (grau), nur ohne Feld gebiet. ofenWahl, gebietWahl: Bericht 42. */
   var AUSSEN = [
     { id: 'gartenhaus', baustein: ['gartenhaus', 'gartengeraetehaus'], passt: null },
     { id: 'garage_carport', baustein: [GC], passt: /garage|carport|überdachte|stellplatz|abstellplatz/i },
     { id: 'terrassendach', baustein: [TW], passt: /terrasse/i },
-    { id: 'sauna', baustein: ['sauna'], passt: null },
+    { id: 'sauna', baustein: ['sauna'], passt: null, ofenWahl: true },
     { id: 'pool', baustein: ['pool'], passt: /^(?!.*überdachung)/i },
     { id: 'gewaechshaus', baustein: ['gewaechshaus'], passt: null, hoeheMass: true, betriebGrau: true },
     { id: 'brunnen', baustein: ['brunnen'], passt: null },
     { id: 'regentank', baustein: [], keinBaustein: true },
-    { id: 'kleinwind', baustein: ['kleinwind'], passt: null, hoeheMass: true, gebietGrau: true },
+    { id: 'kleinwind', baustein: ['kleinwind'], passt: null, hoeheMass: true, gebietGrau: true, gebietWahl: true },
     { id: 'waermepumpe', baustein: ['waermepumpe'], passt: null },
     { id: 'wallbox', baustein: [], keinBaustein: true },
     { id: 'huehnerstall', baustein: ['stall'], passt: null },
@@ -106,8 +106,10 @@
     return out;
   }
   /* Bauantrag-Ampel */
-  function bewerte(e, a, flaeche, hoehe, vf, tiefe) {
+  function bewerte(e, a, flaeche, hoehe, vf, tiefe, opt) {
+    opt = opt || {};
     var z = {
+      auslegung: typeof e.auslegung === 'string' ? e.auslegung : '', alt: !!e.alt, privat: !!e.privat, rotorMax: zahlOk(e.rotor_max) ? e.rotor_max : null, gebietKey: '', gebietHinweis: '',
       bauwerk: e.bauwerk || '', baustein: e.baustein, art: e.art || 'luecke', wert: zahlOk(e.wert) ? e.wert : null, einheit: e.einheit || '', wertRoh: e.wert_roh || '',
       bedingung: e.bedingung && !/^[–—-]$/.test(String(e.bedingung).trim()) ? e.bedingung : '', bedingungVoll: typeof e.bedingung_voll === 'string' ? e.bedingung_voll : '', aussenbereich: e.aussenbereich || '',
       aussenWert: zahlOk(e.ausserbereich_wert) ? e.ausserbereich_wert : null, paragraf: e.paragraf || '', quellen: vfQuellen(e, vf),
@@ -115,6 +117,17 @@
       sonder: /au(ß|ss)enbereich/i.test(e.bauwerk || ''), ampel: 'grau', ursache: null, mass: null, anteil: null, rechnung: null
     };
     if (e.status === 'Lücke' || e.art === undefined) { z.ursache = 'luecke'; return z; }
+    /* Sauna mit Holzofen: die Nummer schließt Feuerstätten aus → rot */
+    if (a.ofenWahl && opt.ofen === 'holz' && e.feuer_aus) { z.feuerAus = true; z.ampel = 'rot'; z.ursache = 'feuerstaette'; return z; }
+    /* Kleinwind je Baugebiet: frei / aus / nicht (nicht gelistet) / gew (nur Gewerbe) */
+    if (a.gebietWahl && e.gebiet) {
+      var gs = e.gebiet[opt.gebiet];
+      z.gebietKey = opt.gebiet || ''; z.gebietStatus = gs || '';
+      if (gs === 'aus') { z.ampel = 'rot'; z.ursache = 'gebietAus'; return z; }
+      if (gs !== 'frei' && gs !== 'gew') { z.ursache = 'gebietNicht'; return z; }
+      if (gs === 'gew') z.gebietHinweis = 'nurGewerbe';
+      if (opt.gebiet === 'gw' && zahlOk(e.gw_wert)) z.wert = e.gw_wert;
+    }
     switch (e.art) {
       case 'grenze':
         if (!z.wert || (z.einheit !== 'm²' && z.einheit !== 'm³' && !(z.einheit === 'm' && a.hoeheMass))) { z.ursache = 'einheit'; break; }
@@ -145,32 +158,50 @@
     if (a.beheizt && e.nur_vorueber && z.ampel !== 'grau') { z.ampelOhneBeheizt = z.ampel; z.ampel = 'grau'; z.ursache = 'nurVorueber'; }
     /* Welle E, Teil 1: Bedingungen, die die Ampel nicht tragen können (Betrieb, Baugebiet): grau statt falsch grün */
     var bed = z.bedingungVoll || z.bedingung;
-    if (a.betriebGrau && z.ampel !== 'grau' && /betrieb|landwirtschaft|^nur\b/i.test(bed)) { z.ampelOhneBedingung = z.ampel; z.ampel = 'grau'; z.ursache = 'nurBetrieb'; z.sonder = true; }
-    if (a.gebietGrau && z.ampel !== 'grau' && /^(nur|nicht|außer)\b/i.test(bed)) { z.ampelOhneBedingung = z.ampel; z.ampel = 'grau'; z.ursache = 'bedingt'; }
+    if (a.betriebGrau && !z.privat && z.ampel !== 'grau' && /betrieb|landwirtschaft|^nur\b/i.test(bed)) { z.ampelOhneBedingung = z.ampel; z.ampel = 'grau'; z.ursache = 'nurBetrieb'; z.sonder = true; }
+    if (a.gebietGrau && !e.gebiet && z.ampel !== 'grau' && /^(nur|nicht|außer)\b/i.test(bed)) { z.ampelOhneBedingung = z.ampel; z.ampel = 'grau'; z.ursache = 'bedingt'; }
+    /* Auslegung wird nie grün allein: höchstens gelb */
+    if (z.auslegung && z.ampel === 'gruen') { z.ampelRoh = 'gruen'; z.ampel = 'gelb'; z.auslegungGelb = true; }
     return z;
   }
-  function verfahrensfrei(artId, land, flaeche, hoehe, tiefe) {
+  /* opt: { ofen: elektro | holz } (Sauna), { gebiet: wr | wa | gw } (Kleinwind); sonst Startannahmen */
+  function optNorm(a, opt) {
+    var o = opt && typeof opt === 'object' ? opt : {};
+    return { ofen: o.ofen === 'holz' ? 'holz' : ANNAHMEN.ofen, gebiet: o.gebiet === 'wr' || o.gebiet === 'gw' ? o.gebiet : ANNAHMEN.gebiet };
+  }
+  function verfahrensfrei(artId, land, flaeche, hoehe, tiefe, opt) {
     var a = artInfo(artId) || aussenInfo(artId), vf = VF();
     if (!a || !zahlOk(flaeche)) return { ok: false, grund: 'eingabe' };
     if (!vf || !vf.laender) return { ok: false, grund: 'keineDaten' };
     var l = vf.laender[land];
     if (!l) return { ok: false, grund: 'keinLand' };
     hoehe = zahlOk(hoehe) ? hoehe : ANNAHMEN.hoehe;
-    var res = { ok: true, art: a.id, land: land, landName: landName(land), flaeche: flaeche, hoehe: hoehe, zeilen: [], summe: { ampel: 'grau', mehrere: false, ursache: 'keinBaustein' }, brauchtHoehe: false, gefunden: [] };
+    opt = optNorm(a, opt);
+    var res = { ok: true, art: a.id, land: land, landName: landName(land), flaeche: flaeche, hoehe: hoehe, zeilen: [], summe: { ampel: 'grau', mehrere: false, ursache: 'keinBaustein' }, brauchtHoehe: false, gefunden: [],
+      ofen: a.ofenWahl ? opt.ofen : null, gebiet: a.gebietWahl ? opt.gebiet : null };
     if (a.wohnraum || a.keinBaustein) return res;     /* kein Baustein in den Daten: nur „Bauaufsicht fragen“ */
     var alle = [];
     a.baustein.forEach(function (b) { (l.strukturen[b] || []).forEach(function (e) { alle.push(Object.assign({ baustein: b }, e)); }); });
     res.gefunden = alle.filter(function (e) { return e.bauwerk; }).map(function (e) { return e.bauwerk; });
     var treffer = alle.filter(function (e) { return !a.passt || !e.bauwerk || a.passt.test(e.bauwerk); });
     if (!treffer.length) { res.summe = { ampel: 'grau', mehrere: false, ursache: 'nichtGenannt' }; return res; }
-    res.zeilen = treffer.map(function (e) { return bewerte(e, a, flaeche, hoehe, vf, zahlOk(tiefe) ? tiefe : null); });
+    res.zeilen = treffer.map(function (e) { return bewerte(e, a, flaeche, hoehe, vf, zahlOk(tiefe) ? tiefe : null, opt); });
     res.brauchtTiefe = res.zeilen.some(function (z) { return z.tiefeMax != null && z.ampel !== 'grau'; });
     res.brauchtHoehe = res.zeilen.some(function (z) { return z.art === 'grenze' && (z.einheit === 'm³' || (z.einheit === 'm' && a.hoeheMass)); });
     var haupt = res.zeilen.filter(function (z) { return !z.sonder; });
     if (!haupt.length) haupt = res.zeilen;
-    var schlimm = haupt[0];
-    haupt.forEach(function (z) { if (RANG[z.ampel] > RANG[schlimm.ampel]) schlimm = z; });
-    res.summe = { ampel: schlimm.ampel, mehrere: haupt.length > 1, ursache: schlimm.ursache, zeile: schlimm };
+    /* alt = Alternativen: die günstigste zählt; sonst die schlechteste */
+    var altZ = haupt.filter(function (z) { return z.alt; }), kand = haupt.filter(function (z) { return !z.alt; });
+    if (altZ.length) {
+      var best = altZ[0];
+      altZ.forEach(function (z) { if (RANG[z.ampel] < RANG[best.ampel]) best = z; });
+      kand.push(best);
+    }
+    var schlimm = kand[0];
+    kand.forEach(function (z) { if (RANG[z.ampel] > RANG[schlimm.ampel]) schlimm = z; });
+    res.summe = { ampel: schlimm.ampel, mehrere: kand.length > 1, alternativen: altZ.length > 1, ursache: schlimm.ursache, zeile: schlimm };
+    /* Holzofen ohne Feuerstätten-Ausschluss im Text: Hinweis, dass die Feuerungsanlage eigenen Regeln folgt */
+    res.holzHinweis = a.ofenWahl && opt.ofen === 'holz' && schlimm.ursache !== 'feuerstaette';
     return res;
   }
 
@@ -204,7 +235,7 @@
 
   var API = {
     ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, AUSSEN: AUSSEN, aussenInfo: aussenInfo, RANG: RANG, FLAECHE_MIN: FLAECHE_MIN, FLAECHE_MAX: FLAECHE_MAX, HOEHE_MIN: HOEHE_MIN, HOEHE_MAX: HOEHE_MAX, TIEFE_MIN: TIEFE_MIN, TIEFE_MAX: TIEFE_MAX, TIEFE_ARTEN: TIEFE_ARTEN,
-    artInfo: artInfo, planAnbau: planAnbau, planLand: planLand, kosten: kosten, verfahrensfrei: verfahrensfrei, abstand: abstand, sachsen: sachsen, rechne: rechne
+    optNorm: optNorm, artInfo: artInfo, planAnbau: planAnbau, planLand: planLand, kosten: kosten, verfahrensfrei: verfahrensfrei, abstand: abstand, sachsen: sachsen, rechne: rechne
   };
   root.ANBAU_KERN = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;

@@ -58,7 +58,8 @@
     gsAuswahlKeine: { de: 'Tippen Sie im Plan auf das Haus oder einen Baustein, um Größe und Lage genau einzustellen.', en: 'Tap the house or an item in the plan to set size and position exactly.', ru: 'Нажмите на дом или постройку в плане, чтобы точно задать размер и положение.' },
     gsBauBreite: { de: 'Breite', en: 'Width', ru: 'Ширина' },
     gsBauTiefe: { de: 'Tiefe', en: 'Depth', ru: 'Глубина' },
-    gsBauHoehe: { de: 'Höhe (Pool und Teich: Wassertiefe)', en: 'Height (pool and pond: water depth)', ru: 'Высота (бассейн и пруд: глубина воды)' },
+    gsBauHoehe: { de: 'Höhe', en: 'Height', ru: 'Высота' },
+    gsBauWassertiefe: { de: 'Wassertiefe', en: 'Water depth', ru: 'Глубина воды' },
     gsBauBreiteText: { de: '{n} m breit', en: '{n} m wide', ru: '{n} м ширина' },
     gsBauTiefeText: { de: '{n} m tief', en: '{n} m deep', ru: '{n} м глубина' },
     gsBauHoeheText: { de: '{n} m Höhe', en: '{n} m height', ru: '{n} м высота' },
@@ -105,6 +106,18 @@
     gsFehlerDaten: { de: 'Die Karte Grundstück kann nicht starten: {grund}', en: 'The plot card cannot start: {grund}', ru: 'Карта участка не запускается: {grund}' },
     gsFehlerRechnen: { de: 'Die Karte Grundstück konnte nicht rechnen: {grund}', en: 'The plot card could not calculate: {grund}', ru: 'Карта участка не смогла посчитать: {grund}' },
     gsFehlerZahl: { de: '{name}: bitte eine Zahl von {min} bis {max} eingeben.', en: '{name}: please enter a number from {min} to {max}.', ru: '{name}: введите число от {min} до {max}.' },
+    /* Welle E, Teil 1c (Bericht 42): Ofen der Sauna, Baugebiet der Kleinwindanlage */
+    gsOfenTitel: { de: 'Ofen der Sauna', en: 'Sauna heater', ru: 'Печь сауны' },
+    gs_ofen_elektro: { de: 'Elektro-Ofen', en: 'Electric heater', ru: 'Электропечь' },
+    gs_ofen_holz: { de: 'Holzofen', en: 'Wood stove', ru: 'Дровяная печь' },
+    gsOfenAnnahme: { de: 'Angenommen: Elektro-Ofen. Mit Holzofen ändert sich das Ergebnis in vielen Ländern.', en: 'Assumed: electric heater. With a wood stove the result changes in many states.', ru: 'Принято: электропечь. С дровяной печью результат во многих землях другой.' },
+    gsHolzHinweis: { de: 'Holzofen: Schornstein und Abnahme durch den Schornsteinfeger gelten trotzdem (1. BImSchV § 14, Bericht 33, Abruf 27.10.2026).', en: 'Wood stove: chimney and the chimney sweep\'s inspection still apply (1st BImSchV § 14, report 33, retrieved 27.10.2026).', ru: 'Дровяная печь: дымоход и приёмка трубочистом всё равно нужны (1-е BImSchV § 14, отчёт 33, 27.10.2026).' },
+    gsGebietTitel: { de: 'Baugebiet des Grundstücks', en: 'Zoning area of the plot', ru: 'Зона участка' },
+    gs_gebiet_wr: { de: 'reines Wohngebiet', en: 'pure residential area', ru: 'чисто жилая зона' },
+    gs_gebiet_wa: { de: 'allgemeines Wohngebiet', en: 'general residential area', ru: 'общая жилая зона' },
+    gs_gebiet_gw: { de: 'Gewerbe/Außenbereich', en: 'commercial / outside area', ru: 'промзона / внешняя зона' },
+    gsGebietAnnahme: { de: 'Angenommen: allgemeines Wohngebiet. Bei einem anderen Gebiet ändert sich das Ergebnis.', en: 'Assumed: general residential area. In another area the result changes.', ru: 'Принято: общая жилая зона. В другой зоне результат иной.' },
+    gsGebietWo: { de: 'Das Baugebiet steht im Bebauungsplan; Auskunft gibt die Gemeinde (Bauamt).', en: 'The zoning area is in the development plan; the municipality (building office) can tell you.', ru: 'Зона указана в плане застройки; информацию даёт община (стройотдел).' },
     gsKopf: { de: 'Grundstück {g} m², bebaut {p} %, {n} Bausteine ({grau} grau, {rot} rot)', en: 'Plot {g} m², built on {p}%, {n} items ({grau} grey, {rot} red)', ru: 'Участок {g} м², застроено {p} %, построек {n} ({grau} серых, {rot} красных)' }
   };
   window.TEXTE = window.TEXTE || {};

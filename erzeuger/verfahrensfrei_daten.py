@@ -4,6 +4,7 @@ import sys, io, os, re, collections
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import regel_lib as L
+import verfahrensfrei_42 as v42
 
 LAENDER = collections.OrderedDict([
     ('BW', 'Baden-Württemberg'), ('BY', 'Bayern'), ('BE', 'Berlin'), ('BB', 'Brandenburg'),
@@ -203,10 +204,10 @@ def schlank_eintrag(e, st=None):
         if e.get('wert') is None and e.get('wert_roh'):
             o['wert_roh'] = kuerzen(e['wert_roh'], 60)
         if e.get('bedingung'):
-            o['bedingung'] = kuerzen(e['bedingung'], 30)
+            o['bedingung'] = kuerzen(e['bedingung'], 70 if str(e.get('id', '')).startswith(('SA-', 'GW-', 'KW-')) else 30)   # Bericht 42: kurze Bedingungen stehen ganz da (kein Doppel in bedingung_voll)
             if (VOLL_BEDINGUNG is None or st in VOLL_BEDINGUNG) and o['bedingung'] != e['bedingung']:
                 o['bedingung_voll'] = e['bedingung']
-        for k in ('aussenbereich', 'ausserbereich_wert', 'mehrere_bauwerke', 'tiefe_max', 'nur_vorueber'):
+        for k in ('aussenbereich', 'ausserbereich_wert', 'mehrere_bauwerke', 'tiefe_max', 'nur_vorueber', 'auslegung', 'feuer_aus', 'alt', 'privat', 'gebiet', 'gw_wert', 'rotor_max'):
             if e.get(k) not in (None, False):
                 o[k] = e[k]
         if e.get('paragraf'):
@@ -394,6 +395,10 @@ def main():
             ent['status'] = status_norm(status)
             daten['BY'].setdefault(BY_KAT[_id], []).append(ent)
 
+    # --- Bericht 42: Sauna (SA), privates Gewaechshaus (GW), Kleinwind im Wohngebiet (KW); ersetzt Altzeilen (siehe verfahrensfrei_42.py), kein zweiter Eintrag ---
+    ersetzt42 = v42.uebernehmen(daten, QUELLEN)
+    print('Bericht 42 ersetzt:', ersetzt42)
+
     # --- Luecken ---
     spezial = {
         ('MV', 'garage_carport'): 'Bericht 35: Garage im MV-Text ausdrücklich nicht gelistet (siehe offene Punkte dort); nicht als „verfahrensfrei“ annehmen',
@@ -440,7 +445,7 @@ def main():
 
     obj = collections.OrderedDict()
     obj['stand'] = '2026-10-27'
-    obj['hinweis'] = ('Verfahrensfreie Garten- und Grundstücksbauten je Bundesland, aus den Berichten 34 (Bayern), 35 und 36 (Abrufe am 27.10.2026) übernommen, Bremen Terrasse/Wintergarten aus Bericht 41 (Abruf 31.10.2026), nicht von Hand ändern. '
+    obj['hinweis'] = ('Verfahrensfreie Garten- und Grundstücksbauten je Bundesland, aus den Berichten 34 (Bayern), 35 und 36 (Abrufe am 27.10.2026) übernommen, Bremen Terrasse/Wintergarten aus Bericht 41 (Abruf 31.10.2026), Sauna, privates Gewächshaus und Kleinwind im Wohngebiet aus Bericht 42 (Abruf 31.10.2026), nicht von Hand ändern. '
                       'Verfahrensfrei heißt nicht regelfrei: Abstandsflächen, Bebauungsplan, Gestaltungs- und Denkmalschutzsatzungen und Naturschutz gelten weiter. '
                       'Einheiten werden nie umgerechnet: m³ (Brutto-Rauminhalt) und m² (Grundfläche) sind verschiedene Maße; die Einheit steht an jedem Wert. '
                       '"Außenbereich" ist meist die Ausnahme (Feld aussenbereich bzw. ausserbereich_wert). Keine Rechtsberatung; vor einem Bau die untere Bauaufsicht fragen.')
