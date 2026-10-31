@@ -20,6 +20,26 @@
     { id: 'anbau', baustein: [], wohnraum: true, min: 5, max: 100, start: 20 },
     { id: 'aufstockung', baustein: [], wohnraum: true, min: 10, max: 200, start: 40 }
   ];
+  /* Welle E, Teil 1: Außen-Bausteine der Karte Grundstück. Gleiche Rechnung (verfahrensfrei), eigene Liste, damit die Karte Anbau bei acht Bildern bleibt.
+     keinBaustein: in daten/verfahrensfrei.js gibt es keinen Baustein dazu (grau, „bei der Bauaufsicht fragen“). hoeheMass: Einheit m gilt für die Höhe (Kleinwind: freie Höhe; Gewächshaus: Firsthöhe).
+     betriebGrau: Eintrag, der laut Bedingung nur für Betriebe gilt, färbt die Ampel nicht (grau, nebensächlich). gebietGrau: Bedingung „nur/nicht/außer in … gebieten“ hängt vom Baugebiet ab (grau). */
+  var AUSSEN = [
+    { id: 'gartenhaus', baustein: ['gartenhaus', 'gartengeraetehaus'], passt: null },
+    { id: 'garage_carport', baustein: [GC], passt: /garage|carport|überdachte|stellplatz|abstellplatz/i },
+    { id: 'terrassendach', baustein: [TW], passt: /terrasse/i },
+    { id: 'sauna', baustein: ['sauna'], passt: null },
+    { id: 'pool', baustein: ['pool'], passt: /^(?!.*überdachung)/i },
+    { id: 'gewaechshaus', baustein: ['gewaechshaus'], passt: null, hoeheMass: true, betriebGrau: true },
+    { id: 'brunnen', baustein: ['brunnen'], passt: null },
+    { id: 'regentank', baustein: [], keinBaustein: true },
+    { id: 'kleinwind', baustein: ['kleinwind'], passt: null, hoeheMass: true, gebietGrau: true },
+    { id: 'waermepumpe', baustein: ['waermepumpe'], passt: null },
+    { id: 'wallbox', baustein: [], keinBaustein: true },
+    { id: 'huehnerstall', baustein: ['stall'], passt: null },
+    { id: 'bienenstock', baustein: [], keinBaustein: true },
+    { id: 'fischteich', baustein: [], keinBaustein: true }
+  ];
+  function aussenInfo(id) { for (var i = 0; i < AUSSEN.length; i++) if (AUSSEN[i].id === id) return AUSSEN[i]; return null; }
   var FLAECHE_MIN = 1, FLAECHE_MAX = 500, HOEHE_MIN = 1, HOEHE_MAX = 10;
   var RANG = { gruen: 0, grau: 1, gelb: 2, rot: 3 };
 
@@ -87,7 +107,7 @@
   function bewerte(e, a, flaeche, hoehe, vf) {
     var z = {
       bauwerk: e.bauwerk || '', baustein: e.baustein, art: e.art || 'luecke', wert: zahlOk(e.wert) ? e.wert : null, einheit: e.einheit || '', wertRoh: e.wert_roh || '',
-      bedingung: e.bedingung && !/^[–—-]$/.test(String(e.bedingung).trim()) ? e.bedingung : '', aussenbereich: e.aussenbereich || '',
+      bedingung: e.bedingung && !/^[–—-]$/.test(String(e.bedingung).trim()) ? e.bedingung : '', bedingungVoll: typeof e.bedingung_voll === 'string' ? e.bedingung_voll : '', aussenbereich: e.aussenbereich || '',
       aussenWert: zahlOk(e.ausserbereich_wert) ? e.ausserbereich_wert : null, paragraf: e.paragraf || '', quellen: vfQuellen(e, vf),
       abruf: e.abruf || vf.abruf_std || '', status: e.status || vf.status_std || '', hinweis: e.hinweis || '', grund: e.luecke_grund || '',
       sonder: /au(ß|ss)enbereich/i.test(e.bauwerk || ''), ampel: 'grau', ursache: null, mass: null, anteil: null, rechnung: null
@@ -95,8 +115,9 @@
     if (e.status === 'Lücke' || e.art === undefined) { z.ursache = 'luecke'; return z; }
     switch (e.art) {
       case 'grenze':
-        if (!z.wert || (z.einheit !== 'm²' && z.einheit !== 'm³')) { z.ursache = 'einheit'; break; }
+        if (!z.wert || (z.einheit !== 'm²' && z.einheit !== 'm³' && !(z.einheit === 'm' && a.hoeheMass))) { z.ursache = 'einheit'; break; }
         if (z.einheit === 'm²') { z.mass = flaeche; z.rechnung = { typ: 'flaeche', flaeche: flaeche }; }
+        else if (z.einheit === 'm') { z.mass = hoehe; z.rechnung = { typ: 'hoehe', hoehe: hoehe }; }
         else { z.mass = flaeche * hoehe; z.rechnung = { typ: 'volumen', flaeche: flaeche, hoehe: hoehe }; }
         z.anteil = z.mass / z.wert;
         z.ampel = z.mass > z.wert ? 'rot' : (z.mass >= ANNAHMEN.gelbAb * z.wert ? 'gelb' : 'gruen');
@@ -109,24 +130,28 @@
     }
     /* Eintrag nur für „unbeheizt“: sagt nichts über den beheizten Wintergarten (grau) */
     if (a.beheizt && /unbeheizt/i.test(z.bedingung) && z.ampel !== 'grau') { z.ampelOhneBeheizt = z.ampel; z.ampel = 'grau'; z.ursache = 'nurUnbeheizt'; }
+    /* Welle E, Teil 1: Bedingungen, die die Ampel nicht tragen können (Betrieb, Baugebiet): grau statt falsch grün */
+    var bed = z.bedingungVoll || z.bedingung;
+    if (a.betriebGrau && z.ampel !== 'grau' && /betrieb|landwirtschaft|^nur\b/i.test(bed)) { z.ampelOhneBedingung = z.ampel; z.ampel = 'grau'; z.ursache = 'nurBetrieb'; z.sonder = true; }
+    if (a.gebietGrau && z.ampel !== 'grau' && /^(nur|nicht|außer)\b/i.test(bed)) { z.ampelOhneBedingung = z.ampel; z.ampel = 'grau'; z.ursache = 'bedingt'; }
     return z;
   }
   function verfahrensfrei(artId, land, flaeche, hoehe) {
-    var a = artInfo(artId), vf = VF();
+    var a = artInfo(artId) || aussenInfo(artId), vf = VF();
     if (!a || !zahlOk(flaeche)) return { ok: false, grund: 'eingabe' };
     if (!vf || !vf.laender) return { ok: false, grund: 'keineDaten' };
     var l = vf.laender[land];
     if (!l) return { ok: false, grund: 'keinLand' };
     hoehe = zahlOk(hoehe) ? hoehe : ANNAHMEN.hoehe;
     var res = { ok: true, art: a.id, land: land, landName: landName(land), flaeche: flaeche, hoehe: hoehe, zeilen: [], summe: { ampel: 'grau', mehrere: false, ursache: 'keinBaustein' }, brauchtHoehe: false, gefunden: [] };
-    if (a.wohnraum) return res;     /* kein Baustein in den Daten: nur „Bauaufsicht fragen“ */
+    if (a.wohnraum || a.keinBaustein) return res;     /* kein Baustein in den Daten: nur „Bauaufsicht fragen“ */
     var alle = [];
     a.baustein.forEach(function (b) { (l.strukturen[b] || []).forEach(function (e) { alle.push(Object.assign({ baustein: b }, e)); }); });
     res.gefunden = alle.filter(function (e) { return e.bauwerk; }).map(function (e) { return e.bauwerk; });
     var treffer = alle.filter(function (e) { return !a.passt || !e.bauwerk || a.passt.test(e.bauwerk); });
     if (!treffer.length) { res.summe = { ampel: 'grau', mehrere: false, ursache: 'nichtGenannt' }; return res; }
     res.zeilen = treffer.map(function (e) { return bewerte(e, a, flaeche, hoehe, vf); });
-    res.brauchtHoehe = res.zeilen.some(function (z) { return z.art === 'grenze' && z.einheit === 'm³'; });
+    res.brauchtHoehe = res.zeilen.some(function (z) { return z.art === 'grenze' && (z.einheit === 'm³' || (z.einheit === 'm' && a.hoeheMass)); });
     var haupt = res.zeilen.filter(function (z) { return !z.sonder; });
     if (!haupt.length) haupt = res.zeilen;
     var schlimm = haupt[0];
@@ -164,7 +189,7 @@
   }
 
   var API = {
-    ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, RANG: RANG, FLAECHE_MIN: FLAECHE_MIN, FLAECHE_MAX: FLAECHE_MAX, HOEHE_MIN: HOEHE_MIN, HOEHE_MAX: HOEHE_MAX,
+    ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, AUSSEN: AUSSEN, aussenInfo: aussenInfo, RANG: RANG, FLAECHE_MIN: FLAECHE_MIN, FLAECHE_MAX: FLAECHE_MAX, HOEHE_MIN: HOEHE_MIN, HOEHE_MAX: HOEHE_MAX,
     artInfo: artInfo, planAnbau: planAnbau, planLand: planLand, kosten: kosten, verfahrensfrei: verfahrensfrei, abstand: abstand, sachsen: sachsen, rechne: rechne
   };
   root.ANBAU_KERN = API;

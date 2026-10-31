@@ -192,6 +192,23 @@
       if (typeof ab0.hoehe_m === 'number' && isFinite(ab0.hoehe_m) && ab0.hoehe_m > 0) ab.hoehe_m = klemme(ab0.hoehe_m, 1, 10);
       if (Object.keys(ab).length) neu.anbau = ab;
     }
+    /* Welle E, Teil 1: plan.grundstueck = { breite_m, tiefe_m, haus_x_m, haus_y_m } und plan.aussen = [ { id, art, x_m, y_m, breite_m, tiefe_m, hoehe_m } ], beide optional.
+       Nur endliche Zahlen und gültig geformte Ids; eine unbekannte art bleibt stehen, die Karte meldet sie (GRUNDSTUECK_KERN); Werte außerhalb des Grundstücks schiebt der Kern an den Rand. */
+    if (p.grundstueck && typeof p.grundstueck === 'object' && !Array.isArray(p.grundstueck)) {
+      var gs0 = p.grundstueck, gs = {};
+      ['breite_m', 'tiefe_m', 'haus_x_m', 'haus_y_m'].forEach(function (k) { if (typeof gs0[k] === 'number' && isFinite(gs0[k])) gs[k] = klemme(gs0[k], k.indexOf('haus') === 0 ? -1000 : 1, 1000); });
+      if (Object.keys(gs).length) neu.grundstueck = gs;
+    }
+    if (Array.isArray(p.aussen)) {
+      var au = [];
+      p.aussen.slice(0, 80).forEach(function (a0) {
+        if (!a0 || typeof a0 !== 'object' || !idOk(a0.art)) return;
+        var a = { id: typeof a0.id === 'string' && /^[a-z0-9_]{1,12}$/.test(a0.id) ? a0.id : 'a' + (au.length + 1), art: a0.art };
+        ['x_m', 'y_m', 'breite_m', 'tiefe_m', 'hoehe_m'].forEach(function (k) { if (typeof a0[k] === 'number' && isFinite(a0[k])) a[k] = klemme(a0[k], -1000, 1000); });
+        au.push(a);
+      });
+      if (au.length) neu.aussen = au;
+    }
     neu.preise = {}; neu.mengen = {};
     Object.keys(p.preise || {}).forEach(function (k) { var v = Number(p.preise[k]); if (isFinite(v) && v >= 0) neu.preise[k] = v; });
     Object.keys(p.mengen || {}).forEach(function (k) { var v = Number(p.mengen[k]); if (isFinite(v) && v >= 0) neu.mengen[k] = v; });
@@ -249,6 +266,7 @@
     if (window.GRUNDRISS_AUSBAU) window.GRUNDRISS_AUSBAU.aktualisieren();   /* Welle D, Teil 2a: Innenausbau, Material und Umbau-Hinweis */
     if (window.GRUNDRISS_HUELLE) window.GRUNDRISS_HUELLE.aktualisieren();   /* Welle D, Teil 2b: Dämmstandard, Lüftung, Wasser */
     if (window.GRUNDRISS_ANBAU) window.GRUNDRISS_ANBAU.aktualisieren();     /* Welle D, Teil 3: Anbau */
+    if (window.GRUNDRISS_GRUNDSTUECK) window.GRUNDRISS_GRUNDSTUECK.aktualisieren();   /* Welle E, Teil 1: Grundstück */
     clearTimeout(speicherTimer);
     speicherTimer = setTimeout(function () {
       try {

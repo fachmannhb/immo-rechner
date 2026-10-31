@@ -184,7 +184,10 @@ def kuerzen(s, n):
     return s[:n].rsplit(' ', 1)[0].rstrip(' ,;:.') + ' …'
 
 
-def schlank_eintrag(e):
+VOLL_BEDINGUNG = None   # None = bei allen Bausteinen steht die ganze Bedingung zusätzlich im Feld bedingung_voll (Karten Anbau und Grundstück zeigen sie aufklappbar); sonst Tupel der Bausteine
+
+
+def schlank_eintrag(e, st=None):
     o = collections.OrderedDict()
     if e['status'] != 'geprüft':     # "geprüft" ist der Standard (status_std)
         o['status'] = e['status']
@@ -201,6 +204,8 @@ def schlank_eintrag(e):
             o['wert_roh'] = kuerzen(e['wert_roh'], 60)
         if e.get('bedingung'):
             o['bedingung'] = kuerzen(e['bedingung'], 30)
+            if (VOLL_BEDINGUNG is None or st in VOLL_BEDINGUNG) and o['bedingung'] != e['bedingung']:
+                o['bedingung_voll'] = e['bedingung']
         for k in ('aussenbereich', 'ausserbereich_wert', 'mehrere_bauwerke'):
             if e.get(k) not in (None, False):
                 o[k] = e[k]
@@ -226,7 +231,7 @@ def schlank_bauen(obj):
         (k, collections.OrderedDict([(a, (kuerzen(b, 45) if a == 'titel' else b)) for a, b in v.items()])) for k, v in obj['quellen'].items())
     s['laender'] = collections.OrderedDict(
         (c, collections.OrderedDict([('name', l['name']),
-                                     ('strukturen', collections.OrderedDict((st, [schlank_eintrag(e) for e in lst]) for st, lst in l['strukturen'].items()))]))
+                                     ('strukturen', collections.OrderedDict((st, [schlank_eintrag(e, st) for e in lst]) for st, lst in l['strukturen'].items()))]))
         for c, l in obj['laender'].items())
     return s
 

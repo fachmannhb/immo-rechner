@@ -124,6 +124,7 @@
   }
   function massText(z) {
     var r = z.rechnung, p = n0(Math.round(z.anteil * 100));
+    if (r.typ === 'hoehe') return tr('anMassHoehe', { h: nz(r.hoehe), wert: nz(z.wert), p: p });
     return r.typ === 'volumen' ? tr('anMassVolumen', { fl: nz(r.flaeche), h: nz(r.hoehe), v: nz(Math.round(z.mass * 10) / 10), wert: nz(z.wert), p: p }) : tr('anMassFlaeche', { fl: nz(r.flaeche), wert: nz(z.wert), p: p });
   }
   function zeileHtml(z) {
@@ -148,7 +149,8 @@
     if (z.aussenbereich === 'nicht_im_aussenbereich') h += '<p class="klein" data-an-aussen="nicht">' + esc(tr('anAussenNicht')) + '</p>';
     if (z.aussenbereich === 'nur_innenbereich') h += '<p class="klein" data-an-aussen="nur">' + esc(tr('anAussenNur')) + '</p>';
     if (z.aussenWert != null) h += '<p class="klein es-zahl" data-an-aussen-wert="' + z.aussenWert + '">' + esc(tr('anAussenWert', { wert: nz(z.aussenWert), einheit: z.einheit })) + '</p>';
-    if (z.bedingung) h += '<p class="klein" data-an-bedingung="1">' + esc(tr('anBedingung', { text: z.bedingung })) + '</p>';
+    if (z.bedingungVoll) h += '<details class="an-bed" data-an-bedingung="voll"><summary>' + esc(tr('anBedingungGanz')) + '</summary><p class="klein">' + esc(z.bedingungVoll) + '</p></details>';
+    else if (z.bedingung) h += '<p class="klein" data-an-bedingung="1">' + esc(tr('anBedingung', { text: z.bedingung })) + '</p>';
     h += '<p class="klein" data-an-fundstelle="1">' + (z.paragraf ? esc(tr('anFundstelle', { p: z.paragraf })) + ' · ' : '') + z.quellen.map(function (q) {
       return quelleHtml({ id: q.id, quelle: q.titel, url: q.url, abruf: z.abruf, status: z.status });
     }).join(' ') + '</p>';
@@ -181,12 +183,13 @@
   function kopf(c) {
     var el = byId('g-anbau-kopfzeile');
     if (!el) return;
-    if (c.leer) { el.textContent = tr('anKopfLeer'); return; }
+    if (c.leer) { el.textContent = tr('anKopfLeer'); el.setAttribute('data-leer', '1'); return; }
+    el.removeAttribute('data-leer');
     el.textContent = tr('anKopf', { art: tr('anArt_' + c.pa.art), fl: nz(c.pa.flaeche), ampel: tr('anA_' + (c.vf && c.vf.ok ? c.vf.summe.ampel : 'grau')) });
   }
 
   /* Zusammenspiel */
-  var timer = null, teilweise = false;
+  var timer = null, teilweise = false, scrollNach = false;
   function jetzt(nurErgebnis) {
     clearTimeout(timer);
     var c;
@@ -199,6 +202,11 @@
         ersatz('an-steuer', steuerHtml); ersatz('an-ergebnis', ergebnisHtml);
       }
       kopf(c);
+      if (scrollNach) {   /* schmaler Bildschirm: nach der Wahl zum Ergebnis, ohne Animation; der Fokus bleibt auf dem Knopf */
+        scrollNach = false;
+        var erg = byId('an-ergebnis');
+        if (erg && !c.leer && window.matchMedia && window.matchMedia('(max-width: 760px)').matches) erg.scrollIntoView({ block: 'start', behavior: 'auto' });
+      }
     } catch (e2) { meldeFehler('g-anbau-fehler', tr('anFehlerRechnen', { grund: e2 && e2.message ? e2.message : e2 })); }
     teilweise = false;
   }
@@ -258,7 +266,7 @@
     if (!t || t.tagName === 'INPUT') return;
     var a = t.getAttribute('data-an'), w = t.getAttribute('data-wert');
     if (a === 'hilfe') { var id = t.getAttribute('aria-controls'), p = byId(id), auf = t.getAttribute('aria-expanded') !== 'true'; t.setAttribute('aria-expanded', auf ? 'true' : 'false'); hilfeOffen[id] = auf; if (p) p.hidden = !auf; return; }
-    if (a === 'art') planFeld('art', w);
+    if (a === 'art') { scrollNach = true; planFeld('art', w); }
   }
 
   /* ---------- Einhängen ---------- */
@@ -268,6 +276,9 @@
   if (det) det.addEventListener('toggle', function () { if (det.open) jetzt(); });
   window.addEventListener('sprachegewechselt', function () { jetzt(); });
 
-  window.GRUNDRISS_ANBAU = { aktualisieren: aktualisieren, jetzt: jetzt, ergebnis: function () { return ctx; } };
+  /* werkzeug: dieselben Bausteine für die Karte Grundstück (Welle E, Teil 1), damit Ampel, Sätze und Quellen nur einmal gebaut werden */
+  window.GRUNDRISS_ANBAU = { aktualisieren: aktualisieren, jetzt: jetzt, ergebnis: function () { return ctx; },
+    werkzeug: { zeileHtml: zeileHtml, satzFuer: satzFuer, quelleHtml: quelleHtml, ampelChip: ampelChip, badge: badge, symbol: symbol, esc: esc, n0: n0, n1: n1, nz: nz, lang: lang, luecke: luecke,
+      annahmeSchild: annahmeSchild, mitFokus: mitFokus, zahlLesen: zahlLesen, meldeFehler: meldeFehler, tr: tr } };
   setTimeout(function () { jetzt(); }, 0);
 })();

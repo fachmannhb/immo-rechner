@@ -1401,7 +1401,7 @@
     mappe: { bereich: 'rechner', titel: 'Bank-Mappe: Zahlen zur Finanzierung', formSel: null, dl: 'mp-teilen', eingaben: [],
       zusatz: 'Nur die Zahlen der Mappe, ohne Notizen und ohne Besichtigung.', linkText: 'Zum Selbstrechnen (öffnet den leeren Rechner):' },
     grundriss: { bereich: 'grundriss', titel: 'Grundriss und Einrichtung', formSel: null, satz: 'g-satz', eingaben: [],
-      ergebnis: [['Wohnfläche', 'g-wfl'], ['Nutzfläche', 'g-nfl'], ['Einrichtung', 'g-einr'], ['Umbau', 'g-umb'], ['Innenausbau (Karte)', 'g-ausbau-kopfzeile'], ['Heizwärme (Karte Material)', 'g-material-kopfzeile'], ['Anbau (Karte)', 'g-anbau-kopfzeile']],
+      ergebnis: [['Wohnfläche', 'g-wfl'], ['Nutzfläche', 'g-nfl'], ['Einrichtung', 'g-einr'], ['Umbau', 'g-umb'], ['Innenausbau (Karte)', 'g-ausbau-kopfzeile'], ['Heizwärme (Karte Material)', 'g-material-kopfzeile'], ['Anbau (Karte)', 'g-anbau-kopfzeile'], ['Grundstück (Karte)', 'g-grund-kopfzeile']],
       zusatz: 'Der gezeichnete Grundriss selbst steckt nicht im Link.' },
     monteur: { bereich: 'monteur', titel: 'Monteurzimmer: Rechnet es sich?', formSel: '#monteur input[type="text"], #monteur input[type="range"]', dl: 'mz-ergebnis',
       eingaben: ['mz-betten', 'mz-preis', 'mz-beleg', 'mz-fix', 'mz-var', 'mz-abgabe'] },
@@ -1467,7 +1467,7 @@
       return v === '' ? null : [TEILEN_LABEL[id] || labelVon(id), v];
     }).filter(Boolean);
     if (ein.length) { zeilen.push('Eingaben:'); ein.forEach(function (p) { zeilen.push('- ' + p[0] + ': ' + p[1]); }); zeilen.push(''); }
-    var erg = cfg.dl ? dlPaare(cfg.dl) : cfg.ergebnis.map(function (p) { return [p[0], ergebnisText(p[1])]; }).filter(function (p) { return p[1] !== '-' && p[1] !== ''; });
+    var erg = cfg.dl ? dlPaare(cfg.dl) : cfg.ergebnis.filter(function (p) { return $(p[1]).getAttribute('data-leer') !== '1'; }).map(function (p) { return [p[0], ergebnisText(p[1])]; }).filter(function (p) { return p[1] !== '-' && p[1] !== ''; });
     if (erg.length) { zeilen.push('Ergebnisse:'); erg.forEach(function (p) { zeilen.push('- ' + p[0] + ': ' + p[1]); }); zeilen.push(''); }
     if (cfg.hinweisId && $(cfg.hinweisId).textContent.trim()) zeilen.push($(cfg.hinweisId).textContent.trim());
     if (cfg.zusatz) zeilen.push(cfg.zusatz);
