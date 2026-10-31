@@ -1040,6 +1040,14 @@ __PALETTE_CSS__
   .mh-tab .summe th, .mh-tab .summe td { font-weight: 800; border-top: 2px solid var(--text); }
   .mh-tab .klein { display: block; font-size: 14px; color: var(--leise); }
   .mh-luecke { font-weight: 700; }
+  .mh-tab .mh-aus td { color: var(--leise); }
+  .mh-tab .mh-aus .z span.mh-wert { text-decoration: line-through; }
+  .mh-tab .mh-enth { display: block; font-size: 14px; font-weight: 700; color: var(--text); }
+  .mh-tab .etage-summe th, .mh-tab .etage-summe td { font-weight: 700; background: var(--karte2); }
+  .mh-foerd { margin: 6px 0; }
+  .mh-foerd .klein { display: block; font-size: 14px; color: var(--leise); }
+  .mh-neu-hinweis { display: block; margin: 8px 0 0; padding: 6px 12px; border: 2px solid var(--akzent); border-radius: 10px; background: var(--akzent-flaeche); font-weight: 700; max-width: 34em; }
+  @media (prefers-reduced-motion: no-preference) { .mh-knopf.mh-puls { animation: gs-puls 1.6s ease-in-out 3; } }
   .mh-dl { display: grid; grid-template-columns: minmax(140px, 28%) 1fr; gap: 4px 14px; margin: 0; }
   .mh-dl dt { font-weight: 700; }
   .mh-dl dd { margin: 0; }
@@ -2905,6 +2913,7 @@ __PALETTE_CSS__
       <button type="button" class="knopf mh-knopf" id="g-mappe-auf"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-grundriss"/></svg><span data-t="mpTitel">Mappe für den Hausbauer</span></button>
       <button type="button" class="knopf zweit mh-knopf" id="g-mappe-plandatei"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-pfeil-ab"/></svg><span data-t="mpPlandatei">Plandatei sichern</span></button>
     </div>
+    <p class="mh-neu-hinweis" id="g-mappe-hinweis" data-t="mpHinweisNeu" hidden></p>
     <div class="meldung" id="g-mappe-status" role="status" aria-live="polite"></div>
     <p class="fehler" id="g-mappe-fehler" role="alert" hidden></p>
   </div>

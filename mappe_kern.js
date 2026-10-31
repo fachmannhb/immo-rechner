@@ -32,9 +32,44 @@
     return out;
   }
 
-  /* Kosten: Innenausbau, Material, Dämm-Mehrkosten, Lüftung einmalig, Anbau wie in den Karten */
+  /* Zuordnung (M2): welche Zeile welche Leistung abdeckt. „zaehlt“ ist die Zeile mit der umfassenderen Basis (inklusive Einbau/Arbeit) und zählt in die Summe; die Zeilen
+     in „deckt“ bleiben sichtbar, zählen aber nicht (Vermerk „schon in … enthalten“). Nur wenn die zählende Zeile einen Preis hat. sicher=false: Überschneidung nicht sicher
+     aufzulösen -> beide gezeigt, keine doppelt in der Summe, dazu eine Frage an den Bauunternehmer. Schlüssel: Gruppe/Id; „daemmung/wand“ und „daemmung/fenster“ sind Teile der Dämm-Zeile. */
+  var ZUORDNUNG = [
+    { id: 'boden', zaehlt: 'innenausbau/boden', deckt: ['material/boden'], sicher: true },
+    { id: 'wanddaemmung', zaehlt: 'daemmung/wand', deckt: ['material/daemmung'], sicher: false },
+    { id: 'fenster', zaehlt: 'daemmung/fenster', deckt: ['material/fenster', 'material/verglasung'], sicher: false }
+  ];
+  var SUMMEN_GRUPPEN = { innenausbau: 1, material: 1, daemmung: 1, lueftung: 1, anbau: 1 };
+  function preisig(x) { return !!x && ((ok(x.von) && x.von > 0) || (ok(x.bis) && x.bis > 0)); }
+  function abschlussMit(z, lu, fe, ex) {
+    var idx = {}, ue = [], roh = { von: 0, bis: 0 }, sum = { von: 0, bis: 0 }, weg = {};
+    z.forEach(function (r) {
+      idx[r.gruppe + '/' + r.id] = r;
+      if (r.gruppe === 'daemmung') (r.teile || []).forEach(function (t) { idx['daemmung/' + t.bauteil] = t; });
+    });
+    ZUORDNUNG.forEach(function (u) {
+      if (!preisig(idx[u.zaehlt])) return;
+      var da = u.deckt.filter(function (k) { return idx[k] && !idx[k].teile; });
+      if (!da.length) return;
+      da.forEach(function (k) { idx[k].inSumme = false; idx[k].enthaltenIn = u.zaehlt; idx[k].sicher = u.sicher; weg['k:' + k.replace('/', ':')] = 1; });
+      ue.push({ id: u.id, zaehlt: u.zaehlt, deckt: da, sicher: u.sicher });
+    });
+    z.forEach(function (r) {
+      if (!SUMMEN_GRUPPEN[r.gruppe]) return;
+      if (ok(r.von)) roh.von += r.von;
+      if (ok(r.bis)) roh.bis += r.bis;
+      if (r.inSumme === false) return;
+      if (ok(r.von)) sum.von += r.von;
+      if (ok(r.bis)) sum.bis += r.bis;
+    });
+    return { zeilen: z, summe: sum, summeRoh: roh, ueberlappungen: ue, luecken: lu.filter(function (l) { return !weg[l.id]; }), fehler: fe, heiz: ex.heiz, foerderung: ex.foerderung };
+  }
+
+  /* Kosten: Innenausbau, Material, Dämm-Mehrkosten, Lüftung einmalig, Anbau wie in den Karten; jede Leistung genau einmal in der Summe (ZUORDNUNG) */
   function kostenBlock(plan, opt, B) {
-    var K = root.AUSBAU_KERN, HK = root.HUELLE_KERN, z = [], lu = [], fe = [], von = 0, bis = 0;
+    var K = root.AUSBAU_KERN, HK = root.HUELLE_KERN, z = [], lu = [], fe = [], ex = { heiz: null, foerderung: [] };
+    function abschluss(a, b, c) { return abschlussMit(a, b, c, ex); }
     var pm = K.planMaterial(plan), mg = K.mengenAusPlan(plan), stufe = opt.stufe === 0 || opt.stufe === 2 ? opt.stufe : 1;
     if (mg.ok) {
       B.mg = mg;
@@ -45,10 +80,9 @@
           belege: belege(g.positionen.filter(function (p) { return !p.luecke; }).map(function (p) { return { quelleTitel: p.quelleTitel, url: p.url, abruf: p.abruf, status: p.status }; })) });
         g.positionen.forEach(function (p) { if (p.luecke) lu.push({ id: 'k:innenausbau:' + p.id, key: 'mLuecke', par: { name: p.name } }); });
       });
-      von += ik.von; bis += ik.bis;
     } else fe.push({ teil: 'innenausbau', grund: mg.fehler || '?' });
     var hb = K.hausBilanz(plan);
-    if (!hb.ok) { fe.push({ teil: 'material', grund: hb.fehler || '?' }); return { zeilen: z, summe: { von: von, bis: bis }, luecken: lu, fehler: fe }; }
+    if (!hb.ok) { fe.push({ teil: 'material', grund: hb.fehler || '?' }); return abschluss(z, lu, fe); }
     K.BAUTEILE_PLAN.forEach(function (bt) {
       var kz = hb.kosten.bauteile[bt], mi = K.matInfo(hb.wahl[bt]);
       if (!kz || kz.keine) return;
@@ -56,30 +90,34 @@
       z.push({ gruppe: 'material', id: bt, material: m, von: ok(kz.von) ? kz.von : null, bis: ok(kz.bis) ? kz.bis : null, luecke: l, belege: kz.preis ? belege([kz.preis.beleg]) : [] });
       if (l) lu.push({ id: 'k:material:' + bt, key: 'mLuecke', par: { bauteil: bt, material: m } });
     });
-    von += hb.kosten.von; bis += hb.kosten.bis;
     /* Dämmstandard und Lüftung: gleiche Argumente wie in grundriss_huelle.js */
     var ps = HK.planStandard(plan), pl = HK.planLueftung(plan);
     var hw = HK.heizwaermeMitStandard(plan, { bilanz: hb, standard: ps.id, lueftungsart: pl.art });
     var mf = HK.mehrkostenUndFoerderung(plan, ps.id, { heizwaerme: hw }), mk = mf.mehrkosten, ml = mk && mk.luecken && mk.luecken.length;
     if (mk && (mk.von > 0 || mk.bis > 0 || ml)) {
-      z.push({ gruppe: 'daemmung', id: ps.id, von: mk.von, bis: mk.bis, luecke: !!ml, belege: belege((mk.teile || []).map(function (t) { return t.beleg; }).concat([mk.beleg])) });
+      z.push({ gruppe: 'daemmung', id: ps.id, von: mk.von, bis: mk.bis, luecke: !!ml, belege: belege((mk.teile || []).map(function (t) { return t.beleg; }).concat([mk.beleg])),
+        teile: (mk.teile || []).map(function (t) { return { bauteil: t.bauteil, von: t.von, bis: t.bis }; }) });
       if (ml) lu.push({ id: 'k:daemmung:' + ps.id, key: 'mLuecke', par: { standard: ps.id } });
-      von += mk.von; bis += mk.bis;
     }
     var lk = HK.lueftungKosten(plan, pl.art, { neubau: pl.neubau, mengen: hb.mengen });   /* Einmalkosten hängen nicht vom Strompreis ab */
     if (lk.ok && pl.art !== 'keine') {
       z.push({ gruppe: 'lueftung', id: pl.art, von: lk.einmalig.von, bis: lk.einmalig.bis, luecke: false, belege: belege(lk.belege) });
-      von += lk.einmalig.von; bis += lk.einmalig.bis;
     }
+    /* Heizwärme (nur Anzeige, keine Kosten) und Förderung (möglicher Zuschuss, wird nirgends abgezogen): gleiche Aufrufe wie die Hülle-Karte */
+    if (hw && hw.ok && hw.gesamt && hw.transmission && hw.lueftung) {
+      ex.heiz = { kwhM2: hw.gesamt.kwhM2, lo: hw.gesamt.kwhM2Lo, hi: hw.gesamt.kwhM2Hi, trans: hw.transmission.kwhM2, lueft: hw.lueftung.kwhM2, kwh: hw.gesamt.kwh, wohn: hw.wohnflaeche, standard: ps.id,
+        belege: belege([hw.gradtage ? { titel: hw.gradtage.station + ' · ' + hw.gradtage.quelle, abruf: hw.gradtage.abruf, status: hw.gradtage.status } : null]) };
+    }
+    if (mf.foerderung && mf.foerderung.art !== 'keine') ex.foerderung.push({ quelle: 'daemmung', art: mf.foerderung.art, von: mf.foerderung.von, bis: mf.foerderung.bis, stufe: mf.foerderung.stufe || null, neubau: !!mf.neubau, belege: belege(mf.foerderung.belege) });
+    if (lk.ok && pl.art !== 'keine' && lk.foerderung && lk.foerderung.art === 'beg') ex.foerderung.push({ quelle: 'lueftung', art: 'beg', von: lk.foerderung.von, bis: lk.foerderung.bis, stufe: null, neubau: false, belege: belege(lk.foerderung.belege || lk.belege) });
     var ac = B.ac;
     if (!ac.leer) {
       if (ac.kosten && ac.kosten.ok) {
         z.push({ gruppe: 'anbau', id: ac.pa.art, von: ac.kosten.von, bis: ac.kosten.bis, luecke: false, belege: belege([ac.kosten.beleg]) });
-        von += ac.kosten.von; bis += ac.kosten.bis;
         if (ac.kosten.gmodgLuecke) lu.push({ id: 'gmodg', key: 'mLueckeGmodg', par: { art: ac.pa.art } });
       } else lu.push({ id: 'k:anbau:' + ac.pa.art, key: 'mLuecke', par: { art: ac.pa.art } });
     }
-    return { zeilen: z, summe: { von: von, bis: bis }, luecken: lu, fehler: fe };
+    return abschluss(z, lu, fe);
   }
 
   function sammle(plan, optionen) {
@@ -93,8 +131,8 @@
     m.ok = true;
     var B = { ac: AK.rechne(plan) }, pm = K.planMaterial(plan), ps = HK.planStandard(plan), pl = HK.planLueftung(plan), pw = HK.planWasser(plan), pa = AK.planAnbau(plan);
     var gc = GK.rechne(plan), plus = !!(plan.grundstueck || gc.items.length), kb;
-    try { kb = kostenBlock(plan, opt, B); } catch (e) { kb = { zeilen: [], summe: { von: 0, bis: 0 }, luecken: [], fehler: [{ teil: 'kosten', grund: e && e.message ? e.message : '?' }] }; }
-    m.kosten = kb; m.fehler = m.fehler.concat(kb.fehler); m.luecken = kb.luecken.slice();
+    try { kb = kostenBlock(plan, opt, B); } catch (e) { kb = { zeilen: [], summe: { von: 0, bis: 0 }, summeRoh: { von: 0, bis: 0 }, ueberlappungen: [], heiz: null, foerderung: [], luecken: [], fehler: [{ teil: 'kosten', grund: e && e.message ? e.message : '?' }] }; }
+    m.kosten = kb; m.fehler = m.fehler.concat(kb.fehler); m.luecken = kb.luecken.slice(); m.ueberlappungen = kb.ueberlappungen;
     m.ausbau = {
       stufe: opt.stufe === 0 || opt.stufe === 2 ? opt.stufe : 1, altbelag: !!opt.altbelag, putz: !!opt.putz,
       material: K.BAUTEILE_PLAN.map(function (bt) { var mi = K.matInfo(pm.wahl[bt]); return { bauteil: bt, id: pm.wahl[bt], name: mi ? mi.name : '', explizit: !!pm.explizit[bt] }; }),
@@ -152,6 +190,7 @@
     var out = [], seen = {};
     function dazu(f) { var k = f.typ + '|' + f.id; if (!seen[k]) { seen[k] = 1; out.push(f); } }
     (s.luecken || []).forEach(function (l) { dazu({ typ: 'luecke', id: l.id, key: 'mFrageLuecke', par: { l: l } }); });
+    (s.ueberlappungen || []).forEach(function (u) { if (!u.sicher) dazu({ typ: 'ueberlappung', id: 'ue:' + u.id, key: 'mFrageUeber', par: { leistung: u.id } }); });
     (s.ampeln || []).forEach(function (a) {
       if (a.ampel === 'gelb' || a.ampel === 'rot' || a.ampel === 'grau') dazu({ typ: 'ampel', id: a.id, key: 'mFrageAmpel', par: { name: a.name || '', art: a.art || '', quelle: a.quelle || '', ampel: a.ampel } });
     });
@@ -160,6 +199,6 @@
     return out;
   }
 
-  root.MAPPE_KERN = { FESTE: FESTE, sammle: sammle, fragen: fragen, raumliste: raumliste, heuteLokal: heuteLokal };
+  root.MAPPE_KERN = { FESTE: FESTE, ZUORDNUNG: ZUORDNUNG,sammle: sammle, fragen: fragen, raumliste: raumliste, heuteLokal: heuteLokal };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.MAPPE_KERN;
 })(typeof window !== 'undefined' ? window : globalThis);

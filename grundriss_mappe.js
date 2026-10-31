@@ -39,6 +39,7 @@
     if (f.typ === 'fest') return tr(f.key);
     if (f.typ === 'luecke') return tr(f.key, { was: sach(p.l) });
     if (f.typ === 'annahme') return tr(f.key, { an: annahmeText({ id: f.id, par: p.ap }) });
+    if (f.typ === 'ueberlappung') return tr(f.key, { leistung: tr('mpUe_' + p.leistung) });
     return tr(f.key, { name: p.name || (p.quelle === 'regel' ? tr('mpRegelHaus') : artName(p.art)), farbe: p.quelle === 'regel' ? tr('ampel' + cap(p.ampel)) : tr('anA_' + p.ampel) });
   }
   var chip = function (a, wort) { return '<span class="fm-ampel ' + (a === 'grau' ? 'offen' : a) + '" data-ampel="' + a + '"><i aria-hidden="true">' + { gruen: '✓', gelb: '!', rot: '✕', grau: '?' }[a] + '</i>' + esc(wort) + '</span>'; };
@@ -72,9 +73,15 @@
   }
   function raumliste(m) {
     var r = m.raeume, f = function (x) { return '<td class="z">' + n1(x) + ' m²</td>'; };
-    var h = r.zeilen.map(function (z) {
+    var mehr = r.etagen.filter(function (e) { return e.raeume > 0; }).length > 1;   /* Teilsummen nur, wenn mehr als eine Etage Räume hat */
+    var etSumme = function (i) {
+      var e = r.etagen[i];
+      return mehr && e && e.raeume > 0 ? '<tr class="etage-summe" data-etage-summe="' + i + '" data-grund="' + e.grund + '" data-wohn="' + e.wohn + '"><th colspan="3">' + T('mpEtageSumme', { etage: e.name }) + '</th>' + f(e.grund) + f(e.wohn) + '</tr>' : '';
+    };
+    var h = r.zeilen.map(function (z, i) {
+      var nxt = r.zeilen[i + 1], zu = !nxt || nxt.etageIndex !== z.etageIndex;
       return '<tr data-raum="' + esc(z.id) + '" data-wohn="' + z.wohn + '"><td>' + esc(z.etage) + '</td><td>' + esc(z.name) + '</td><td>' + (z.nutzung && hat('nutz' + cap(z.nutzung)) ? T('nutz' + cap(z.nutzung)) : '–') +
-        (z.art !== 'voll' ? ' (' + T(ART_KEY[z.art] || 'artVoll') + ')' : '') + '</td>' + f(z.flaeche) + f(z.wohn) + '</tr>';
+        (z.art !== 'voll' ? ' (' + T(ART_KEY[z.art] || 'artVoll') + ')' : '') + '</td>' + f(z.flaeche) + f(z.wohn) + '</tr>' + (zu ? etSumme(z.etageIndex) : '');
     }).join('') + '<tr class="summe" data-summe="raeume" data-grund="' + r.grund + '" data-wohn="' + r.wohn + '"><th colspan="3">' + T('druckSumme') + '</th>' + f(r.grund) + f(r.wohn) + '</tr>';
     return sect('raumliste', true, 'mpRaumliste', tab('<th>' + T('mpEtage') + '</th><th>' + T('druckRaum') + '</th><th>' + T('mpNutzung') + '</th><th class="z">' + T('druckGrund') + '</th><th class="z">' + T('druckWohn') + '</th>', h));
   }
@@ -101,11 +108,27 @@
       if (z.gruppe !== gruppe) { gruppe = z.gruppe; h += '<tr class="gruppe"><th colspan="3">' + T(gruppe === 'anbau' ? 'mpAnbau' : 'mpG_' + gruppe) + '</th></tr>'; }
       var name = z.gruppe === 'innenausbau' ? tr('abGew_' + z.id) : z.gruppe === 'material' ? tr('maBt_' + z.id) + (z.material ? ': ' + z.material : '') : z.gruppe === 'daemmung' ? tr('hdStd_' + z.id) : z.gruppe === 'lueftung' ? tr('hlArt_' + z.id) : z.gruppe === 'grundstueck' ? gsName(z.art, z.name) : artName(z.id);
       var leer = z.luecke && !(z.von > 0 || z.bis > 0), no = '<span class="mh-luecke">' + T('mpKeineAngabe') + '</span>';
-      h += '<tr data-k="' + z.gruppe + '/' + esc(z.id) + '"' + (leer ? ' data-luecke="1"' : ' data-von="' + z.von + '" data-bis="' + z.bis + '"') + '><td>' + esc(name) + '</td><td class="z">' + (leer ? no : esc(spanne(z.von, z.bis, z.einheit)) + (z.luecke ? '<span class="klein">+ ' + no + '</span>' : '')) + '</td><td>' + (leer ? '' : belege(z.belege)) + '</td></tr>';
+      var aus = z.inSumme === false, vermerk = aus ? '<span class="mh-enth" data-enthalten-in="' + esc(z.enthaltenIn) + '">' + T('mpEnthalten', { wo: tr('mpZ_' + z.enthaltenIn.replace('/', '_')) }) + (z.sicher ? '' : ' · ' + T('mpEnthaltenUnsicher')) + '</span>' : '';
+      h += '<tr data-k="' + z.gruppe + '/' + esc(z.id) + '"' + (aus ? ' class="mh-aus" data-nicht-summe="1"' : '') + (leer ? ' data-luecke="1"' : ' data-von="' + z.von + '" data-bis="' + z.bis + '"') + '><td>' + esc(name) + vermerk + '</td><td class="z">' +
+        (leer ? no : (aus ? '<span class="mh-wert">' : '') + esc(spanne(z.von, z.bis, z.einheit)) + (aus ? '</span>' : '') + (z.luecke ? '<span class="klein">+ ' + no + '</span>' : '')) + '</td><td>' + (leer ? '' : belege(z.belege)) + '</td></tr>';
     });
     if (!fertig) h += summe();
     return sect('kosten', true, 'mpKosten', tab('<th>' + T('mpPosition') + '</th><th class="z">' + T('maSpanne') + '</th><th>' + T('regQuelle') + '</th>', h, ' data-kosten="1"') +
-      (ohne ? '<p class="klein" data-ohne-preis="' + ohne + '">' + T('mpOhnePreis', { n: ohne }) + '</p>' : '') + '<p class="mh-hinweis">' + schild() + ' ' + T('mpUeberschneid') + '</p>');
+      (ohne ? '<p class="klein" data-ohne-preis="' + ohne + '">' + T('mpOhnePreis', { n: ohne }) + '</p>' : '') + heizwaerme(k.heiz) + foerderung(k.foerderung) + '<p class="mh-hinweis" data-ohne-doppelung="1">' + schild() + ' ' + T('mpUeberschneid') + '</p>');
+  }
+  var r100 = function (x) { return Math.round(x / 100) * 100; };
+  function heizwaerme(hz) {
+    if (!hz) return '';
+    return '<p class="mh-foerd" data-heiz="1" data-kwh-m2="' + hz.kwhM2 + '" data-lo="' + hz.lo + '" data-hi="' + hz.hi + '"><b>' + T('mpHeizKopf') + ':</b> ' + T('mpHeizText', { kwh: n0(hz.kwhM2), lo: n0(hz.lo), hi: n0(hz.hi), t: n0(hz.trans), v: n0(hz.lueft), std: tr('hdStd_' + hz.standard) }) + ' ' + schild() + belege(hz.belege) + '</p>';
+  }
+  function foerderung(liste) {
+    if (!liste || !liste.length) return '';
+    return '<div class="mh-foerd" data-foerderung="' + liste.length + '"><h4>' + T('mpFoerdKopf') + '</h4><ul class="mp-annahmen">' + liste.map(function (f) {
+      var beg = f.art === 'beg', zahl = beg || f.art === 'kfw261', rund = beg ? r100 : function (x) { return x; };
+      var text = zahl ? '<b data-foerd-von="' + f.von + '" data-foerd-bis="' + f.bis + '">' + esc(spanne(rund(f.von), rund(f.bis))) + '</b> ' + (f.art === 'kfw261' ? T('hdFoerdKfw', { stufe: 'EH ' + String(f.stufe).slice(2) }) : T(f.quelle === 'lueftung' ? 'hlFoerdBeg' : 'hdFoerdBeg')) :
+        f.art === 'beg_offen' ? T('mpFoerdOffen') : f.art === 'neubauKeine' ? T('hdFoerdNeubau') : T('mpFoerdKredit');
+      return '<li data-foerd="' + f.quelle + '" data-art="' + f.art + '"><b>' + T('mpFoerdQ_' + f.quelle) + ':</b> ' + text + belege(f.belege) + '<span class="klein">' + T('mpFoerdPruefen') + '</span></li>';
+    }).join('') + '</ul></div>';
   }
   function regeln(m) {
     var r = m.regeln, RG = window.GRUNDRISS_REGELN, s = r.summe, bau = [];
@@ -154,7 +177,13 @@
       window.OVERLAY_OEFFNEN('g-mappe-ov', '#g-mappe-auf', 'mh-h');
     }, 30);
   }
-  knopf.addEventListener('click', oeffnen);
+  /* Erstnutzer-Hinweis: kurzes Pulsieren des Knopfes und ein Satz, bis die Mappe einmal geöffnet wurde (Merker im Browser; geht der Speicher nicht, kommt der Hinweis wieder) */
+  var hinweis = $('g-mappe-hinweis'), MERKER = 'mappe_hinweis_gesehen';
+  try { if (hinweis && localStorage.getItem(MERKER) !== '1') { hinweis.hidden = false; knopf.classList.add('mh-puls'); knopf.setAttribute('aria-describedby', 'g-mappe-hinweis'); } } catch (eh) { if (hinweis) { hinweis.hidden = false; knopf.classList.add('mh-puls'); } }
+  knopf.addEventListener('click', function () {
+    if (hinweis && !hinweis.hidden) { hinweis.hidden = true; knopf.classList.remove('mh-puls'); try { localStorage.setItem(MERKER, '1'); } catch (es) { /* kein Speicher: Hinweis kommt beim nächsten Laden wieder */ } }
+    oeffnen();
+  });
   $('g-mappe-plandatei').addEventListener('click', function () {
     var ok = false;
     try { ok = G.dateiSichern(); } catch (e) { ok = false; }
