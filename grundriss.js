@@ -1698,6 +1698,7 @@
     var fit = { w: vb.w, h: vb.h };
     /* Maßstab: 180 mm breit, 150 mm hoch verfügbar; auf eine runde Zahl 1:N gerundet, Größe dann exakt */
     var verh = Math.max(fit.w * 1000 / 180, fit.h * 1000 / 150), N = nettoSkala(verh);
+    druckZustand.N = N;   /* für die Mappe (etagenBilder) */
     /* Beschriftungen in Papiergröße rechnen (1 Punkt = 0,2646 mm), dann neu zeichnen */
     skalaUeber = (0.2646 / 1000) * N;
     try { zeichnen(); } finally { skalaUeber = 0; }
@@ -1745,6 +1746,30 @@
   window.addEventListener('afterprint', druckAufraeumen);
   if ($('g-drucken')) $('g-drucken').addEventListener('click', drucken);
 
+  /* Mappe (M1): Plan jeder Etage mit Maßen als SVG-Text, mit der Druckvorbereitung von „Plan drucken“; die Etage wird nur vorübergehend gewechselt. */
+  function etagenBilder() {
+    var vorher = plan.aktiv, out = [];
+    try {
+      plan.etagen.forEach(function (e, i) {
+        if (!e.raeume.length) return;
+        plan.aktiv = i;
+        if (!druckVorbereiten()) return;
+        var n = druckZustand ? druckZustand.N : 0, kl = $('g-druck').querySelector('.planzeichnung');
+        if (kl) out.push({ name: e.name, index: i, hoehe: e.hoehe, massstab: n, svg: kl.outerHTML });
+        druckAufraeumen();
+      });
+    } finally {
+      plan.aktiv = vorher; druckAufraeumen();
+      if (sichtbar && !ansicht3d) zeichnen();
+    }
+    return out;
+  }
+  function dreiBilder(richtungen, w, h) {
+    if (!window.GRUNDRISS3D || !window.GRUNDRISS3D.fotos) return { fehler: 'webgl' };
+    nachfuehrenAlle();
+    return window.GRUNDRISS3D.fotos(plan, ART, richtungen, w, h);
+  }
+
   /* Sprache gewechselt: neue Texte in Seitenfeld, Statuszeile, Maßzahlen */
   window.addEventListener('sprachegewechselt', function () {
     if (!$('g-hinweis').hidden) $('g-hinweis-text').textContent = tr('hinweisWand');
@@ -1774,6 +1799,7 @@
     waende: function (e) { return GEO.waende(e || etage()); },
     nachfuehren: nachfuehrenAlle,
     druckVorbereiten: druckVorbereiten, druckAufraeumen: druckAufraeumen,
+    etagenBilder: etagenBilder, dreiBilder: dreiBilder, dateiSichern: function () { return dateiSichern(); },
     /* für Prüfskripte: Plan setzen, geprüft wie beim Datei-Import */
     setzePlan: function (p) { var n = pruefePlan(p); if (!n) return false; plan = n; gewaehlt = null; vb = null; speichern(); allesZeigen(); return true; }
   };

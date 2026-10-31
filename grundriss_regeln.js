@@ -368,6 +368,8 @@
   window.GRUNDRISS_REGELN = {
     raumPanel: raumPanel, zeichneFrei: zeichneFrei, aktualisieren: aktualisieren, jetzt: jetzt, landSetzen: landSetzen,
     ergebnis: function () { return letzte; }, freiAn: function () { return freiAn; },
+    /* Text einer Prüfzeile { code, par } wie in der Karte (für die Mappe für den Hausbauer) */
+    pruefText: function (it, land) { return itemText(it, land); },
     zuklappen: function () { offen = {}; signatur.regeln = ''; signatur.frei = ''; jetzt(); },
     /* für Prüfskripte: Stichtag setzen (z. B. '2027-01-01'; leer = heute) und neu zeigen */
     setzeDatum: function (d) { RK.setzeDatum(d); signatur = { regeln: '', frei: '', land: '' }; jetzt(); }

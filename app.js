@@ -1402,7 +1402,7 @@
       zusatz: 'Nur die Zahlen der Mappe, ohne Notizen und ohne Besichtigung.', linkText: 'Zum Selbstrechnen (öffnet den leeren Rechner):' },
     grundriss: { bereich: 'grundriss', titel: 'Grundriss und Einrichtung', formSel: null, satz: 'g-satz', eingaben: [],
       ergebnis: [['Wohnfläche', 'g-wfl'], ['Nutzfläche', 'g-nfl'], ['Einrichtung', 'g-einr'], ['Umbau', 'g-umb'], ['Innenausbau (Karte)', 'g-ausbau-kopfzeile'], ['Heizwärme (Karte Material)', 'g-material-kopfzeile'], ['Anbau (Karte)', 'g-anbau-kopfzeile'], ['Grundstück (Karte)', 'g-grund-kopfzeile']],
-      zusatz: 'Der gezeichnete Grundriss selbst steckt nicht im Link.' },
+      zusatz: 'Der gezeichnete Grundriss selbst steckt nicht im Link. Für den Hausbauer: unten im Grundriss „Mappe für den Hausbauer“ (PDF) und „Plandatei sichern“.' },
     monteur: { bereich: 'monteur', titel: 'Monteurzimmer: Rechnet es sich?', formSel: '#monteur input[type="text"], #monteur input[type="range"]', dl: 'mz-ergebnis',
       eingaben: ['mz-betten', 'mz-preis', 'mz-beleg', 'mz-fix', 'mz-var', 'mz-abgabe'] },
     'st-a': { bereich: 'steuern', ohne: ['r-objekt'], fokus: 'st-a', titel: 'Steuern sparen: 15-Prozent-Prüfer', formSel: STFORM, satz: 'st-a-satz', dl: 'st-a-ergebnis', hinweisId: 'st-a-quelle',
@@ -2441,7 +2441,7 @@
     document.querySelectorAll(SEITE_TEILE).forEach(function (e) { e.inert = true; });
     overlayAuf.hidden = false; overlayAuf.scrollTop = 0;
     document.documentElement.classList.add('overlay-offen');
-    if (id === 'mappe-ov') document.body.classList.add('mappe-offen');
+    if (id === 'mappe-ov' || id === 'g-mappe-ov') document.body.classList.add(id === 'mappe-ov' ? 'mappe-offen' : 'g-mappe-offen');
     $(fokusId).focus({ preventScroll: true });
   }
   function overlaySchliessen() {
@@ -2450,11 +2450,12 @@
     overlayAuf.hidden = true; overlayAuf = null; overlaySel = null;
     document.querySelectorAll(SEITE_TEILE).forEach(function (e) { e.inert = false; });
     document.documentElement.classList.remove('overlay-offen');
-    document.body.classList.remove('mappe-offen');
+    document.body.classList.remove('mappe-offen', 'g-mappe-offen');
     if (war === 'bes-ov') zeigeMerkKarten();
     var a = sel ? document.querySelector(sel) : null;
     if (a) a.focus();
   }
+  window.OVERLAY_OEFFNEN = overlayOeffnen;   /* auch für die Mappe für den Hausbauer (grundriss_mappe.js) */
   document.addEventListener('click', function (ev) { if (ev.target.closest('[data-overlay-zu]')) overlaySchliessen(); });
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && overlayAuf) { ev.preventDefault(); overlaySchliessen(); } });
 

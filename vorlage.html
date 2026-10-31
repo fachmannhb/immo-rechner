@@ -1020,6 +1020,43 @@ __PALETTE_CSS__
     #g-druck .g-druck-tab .z { text-align: right; }
     #g-druck .g-druck-tab .summe th, #g-druck .g-druck-tab .summe td { font-weight: 800; border-top: 2px solid #241d2e; }
   }
+  /* Mappe für den Hausbauer (M1): Overlay mit .blatt (immer helle Palette); gedruckt wird nur das Overlay. Farben nur aus der Palette (R024). */
+  .mh-knopf { display: inline-flex; align-items: center; gap: 8px; }
+  .mh-knopf svg.sym { width: 1.3em; height: 1.3em; flex: none; }
+  .mp-teil h4 { font: 700 17px var(--display); margin: 12px 0 6px; }
+  .mh-meta { display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 0 0 10px; }
+  .mh-bild, .mh-3d img { display: block; width: 100%; height: auto; border: 1px solid var(--linie); background: var(--karte); }
+  .mh-3d { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .mh-3d figure { margin: 0; break-inside: avoid; }
+  .mh-etage { break-inside: avoid; margin-bottom: 16px; }
+  .mh-etage svg.planzeichnung { display: block; border: 1px solid var(--linie2); background: var(--karte); }
+  .mh-kasten { overflow-x: auto; max-width: 100%; }
+  .mh-tab { width: 100%; border-collapse: collapse; font-size: 16px; }
+  .mh-tab th, .mh-tab td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--linie); vertical-align: top; font-weight: 400; position: static; }
+  .mh-tab th { background: none; color: var(--text); }
+  .mh-tab thead th { font-weight: 700; border-bottom: 2px solid var(--linie2); }
+  .mh-tab .z { text-align: right; white-space: nowrap; }
+  .mh-tab .gruppe th { font-weight: 800; background: var(--karte2); }
+  .mh-tab .summe th, .mh-tab .summe td { font-weight: 800; border-top: 2px solid var(--text); }
+  .mh-tab .klein { display: block; font-size: 14px; color: var(--leise); }
+  .mh-luecke { font-weight: 700; }
+  .mh-dl { display: grid; grid-template-columns: minmax(140px, 28%) 1fr; gap: 4px 14px; margin: 0; }
+  .mh-dl dt { font-weight: 700; }
+  .mh-dl dd { margin: 0; }
+  .mh-hinweis { border: 2px solid var(--linie2); background: var(--karte2); border-radius: 10px; padding: 8px 12px; margin: 10px 0; }
+  @media screen { .mh-etage svg.planzeichnung { max-width: 100%; height: auto !important; } }
+  @media (max-width: 640px) { .mh-3d, .mh-dl { grid-template-columns: 1fr; } .mh-tab { min-width: 520px; } }
+  @media print {
+    body.g-mappe-offen { background: #ffffff !important; }
+    body.g-mappe-offen > *:not(#g-mappe-ov) { display: none !important; }
+    #g-mappe-ov { position: static; overflow: visible; padding: 0; background: #ffffff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    #g-mappe-ov .overlay-kopf { display: none !important; }
+    #g-mappe-ov .blatt { max-width: none; margin: 0; padding: 0; border: 0; box-shadow: none; border-radius: 0; font-size: 11pt; }
+    #g-mappe-ov .mh-neu { break-before: page; }
+    #g-mappe-ov .mh-kasten { overflow: visible; }
+    #g-mappe-ov thead { display: table-header-group; }
+    #g-mappe-ov tr, #g-mappe-ov li, #g-mappe-ov .mh-hinweis { break-inside: avoid; }
+  }
   /* Welle D, Teil 1: Strom vom eigenen Dach (es-), Haus- und Dachform (fm-). Farben nur aus der Palette (R024). */
   .es-karte-summary, .fm-karte-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; min-height: 48px; cursor: pointer; list-style: none; }
   .es-karte-summary::-webkit-details-marker, .fm-karte-summary::-webkit-details-marker { display: none; }
@@ -2861,6 +2898,17 @@ __PALETTE_CSS__
     <div class="meldung" id="g-uebernahme-meldung" role="status" aria-live="polite"></div>
   </div>
 
+  <div class="karte g-mappe" id="g-mappe-karte">
+    <h3 data-t="mpTitel">Mappe für den Hausbauer</h3>
+    <p class="klein" data-t="mpKurz"></p>
+    <div class="knopfreihe">
+      <button type="button" class="knopf mh-knopf" id="g-mappe-auf"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-grundriss"/></svg><span data-t="mpTitel">Mappe für den Hausbauer</span></button>
+      <button type="button" class="knopf zweit mh-knopf" id="g-mappe-plandatei"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-pfeil-ab"/></svg><span data-t="mpPlandatei">Plandatei sichern</span></button>
+    </div>
+    <div class="meldung" id="g-mappe-status" role="status" aria-live="polite"></div>
+    <p class="fehler" id="g-mappe-fehler" role="alert" hidden></p>
+  </div>
+
   <div class="karte">
     <h3>Plan sichern</h3>
     <p class="klein">Der Plan wird in diesem Browser automatisch gespeichert. Als Datei sichern, wenn Sie ihn auf ein anderes Gerät mitnehmen oder aufbewahren wollen.</p>
@@ -3637,12 +3685,24 @@ __PALETTE_CSS__
 <script src="daten/ausbau_entscheidungen.js"></script>
 <script src="daten/grundstueck.js"></script>
 <div class="g-druck" id="g-druck" aria-hidden="true"></div>
+<div class="overlay" id="g-mappe-ov" role="dialog" aria-modal="true" aria-labelledby="mh-h" hidden>
+  <div class="overlay-kopf">
+    <div class="knopfreihe" style="margin-top:0">
+      <button type="button" class="knopf zweit mittel mh-knopf" id="g-mappe-zu" data-overlay-zu><span data-t="mpZurueck">← Zurück zum Plan</span></button>
+      <button type="button" class="knopf mittel mh-knopf" id="g-mappe-drucken"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-druck"/></svg><span data-t="mpDrucken">Drucken / als PDF speichern</span></button>
+    </div>
+    <p class="klein" data-t="mpPdfHinweis"></p>
+    <p class="fehler" id="g-mappe-ov-fehler" role="alert" hidden></p>
+  </div>
+  <article class="blatt" id="g-mappe-blatt" lang="de"><div id="g-mappe-inhalt"></div></article>
+</div>
 <script src="daten/texte.js"></script>
 <script src="daten/texte_energie.js"></script>
 <script src="daten/texte_ausbau.js"></script>
 <script src="daten/texte_huelle.js"></script>
 <script src="daten/texte_anbau.js"></script>
 <script src="daten/texte_grundstueck.js"></script>
+<script src="daten/texte_mappe.js"></script>
 <script src="sprache.js"></script>
 <script src="grundriss_geo.js"></script>
 <script src="grundriss_dach.js"></script>
@@ -3653,6 +3713,7 @@ __PALETTE_CSS__
 <script src="anbau_kern.js"></script>
 <script src="grundstueck_kern.js"></script>
 <script src="autarkie_kern.js"></script>
+<script src="mappe_kern.js"></script>
 <script src="rechner.js"></script>
 <script src="grafik.js"></script>
 <script src="haus3d.js"></script>
@@ -3665,6 +3726,7 @@ __PALETTE_CSS__
 <script src="grundriss_huelle.js"></script>
 <script src="grundriss_anbau.js"></script>
 <script src="grundriss_grundstueck.js"></script>
+<script src="grundriss_mappe.js"></script>
 <script src="karte3d.js"></script>
 <script src="karte.js"></script>
 <script src="app.js"></script>

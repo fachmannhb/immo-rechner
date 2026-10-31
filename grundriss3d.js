@@ -689,8 +689,47 @@
     var h = rc.intersectObjects(liste, false)[0];
     return h ? { kind: h.object.userData.kind, abstand: h.distance } : null;
   }
+  /* Mappe (M1): Standbilder von vier Seiten und von oben, helle Farben, alle Etagen, nicht aufgeschnitten; Render und Auslesen im selben Aufruf (kein preserveDrawingBuffer),
+     auf weißem Grund. Danach steht die Ansicht wie vorher. Rückgabe { fehler: 'webgl' | 'leer' | Text } oder { bilder: [{ richtung, url }] }. */
+  function fotos(plan, ART, richtungen, w, h) {
+    if (!renderer && !anlegen()) return { fehler: 'webgl' };
+    var html = document.documentElement, thema = html.getAttribute('data-theme');
+    var sich = { P: P, A: A, winkel: winkel, hoehe: hoehe, abstand: abstand, gedreht: gedreht, geh: geh, versteckt: an.versteckt, schnitt: an.schnitt, df: an.dachfarbe, ratio: renderer.getPixelRatio() };
+    var out = [], z2 = document.createElement('canvas'), c2 = z2.getContext('2d'), grund = null;
+    z2.width = w; z2.height = h;
+    try {
+      html.setAttribute('data-theme', 'light');
+      geh = null; an.versteckt = {}; an.schnitt = false; an.dachfarbe = false; gedreht = true;   /* Dach ohne Ertragsfarbe: auf Papier gäbe es keine Legende */
+      zeige(plan, ART);
+      renderer.setPixelRatio(1); renderer.setSize(w, h, false);
+      kamera.aspect = w / h; kamera.updateProjectionMatrix();
+      var nord = (plan.nord || 0) * RAD;
+      richtungen.forEach(function (r) {
+        if (r === 'oben') { winkel = -nord; hoehe = 1.5; abstand = kugel.r * 2.2; }
+        else { var k = { nord: 0, ost: 1, sued: 2, west: 3 }[r]; winkel = Math.PI - (k * 90 * RAD + nord); hoehe = 0.33; abstand = kugel.r * 2.5; }
+        zeichnen();
+        c2.fillStyle = '#ffffff'; c2.fillRect(0, 0, w, h);
+        c2.drawImage(renderer.domElement, 0, 0, w, h);
+        var d = c2.getImageData(0, 0, w, h).data, i, bunt = false;
+        for (i = 4; i < d.length && !bunt; i += 388) bunt = d[i] !== d[0] || d[i + 1] !== d[1] || d[i + 2] !== d[2];
+        if (!bunt) grund = 'leer';
+        out.push({ richtung: r, url: z2.toDataURL('image/jpeg', 0.82) });
+      });
+    } catch (e) {
+      grund = e && e.message ? e.message : 'unbekannt';
+    } finally {
+      if (thema === null) html.removeAttribute('data-theme'); else html.setAttribute('data-theme', thema);
+      an.versteckt = sich.versteckt; an.schnitt = sich.schnitt; an.dachfarbe = sich.df; geh = sich.geh;
+      renderer.setPixelRatio(sich.ratio);
+      try { zeige(sich.P || plan, sich.A || ART); } catch (e2) { /* die Ansicht baut sich beim nächsten Öffnen neu auf */ }
+      winkel = sich.winkel; hoehe = sich.hoehe; abstand = sich.abstand; gedreht = sich.gedreht;
+      zeichnen();
+    }
+    return grund ? { fehler: grund } : { bilder: out };
+  }
+
   window.GRUNDRISS3D = {
-    zeige: zeige, aktiv: aktivSetzen, pause: pause, ort: ortWaehlen,
+    zeige: zeige, aktiv: aktivSetzen, pause: pause, ort: ortWaehlen, fotos: fotos,
     test: {
       pixelWelt: pixelAn,
       pixelEcke: function () { return pixelBei(0, renderer.domElement.height - 1); },

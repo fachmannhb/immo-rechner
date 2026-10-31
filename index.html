@@ -1028,6 +1028,43 @@
     #g-druck .g-druck-tab .z { text-align: right; }
     #g-druck .g-druck-tab .summe th, #g-druck .g-druck-tab .summe td { font-weight: 800; border-top: 2px solid #241d2e; }
   }
+  /* Mappe für den Hausbauer (M1): Overlay mit .blatt (immer helle Palette); gedruckt wird nur das Overlay. Farben nur aus der Palette (R024). */
+  .mh-knopf { display: inline-flex; align-items: center; gap: 8px; }
+  .mh-knopf svg.sym { width: 1.3em; height: 1.3em; flex: none; }
+  .mp-teil h4 { font: 700 17px var(--display); margin: 12px 0 6px; }
+  .mh-meta { display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 0 0 10px; }
+  .mh-bild, .mh-3d img { display: block; width: 100%; height: auto; border: 1px solid var(--linie); background: var(--karte); }
+  .mh-3d { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .mh-3d figure { margin: 0; break-inside: avoid; }
+  .mh-etage { break-inside: avoid; margin-bottom: 16px; }
+  .mh-etage svg.planzeichnung { display: block; border: 1px solid var(--linie2); background: var(--karte); }
+  .mh-kasten { overflow-x: auto; max-width: 100%; }
+  .mh-tab { width: 100%; border-collapse: collapse; font-size: 16px; }
+  .mh-tab th, .mh-tab td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--linie); vertical-align: top; font-weight: 400; position: static; }
+  .mh-tab th { background: none; color: var(--text); }
+  .mh-tab thead th { font-weight: 700; border-bottom: 2px solid var(--linie2); }
+  .mh-tab .z { text-align: right; white-space: nowrap; }
+  .mh-tab .gruppe th { font-weight: 800; background: var(--karte2); }
+  .mh-tab .summe th, .mh-tab .summe td { font-weight: 800; border-top: 2px solid var(--text); }
+  .mh-tab .klein { display: block; font-size: 14px; color: var(--leise); }
+  .mh-luecke { font-weight: 700; }
+  .mh-dl { display: grid; grid-template-columns: minmax(140px, 28%) 1fr; gap: 4px 14px; margin: 0; }
+  .mh-dl dt { font-weight: 700; }
+  .mh-dl dd { margin: 0; }
+  .mh-hinweis { border: 2px solid var(--linie2); background: var(--karte2); border-radius: 10px; padding: 8px 12px; margin: 10px 0; }
+  @media screen { .mh-etage svg.planzeichnung { max-width: 100%; height: auto !important; } }
+  @media (max-width: 640px) { .mh-3d, .mh-dl { grid-template-columns: 1fr; } .mh-tab { min-width: 520px; } }
+  @media print {
+    body.g-mappe-offen { background: #ffffff !important; }
+    body.g-mappe-offen > *:not(#g-mappe-ov) { display: none !important; }
+    #g-mappe-ov { position: static; overflow: visible; padding: 0; background: #ffffff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    #g-mappe-ov .overlay-kopf { display: none !important; }
+    #g-mappe-ov .blatt { max-width: none; margin: 0; padding: 0; border: 0; box-shadow: none; border-radius: 0; font-size: 11pt; }
+    #g-mappe-ov .mh-neu { break-before: page; }
+    #g-mappe-ov .mh-kasten { overflow: visible; }
+    #g-mappe-ov thead { display: table-header-group; }
+    #g-mappe-ov tr, #g-mappe-ov li, #g-mappe-ov .mh-hinweis { break-inside: avoid; }
+  }
   /* Welle D, Teil 1: Strom vom eigenen Dach (es-), Haus- und Dachform (fm-). Farben nur aus der Palette (R024). */
   .es-karte-summary, .fm-karte-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; min-height: 48px; cursor: pointer; list-style: none; }
   .es-karte-summary::-webkit-details-marker, .fm-karte-summary::-webkit-details-marker { display: none; }
@@ -2867,6 +2904,17 @@
       <div class="knopfreihe" style="margin-top:0"><button type="button" class="knopf" id="g-frage-ersetzen">Ersetzen</button><button type="button" class="knopf zweit" id="g-frage-dazu">Kosten dazurechnen</button><button type="button" class="knopf zweit" id="g-frage-nein">Abbrechen</button></div>
     </div>
     <div class="meldung" id="g-uebernahme-meldung" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="karte g-mappe" id="g-mappe-karte">
+    <h3 data-t="mpTitel">Mappe für den Hausbauer</h3>
+    <p class="klein" data-t="mpKurz"></p>
+    <div class="knopfreihe">
+      <button type="button" class="knopf mh-knopf" id="g-mappe-auf"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-grundriss"/></svg><span data-t="mpTitel">Mappe für den Hausbauer</span></button>
+      <button type="button" class="knopf zweit mh-knopf" id="g-mappe-plandatei"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-pfeil-ab"/></svg><span data-t="mpPlandatei">Plandatei sichern</span></button>
+    </div>
+    <div class="meldung" id="g-mappe-status" role="status" aria-live="polite"></div>
+    <p class="fehler" id="g-mappe-fehler" role="alert" hidden></p>
   </div>
 
   <div class="karte">
@@ -5839,6 +5887,17 @@ window.DATEN.grundstueck = {
 
 </script>
 <div class="g-druck" id="g-druck" aria-hidden="true"></div>
+<div class="overlay" id="g-mappe-ov" role="dialog" aria-modal="true" aria-labelledby="mh-h" hidden>
+  <div class="overlay-kopf">
+    <div class="knopfreihe" style="margin-top:0">
+      <button type="button" class="knopf zweit mittel mh-knopf" id="g-mappe-zu" data-overlay-zu><span data-t="mpZurueck">← Zurück zum Plan</span></button>
+      <button type="button" class="knopf mittel mh-knopf" id="g-mappe-drucken"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-druck"/></svg><span data-t="mpDrucken">Drucken / als PDF speichern</span></button>
+    </div>
+    <p class="klein" data-t="mpPdfHinweis"></p>
+    <p class="fehler" id="g-mappe-ov-fehler" role="alert" hidden></p>
+  </div>
+  <article class="blatt" id="g-mappe-blatt" lang="de"><div id="g-mappe-inhalt"></div></article>
+</div>
 <script>/* daten/texte.js */
 /* Texte der neuen Planungsfunktionen in drei Sprachen: { schlüssel: { de, en, ru } }.
    Platzhalter in geschweiften Klammern, z. B. {raum}. Gelesen von sprache.js (window.TXT.t).
@@ -7458,6 +7517,77 @@ window.TEXTE = {
   };
   window.TEXTE = window.TEXTE || {};
   Object.keys(T).forEach(function (k) { window.TEXTE[k] = T[k]; });
+})();
+
+</script>
+<script>/* daten/texte_mappe.js */
+/* Texte „Mappe für den Hausbauer“ (M1): Schlüssel -> [de, en, ru]. Fragen sind Fragen, ohne Paragrafen (R006, R007). Dazu genutzt: Texte der Karten (druck*, hw*, an*, gs*, ab*, ma*, hd*, hl*). */
+(function () {
+  var T = {
+    mpTitel: ['Mappe für den Hausbauer', 'Folder for the builder', 'Папка для строителя'],
+    mpKurz: ['Plan, Kosten, Regeln und Fragen an den Bauunternehmer: drucken oder als PDF.', 'Plan, costs, rules and questions for the builder: print or save as PDF.', 'План, стоимость, правила и вопросы строителю: печать или PDF.'],
+    mpPlandatei: ['Plandatei sichern', 'Save plan file', 'Сохранить файл плана'],
+    mpPlandateiOk: ['Plandatei gespeichert. Schicken Sie sie zusammen mit dem PDF.', 'Plan file saved. Send it together with the PDF.', 'Файл плана сохранён. Отправьте его вместе с PDF.'],
+    mpPlandateiFehler: ['Plandatei nicht gespeichert. Der Plan bleibt im Browser.', 'Plan file not saved. The plan stays in the browser.', 'Файл не сохранён. План остаётся в браузере.'],
+    mpZurueck: ['← Zurück zum Plan', '← Back to the plan', '← Назад к плану'],
+    mpDrucken: ['Drucken / als PDF speichern', 'Print / save as PDF', 'Печать / сохранить в PDF'],
+    mpPdfHinweis: ['Im Druckfenster „Als PDF speichern“ wählen.', 'In the print window choose "Save as PDF".', 'В окне печати выберите «Сохранить как PDF».'],
+    mpBauen: ['Die Mappe wird erstellt …', 'Creating the folder …', 'Папка создаётся …'],
+    mpFehlt_raeume: ['Noch kein Raum gezeichnet. Laden Sie eine Vorlage oder zeichnen Sie einen Raum.', 'No room drawn yet. Load a template or draw a room.', 'Комнат нет. Загрузите шаблон или нарисуйте комнату.'],
+    mpTeilFehler: ['Ein Teil fehlt ({teil}: {grund}).', 'One part is missing ({teil}: {grund}).', 'Одной части нет ({teil}: {grund}).'],
+    mp3dFehlt: ['Die 3D-Bilder fehlen: {grund}.', 'The 3D pictures are missing: {grund}.', '3D-изображений нет: {grund}.'],
+    mp3dGrund_webgl: ['WebGL ist in diesem Browser aus', 'WebGL is off in this browser', 'WebGL в браузере отключён'],
+    mp3dGrund_leer: ['ein Bild blieb leer', 'a picture stayed empty', 'одно изображение пустое'],
+    mpLand: ['Bundesland', 'State', 'Земля'],
+    mpEtagen: ['Etagen', 'Storeys', 'Этажей'],
+    mpKein: ['Planungshilfe, kein Bauplan, keine Rechts- oder Bauberatung. Zahlen sind Spannen mit Quelle.', 'Planning aid, no construction drawing, no legal or building advice. Figures are ranges with a source.', 'Подсказка, не чертёж и не консультация. Цифры - диапазоны с источником.'],
+    mpGrundrisse: ['Grundriss je Etage', 'Floor plan per storey', 'План этажей'],
+    mp3d: ['Ansichten des Hauses', 'Views of the house', 'Виды дома'],
+    mpRi_nord: ['Von Norden', 'From the north', 'С севера'],
+    mpRi_ost: ['Von Osten', 'From the east', 'С востока'],
+    mpRi_sued: ['Von Süden', 'From the south', 'С юга'],
+    mpRi_west: ['Von Westen', 'From the west', 'С запада'],
+    mpRi_oben: ['Von oben', 'From above', 'Сверху'],
+    mpRaumliste: ['Raumliste', 'Room list', 'Список комнат'],
+    mpEtage: ['Etage', 'Storey', 'Этаж'],
+    mpNutzung: ['Nutzung', 'Use', 'Назначение'],
+    mpAusbau: ['Ausbau und Bausteine', 'Fit-out and items', 'Отделка и элементы'],
+    mpStufe: ['Innenausbau', 'Interior fit-out', 'Внутренняя отделка'],
+    mpStandard: ['Dämmstandard', 'Insulation standard', 'Стандарт утепления'],
+    mpLueftung: ['Lüftung', 'Ventilation', 'Вентиляция'],
+    mpWasser: ['Wasser', 'Water', 'Вода'],
+    mpAnbau: ['Anbau', 'Extension', 'Пристройка'],
+    mpGrundstueck: ['Grundstück', 'Plot', 'Участок'],
+    mpKeineAngabe: ['Keine Angabe', 'No data', 'Нет данных'],
+    mpKosten: ['Kosten je Gewerk', 'Costs per trade', 'Стоимость по работам'],
+    mpPosition: ['Position', 'Item', 'Позиция'],
+    mpG_innenausbau: ['Innenausbau', 'Interior fit-out', 'Внутренняя отделка'],
+    mpG_material: ['Material der Hülle', 'Shell materials', 'Материалы оболочки'],
+    mpG_daemmung: ['Dämmstandard (Mehrkosten)', 'Insulation standard (extra)', 'Стандарт утепления (доплата)'],
+    mpG_lueftung: ['Lüftung (einmalig)', 'Ventilation (one-off)', 'Вентиляция (разово)'],
+    mpSumme: ['Summe (Spanne)', 'Total (range)', 'Итого (диапазон)'],
+    mpOhnePreis: ['{n} Position(en) ohne Preis, nicht in der Summe.', '{n} item(s) without price, not in the total.', '{n} поз. без цены, не в итоге.'],
+    mpUeberschneid: ['Die Karten überschneiden sich teils (Boden, Dämmung): Die Summe ist nur eine grobe Größenordnung, kein Angebot.', 'The cards partly overlap (floor, insulation): the total is only a rough guide, not a quote.', 'Карточки частично пересекаются (пол, утепление): итог - лишь ориентир, не предложение.'],
+    mpG_grundstueck: ['Grundstück: Einzelpreise, nicht in der Summe', 'Plot: single prices, not in the total', 'Участок: цены, не в итоге'],
+    mpRegeln: ['Regeln des Bundeslands', 'Rules of the state', 'Правила земли'],
+    mpRegelSumme: ['{g} passt, {y} prüfen, {r} passt nicht', '{g} fine, {y} to check, {r} not fine', '{g} ок, {y} проверить, {r} не ок'],
+    mpRegelHaus: ['Haus als Ganzes', 'House as a whole', 'Дом в целом'],
+    mpBauantrag: ['Bauantrag: Anbau und Bausteine', 'Permit: extension and items', 'Разрешение: пристройка и элементы'],
+    mpVerbindlich: ['Eigene Einordnung aus den gelesenen Landesbauordnungen. Verbindlich ist nur die Bauaufsicht.', 'Own classification from the state building codes read. Only the building authority is binding.', 'Собственная оценка по нормам земли. Обязателен только строительный надзор.'],
+    mpFragen: ['Fragen an den Bauunternehmer', 'Questions for the builder', 'Вопросы строителю'],
+    mFrageLuecke: ['Welchen Preis nennen Sie dafür? Im Plan fehlt: {was}.', 'What price do you quote? Missing in the plan: {was}.', 'Какую цену назовёте? В плане нет: {was}.'],
+    mFrageAmpel: ['„{name}“: Die Seite zeigt „{farbe}“. Brauchen wir dafür einen Bauantrag?', '"{name}": the page shows "{farbe}". Do we need a building permit for it?', '«{name}»: показано «{farbe}». Нужно ли для этого разрешение на строительство?'],
+    mFrageAnnahme: ['Stimmt die Annahme: {an}?', 'Is this assumption right: {an}?', 'Верно ли допущение: {an}?'],
+    mFest_festpreis: ['Gibt es einen Festpreis, oder wird nach Aufwand abgerechnet?', 'Is there a fixed price, or billing by effort?', 'Цена фиксированная или по затратам?'],
+    mFest_zeitplan: ['Wie sieht der Zeitplan aus: Beginn, Dauer, wichtige Termine?', 'What is the schedule: start, duration, key dates?', 'Каков график: начало, срок, даты?'],
+    mFest_gewaehrleistung: ['Welche Gewährleistung gilt, und wie lange?', 'Which warranty applies, and for how long?', 'Какая гарантия и на какой срок?'],
+    mFest_nichtEnthalten: ['Was ist in Ihrem Angebot nicht enthalten?', 'What is not included in your offer?', 'Что не входит в предложение?'],
+    mpAnnahmen: ['Annahmen und Lücken', 'Assumptions and gaps', 'Допущения и пробелы'],
+    mLuecke: ['Preis für „{was}“', 'Price for "{was}"', 'Цена: «{was}»'],
+    mLueckeGmodg: ['Anforderungen an „{art}“ (beheizt)', 'Requirements for "{art}" (heated)', 'Требования к «{art}» (отапливаемый)']
+  };
+  window.TEXTE = window.TEXTE || {};
+  Object.keys(T).forEach(function (k) { window.TEXTE[k] = { de: T[k][0], en: T[k][1], ru: T[k][2] }; });
 })();
 
 </script>
@@ -10768,6 +10898,174 @@ window.TEXTE = {
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
+<script>/* mappe_kern.js */
+/* Mappe für den Hausbauer (M1): sammelt aus Plan und Kernen ein Objekt (rein, ohne Texte/DOM). Jede Zahl kommt aus derselben Funktion mit denselben Argumenten wie in der Karte;
+   Bedienzustand (Stufe, Altbelag, Putz) kommt über opt. */
+(function (root) {
+  'use strict';
+  var FESTE = ['festpreis', 'zeitplan', 'gewaehrleistung', 'nichtEnthalten'];
+  var ok = function (x) { return typeof x === 'number' && isFinite(x); };
+  function heuteLokal() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function belege(liste) {
+    var seen = {}, out = [];
+    liste.forEach(function (b) {
+      if (!b) return;
+      var x = { titel: b.quelleTitel || b.titel || b.quelle || b.name || '', url: /^https?:/.test(b.url || '') ? b.url : '', abruf: b.abruf || '', status: b.status || '' }, k = x.titel + '|' + x.abruf;
+      if (x.titel && !seen[k]) { seen[k] = 1; out.push(x); }
+    });
+    return out;
+  }
+
+  /* Raumliste: dieselben Bausteine wie raumWohn in grundriss.js */
+  function raumliste(plan) {
+    var R = root.RECHNER, RK = root.REGELN, ART = {}, out = { zeilen: [], etagen: [], grund: 0, wohn: 0, nutz: 0 };
+    ((root.DATEN && root.DATEN.moebel && root.DATEN.moebel.artikel) || []).forEach(function (a) { ART[a.id] = a; });
+    plan.etagen.forEach(function (e, ei) {
+      var s = { name: e.name, index: ei, raeume: 0, grund: 0, wohn: 0, nutz: 0 };
+      (e.raeume || []).forEach(function (r) {
+        var f = R.polygonFlaeche(r.punkte), d = { flaeche: f, art: r.art, teil12: r.teil12, teil0: r.teil0, balkonProzent: r.balkon };
+        var w = Math.max(0, R.wohnflaecheRaum(d) - (r.art === 'voll' ? RK.treppenAbzug(e, r, ART) : 0));
+        out.zeilen.push({ etage: e.name, etageIndex: ei, id: r.id, name: r.name, nutzung: RK.nutzungVon(r), art: r.art, flaeche: f, wohn: w });
+        s.raeume++; s.grund += f; s.wohn += w; s.nutz += R.nutzflaecheRaum(d);
+      });
+      out.etagen.push(s); out.grund += s.grund; out.wohn += s.wohn; out.nutz += s.nutz;
+    });
+    return out;
+  }
+
+  /* Kosten: Innenausbau, Material, Dämm-Mehrkosten, Lüftung einmalig, Anbau wie in den Karten */
+  function kostenBlock(plan, opt, B) {
+    var K = root.AUSBAU_KERN, HK = root.HUELLE_KERN, z = [], lu = [], fe = [], von = 0, bis = 0;
+    var pm = K.planMaterial(plan), mg = K.mengenAusPlan(plan), stufe = opt.stufe === 0 || opt.stufe === 2 ? opt.stufe : 1;
+    if (mg.ok) {
+      B.mg = mg;
+      var ik = K.innenausbauKosten(mg, null, stufe, { altbelag: !!opt.altbelag, putz: !!opt.putz, bodenMaterial: pm.explizit.boden ? pm.wahl.boden : '' });
+      ik.gewerke.forEach(function (g) {
+        if (!g.positionen.length) return;
+        z.push({ gruppe: 'innenausbau', id: g.id, von: g.von, bis: g.bis, luecke: g.positionen.some(function (p) { return p.luecke; }),
+          belege: belege(g.positionen.filter(function (p) { return !p.luecke; }).map(function (p) { return { quelleTitel: p.quelleTitel, url: p.url, abruf: p.abruf, status: p.status }; })) });
+        g.positionen.forEach(function (p) { if (p.luecke) lu.push({ id: 'k:innenausbau:' + p.id, key: 'mLuecke', par: { name: p.name } }); });
+      });
+      von += ik.von; bis += ik.bis;
+    } else fe.push({ teil: 'innenausbau', grund: mg.fehler || '?' });
+    var hb = K.hausBilanz(plan);
+    if (!hb.ok) { fe.push({ teil: 'material', grund: hb.fehler || '?' }); return { zeilen: z, summe: { von: von, bis: bis }, luecken: lu, fehler: fe }; }
+    K.BAUTEILE_PLAN.forEach(function (bt) {
+      var kz = hb.kosten.bauteile[bt], mi = K.matInfo(hb.wahl[bt]);
+      if (!kz || kz.keine) return;
+      var l = !!(kz.luecke || kz.von == null), m = mi ? mi.name : '';
+      z.push({ gruppe: 'material', id: bt, material: m, von: ok(kz.von) ? kz.von : null, bis: ok(kz.bis) ? kz.bis : null, luecke: l, belege: kz.preis ? belege([kz.preis.beleg]) : [] });
+      if (l) lu.push({ id: 'k:material:' + bt, key: 'mLuecke', par: { bauteil: bt, material: m } });
+    });
+    von += hb.kosten.von; bis += hb.kosten.bis;
+    /* Dämmstandard und Lüftung: gleiche Argumente wie in grundriss_huelle.js */
+    var ps = HK.planStandard(plan), pl = HK.planLueftung(plan);
+    var hw = HK.heizwaermeMitStandard(plan, { bilanz: hb, standard: ps.id, lueftungsart: pl.art });
+    var mf = HK.mehrkostenUndFoerderung(plan, ps.id, { heizwaerme: hw }), mk = mf.mehrkosten, ml = mk && mk.luecken && mk.luecken.length;
+    if (mk && (mk.von > 0 || mk.bis > 0 || ml)) {
+      z.push({ gruppe: 'daemmung', id: ps.id, von: mk.von, bis: mk.bis, luecke: !!ml, belege: belege((mk.teile || []).map(function (t) { return t.beleg; }).concat([mk.beleg])) });
+      if (ml) lu.push({ id: 'k:daemmung:' + ps.id, key: 'mLuecke', par: { standard: ps.id } });
+      von += mk.von; bis += mk.bis;
+    }
+    var lk = HK.lueftungKosten(plan, pl.art, { neubau: pl.neubau, mengen: hb.mengen });   /* Einmalkosten hängen nicht vom Strompreis ab */
+    if (lk.ok && pl.art !== 'keine') {
+      z.push({ gruppe: 'lueftung', id: pl.art, von: lk.einmalig.von, bis: lk.einmalig.bis, luecke: false, belege: belege(lk.belege) });
+      von += lk.einmalig.von; bis += lk.einmalig.bis;
+    }
+    var ac = B.ac;
+    if (!ac.leer) {
+      if (ac.kosten && ac.kosten.ok) {
+        z.push({ gruppe: 'anbau', id: ac.pa.art, von: ac.kosten.von, bis: ac.kosten.bis, luecke: false, belege: belege([ac.kosten.beleg]) });
+        von += ac.kosten.von; bis += ac.kosten.bis;
+        if (ac.kosten.gmodgLuecke) lu.push({ id: 'gmodg', key: 'mLueckeGmodg', par: { art: ac.pa.art } });
+      } else lu.push({ id: 'k:anbau:' + ac.pa.art, key: 'mLuecke', par: { art: ac.pa.art } });
+    }
+    return { zeilen: z, summe: { von: von, bis: bis }, luecken: lu, fehler: fe };
+  }
+
+  function sammle(plan, optionen) {
+    var opt = optionen || {}, RK = root.REGELN, K = root.AUSBAU_KERN, HK = root.HUELLE_KERN, AK = root.ANBAU_KERN, GK = root.GRUNDSTUECK_KERN;
+    var m = { ok: false, fehlt: [], fehler: [], luecken: [], annahmen: [], ampeln: [], fragen: [] };
+    if (!plan || !Array.isArray(plan.etagen) || !root.RECHNER || !RK || !K || !HK || !AK || !GK) { m.fehler.push({ teil: 'start', grund: 'kern' }); m.fehlt.push('raeume'); return m; }
+    var datum = opt.datum || heuteLokal(), land = AK.planLand(plan);
+    m.raeume = raumliste(plan);
+    m.kopf = { datum: datum, land: land, landName: RK.landInfo(land).name, etagen: m.raeume.etagen.filter(function (e) { return e.raeume > 0; }).length, wohn: m.raeume.wohn };
+    if (!m.raeume.zeilen.length) { m.fehlt.push('raeume'); return m; }
+    m.ok = true;
+    var B = { ac: AK.rechne(plan) }, pm = K.planMaterial(plan), ps = HK.planStandard(plan), pl = HK.planLueftung(plan), pw = HK.planWasser(plan), pa = AK.planAnbau(plan);
+    var gc = GK.rechne(plan), plus = !!(plan.grundstueck || gc.items.length), kb;
+    try { kb = kostenBlock(plan, opt, B); } catch (e) { kb = { zeilen: [], summe: { von: 0, bis: 0 }, luecken: [], fehler: [{ teil: 'kosten', grund: e && e.message ? e.message : '?' }] }; }
+    m.kosten = kb; m.fehler = m.fehler.concat(kb.fehler); m.luecken = kb.luecken.slice();
+    m.ausbau = {
+      stufe: opt.stufe === 0 || opt.stufe === 2 ? opt.stufe : 1, altbelag: !!opt.altbelag, putz: !!opt.putz,
+      material: K.BAUTEILE_PLAN.map(function (bt) { var mi = K.matInfo(pm.wahl[bt]); return { bauteil: bt, id: pm.wahl[bt], name: mi ? mi.name : '', explizit: !!pm.explizit[bt] }; }),
+      daemmdickeCm: pm.wahl.daemmdicke_cm, standard: ps.id, standardExplizit: ps.explizit, lueftung: pl.art, lueftungExplizit: pl.explizit,
+      wasser: { personen: pw.personen, regenwasser: pw.regenwasser },
+      anbau: pa.art ? { art: pa.art, flaeche: pa.flaeche, hoehe: pa.hoehe } : null,
+      grundstueck: plus ? { breite: gc.g.breite, tiefe: gc.g.tiefe, flaechen: gc.flaechen, zaehlung: gc.zaehlung,
+        items: gc.items.map(function (it) { return { id: it.id, art: it.art, b: it.b, t: it.t, flaeche: it.flaeche, ampel: it.ampel, garten: !!it.garten }; }) } : null
+    };
+    /* Grundstücks-Preise nicht addierbar (Alternativen, €/Jahr, €/kW): Zeilen mit ohneSumme */
+    gc.items.forEach(function (it) {
+      (it.daten.kosten || []).forEach(function (k) {
+        kb.zeilen.push({ gruppe: 'grundstueck', id: it.id + ':' + k.id, art: it.art, name: k.name, einheit: k.einheit, von: k.von, bis: k.bis, luecke: !!k.luecke, ohneSumme: true, belege: k.luecke ? [] : belege([k]) });
+        if (k.luecke) m.luecken.push({ id: 'k:gs:' + it.id + ':' + k.id, key: 'mLuecke', par: { art: it.art, name: k.name } });
+      });
+    });
+    /* Regeln des Landes: RK.pruefe, nur gelbe und rote Zeilen */
+    var rg = RK.pruefe(plan, { datum: datum }), rang = { rot: 2, gelb: 1 };
+    m.regeln = { datum: rg.datum, land: rg.land, summe: rg.summe, stand: RK.daten() ? RK.daten().stand : '', zeilen: [] };
+    function zeile(z, id, name, etage) {
+      if (!z || (z.ampel !== 'gelb' && z.ampel !== 'rot')) return;
+      var w = (z.pruefungen || []).filter(function (p) { return rang[p.stufe]; }).sort(function (a, b) { return rang[b.stufe] - rang[a.stufe]; })[0];
+      m.regeln.zeilen.push({ id: id, name: name, etage: etage, ampel: z.ampel, grund: w ? { code: w.code, par: w.par || {} } : null });
+      m.ampeln.push({ id: 'rg:' + id, quelle: 'regel', name: name, ampel: z.ampel });
+    }
+    zeile(rg.haus, 'haus', '', '');
+    rg.raeume.forEach(function (z) { if (z.art === 'voll') zeile(z, z.etageIndex + ':' + z.raum, z.name, z.etage); });
+    m.anbauAmpel = null;
+    if (!B.ac.leer) {
+      var aa = B.ac.vf && B.ac.vf.ok ? B.ac.vf.summe.ampel : 'grau';
+      m.anbauAmpel = { art: B.ac.pa.art, ampel: aa, flaeche: B.ac.pa.flaeche };
+      if (aa !== 'gruen') m.ampeln.push({ id: 'anbau', quelle: 'anbau', art: B.ac.pa.art, ampel: aa });
+    }
+    gc.items.forEach(function (it) { if (!it.garten && it.ampel !== 'gruen') m.ampeln.push({ id: 'gs:' + it.id, quelle: 'grundstueck', art: it.art, ampel: it.ampel }); });
+    /* Annahmen: alles, was die Seite selbst festgelegt hat */
+    var an = function (id, par) { m.annahmen.push({ id: id, par: par || {} }); };
+    var nm = m.ausbau.material.filter(function (x) { return !x.explizit && x.id; });
+    if (nm.length) an('material', { items: nm.map(function (x) { return { bauteil: x.bauteil, name: x.name }; }) });
+    if (!ps.explizit) an('standard', { standard: ps.id });
+    if (!pl.explizit) an('lueftung');
+    if (!pw.explizit.personen) an('personen', { n: pw.personen });
+    if (B.mg && B.mg.annahmen.indexOf('raumhoehe') >= 0) an('raumhoehe', { h: K.ANNAHMEN.raumhoehe });
+    if (pa.art && !(pa.flaecheExplizit && pa.hoeheExplizit)) an('anbau', { fl: pa.flaeche, h: pa.hoehe });
+    if (plus && !gc.g.explizit.groesse) an('grundstueck', { b: gc.g.breite, t: gc.g.tiefe });
+    gc.items.forEach(function (it) {
+      if (it.art === 'sauna' && !it.ofenEigen) an('ofen:' + it.id);
+      if (it.art === 'kleinwind' && !it.gebietEigen) an('gebiet:' + it.id);
+    });
+    m.fragen = fragen(m);
+    return m;
+  }
+
+  /* Fragen: je Lücke Preisfrage, je gelbe/rote/graue Ampel „Bauantrag?“, je Annahme Rückfrage, dazu vier feste; jede Id einmal. */
+  function fragen(s) {
+    var out = [], seen = {};
+    function dazu(f) { var k = f.typ + '|' + f.id; if (!seen[k]) { seen[k] = 1; out.push(f); } }
+    (s.luecken || []).forEach(function (l) { dazu({ typ: 'luecke', id: l.id, key: 'mFrageLuecke', par: { l: l } }); });
+    (s.ampeln || []).forEach(function (a) {
+      if (a.ampel === 'gelb' || a.ampel === 'rot' || a.ampel === 'grau') dazu({ typ: 'ampel', id: a.id, key: 'mFrageAmpel', par: { name: a.name || '', art: a.art || '', quelle: a.quelle || '', ampel: a.ampel } });
+    });
+    (s.annahmen || []).forEach(function (a) { dazu({ typ: 'annahme', id: a.id, key: 'mFrageAnnahme', par: { ap: a.par || {} } }); });
+    FESTE.forEach(function (f) { dazu({ typ: 'fest', id: f, key: 'mFest_' + f, par: {} }); });
+    return out;
+  }
+
+  root.MAPPE_KERN = { FESTE: FESTE, sammle: sammle, fragen: fragen, raumliste: raumliste, heuteLokal: heuteLokal };
+  if (typeof module !== 'undefined' && module.exports) module.exports = root.MAPPE_KERN;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
 <script>/* rechner.js */
 /* Rechenfunktionen der Werkzeugseite, ohne Bezug zur Oberfläche.
    Die Seite und tmp/rechner_test.js (Node) benutzen dieselben Funktionen.
@@ -12758,8 +13056,47 @@ window.TEXTE = {
     var h = rc.intersectObjects(liste, false)[0];
     return h ? { kind: h.object.userData.kind, abstand: h.distance } : null;
   }
+  /* Mappe (M1): Standbilder von vier Seiten und von oben, helle Farben, alle Etagen, nicht aufgeschnitten; Render und Auslesen im selben Aufruf (kein preserveDrawingBuffer),
+     auf weißem Grund. Danach steht die Ansicht wie vorher. Rückgabe { fehler: 'webgl' | 'leer' | Text } oder { bilder: [{ richtung, url }] }. */
+  function fotos(plan, ART, richtungen, w, h) {
+    if (!renderer && !anlegen()) return { fehler: 'webgl' };
+    var html = document.documentElement, thema = html.getAttribute('data-theme');
+    var sich = { P: P, A: A, winkel: winkel, hoehe: hoehe, abstand: abstand, gedreht: gedreht, geh: geh, versteckt: an.versteckt, schnitt: an.schnitt, df: an.dachfarbe, ratio: renderer.getPixelRatio() };
+    var out = [], z2 = document.createElement('canvas'), c2 = z2.getContext('2d'), grund = null;
+    z2.width = w; z2.height = h;
+    try {
+      html.setAttribute('data-theme', 'light');
+      geh = null; an.versteckt = {}; an.schnitt = false; an.dachfarbe = false; gedreht = true;   /* Dach ohne Ertragsfarbe: auf Papier gäbe es keine Legende */
+      zeige(plan, ART);
+      renderer.setPixelRatio(1); renderer.setSize(w, h, false);
+      kamera.aspect = w / h; kamera.updateProjectionMatrix();
+      var nord = (plan.nord || 0) * RAD;
+      richtungen.forEach(function (r) {
+        if (r === 'oben') { winkel = -nord; hoehe = 1.5; abstand = kugel.r * 2.2; }
+        else { var k = { nord: 0, ost: 1, sued: 2, west: 3 }[r]; winkel = Math.PI - (k * 90 * RAD + nord); hoehe = 0.33; abstand = kugel.r * 2.5; }
+        zeichnen();
+        c2.fillStyle = '#ffffff'; c2.fillRect(0, 0, w, h);
+        c2.drawImage(renderer.domElement, 0, 0, w, h);
+        var d = c2.getImageData(0, 0, w, h).data, i, bunt = false;
+        for (i = 4; i < d.length && !bunt; i += 388) bunt = d[i] !== d[0] || d[i + 1] !== d[1] || d[i + 2] !== d[2];
+        if (!bunt) grund = 'leer';
+        out.push({ richtung: r, url: z2.toDataURL('image/jpeg', 0.82) });
+      });
+    } catch (e) {
+      grund = e && e.message ? e.message : 'unbekannt';
+    } finally {
+      if (thema === null) html.removeAttribute('data-theme'); else html.setAttribute('data-theme', thema);
+      an.versteckt = sich.versteckt; an.schnitt = sich.schnitt; an.dachfarbe = sich.df; geh = sich.geh;
+      renderer.setPixelRatio(sich.ratio);
+      try { zeige(sich.P || plan, sich.A || ART); } catch (e2) { /* die Ansicht baut sich beim nächsten Öffnen neu auf */ }
+      winkel = sich.winkel; hoehe = sich.hoehe; abstand = sich.abstand; gedreht = sich.gedreht;
+      zeichnen();
+    }
+    return grund ? { fehler: grund } : { bilder: out };
+  }
+
   window.GRUNDRISS3D = {
-    zeige: zeige, aktiv: aktivSetzen, pause: pause, ort: ortWaehlen,
+    zeige: zeige, aktiv: aktivSetzen, pause: pause, ort: ortWaehlen, fotos: fotos,
     test: {
       pixelWelt: pixelAn,
       pixelEcke: function () { return pixelBei(0, renderer.domElement.height - 1); },
@@ -14483,6 +14820,7 @@ window.TEXTE = {
     var fit = { w: vb.w, h: vb.h };
     /* Maßstab: 180 mm breit, 150 mm hoch verfügbar; auf eine runde Zahl 1:N gerundet, Größe dann exakt */
     var verh = Math.max(fit.w * 1000 / 180, fit.h * 1000 / 150), N = nettoSkala(verh);
+    druckZustand.N = N;   /* für die Mappe (etagenBilder) */
     /* Beschriftungen in Papiergröße rechnen (1 Punkt = 0,2646 mm), dann neu zeichnen */
     skalaUeber = (0.2646 / 1000) * N;
     try { zeichnen(); } finally { skalaUeber = 0; }
@@ -14530,6 +14868,30 @@ window.TEXTE = {
   window.addEventListener('afterprint', druckAufraeumen);
   if ($('g-drucken')) $('g-drucken').addEventListener('click', drucken);
 
+  /* Mappe (M1): Plan jeder Etage mit Maßen als SVG-Text, mit der Druckvorbereitung von „Plan drucken“; die Etage wird nur vorübergehend gewechselt. */
+  function etagenBilder() {
+    var vorher = plan.aktiv, out = [];
+    try {
+      plan.etagen.forEach(function (e, i) {
+        if (!e.raeume.length) return;
+        plan.aktiv = i;
+        if (!druckVorbereiten()) return;
+        var n = druckZustand ? druckZustand.N : 0, kl = $('g-druck').querySelector('.planzeichnung');
+        if (kl) out.push({ name: e.name, index: i, hoehe: e.hoehe, massstab: n, svg: kl.outerHTML });
+        druckAufraeumen();
+      });
+    } finally {
+      plan.aktiv = vorher; druckAufraeumen();
+      if (sichtbar && !ansicht3d) zeichnen();
+    }
+    return out;
+  }
+  function dreiBilder(richtungen, w, h) {
+    if (!window.GRUNDRISS3D || !window.GRUNDRISS3D.fotos) return { fehler: 'webgl' };
+    nachfuehrenAlle();
+    return window.GRUNDRISS3D.fotos(plan, ART, richtungen, w, h);
+  }
+
   /* Sprache gewechselt: neue Texte in Seitenfeld, Statuszeile, Maßzahlen */
   window.addEventListener('sprachegewechselt', function () {
     if (!$('g-hinweis').hidden) $('g-hinweis-text').textContent = tr('hinweisWand');
@@ -14559,6 +14921,7 @@ window.TEXTE = {
     waende: function (e) { return GEO.waende(e || etage()); },
     nachfuehren: nachfuehrenAlle,
     druckVorbereiten: druckVorbereiten, druckAufraeumen: druckAufraeumen,
+    etagenBilder: etagenBilder, dreiBilder: dreiBilder, dateiSichern: function () { return dateiSichern(); },
     /* für Prüfskripte: Plan setzen, geprüft wie beim Datei-Import */
     setzePlan: function (p) { var n = pruefePlan(p); if (!n) return false; plan = n; gewaehlt = null; vb = null; speichern(); allesZeigen(); return true; }
   };
@@ -14936,6 +15299,8 @@ window.TEXTE = {
   window.GRUNDRISS_REGELN = {
     raumPanel: raumPanel, zeichneFrei: zeichneFrei, aktualisieren: aktualisieren, jetzt: jetzt, landSetzen: landSetzen,
     ergebnis: function () { return letzte; }, freiAn: function () { return freiAn; },
+    /* Text einer Prüfzeile { code, par } wie in der Karte (für die Mappe für den Hausbauer) */
+    pruefText: function (it, land) { return itemText(it, land); },
     zuklappen: function () { offen = {}; signatur.regeln = ''; signatur.frei = ''; jetzt(); },
     /* für Prüfskripte: Stichtag setzen (z. B. '2027-01-01'; leer = heute) und neu zeigen */
     setzeDatum: function (d) { RK.setzeDatum(d); signatur = { regeln: '', frei: '', land: '' }; jetzt(); }
@@ -17940,6 +18305,178 @@ window.TEXTE = {
 })();
 
 </script>
+<script>/* grundriss_mappe.js */
+/* Mappe für den Hausbauer (M1): Knopf, Vorschau im Overlay, Druck des Overlays (@media print). Zahlen aus mappe_kern.js; Bilder entstehen beim Öffnen, nichts wird gespeichert. */
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); }, knopf = $('g-mappe-auf');
+  if (!knopf) return;
+  var tr = function (k, v) { return window.TXT ? window.TXT.t(k, v) : k; };
+  var lang = function () { return window.TXT ? window.TXT.lang() : 'de'; };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var T = function (k, v) { return esc(tr(k, v)); };
+  var nf = function (a, b, x) { return new Intl.NumberFormat(lang(), { minimumFractionDigits: a, maximumFractionDigits: b }).format(x); };
+  var n0 = function (x) { return nf(0, 0, x); }, n1 = function (x) { return nf(1, 1, x); }, nz = function (x) { return nf(0, 2, x); };
+  var datumDe = function (iso) { var t = String(iso || '').split('-'); return t.length === 3 ? t[2] + '.' + t[1] + '.' + t[0] : String(iso || ''); };
+  var spanne = function (a, b, e) { return (Math.round(a) === Math.round(b) ? n0(a) : n0(a) + ' ' + tr('wortBis') + ' ' + n0(b)) + ' ' + (e == null ? '€' : e); };
+  var fehlerBox = $('g-mappe-fehler'), status = $('g-mappe-status');
+  var fehler = function (text) { fehlerBox.textContent = text || ''; fehlerBox.hidden = !text; };
+  var M = window.MAPPE_KERN, G = window.GRUNDRISS, RK = window.REGELN;
+  if (!M || !G || !RK) { fehler('Die Mappe konnte nicht geladen werden: ' + (!M ? 'mappe_kern.js' : 'Grundriss oder Regeln') + ' fehlt.'); knopf.disabled = true; return; }
+
+  var hat = function (k) { return !!(window.TEXTE && window.TEXTE[k]); };
+  var cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
+  var artName = function (a) { return hat('anArt_' + a) ? tr('anArt_' + a) : (hat('gsArt_' + a) ? tr('gsArt_' + a) : a); };
+  var ART_KEY = { voll: 'artVoll', balkon: 'artBalkon', wintergarten: 'artWinter', zubehoer: 'artZubehoer' };
+  var STATUS_KEY = { 'geprüft': 'statusGeprueft', 'geprüft (Landesportal)': 'statusPortal', 'prüfen vor Nutzung': 'statusPruefen' };
+  /* Namen für Lücken, Annahmen und Fragen aus den Parametern des Kerns (Ids und Zahlen), nur mit vorhandenen Texten */
+  var gsName = function (art, n) { return /^Preis\s/i.test(n) ? n.replace(/^Preis\s+(für\s+)?/i, '') : artName(art) + ': ' + n; };
+  function lueckeName(p) {
+    return p.bauteil ? tr('maBt_' + p.bauteil) + ' (' + p.material + ')' : p.standard ? tr('mpStandard') + ' ' + tr('hdStd_' + p.standard) : p.name ? (p.art ? gsName(p.art, p.name) : p.name) : tr('mpAnbau') + ': ' + artName(p.art);
+  }
+  function annahmeText(a) {
+    var p = a.par, id = a.id.split(':')[0];
+    return id === 'material' ? p.items.map(function (x) { return tr('maBt_' + x.bauteil) + ': ' + x.name; }).join('; ') :
+      id === 'standard' ? tr('mpStandard') + ': ' + tr('hdStd_' + p.standard) : id === 'lueftung' ? tr('mpLueftung') + ': ' + tr('hlArt_keine') :
+      id === 'personen' ? tr('hwPersonenText', { n: p.n }) : id === 'raumhoehe' ? tr('druckHoehe') + ' ' + nz(p.h) + ' m' :
+      id === 'anbau' ? tr('mpAnbau') + ': ' + nz(p.fl) + ' m², ' + nz(p.h) + ' m' : id === 'grundstueck' ? tr('mpGrundstueck') + ': ' + nz(p.b) + ' × ' + nz(p.t) + ' m' : tr(id === 'ofen' ? 'gsOfenAnnahme' : 'gsGebietAnnahme');
+  }
+  var sach = function (l) { return l.key === 'mLuecke' ? tr('mLuecke', { was: lueckeName(l.par) }) : tr(l.key, { art: artName(l.par.art) }); };
+  function frageText(f) {
+    var p = f.par;
+    if (f.typ === 'fest') return tr(f.key);
+    if (f.typ === 'luecke') return tr(f.key, { was: sach(p.l) });
+    if (f.typ === 'annahme') return tr(f.key, { an: annahmeText({ id: f.id, par: p.ap }) });
+    return tr(f.key, { name: p.name || (p.quelle === 'regel' ? tr('mpRegelHaus') : artName(p.art)), farbe: p.quelle === 'regel' ? tr('ampel' + cap(p.ampel)) : tr('anA_' + p.ampel) });
+  }
+  var chip = function (a, wort) { return '<span class="fm-ampel ' + (a === 'grau' ? 'offen' : a) + '" data-ampel="' + a + '"><i aria-hidden="true">' + { gruen: '✓', gelb: '!', rot: '✕', grau: '?' }[a] + '</i>' + esc(wort) + '</span>'; };
+  var schild = function () { return '<span class="annahme">' + T('annahme') + '</span>'; };
+  function belege(liste) {
+    return (liste || []).map(function (b) {
+      var t = esc(b.titel.length > 90 ? b.titel.slice(0, 88) + '…' : b.titel);
+      return '<span class="klein">' + (b.url ? '<a href="' + esc(b.url) + '" target="_blank" rel="noopener">' + t + '</a>' : t) + (b.abruf ? ' · ' + T('regAbruf', { datum: datumDe(b.abruf) }) : '') + (b.status ? ' · ' + (STATUS_KEY[b.status] ? T(STATUS_KEY[b.status]) : esc(b.status)) : '') + '</span>';
+    }).join('');
+  }
+  var tab = function (kopf, rumpf, attr) { return '<div class="mh-kasten"><table class="mh-tab"' + (attr || '') + '>' + (kopf ? '<thead><tr>' + kopf + '</tr></thead>' : '') + '<tbody>' + rumpf + '</tbody></table></div>'; };
+  var sect = function (name, neu, titel, inner) { return '<section class="mp-teil' + (neu ? ' mh-neu' : '') + '" data-abschnitt="' + name + '"><h3>' + T(titel) + '</h3>' + inner + '</section>'; };
+
+  /* ---------- Abschnitte ---------- */
+  function deckblatt(m, drei) {
+    var k = m.kopf, bild = (drei.bilder || [])[2], d = function (l, v, a) { return '<span>' + T(l) + ': <b data-d="' + a + '">' + v + '</b></span>'; };
+    return '<header class="mp-teil" data-abschnitt="deckblatt"><h2 id="mh-h" tabindex="-1">' + T('mpTitel') + '</h2><p class="mh-meta">' + d('druckDatum', esc(datumDe(k.datum)), 'datum') + d('mpLand', esc(k.landName), 'land') +
+      d('druckWohn', n1(k.wohn) + ' m²', 'wohn') + d('mpEtagen', k.etagen, 'etagen') + '</p>' + (bild ? '<img class="mh-bild" alt="' + T('mpRi_sued') + '" src="' + bild.url + '">' : '') + '<p class="mh-hinweis">' + T('mpKein') + '</p>' +
+      m.fehler.map(function (f) { return '<p class="mp-fehler" data-fehler="' + esc(f.teil) + '">' + T('mpTeilFehler', { teil: f.teil, grund: f.grund }) + '</p>'; }).join('') + '</header>';
+  }
+  function grundrisse(bilder) {
+    if (!bilder.length) return '';
+    return sect('grundriss', true, 'mpGrundrisse', bilder.map(function (b, i) {
+      return '<div class="mh-etage' + (i ? ' mh-neu' : '') + '" data-etage="' + b.index + '" data-massstab="' + b.massstab + '"><h4>' + T('druckTitel', { etage: b.name }) + '</h4><p class="mh-meta"><span>' + T('druckMassstab') + ' <b>1:' + b.massstab +
+        '</b></span><span>' + T('druckHoehe') + ' <b>' + nz(b.hoehe) + ' m</b></span><span>' + T('nordWert', { grad: G.plan().nord || 0 }) + '</span></p>' + b.svg + '</div>';
+    }).join(''));
+  }
+  function dreiD(drei) {
+    if (!drei.bilder) return sect('3d', true, 'mp3d', '<p class="mp-fehler" data-fehler="3d">' + T('mp3dFehlt', { grund: hat('mp3dGrund_' + drei.fehler) ? tr('mp3dGrund_' + drei.fehler) : drei.fehler }) + '</p>');
+    return sect('3d', true, 'mp3d', '<div class="mh-3d">' + drei.bilder.map(function (b) { return '<figure data-richtung="' + b.richtung + '"><img src="' + b.url + '" alt="' + T('mpRi_' + b.richtung) + '"><figcaption>' + T('mpRi_' + b.richtung) + '</figcaption></figure>'; }).join('') + '</div>');
+  }
+  function raumliste(m) {
+    var r = m.raeume, f = function (x) { return '<td class="z">' + n1(x) + ' m²</td>'; };
+    var h = r.zeilen.map(function (z) {
+      return '<tr data-raum="' + esc(z.id) + '" data-wohn="' + z.wohn + '"><td>' + esc(z.etage) + '</td><td>' + esc(z.name) + '</td><td>' + (z.nutzung && hat('nutz' + cap(z.nutzung)) ? T('nutz' + cap(z.nutzung)) : '–') +
+        (z.art !== 'voll' ? ' (' + T(ART_KEY[z.art] || 'artVoll') + ')' : '') + '</td>' + f(z.flaeche) + f(z.wohn) + '</tr>';
+    }).join('') + '<tr class="summe" data-summe="raeume" data-grund="' + r.grund + '" data-wohn="' + r.wohn + '"><th colspan="3">' + T('druckSumme') + '</th>' + f(r.grund) + f(r.wohn) + '</tr>';
+    return sect('raumliste', true, 'mpRaumliste', tab('<th>' + T('mpEtage') + '</th><th>' + T('druckRaum') + '</th><th>' + T('mpNutzung') + '</th><th class="z">' + T('druckGrund') + '</th><th class="z">' + T('druckWohn') + '</th>', h));
+  }
+  function ausbau(m) {
+    var a = m.ausbau, g = a.grundstueck, h = '';
+    var zeile = function (k, w) { h += '<dt>' + T(k) + '</dt><dd>' + w + '</dd>'; };
+    zeile('mpStufe', T('abStufe_' + a.stufe) + (a.altbelag ? ', ' + T('abOptAlt') : '') + (a.putz ? ', ' + T('abOptPutz') : ''));
+    zeile('abEntMaterial', '<ul class="mp-annahmen">' + a.material.map(function (x) {
+      return '<li data-material="' + x.bauteil + '"><b>' + T('maBt_' + x.bauteil) + ':</b> ' + (x.id ? esc(x.name) : '–') +(x.bauteil === 'daemmung' && x.id ? ' (' + nz(a.daemmdickeCm) + ' cm)' : '') + (!x.explizit && x.id ? ' ' + schild() : '') + '</li>';
+    }).join('') + '</ul>');
+    zeile('mpStandard', T('hdStd_' + a.standard) + (a.standardExplizit ? '' : ' ' + schild()));
+    zeile('mpLueftung', T('hlArt_' + a.lueftung) + (a.lueftungExplizit ? '' : ' ' + schild()));
+    zeile('mpWasser', T('hwPersonenText', { n: a.wasser.personen }) + ', ' + T('hwRegen') + ': ' + T(a.wasser.regenwasser ? 'hwRegenJa' : 'hwRegenNein'));
+    if (a.anbau) zeile('mpAnbau', T('anKopf', { art: artName(a.anbau.art), fl: nz(a.anbau.flaeche), ampel: tr('anA_' + m.anbauAmpel.ampel) }));
+    if (g) zeile('mpGrundstueck', esc(nz(g.breite) + ' × ' + nz(g.tiefe) + ' m: ') + T('gsKopf', { g: n0(g.flaechen.grund), p: n0(Math.round(g.flaechen.prozent)), n: g.items.length, grau: g.zaehlung.grau, rot: g.zaehlung.rot }) + (g.items.length ? '<ul class="mp-annahmen">' +
+      g.items.map(function (it) { return '<li data-baustein="' + esc(it.id) + '">' + esc(artName(it.art) + ': ' + nz(it.b) + ' × ' + nz(it.t) + ' m') + '</li>'; }).join('') + '</ul>' : ''));
+    return sect('ausbau', false, 'mpAusbau', '<dl class="mh-dl">' + h + '</dl>');
+  }
+  function kosten(m) {
+    var k = m.kosten, h = '', gruppe = '', fertig = false, ohne = m.luecken.filter(function (l) { return /^k:/.test(l.id); }).length;
+    var summe = function () { fertig = true; return '<tr class="summe" data-summe="kosten" data-von="' + k.summe.von + '" data-bis="' + k.summe.bis + '"><th>' + T('mpSumme') + '</th><td class="z">' + esc(spanne(k.summe.von, k.summe.bis)) + '</td><td></td></tr>'; };
+    k.zeilen.forEach(function (z) {
+      if (z.ohneSumme && !fertig) h += summe();
+      if (z.gruppe !== gruppe) { gruppe = z.gruppe; h += '<tr class="gruppe"><th colspan="3">' + T(gruppe === 'anbau' ? 'mpAnbau' : 'mpG_' + gruppe) + '</th></tr>'; }
+      var name = z.gruppe === 'innenausbau' ? tr('abGew_' + z.id) : z.gruppe === 'material' ? tr('maBt_' + z.id) + (z.material ? ': ' + z.material : '') : z.gruppe === 'daemmung' ? tr('hdStd_' + z.id) : z.gruppe === 'lueftung' ? tr('hlArt_' + z.id) : z.gruppe === 'grundstueck' ? gsName(z.art, z.name) : artName(z.id);
+      var leer = z.luecke && !(z.von > 0 || z.bis > 0), no = '<span class="mh-luecke">' + T('mpKeineAngabe') + '</span>';
+      h += '<tr data-k="' + z.gruppe + '/' + esc(z.id) + '"' + (leer ? ' data-luecke="1"' : ' data-von="' + z.von + '" data-bis="' + z.bis + '"') + '><td>' + esc(name) + '</td><td class="z">' + (leer ? no : esc(spanne(z.von, z.bis, z.einheit)) + (z.luecke ? '<span class="klein">+ ' + no + '</span>' : '')) + '</td><td>' + (leer ? '' : belege(z.belege)) + '</td></tr>';
+    });
+    if (!fertig) h += summe();
+    return sect('kosten', true, 'mpKosten', tab('<th>' + T('mpPosition') + '</th><th class="z">' + T('maSpanne') + '</th><th>' + T('regQuelle') + '</th>', h, ' data-kosten="1"') +
+      (ohne ? '<p class="klein" data-ohne-preis="' + ohne + '">' + T('mpOhnePreis', { n: ohne }) + '</p>' : '') + '<p class="mh-hinweis">' + schild() + ' ' + T('mpUeberschneid') + '</p>');
+  }
+  function regeln(m) {
+    var r = m.regeln, RG = window.GRUNDRISS_REGELN, s = r.summe, bau = [];
+    if (m.anbauAmpel) bau.push({ id: 'anbau', ampel: m.anbauAmpel.ampel, name: artName(m.anbauAmpel.art) + ' (' + nz(m.anbauAmpel.flaeche) + ' m²)' });
+    if (m.ausbau.grundstueck) m.ausbau.grundstueck.items.forEach(function (it) { if (!it.garten) bau.push({ id: it.id, ampel: it.ampel, name: artName(it.art) }); });
+    return sect('regeln', true, 'mpRegeln', '<p class="klein">' + T('regStichtag', { datum: datumDe(r.datum), land: m.kopf.landName, stand: datumDe(r.stand) }) + '</p><p data-regel-summe="1"><b>' + T('mpRegelSumme', { g: s.gruen, y: s.gelb, r: s.rot }) + '</b></p>' +
+      (r.zeilen.length ? '<ul class="mp-annahmen" data-regeln="1">' + r.zeilen.map(function (z) {
+        return '<li data-regel="' + esc(z.id) + '" data-ampel="' + z.ampel + '">' + chip(z.ampel, tr('ampel' + cap(z.ampel))) + ' <b>' + esc(z.name ? z.etage + ' · ' + z.name : tr('mpRegelHaus')) + ':</b> ' + esc(z.grund ? (RG && RG.pruefText ? RG.pruefText(z.grund, r.land) : z.grund.code) : '') + '</li>';
+      }).join('') + '</ul>' : '') +
+      (bau.length ? '<h4>' + T('mpBauantrag') + '</h4><ul class="mp-annahmen" data-bauantrag="1">' + bau.map(function (b) { return '<li data-baustein="' + esc(b.id) + '" data-ampel="' + b.ampel + '">' + chip(b.ampel, tr('anA_' + b.ampel)) + ' ' + esc(b.name) + '</li>'; }).join('') + '</ul>' : '') +
+      '<p class="mh-hinweis">' + schild() + ' ' + T('mpVerbindlich') + '</p>');
+  }
+  function fragen(m) {
+    var liste = function (items, f) { return items.length ? '<ul class="mp-annahmen">' + items.map(f).join('') + '</ul>' : '<p class="klein">–</p>'; };
+    return sect('fragen', true, 'mpFragen', '<ol class="mp-annahmen" data-fragen="' + m.fragen.length + '">' +
+      m.fragen.map(function (f) { return '<li data-frage="' + esc(f.typ + ':' + f.id) + '">' + esc(frageText(f)) + '</li>'; }).join('') + '</ol>') +
+      sect('annahmen', false, 'mpAnnahmen', liste(m.annahmen, function (a) { return '<li data-annahme="' + esc(a.id) + '">' + schild() + ' ' + esc(annahmeText(a)) + '</li>'; }) +
+        '<h4>' + T('mpKeineAngabe') + '</h4>' + liste(m.luecken, function (l) { return '<li data-luecke="' + esc(l.id) + '">' + esc(sach(l)) + '</li>'; }));
+  }
+
+  /* ---------- Öffnen und Drucken (Overlay, Escape, „Zurück“ und Fokus über app.js) ---------- */
+  var ov = $('g-mappe-ov'), inhalt = $('g-mappe-inhalt'), letzte = null;
+  function optionen() {
+    var o = { datum: RK.heute() }, a = window.GRUNDRISS_AUSBAU && window.GRUNDRISS_AUSBAU.zustand ? window.GRUNDRISS_AUSBAU.zustand() : null;
+    if (a) { o.stufe = a.stufe; o.altbelag = !!a.altbelag; o.putz = !!a.putz; }
+    return o;
+  }
+  function zeigen() {
+    var m = letzte.m;
+    $('g-mappe-blatt').setAttribute('lang', lang());
+    inhalt.innerHTML = deckblatt(m, letzte.drei) + grundrisse(letzte.bilder) + dreiD(letzte.drei) + raumliste(m) + ausbau(m) + kosten(m) + regeln(m) + fragen(m);
+  }
+  var msg = function (e) { return e && e.message ? e.message : '?'; };
+  function oeffnen() {
+    fehler(''); status.textContent = tr('mpBauen');
+    setTimeout(function () {
+      var m, bilder = [], drei;
+      status.textContent = '';
+      try { m = M.sammle(G.plan(), optionen()); } catch (e) { fehler(tr('mpTeilFehler', { teil: 'Mappe', grund: msg(e) })); return; }
+      if (!m.ok) { fehler(tr('mpFehlt_raeume')); return; }
+      if (!window.OVERLAY_OEFFNEN) { fehler(tr('mpTeilFehler', { teil: 'Ansicht', grund: 'app.js' })); return; }
+      try { bilder = G.etagenBilder(); } catch (e) { m.fehler.push({ teil: 'grundriss', grund: msg(e) }); }
+      try { drei = G.dreiBilder(['nord', 'ost', 'sued', 'west', 'oben'], 800, 600); } catch (e2) { drei = { fehler: msg(e2) }; }
+      letzte = { m: m, bilder: bilder, drei: drei };
+      zeigen();
+      window.OVERLAY_OEFFNEN('g-mappe-ov', '#g-mappe-auf', 'mh-h');
+    }, 30);
+  }
+  knopf.addEventListener('click', oeffnen);
+  $('g-mappe-plandatei').addEventListener('click', function () {
+    var ok = false;
+    try { ok = G.dateiSichern(); } catch (e) { ok = false; }
+    status.textContent = tr(ok ? 'mpPlandateiOk' : 'mpPlandateiFehler');
+  });
+  $('g-mappe-drucken').addEventListener('click', function () {
+    var f = $('g-mappe-ov-fehler');
+    try { f.hidden = true; window.print(); } catch (e) { f.textContent = tr('mpTeilFehler', { teil: 'print', grund: msg(e) }); f.hidden = false; }
+  });
+  window.addEventListener('sprachegewechselt', function () { if (!ov.hidden && letzte) zeigen(); });
+  window.GRUNDRISS_MAPPE = { oeffnen: oeffnen, letzte: function () { return letzte; } };
+})();
+
+</script>
 <script>/* karte3d.js */
 /* 3D-Ansicht der Deutschlandkarte (Three.js r160, global THREE): jeder Landkreis als Säule in seiner Form,
    Höhe = Wert der gewählten Ebene (0–100), Farbe = Ampel. Zeichnet nur bei Änderung oder Drehen (ruhig).
@@ -20002,7 +20539,7 @@ window.TEXTE = {
       zusatz: 'Nur die Zahlen der Mappe, ohne Notizen und ohne Besichtigung.', linkText: 'Zum Selbstrechnen (öffnet den leeren Rechner):' },
     grundriss: { bereich: 'grundriss', titel: 'Grundriss und Einrichtung', formSel: null, satz: 'g-satz', eingaben: [],
       ergebnis: [['Wohnfläche', 'g-wfl'], ['Nutzfläche', 'g-nfl'], ['Einrichtung', 'g-einr'], ['Umbau', 'g-umb'], ['Innenausbau (Karte)', 'g-ausbau-kopfzeile'], ['Heizwärme (Karte Material)', 'g-material-kopfzeile'], ['Anbau (Karte)', 'g-anbau-kopfzeile'], ['Grundstück (Karte)', 'g-grund-kopfzeile']],
-      zusatz: 'Der gezeichnete Grundriss selbst steckt nicht im Link.' },
+      zusatz: 'Der gezeichnete Grundriss selbst steckt nicht im Link. Für den Hausbauer: unten im Grundriss „Mappe für den Hausbauer“ (PDF) und „Plandatei sichern“.' },
     monteur: { bereich: 'monteur', titel: 'Monteurzimmer: Rechnet es sich?', formSel: '#monteur input[type="text"], #monteur input[type="range"]', dl: 'mz-ergebnis',
       eingaben: ['mz-betten', 'mz-preis', 'mz-beleg', 'mz-fix', 'mz-var', 'mz-abgabe'] },
     'st-a': { bereich: 'steuern', ohne: ['r-objekt'], fokus: 'st-a', titel: 'Steuern sparen: 15-Prozent-Prüfer', formSel: STFORM, satz: 'st-a-satz', dl: 'st-a-ergebnis', hinweisId: 'st-a-quelle',
@@ -21041,7 +21578,7 @@ window.TEXTE = {
     document.querySelectorAll(SEITE_TEILE).forEach(function (e) { e.inert = true; });
     overlayAuf.hidden = false; overlayAuf.scrollTop = 0;
     document.documentElement.classList.add('overlay-offen');
-    if (id === 'mappe-ov') document.body.classList.add('mappe-offen');
+    if (id === 'mappe-ov' || id === 'g-mappe-ov') document.body.classList.add(id === 'mappe-ov' ? 'mappe-offen' : 'g-mappe-offen');
     $(fokusId).focus({ preventScroll: true });
   }
   function overlaySchliessen() {
@@ -21050,11 +21587,12 @@ window.TEXTE = {
     overlayAuf.hidden = true; overlayAuf = null; overlaySel = null;
     document.querySelectorAll(SEITE_TEILE).forEach(function (e) { e.inert = false; });
     document.documentElement.classList.remove('overlay-offen');
-    document.body.classList.remove('mappe-offen');
+    document.body.classList.remove('mappe-offen', 'g-mappe-offen');
     if (war === 'bes-ov') zeigeMerkKarten();
     var a = sel ? document.querySelector(sel) : null;
     if (a) a.focus();
   }
+  window.OVERLAY_OEFFNEN = overlayOeffnen;   /* auch für die Mappe für den Hausbauer (grundriss_mappe.js) */
   document.addEventListener('click', function (ev) { if (ev.target.closest('[data-overlay-zu]')) overlaySchliessen(); });
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && overlayAuf) { ev.preventDefault(); overlaySchliessen(); } });
 
