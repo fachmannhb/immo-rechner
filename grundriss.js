@@ -184,6 +184,14 @@
       if (typeof ep0.oel_eur100l === 'number' && isFinite(ep0.oel_eur100l) && ep0.oel_eur100l > 0) ep.oel_eur100l = klemme(ep0.oel_eur100l, 0.01, 999.99);
       if (Object.keys(ep).length) neu.energiepreise = ep;
     }
+    /* Welle D, Teil 3: plan.anbau = { art, flaeche_m2, hoehe_m }, optional (eine unbekannte art bleibt stehen, die Karte meldet sie) */
+    if (p.anbau && typeof p.anbau === 'object' && !Array.isArray(p.anbau)) {
+      var ab0 = p.anbau, ab = {};
+      if (idOk(ab0.art)) ab.art = ab0.art;
+      if (typeof ab0.flaeche_m2 === 'number' && isFinite(ab0.flaeche_m2) && ab0.flaeche_m2 > 0) ab.flaeche_m2 = klemme(ab0.flaeche_m2, 1, 500);
+      if (typeof ab0.hoehe_m === 'number' && isFinite(ab0.hoehe_m) && ab0.hoehe_m > 0) ab.hoehe_m = klemme(ab0.hoehe_m, 1, 10);
+      if (Object.keys(ab).length) neu.anbau = ab;
+    }
     neu.preise = {}; neu.mengen = {};
     Object.keys(p.preise || {}).forEach(function (k) { var v = Number(p.preise[k]); if (isFinite(v) && v >= 0) neu.preise[k] = v; });
     Object.keys(p.mengen || {}).forEach(function (k) { var v = Number(p.mengen[k]); if (isFinite(v) && v >= 0) neu.mengen[k] = v; });
@@ -240,6 +248,7 @@
     if (window.GRUNDRISS_FORMEN) window.GRUNDRISS_FORMEN.aktualisieren();
     if (window.GRUNDRISS_AUSBAU) window.GRUNDRISS_AUSBAU.aktualisieren();   /* Welle D, Teil 2a: Innenausbau, Material und Umbau-Hinweis */
     if (window.GRUNDRISS_HUELLE) window.GRUNDRISS_HUELLE.aktualisieren();   /* Welle D, Teil 2b: Dämmstandard, Lüftung, Wasser */
+    if (window.GRUNDRISS_ANBAU) window.GRUNDRISS_ANBAU.aktualisieren();     /* Welle D, Teil 3: Anbau */
     clearTimeout(speicherTimer);
     speicherTimer = setTimeout(function () {
       try {

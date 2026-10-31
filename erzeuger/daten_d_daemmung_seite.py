@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Erzeugt daten/daemmung_seite.js, die schlanke Fassung von daten/daemmung_lueftung.js fuer die Seite (Welle D, Teil 2b).
 Nur die Zeilen, die die Karten "Wie gut gedaemmt?" und "Frische Luft" zeigen, plus die dort referenzierten Quellen; das Feld "ref" faellt weg.
-Nicht eingebettet: kamin, brennholz, wintergarten_anbau, grill_feuerstelle, gmodg_anlage7 (die Grenzwerte stehen schon in daten/material_seite.js unter anlage7),
+Seit Welle D Teil 3 eingebettet: wintergarten_anbau (sieben von neun Zeilen; weggelassen: wg_rahmen, nur Material ohne Montage, und wg_verfahrensfrei, eine Luecke, die verfahrensfrei.js schliesst). Nicht eingebettet: kamin, brennholz, grill_feuerstelle, gmodg_anlage7 (die Grenzwerte stehen schon in daten/material_seite.js unter anlage7),
 die Liste gmodg, nicht gezeigte Zeilen und die Widersprueche (sie stehen in der README, Tabelle Welle D Teil 2b).
 daten/daemmung_lueftung.js bleibt vollstaendig im Repository (die Seite darf Zeilen nur weglassen, nie aendern).
 Aufruf (im Ordner werkzeuge):  python -I -X utf8 erzeuger/daten_d_daemmung_seite.py"""
@@ -21,6 +21,8 @@ BEHALTEN = {
     'beg_einzelmassnahmen': ['beg_huelle', 'beg_hoechst', 'beg_lueftung_satz', 'beg_lueftung_wbg', 'beg_lueftung_nachweis', 'beg_alter'],
     'passivhaus': ['ph_heizwaerme', 'ph_luft', 'ph_mehrkosten'],
     'lueftung': ['lu_dez_abluft', 'lu_dez_wrg', 'lu_zentral', 'lu_zentral2', 'lu_strom', 'lu_strom2', 'lu_wrg_praxis', 'lu_filter_wechsel', 'lu_filter_preis', 'lu_luecke'],
+    # Welle D Teil 3 (Karte "Anbau und Nebengebäude"): alle Zeilen der Liste, nur das Feld ref fällt weg
+    'wintergarten_anbau': ['wg_kalt', 'wg_warm', 'wg_gesamt', 'wg_gmodg', 'wg_anbau_kosten', 'wg_abstand', 'wg_sachsen'],
 }
 
 obj = {'meta': {k: v for k, v in OBJ_VOLL['meta'].items() if k in ('titel', 'abruf')}}   # der lange Hinweistext bleibt in daemmung_lueftung.js
