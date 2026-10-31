@@ -1396,6 +1396,32 @@
   .gs-ul { margin: 4px 0 8px; padding-left: 20px; }
   .gs-ul li { margin: 6px 0; }
   .gs-weg svg.sym { width: 1.2em; height: 1.2em; vertical-align: -3px; }
+  .au-block { margin: 8px 0 16px; padding: 12px 16px; border: 2px solid var(--linie); border-radius: 14px; background: var(--karte); min-width: 0; }
+  .au-pers { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 8px 0; }
+  .au-pers-name svg.sym, .au-name svg.sym { width: 1.5em; height: 1.5em; vertical-align: -4px; margin-right: 6px; color: var(--akzent-text); }
+  .au-pm { min-width: 44px; min-height: 44px; font-size: 1.3rem; padding: 0 12px; }
+  .au-pers-k { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; }
+  .au-pers-zahl { min-width: 2ch; text-align: center; font-size: 1.2rem; }
+  .au-zeile { display: grid; grid-template-columns: minmax(110px, 150px) minmax(0, 1fr) auto; gap: 6px 14px; align-items: center; margin: 14px 0; padding-top: 10px; border-top: 1px solid var(--linie); min-width: 0; }
+  .au-spur { position: relative; display: block; height: 24px; border-radius: 999px; background: var(--linie); border: 1px solid var(--linie2); overflow: hidden; }
+  .au-fuell { display: block; height: 100%; background: var(--c1); }
+  .au-keine .au-spur { background: none; border: 2px dashed var(--leise); }
+  .au-marke, .au-pkt { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1px; background: var(--text); opacity: .8; }
+  .au-zahl-box { display: inline-flex; align-items: center; gap: 8px; }
+  .au-zahl { font-size: 1.15rem; white-space: nowrap; }
+  .au-text, .au-hilfe { grid-column: 1 / -1; min-width: 0; overflow-wrap: anywhere; }
+  .au-text p, .au-stufen li { margin: 4px 0; }
+  .au-sprung svg.sym { width: 1.1em; height: 1.1em; vertical-align: -2px; }
+  .au-stufen { list-style: none; margin: 6px 0; padding: 0; }
+  .au-pkt { position: static; display: inline-block; width: 4px; height: 14px; margin: 0 8px -2px 0; }
+  .au-pkt-voll { width: 14px; border-radius: 4px; background: var(--c1); opacity: 1; }
+  .gs-verkn { margin: 8px 0; padding: 8px 12px; border-left: 4px solid var(--c3); background: var(--leer-fl); border-radius: 8px; }
+  .gs-verkn p { margin: 4px 0; }
+  .gs-a-keine .gs-form { stroke: var(--c3); }
+  .gs-k-keine { border-left-color: var(--c3); }
+  .gs-gart { min-height: 64px; }
+  .gs-gart .es-var-kopf svg.sym { width: 2em; height: 2em; }
+  @media (max-width: 760px) { .au-zeile { grid-template-columns: minmax(0, 1fr) auto; } .au-name { grid-column: 1 / -1; } .au-spur { grid-column: 1; } }
   @media (max-width: 760px) { .an-reihe { grid-template-columns: minmax(0, 1fr); } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 </style>
@@ -1504,6 +1530,8 @@
   <symbol id="i-gs-brunnen" viewBox="0 0 24 24"><path d="M5 20h14M6 20v-9M18 20v-9M4 11h16M7 11V6h10v5M12 6V3M12 11v6M10 17h4"/></symbol>
   <symbol id="i-gs-regentank" viewBox="0 0 24 24"><path d="M6 20V8c0-2.5 12-2.5 12 0v12c0 2.5-12 2.5-12 0M6 8c0 2.5 12 2.5 12 0M12 11c-1.5 2-2 3-2 4a2 2 0 0 0 4 0c0-1-.5-2-2-4z"/></symbol>
   <symbol id="i-gs-kleinwind" viewBox="0 0 24 24"><path d="M12 11v10M9 21h6M12 11V3M12 11l6.5 4M12 11l-6.5 4"/><circle cx="12" cy="11" r="1.2"/></symbol>
+  <symbol id="i-gs-beet" viewBox="0 0 24 24"><path d="M3 20h18M5 20c0-3 2-5 4-5M19 20c0-3-2-5-4-5M12 20v-9M12 14c-3 0-5-2-5-5 3 0 5 2 5 5zM12 12c0-3 2-5 5-5 0 3-2 5-5 5z"/></symbol>
+  <symbol id="i-gs-baum" viewBox="0 0 24 24"><path d="M12 21v-7M12 14c-4 0-7-3-7-6.5a7 7 0 0 1 14 0C19 11 16 14 12 14zM9.5 8h.01M14 6.5h.01M13.5 10h.01"/></symbol>
   <symbol id="i-gs-wr" viewBox="0 0 24 24"><path d="M3 20h18M6 20v-7l6-5 6 5v7M10 20v-4h4v4"/></symbol>
   <symbol id="i-gs-wa" viewBox="0 0 24 24"><path d="M2 20h20M3 20v-6l4-4 4 4v6M13 20v-8l4-4 4 4v8M5.5 20v-3h3v3"/></symbol>
   <symbol id="i-gs-gewerbe" viewBox="0 0 24 24"><path d="M3 20h18M4 20v-8l5 3v-3l5 3V6h5v14M7 17h2M12 17h2"/></symbol>
@@ -2799,6 +2827,7 @@
         <p class="klein" data-t="gsKurz">Stellen Sie das Grundstück ein, schieben Sie Ihr Haus darauf und setzen Sie Bausteine wie Gartenhaus, Pool oder Wallbox. Unten steht, ob es einen Bauantrag braucht und was es ungefähr kostet.</p>
         <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="gsKeineBeratung">Eigene Einordnung aus den gelesenen Landesbauordnungen, keine Rechts- oder Bauberatung. Abstände sind nur gemessen. Bebauungsplan und Landesbauordnung bei der Bauaufsicht prüfen.</span></p>
         <div id="g-grund-inhalt">
+          <div id="gs-autark"></div>
           <div id="gs-steuer"></div>
           <div id="gs-plan"></div>
           <div id="gs-auswahl" aria-live="polite"></div>
@@ -7255,9 +7284,7 @@ window.TEXTE = {
     gsKeineBeratung: { de: 'Eigene Einordnung aus den gelesenen Landesbauordnungen, keine Rechts- oder Bauberatung. Abstände sind nur gemessen. Bebauungsplan und Landesbauordnung bei der Bauaufsicht prüfen.',
       en: 'Own classification from the state building codes read, not legal or building advice. Distances are only measured. Check the development plan and state building code with the building authority.',
       ru: 'Собственная оценка по прочитанным нормам земель, не консультация. Расстояния только измерены. План застройки и нормы земли уточните в строительном надзоре.' },
-    gsVerknuepfung: { de: 'Die Bausteine ändern noch nichts an Wohnfläche, Heizwärme, Strom oder Wasser des Hauses. Diese Verknüpfungen (zum Beispiel Regenwassertank mit der Wasser-Karte) kommen im nächsten Teil.',
-      en: 'The items do not yet change living area, heat demand, electricity or water of the house. These links (for example rain tank with the water card) come in the next part.',
-      ru: 'Постройки пока не меняют жилую площадь, потребность в тепле, электричестве и воде дома. Такие связи (например, бак для дождевой воды) появятся в следующей части.' },
+    gsVerknuepfung: { de: 'Die Bausteine ändern Wohnfläche, Heizwärme, Strom und Wasser des Hauses nicht und schalten in den anderen Karten nichts um. Regentank und Wallbox zeigen nur den Stand der zuständigen Karte.', en: 'The items do not change living area, heat, electricity or water of the house and switch nothing in other cards. Rain tank and wall box only show the state of the card responsible.', ru: 'Постройки не меняют площадь, тепло, электричество и воду дома и ничего не переключают в других картах. Бак и зарядная станция лишь показывают состояние ответственной карты.' },
     gsGroesse: { de: 'Wie groß ist das Grundstück?', en: 'How big is the plot?', ru: 'Какого размера участок?' },
     gsBreite: { de: 'Breite', en: 'Width', ru: 'Ширина' },
     gsTiefe: { de: 'Tiefe', en: 'Depth', ru: 'Глубина' },
@@ -7364,7 +7391,70 @@ window.TEXTE = {
     gs_gebiet_gw: { de: 'Gewerbe/Außenbereich', en: 'commercial / outside area', ru: 'промзона / внешняя зона' },
     gsGebietAnnahme: { de: 'Angenommen: allgemeines Wohngebiet. Bei einem anderen Gebiet ändert sich das Ergebnis.', en: 'Assumed: general residential area. In another area the result changes.', ru: 'Принято: общая жилая зона. В другой зоне результат иной.' },
     gsGebietWo: { de: 'Das Baugebiet steht im Bebauungsplan; Auskunft gibt die Gemeinde (Bauamt).', en: 'The zoning area is in the development plan; the municipality (building office) can tell you.', ru: 'Зона указана в плане застройки; информацию даёт община (стройотдел).' },
-    gsKopf: { de: 'Grundstück {g} m², bebaut {p} %, {n} Bausteine ({grau} grau, {rot} rot)', en: 'Plot {g} m², built on {p}%, {n} items ({grau} grey, {rot} red)', ru: 'Участок {g} м², застроено {p} %, построек {n} ({grau} серых, {rot} красных)' }
+    gsKopf: { de: 'Grundstück {g} m², bebaut {p} %, {n} Bausteine ({grau} grau, {rot} rot)', en: 'Plot {g} m², built on {p}%, {n} items ({grau} grey, {rot} red)', ru: 'Участок {g} м², застроено {p} %, построек {n} ({grau} серых, {rot} красных)' },
+    /* Welle E, Teil 2: Block „Wie autark ist Ihr Haus?“, Garten-Bausteine, verknüpfte Bausteine */
+    auTitel: { de: 'Wie autark ist Ihr Haus?', en: 'How self-sufficient is your house?', ru: 'Насколько дом самообеспечен?' },
+    auErkl: { de: 'Wie viel Ihr Haus selbst erzeugt oder sammelt, statt es zu kaufen.', en: 'How much your house produces or collects itself instead of buying it.', ru: 'Сколько дом производит или собирает сам, вместо того чтобы покупать.' },
+    au_strom: { de: 'Strom', en: 'Electricity', ru: 'Электричество' },
+    au_wasser: { de: 'Wasser', en: 'Water', ru: 'Вода' },
+    au_waerme: { de: 'Wärme', en: 'Heat', ru: 'Тепло' },
+    au_essen: { de: 'Essen', en: 'Food', ru: 'Еда' },
+    auAria: { de: '{name}: {p} Prozent', en: '{name}: {p} percent', ru: '{name}: {p} процентов' },
+    auKeineAngabe: { de: 'Keine Angabe', en: 'No figure', ru: 'Нет данных' },
+    auPersonen: { de: 'Personen im Haus', en: 'People in the house', ru: 'Людей в доме' },
+    auPersMinus: { de: 'Eine Person weniger', en: 'One person less', ru: 'На одного человека меньше' },
+    auPersPlus: { de: 'Eine Person mehr', en: 'One person more', ru: 'На одного человека больше' },
+    auPersGesetzt: { de: '{n} Personen im Haus.', en: '{n} people in the house.', ru: 'Людей в доме: {n}.' },
+    auPersAnnahme: { de: 'Angenommen: 3 Personen, bis Sie die Zahl ändern. Die Wasser-Karte nutzt dieselbe Zahl.', en: 'Assumed: 3 people until you change it. The water card uses the same number.', ru: 'Предположено: 3 человека, пока вы не измените. Карта воды использует то же число.' },
+    auGrund: { de: 'Grund: {grund}.', en: 'Reason: {grund}.', ru: 'Причина: {grund}.' },
+    auZu_strom: { de: 'Zur Energie-Karte', en: 'To the energy card', ru: 'К карте энергии' },
+    auZu_wasser: { de: 'Zur Wasser-Karte', en: 'To the water card', ru: 'К карте воды' },
+    auZu_daemmung: { de: 'Zur Dämm-Karte', en: 'To the insulation card', ru: 'К карте утепления' },
+    auZu_beet: { de: 'Zum Gemüsebeet', en: 'To the vegetable bed', ru: 'К грядке' },
+    auSprungFehlt: { de: 'Die Karte ist auf dieser Seite nicht da.', en: 'That card is not on this page.', ru: 'Этой карты нет на странице.' },
+    auFehltStrom: { de: 'Es fehlt eine Solaranlage: Zeichnen Sie Räume mit Dach, dann wählen Sie in der Energie-Karte die Dachflächen.', en: 'No solar system yet: draw rooms with a roof, then choose roof areas in the energy card.', ru: 'Нет солнечной станции: нарисуйте комнаты с крышей и выберите скаты в карте энергии.' },
+    auQuelleStrom: { de: 'Wert der Energie-Karte (Solaranlage auf dem Dach).', en: 'Value from the energy card (solar system on the roof).', ru: 'Значение из карты энергии (солнечная станция на крыше).' },
+    auStromPers: { de: 'Die Energie-Karte rechnet mit {n} Personen, dieser Block mit {m}. Stellen Sie es dort ein.', en: 'The energy card uses {n} people, this block {m}. Change it there.', ru: 'Карта энергии считает на {n} чел., этот блок на {m}. Меняется там.' },
+    auMitAuto: { de: ' und Elektroauto', en: ' and electric car', ru: ' и электромобиль' },
+    auStromRechnung: { de: 'Aus der Energie-Karte: selbst genutzter Solarstrom geteilt durch Ihren Stromverbrauch (Haus{auto}), {kwp} kWp auf dem Dach, {n} Personen.', en: 'From the energy card: self-used solar power divided by your electricity use (house{auto}), {kwp} kWp on the roof, {n} people.', ru: 'Из карты энергии: использованный солнечный ток, делённый на потребление (дом{auto}), {kwp} кВт на крыше, {n} чел.' },
+    auFehltWasser_aus: { de: 'Regenwasser nutzen ist in der Wasser-Karte ausgeschaltet.', en: 'Using rainwater is switched off in the water card.', ru: 'Использование дождевой воды выключено в карте воды.' },
+    auFehltWasser_keinDach: { de: 'Es fehlt ein Dach für die Regenwasser-Rechnung.', en: 'A roof is missing for the rainwater calculation.', ru: 'Для расчёта дождевой воды нет крыши.' },
+    auFehltWasser_keinPlan: { de: 'Es sind noch keine Räume gezeichnet.', en: 'No rooms are drawn yet.', ru: 'Комнаты ещё не нарисованы.' },
+    auFehltWasser_fehler: { de: 'Die Regenwasser-Rechnung ging nicht, Grund in der Wasser-Karte.', en: 'The rainwater calculation failed, see the water card for the reason.', ru: 'Расчёт дождевой воды не удался, причина в карте воды.' },
+    auWasserGruen: { de: 'Bei einem Gründach nennt die Wasser-Karte keinen Ertrag, darum keine Zahl.', en: 'With a green roof the water card gives no yield, so there is no figure.', ru: 'Для зелёной крыши карта воды не даёт урожайность, поэтому числа нет.' },
+    auQuelleWasser: { de: 'Wert der Wasser-Karte (Regenwasser für WC und Waschmaschine).', en: 'Value from the water card (rainwater for toilet and washing machine).', ru: 'Значение из карты воды (дождевая вода для туалета и стиралки).' },
+    auWasserRechnung: { de: 'Aus der Wasser-Karte: Regenwasser für WC und Waschmaschine ({ntw} l im Jahr) geteilt durch den ganzen Wasserbedarf ({ges} l, {n} Personen). Mitte {mitte} %, Spanne {von} bis {bis} %.', en: 'From the water card: rainwater for toilet and washing machine ({ntw} l a year) divided by total water use ({ges} l, {n} people). Middle {mitte}%, range {von} to {bis}%.', ru: 'Из карты воды: дождевая вода для туалета и стиралки ({ntw} л в год), делённая на всё потребление ({ges} л, {n} чел.). Среднее {mitte} %, диапазон от {von} до {bis} %.' },
+    auWaermeBedarf: { de: 'Heizwärmebedarf des Hauses: {kwh} kWh im Jahr ({m2} kWh je m²).', en: 'Heat demand of the house: {kwh} kWh a year ({m2} kWh per m²).', ru: 'Потребность дома в тепле: {kwh} кВт·ч в год ({m2} кВт·ч на м²).' },
+    auWaermeKeine: { de: 'Was davon Holz vom eigenen Grundstück oder eine Wärmepumpe mit eigenem Solarstrom deckt, belegen die Daten nicht. Darum keine Zahl.', en: 'How much of it own wood or a heat pump on own solar power covers is not backed by the data. So no figure.', ru: 'Сколько из этого покроют свои дрова или тепловой насос на своём токе, данные не подтверждают. Числа нет.' },
+    auWaermeOffen: { de: 'Der Heizwärmebedarf ist noch nicht berechenbar ({grund}). Eigene Deckung belegen die Daten ohnehin nicht.', en: 'The heat demand cannot be calculated yet ({grund}). The data do not back own coverage anyway.', ru: 'Потребность в тепле пока не рассчитать ({grund}). Собственное покрытие данные всё равно не подтверждают.' },
+    auWaermeRechnung: { de: 'Der Bedarf kommt aus der Dämm-Karte. Die Energie-Daten rechnen nur Solarthermie, keinen Solarstrom für Wärmepumpen und keinen Holzertrag: keine Schätzung.', en: 'The demand comes from the insulation card. The energy data cover only solar thermal, no solar power for heat pumps, no wood yield: no estimate.', ru: 'Потребность из карты утепления. Данные по энергии считают только гелиоколлекторы, без тока для насосов и дров: оценки нет.' },
+    auEssenKeineDaten: { de: 'Die Flächenwerte je Person fehlen in den Daten.', en: 'The area values per person are missing in the data.', ru: 'В данных нет площадей на человека.' },
+    auEssenLeer: { de: 'Noch kein Gemüsebeet. Setzen Sie eines im Garten (Bild unten), dann steigt der Balken.', en: 'No vegetable bed yet. Place one in the garden (picture below) and the bar rises.', ru: 'Грядок пока нет. Поставьте грядку в саду (кнопка ниже), и полоса вырастет.' },
+    auEssenSatz: { de: '{a} m² Beet für {n} Personen.', en: '{a} m² of beds for {n} people.', ru: '{a} м² грядок на {n} чел.' },
+    auStufe_gemuese: { de: 'Gemüse', en: 'Vegetables', ru: 'Овощи' },
+    auStufe_kartoffeln: { de: 'mit Kartoffeln', en: 'with potatoes', ru: 'с картофелем' },
+    auStufe_voll: { de: 'fast alles', en: 'almost everything', ru: 'почти всё' },
+    auBis: { de: 'bis', en: 'to', ru: 'до' },
+    auStufeFlaeche: { de: '({fl} m² je Person, bei {n} Personen {bed} m²)', en: '({fl} m² per person, for {n} people {bed} m²)', ru: '({fl} м² на человека, на {n} чел. {bed} м²)' },
+    auObstNichtGezaehlt: { de: '{n} Obstbaum/-bäume gesetzt: werden gezeigt, aber nicht gezählt, weil die Daten keine Fläche je Baum nennen.', en: '{n} fruit tree(s) placed: shown but not counted, because the data give no area per tree.', ru: 'Поставлено деревьев: {n}. Они показаны, но не учтены, так как в данных нет площади на дерево.' },
+    auEssenRechnung: { de: 'Beetfläche geteilt durch (Fläche je Person mal Personen). Die Zahl am Balken ist der Anteil an „fast alles“ (Mitte der Spanne, {vm} m² je Person); die zwei Striche zeigen „Gemüse“ und „mit Kartoffeln“. Höchstens 100 %.', en: 'Bed area divided by (area per person times people). The figure is the share of “almost everything” (middle of the range, {vm} m² per person); the two marks show “vegetables” and “with potatoes”. At most 100%.', ru: 'Площадь грядок, делённая на (площадь на человека × число людей). Число: доля «почти всё» (середина диапазона, {vm} м² на человека); две черты показывают «овощи» и «с картофелем». Не больше 100 %.' },
+    auEssenAnnahme: { de: 'Eigene Einordnung nach Flächen aus einem Ratgeber, keine Kalorien- oder Kilorechnung.', en: 'Own classification by areas from a guide, not a calorie or kilo calculation.', ru: 'Собственная оценка по площадям из руководства, не расчёт калорий или килограммов.' },
+    auEssenNicht: { de: 'Nicht gezählt: Obstbäume (keine Fläche je Baum in den Daten), Hühner und Bienen (keine Ertragsdaten).', en: 'Not counted: fruit trees (no area per tree in the data), chickens and bees (no yield data).', ru: 'Не учтены: плодовые деревья (нет площади на дерево), куры и пчёлы (нет данных об урожае).' },
+    auEinordnung: { de: 'Eigene Einordnung, keine Empfehlung. Strom, Wasser und Wärme liest dieser Block nur aus den Karten, die sie rechnen.', en: 'Own classification, not a recommendation. Electricity, water and heat are only read from the cards that calculate them.', ru: 'Собственная оценка, не рекомендация. Электричество, воду и тепло блок только читает из карт, которые их считают.' },
+    gsGartenTitel: { de: 'Garten', en: 'Garden', ru: 'Сад' },
+    gsArt_gemuesebeet: { de: 'Gemüsebeet', en: 'Vegetable bed', ru: 'Грядка' },
+    gsArt_obstbaum: { de: 'Obstbaum', en: 'Fruit tree', ru: 'Плодовое дерево' },
+    anA_keine: { de: 'Kein Gebäude, keine Ampel', en: 'Not a building, no traffic light', ru: 'Не здание, без светофора' },
+    gsStatusGesetztGarten: { de: '{name} ist gesetzt. Ziehen oder Pfeiltasten verschieben es.', en: '{name} is placed. Drag it or use the arrow keys to move it.', ru: '{name} поставлен. Тяните или стрелками, чтобы передвинуть.' },
+    gsGartenKarte_gemuesebeet: { de: 'Kein Gebäude, keine Ampel, keine Kosten. Die Fläche ({f} m²) geht in den Essen-Balken oben.', en: 'Not a building, no light, no costs. The area ({f} m²) feeds the food bar above.', ru: 'Не здание, без светофора и стоимости. Площадь ({f} м²) идёт в полосу «Еда» выше.' },
+    gsGartenKarte_obstbaum: { de: 'Kein Gebäude, keine Ampel. Der Baum wird gezeigt, aber nicht gezählt: keine Fläche je Baum in den Daten.', en: 'Not a building, no light. The tree is shown but not counted: no area per tree in the data.', ru: 'Не здание, без светофора. Дерево показано, но не учтено: в данных нет площади на дерево.' },
+    gsGartenAnnahme: { de: 'Startgröße (Beet 2 × 3 m, Baum 3 × 3 m) ist eine Annahme; ändern Sie sie mit den Reglern.', en: 'Start size (bed 2 × 3 m, tree 3 × 3 m) is an assumption; change it with the sliders.', ru: 'Начальный размер (грядка 2 × 3 м, дерево 3 × 3 м) это предположение; меняйте ползунками.' },
+    gsVerknSatz: { de: 'Dieser Baustein schaltet dort nichts um. Eingestellt wird in der genannten Karte.', en: 'This item does not switch anything there. Settings are made in the card named.', ru: 'Этот элемент там ничего не переключает. Настройки меняются в указанной карте.' },
+    gsVerkn_regentank_ja: { de: 'Regenwasser nutzen: Ja, laut Wasser-Karte.', en: 'Use rainwater: yes, according to the water card.', ru: 'Использовать дождевую воду: да, по карте воды.' },
+    gsVerkn_regentank_nein: { de: 'Regenwasser nutzen: Nein, laut Wasser-Karte.', en: 'Use rainwater: no, according to the water card.', ru: 'Использовать дождевую воду: нет, по карте воды.' },
+    gsVerkn_wallbox_ja: { de: 'Elektroauto mit Wallbox: Ja, laut Energie-Karte.', en: 'Electric car with wall box: yes, according to the energy card.', ru: 'Электромобиль с зарядной станцией: да, по карте энергии.' },
+    gsVerkn_wallbox_nein: { de: 'Elektroauto mit Wallbox: Nein, laut Energie-Karte.', en: 'Electric car with wall box: no, according to the energy card.', ru: 'Электромобиль с зарядной станцией: нет, по карте энергии.' },
+    gsVerkn_waermepumpe: { de: 'Keine Karte dieser Seite rechnet eine Wärmepumpe. Der Baustein zeigt nur Lage, Ampel und Kosten.', en: 'No card on this page calculates a heat pump. The item only shows position, light and costs.', ru: 'Ни одна карта здесь не считает тепловой насос. Элемент показывает только место, светофор и стоимость.' },
   };
   window.TEXTE = window.TEXTE || {};
   Object.keys(T).forEach(function (k) { window.TEXTE[k] = T[k]; });
@@ -9617,10 +9707,19 @@ window.TEXTE = {
     else res.neubau = !!(plan && (plan.vorlage || plan.beispiel));   /* Annahme: ein Plan aus einer Vorlage gilt als Neubau */
     return res;
   }
+  /* Welle E, Teil 2: Personen im Haus, eine gemeinsame Stelle im Plan (plan.personen, 1 bis 12). Fehlt sie, gilt der ältere Wert plan.wasser.personen (alte Pläne), sonst die Annahme 3. */
+  function personenPlan(plan) {
+    var kandidaten = [plan && plan.personen, plan && plan.wasser && typeof plan.wasser === 'object' ? plan.wasser.personen : undefined];
+    for (var i = 0; i < kandidaten.length; i++) {
+      var p = Number(kandidaten[i]);
+      if (kandidaten[i] != null && kandidaten[i] !== '' && isFinite(p) && p >= 1 && p <= 12) return { n: Math.round(p), explizit: true };
+    }
+    return { n: ANNAHMEN.personen, explizit: false };
+  }
   function planWasser(plan) {
     var pw = plan && plan.wasser && typeof plan.wasser === 'object' ? plan.wasser : {}, res = { personen: ANNAHMEN.personen, regenwasser: true, gruendach: false, haerte: 'mittel', enthaertung: false, preis: null, meldung: null, explizit: {} };
-    var p = Number(pw.personen);
-    if (isFinite(p) && p >= 1 && p <= 12) { res.personen = Math.round(p); res.explizit.personen = true; }
+    var pp = personenPlan(plan);
+    if (pp.explizit) { res.personen = pp.n; res.explizit.personen = true; }
     if (typeof pw.regenwasser === 'boolean') { res.regenwasser = pw.regenwasser; res.explizit.regenwasser = true; }
     if (typeof pw.gruendach === 'boolean') res.gruendach = pw.gruendach;
     if (typeof pw.enthaertung === 'boolean') res.enthaertung = pw.enthaertung;
@@ -10034,7 +10133,27 @@ window.TEXTE = {
     return res;
   }
 
+  /* Welle E, Teil 2: Regenwasser des Plans in einem Rechenweg (Wasser-Karte und Autarkie-Block). status: aus | keinDach | gruen | fehler | ok; Anteil am Wasserbedarf = rw.autarkie.mitte */
+  function wasserBilanz(plan, pwIn) {
+    var pw = pwIn || planWasser(plan), land = (plan && plan.land) || 'HB';
+    if (!pw.regenwasser) return { status: 'aus', pw: pw, land: land };
+    var dr = dachflaecheRegen(plan);
+    if (!dr.ok) return { status: 'keinDach', pw: pw, dr: dr, land: land };
+    var rw = regenwasser(dr.projektion, land, pw.personen, { gruendach: pw.gruendach, preisEurM3: pw.preis });
+    if (!rw.ok) return { status: 'fehler', pw: pw, dr: dr, rw: rw, land: land };
+    if (rw.gruendach) return { status: 'gruen', pw: pw, dr: dr, rw: rw, land: land };
+    return { status: 'ok', pw: pw, dr: dr, rw: rw, land: land };
+  }
+  /* Heizwärmebedarf des Hauses im Jahr mit dem gewählten Dämmstandard und der gewählten Lüftung (dieselben Parameter wie die Dämm-Karte) */
+  function waermeBedarf(plan) {
+    if (!plan || !AK) return { ok: false, grund: 'keinPlan' };
+    var hw = heizwaermeMitStandard(plan, { standard: planStandard(plan).id, lueftungsart: planLueftung(plan).art });
+    if (!hw.ok || !hw.gesamt) return { ok: false, grund: hw.grund || 'keineHuelle' };
+    return { ok: true, kwh: hw.gesamt.kwh, kwhM2: hw.gesamt.kwhM2, wohnflaeche: hw.wohnflaeche, standard: hw.standard };
+  }
+
   var api = {
+    personenPlan: personenPlan, wasserBilanz: wasserBilanz, waermeBedarf: waermeBedarf,
     ANNAHMEN: ANNAHMEN, STANDARDS: STANDARDS, KFW_STUFEN: KFW_STUFEN, LUEFTUNG_ARTEN: LUEFTUNG_ARTEN, HAERTEN: HAERTEN, TRAEGER: TRAEGER,
     planStandard: planStandard, planLueftung: planLueftung, planWasser: planWasser, energiepreise: energiepreise, oelCtProKwh: oelCtProKwh, heizkosten: heizkosten,
     daemmstandards: daemmstandards, luftVolumen: luftVolumen, lueftungsverlust: lueftungsverlust, wrgGrad: wrgGrad, heizwaermeMitStandard: heizwaermeMitStandard,
@@ -10325,7 +10444,17 @@ window.TEXTE = {
     { id: 'bienenstock', b: 1, t: 1, h: 1, max: 3 },
     { id: 'fischteich', b: 4, t: 3, h: 1.5, max: 20 }
   ];
-  function artInfo(id) { for (var i = 0; i < ARTEN.length; i++) if (ARTEN[i].id === id) return ARTEN[i]; return null; }
+  /* Welle E, Teil 2: Garten-Bausteine (kein Gebäude, keine Bauantrag-Ampel, keine Kosten- oder Pflichtzeilen). Sie stehen nicht in ARTEN, damit die Bildleiste der Gebäude und Anlagen gleich bleibt.
+     Gemüsebeet: Fläche speist den Essen-Balken. Obstbaum: wird gezeigt, aber nicht gezählt (die Daten nennen keine Fläche je Baum). Startgrößen sind eigene Annahmen. */
+  var GARTEN = [
+    { id: 'gemuesebeet', b: 2, t: 3, h: 0.3, max: 30, garten: true },
+    { id: 'obstbaum', b: 3, t: 3, h: 3, max: 10, garten: true }
+  ];
+  function artInfo(id) {
+    for (var i = 0; i < ARTEN.length; i++) if (ARTEN[i].id === id) return ARTEN[i];
+    for (var j = 0; j < GARTEN.length; j++) if (GARTEN[j].id === id) return GARTEN[j];
+    return null;
+  }
   function zahlOk(x) { return typeof x === 'number' && isFinite(x); }
   function klemme(x, lo, hi) { return Math.min(hi, Math.max(lo, x)); }
   function r2(x) { return Math.round(x * 100) / 100; }
@@ -10408,11 +10537,16 @@ window.TEXTE = {
     return { links: r2(g.hausX), rechts: r2(g.breite - (g.hausX + h.b)), oben: r2(g.hausY), unten: r2(g.tiefe - (g.hausY + h.t)) };
   }
   function flaechen(s) {
-    var grund = r2(s.g.breite * s.g.tiefe), haus = s.haus ? s.haus.flaeche : 0, bs = 0;
-    s.items.forEach(function (it) { bs += it.b * it.t; });
+    var grund = r2(s.g.breite * s.g.tiefe), haus = s.haus ? s.haus.flaeche : 0, bs = 0, beet = 0, baeume = 0, nBeet = 0, nBaum = 0;
+    /* Welle E, Teil 2: Beete und Obstbäume sind nicht bebaut (kein Gebäude); sie zählen nicht zur bebauten Fläche, das Gemüsebeet speist den Essen-Balken */
+    s.items.forEach(function (it) {
+      if (it.art === 'gemuesebeet') { beet += it.b * it.t; nBeet++; }
+      else if (it.art === 'obstbaum') { baeume += it.b * it.t; nBaum++; }
+      else bs += it.b * it.t;
+    });
     bs = r2(bs);
     var bebaut = r2(haus + bs);
-    return { grund: grund, haus: haus, bausteine: bs, bebaut: bebaut, prozent: grund > 0 ? Math.round(bebaut / grund * 1000) / 10 : 0, frei: r2(grund - bebaut) };
+    return { grund: grund, haus: haus, bausteine: bs, bebaut: bebaut, prozent: grund > 0 ? Math.round(bebaut / grund * 1000) / 10 : 0, frei: r2(grund - bebaut), beet: r2(beet), beete: nBeet, baeume: r2(baeume), baumAnzahl: nBaum };
   }
 
   /* ---------- Daten zu einem Baustein ---------- */
@@ -10442,6 +10576,7 @@ window.TEXTE = {
     s.zaehlung = { gruen: 0, gelb: 0, rot: 0, grau: 0 };
     s.items.forEach(function (it) {
       it.flaeche = r2(it.b * it.t);
+      if (artInfo(it.art).garten) { it.garten = true; it.vf = null; it.ampel = 'keine'; it.daten = { kosten: [], pflichten: [], werte: [] }; return; }   /* Welle E, Teil 2: Garten-Baustein, keine Ampel, nicht in der Zählung */
       /* Tiefe nur für das Terrassendach (Bremen: Vorbau bis 3,50 m Tiefe); Annahme: die Tiefe des Bausteins (t) ist die Tiefe senkrecht zur Außenwand, der Text legt die Bezugsgröße nicht fest */
       it.vf = AK.verfahrensfrei(it.art, land, it.flaeche, it.h, it.art === 'terrassendach' ? it.t : null, { ofen: it.ofen, gebiet: it.gebiet });
       it.ampel = it.vf && it.vf.ok ? it.vf.summe.ampel : 'grau';
@@ -10551,12 +10686,84 @@ window.TEXTE = {
   }
 
   var API = {
-    ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, GRUND_MIN: GRUND_MIN, GRUND_MAX: GRUND_MAX, MASS_MIN: MASS_MIN, HOEHE_MAX: HOEHE_MAX, MAX_BAUSTEINE: MAX_BAUSTEINE,
+    ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, GARTEN: GARTEN, GRUND_MIN: GRUND_MIN, GRUND_MAX: GRUND_MAX, MASS_MIN: MASS_MIN, HOEHE_MAX: HOEHE_MAX, MAX_BAUSTEINE: MAX_BAUSTEINE,
     artInfo: artInfo, hausUmriss: hausUmriss, startGrund: startGrund, normalisiere: normalisiere, abstaende: abstaende, flaechen: flaechen, datenZu: datenZu, rechne: rechne,
     bausteinHinzu: bausteinHinzu, bausteinEntfernen: bausteinEntfernen, bausteinSetzen: bausteinSetzen, bausteinOption: bausteinOption, grundstueckSetzen: grundstueckSetzen, festschreiben: festschreiben, ueberlappt: ueberlappt,
     platzKasten: platzKasten
   };
   root.GRUNDSTUECK_KERN = API;
+  if (typeof module !== 'undefined' && module.exports) module.exports = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>/* autarkie_kern.js */
+/* Kern „Wie autark ist Ihr Haus?“ (Welle E, Teil 2), rein, Node-fähig (tmp/autarkie_kern_test.js). Strom, Wasser und Wärme werden hier nur eingeordnet (Wert, „fehlt“, „Keine Angabe“), nicht gerechnet;
+   Essen = Beetfläche / (Fläche je Person × Personen) für drei Stufen aus daten/grundstueck.js (a_gemuese, a_kartoffeln, a_voll). Zahl am Balken: Anteil „fast alles“ mit der Mitte der Spanne. Details: README. */
+(function (root) {
+  'use strict';
+  var GK = root.GRUNDSTUECK_KERN || (typeof require === 'function' ? require('./grundstueck_kern.js') : null);
+
+  function klemme(x, lo, hi) { return Math.min(hi, Math.max(lo, x)); }
+  function zahlOk(x) { return typeof x === 'number' && isFinite(x); }
+  var STUFEN = [['gemuese', 'a_gemuese'], ['kartoffeln', 'a_kartoffeln'], ['voll', 'a_voll']];
+
+  /* Stufen aus den Daten: je Stufe Fläche je Person (von, bis) und der Beleg (Quelle, Abruf, Status) */
+  function stufenDaten() {
+    var liste = GK && GK.datenZu ? GK.datenZu('autarkie').werte : [], out = {};
+    STUFEN.forEach(function (s) {
+      var e = liste.filter(function (w) { return w.id === s[1]; })[0];
+      if (e && zahlOk(e.von) && zahlOk(e.bis) && e.von > 0 && e.bis >= e.von) out[s[0]] = { id: e.id, von: e.von, bis: e.bis, mitte: (e.von + e.bis) / 2, beleg: e };
+    });
+    return out.gemuese && out.kartoffeln && out.voll ? out : null;
+  }
+
+  /* Essen: Beetfläche in m², Personen. Prozentwerte 0 bis 100, bei 100 gedeckelt. */
+  function essen(flaecheM2, personen) {
+    var st = stufenDaten();
+    if (!st) return { ok: false, grund: 'keineDaten' };
+    var P = zahlOk(personen) && personen >= 1 ? Math.round(personen) : 3, A = zahlOk(flaecheM2) && flaecheM2 > 0 ? flaecheM2 : 0;
+    function pr(jeP) { return Math.round(klemme(A / (jeP * P), 0, 1) * 100000) / 1000; }
+    var res = { ok: true, flaeche: A, personen: P, stufen: {}, erreicht: null };
+    STUFEN.forEach(function (s) {
+      var d = st[s[0]];
+      /* größere Fläche je Person → kleinerer Anteil: von = niedrigster, bis = höchster Anteil */
+      res.stufen[s[0]] = { id: d.id, jeP: { von: d.von, bis: d.bis, mitte: d.mitte }, bedarf: { von: d.von * P, bis: d.bis * P }, von: pr(d.bis), bis: pr(d.von), mitte: pr(d.mitte), beleg: d.beleg };
+      if (A >= d.bis * P - 1e-9) res.erreicht = s[0];   /* sicher erreicht: Fläche reicht auch am oberen Ende der Spanne */
+    });
+    res.prozent = res.stufen.voll.mitte;
+    res.skala = { gemuese: res.stufen.gemuese.jeP.mitte / res.stufen.voll.jeP.mitte * 100, kartoffeln: res.stufen.kartoffeln.jeP.mitte / res.stufen.voll.jeP.mitte * 100, voll: 100 };
+    return res;
+  }
+
+  /* Strom: Antwort von GRUNDRISS_ENERGIE.autarkie() ({ ok, anteil, personen, kwp, … } oder { ok:false, grund }) */
+  function strom(x) {
+    if (!x || !x.ok) return { id: 'strom', status: 'fehlt', prozent: 0, grund: x && x.grund ? x.grund : 'keineKarte', karte: 'strom' };
+    return { id: 'strom', status: 'wert', prozent: klemme(x.anteil, 0, 1) * 100, personen: x.personen, kwp: x.kwp, mitAuto: !!x.mitAuto, karte: 'strom' };
+  }
+  /* Wasser: Antwort von HUELLE_KERN.wasserBilanz() (status aus | keinDach | gruen | fehler | ok | keinPlan) */
+  function wasser(b) {
+    if (!b) return { id: 'wasser', status: 'fehlt', prozent: 0, grund: 'keinPlan', karte: 'wasser' };
+    if (b.status === 'ok') {
+      var a = b.rw.autarkie;
+      return { id: 'wasser', status: 'wert', prozent: klemme(a.mitte, 0, 1) * 100, von: klemme(a.von, 0, 1) * 100, bis: klemme(a.bis, 0, 1) * 100, personen: b.rw.personen, karte: 'wasser', rw: b.rw };
+    }
+    if (b.status === 'gruen') return { id: 'wasser', status: 'keine', prozent: null, grund: 'gruen', karte: 'wasser' };
+    return { id: 'wasser', status: 'fehlt', prozent: 0, grund: b.status, karte: 'wasser' };
+  }
+  /* Wärme: die Daten belegen keine Deckung (Holz, Wärmepumpe mit eigenem Solarstrom), also nie eine Zahl */
+  function waerme(w) {
+    return { id: 'waerme', status: 'keine', prozent: null, grund: w && w.ok ? 'keineDeckung' : (w && w.grund) || 'keinPlan', bedarfKwh: w && w.ok ? w.kwh : null, bedarfKwhM2: w && w.ok ? w.kwhM2 : null, karte: 'daemmung' };
+  }
+  function essenZeile(flaecheM2, personen) {
+    var e = essen(flaecheM2, personen);
+    return { id: 'essen', status: e.ok ? 'wert' : 'fehlt', prozent: e.ok ? e.prozent : 0, grund: e.ok ? '' : e.grund, essen: e, karte: 'beet' };
+  }
+  function alle(eing) {
+    return [strom(eing.strom), wasser(eing.wasser), waerme(eing.waerme), essenZeile(eing.flaeche, eing.personen)];
+  }
+
+  var API = { STUFEN: STUFEN, stufenDaten: stufenDaten, essen: essen, strom: strom, wasser: wasser, waerme: waerme, essenZeile: essenZeile, alle: alle };
+  root.AUTARKIE_KERN = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -12745,6 +12952,8 @@ window.TEXTE = {
       if (typeof p.lueftung.neubau === 'boolean') lu.neubau = p.lueftung.neubau;
       if (Object.keys(lu).length) neu.lueftung = lu;
     }
+    /* Welle E, Teil 2: Personen im Haus, gemeinsame Stelle für Wasser-Karte und Autarkie-Block (1 bis 12); ältere Pläne haben nur plan.wasser.personen, das bleibt gültig */
+    if (typeof p.personen === 'number' && isFinite(p.personen)) neu.personen = Math.round(klemme(p.personen, 1, 12));
     if (p.wasser && typeof p.wasser === 'object' && !Array.isArray(p.wasser)) {
       var wa = {}, pw0 = p.wasser;
       if (typeof pw0.personen === 'number' && isFinite(pw0.personen)) wa.personen = Math.round(klemme(pw0.personen, 1, 12));
@@ -15346,7 +15555,17 @@ window.TEXTE = {
   }
   function alle(voll, struktur) {
     instanzen.forEach(function (inst) { if (inst.gebaut) aktualisiere(inst, !!struktur || !!voll); });
+    autarkieMelden();
   }
+  /* Welle E, Teil 2: Lese-Funktion für den Autarkie-Block (Karte Grundstück): Autarkiegrad der gewählten Variante, derselbe Wert wie in dieser Karte (Haus plus Auto) */
+  function autarkieLesen() {
+    if (!planInst) return { ok: false, grund: 'keineKarte' };
+    var ein = eingaben(planInst), res = K.rechne(ein.rechnung);
+    if (!res.ok) return { ok: false, grund: res.fehler ? res.fehler.code : 'unbekannt', personen: S.personen };
+    var x = res.varianten[res.gewaehlteVariante];
+    return { ok: true, anteil: x.autarkie, kwp: res.kwp, erzeugung: res.erzeugung, verbrauch: res.verbrauch.gesamt, personen: res.verbrauch.personen, variante: res.gewaehlteVariante, mitAuto: !!(res.auto && res.auto.an) };
+  }
+  function autarkieMelden() { if (window.GRUNDRISS_GRUNDSTUECK && window.GRUNDRISS_GRUNDSTUECK.autarkieNeu) window.GRUNDRISS_GRUNDSTUECK.autarkieNeu(); }
 
   function bauen(inst) {
     if (inst.gebaut || !inst.wurzel) return;
@@ -15384,6 +15603,7 @@ window.TEXTE = {
         inst.kopfEl.textContent = res.ok ? tr('esKopfZeile', { kwp: n1(res.kwp), kwh: n0(res.erzeugung) }) : tr('esKopfLeer');
       }
     });
+    autarkieMelden();
   }
   function aktualisieren() { clearTimeout(timer); timer = setTimeout(jetzt, 150); }
   window.addEventListener('sprachegewechselt', function () { instanzen.forEach(function (i) { if (i.gebaut) { i.wurzel.innerHTML = geruestHtml(i); i.landHtml = null; i.sigFl = null; i.sigStruktur = null; } }); jetzt(); });
@@ -15392,6 +15612,7 @@ window.TEXTE = {
     aktualisieren: aktualisieren, jetzt: jetzt,
     ergebnis: function (modus) { var i = instanzen.filter(function (x) { return x.modus === (modus || 'plan'); })[0]; return i ? i.letzte : null; },
     zustand: function () { return JSON.parse(JSON.stringify(S)); },
+    autarkie: autarkieLesen,
     setze: function (o) { Object.keys(o || {}).forEach(function (k) { if (k === 'auto') Object.keys(o.auto).forEach(function (a) { S.auto[a] = o.auto[a]; }); else S[k] = o[k]; }); speichern(); alle(false, true); },
     auswahl: function (liste) { if (liste) { planAuswahl = liste.slice(); alle(false, true); } return planAuswahl && planAuswahl.slice(); },
     ausPlan: function () { if (freiInst) planInFrei(freiInst); speichern(); alle(false, true); }
@@ -16592,16 +16813,16 @@ window.TEXTE = {
   function wasserErgebnisHtml(c) {
     if (c.leer || c.fehler) return '';
     var pw = c.pw, plan = c.plan, land = plan.land || 'HB', h = '';
-    var dr = HK.dachflaecheRegen(plan);
-    if (!pw.regenwasser) {
+    var wb = HK.wasserBilanz(plan, pw), dr = wb.dr;   /* Welle E, Teil 2: ein Rechenweg für diese Karte und den Autarkie-Block */
+    if (wb.status === 'aus') {
       h += '<p class="es-satz klein-satz" data-wasser-satz="aus">' + esc(tr('hwAus')) + '</p>' + enthaertungHtml(c);
       c.rw = null;
       return h;
     }
-    if (!dr.ok) { h += '<p class="ab-meldung fehler" role="alert" data-fehler="dach">' + esc(tr('hwKeinDach')) + '</p>'; c.rw = null; return h + enthaertungHtml(c); }
-    var rw = HK.regenwasser(dr.projektion, land, pw.personen, { gruendach: pw.gruendach, preisEurM3: pw.preis });
+    if (wb.status === 'keinDach') { h += '<p class="ab-meldung fehler" role="alert" data-fehler="dach">' + esc(tr('hwKeinDach')) + '</p>'; c.rw = null; return h + enthaertungHtml(c); }
+    var rw = wb.rw;
     c.rw = rw; c.dr = dr;
-    if (!rw.ok) { h += '<p class="ab-meldung fehler" role="alert" data-fehler="regen">' + esc(tr('hwFehler', { grund: rw.grund })) + '</p>'; return h + enthaertungHtml(c); }
+    if (wb.status === 'fehler') { h += '<p class="ab-meldung fehler" role="alert" data-fehler="regen">' + esc(tr('hwFehler', { grund: rw.grund })) + '</p>'; return h + enthaertungHtml(c); }
     var nd = rw.niederschlag;
     if (rw.gruendach) {
       h += '<p class="es-satz klein-satz" data-wasser-satz="gruen">' + esc(tr('hwGruenSatz')) + '</p><p class="klein">' + luecke('hdKeineAngabe') + ' ' + esc(tr('hwGruenLuecke')) + ' ' + quelleHtml(rw.belegGruen) + '</p>';
@@ -16671,6 +16892,7 @@ window.TEXTE = {
       FEHLER_IDS.forEach(function (id) { meldeFehler(id, t); });
     }
     teilweise = false;
+    if (window.GRUNDRISS_GRUNDSTUECK && window.GRUNDRISS_GRUNDSTUECK.autarkieNeu) window.GRUNDRISS_GRUNDSTUECK.autarkieNeu();   /* Autarkie-Block liest Wasser und Wärme von dieser Karte */
   }
   function aktualisieren() { clearTimeout(timer); var nur = teilweise; timer = setTimeout(function () { jetzt(nur); }, 150); }
 
@@ -16700,7 +16922,8 @@ window.TEXTE = {
     var a = t.getAttribute('data-hu');
     if (a === 'personen') {
       var p = Math.round(+t.value), lab = byId('hw-personen-wert'); if (lab) lab.textContent = p; t.setAttribute('aria-valuetext', tr('hwPersonenText', { n: p }));
-      teilweise = true; planFeld('wasser', 'personen', p); return;
+      /* Welle E, Teil 2: Personen im Haus liegen an einer gemeinsamen Stelle (plan.personen); plan.wasser.personen bleibt für ältere Stände mit gleichem Wert */
+      teilweise = true; G.plan().personen = p; planFeld('wasser', 'personen', p); return;
     }
     if (ev.type !== 'change') return;
     if (a === 'gruendach') { planFeld('wasser', 'gruendach', !!t.checked); return; }
@@ -16763,7 +16986,10 @@ window.TEXTE = {
       var hw = HK.heizwaermeMitStandard(cc.plan, { bilanz: cc.bilanz });
       return hw.ok && hw.gesamt ? hw.gesamt.kwhM2 : null;
     },
-    ergebnis: function () { return ctx; }
+    ergebnis: function () { return ctx; },
+    /* Welle E, Teil 2: Lese-Funktionen für den Autarkie-Block der Karte Grundstück (rechnen nichts anderes als diese Karte: HK.wasserBilanz, HK.waermeBedarf, HK.planWasser) */
+    wasserAutarkie: function () { var plan = G.plan(); return hatRaeume(plan) ? HK.wasserBilanz(plan) : { status: 'keinPlan', pw: HK.planWasser(plan) }; },
+    waermeBedarf: function () { var plan = G.plan(); return hatRaeume(plan) ? HK.waermeBedarf(plan) : { ok: false, grund: 'keineRaeume' }; }
   };
   setTimeout(function () { jetzt(); }, 0);
 })();
@@ -17101,7 +17327,8 @@ window.TEXTE = {
   function m(x) { return nz(Math.round(x * 10) / 10); }   /* Meter mit höchstens einer Stelle */
   function m2(x) { return new Intl.NumberFormat(W.lang(), { maximumFractionDigits: 2 }).format(x); }
 
-  var ICON = { gartenhaus: 'i-an-gartenhaus', garage_carport: 'i-an-garage', terrassendach: 'i-an-terrasse', sauna: 'i-gs-sauna', pool: 'i-gs-pool', gewaechshaus: 'i-gs-gewaechshaus', brunnen: 'i-gs-brunnen', regentank: 'i-gs-regentank',
+  var AU = window.AUTARKIE_KERN, HK = window.HUELLE_KERN;
+  var ICON = { gemuesebeet: 'i-gs-beet', obstbaum: 'i-gs-baum', gartenhaus: 'i-an-gartenhaus', garage_carport: 'i-an-garage', terrassendach: 'i-an-terrasse', sauna: 'i-gs-sauna', pool: 'i-gs-pool', gewaechshaus: 'i-gs-gewaechshaus', brunnen: 'i-gs-brunnen', regentank: 'i-gs-regentank',
     kleinwind: 'i-gs-kleinwind', waermepumpe: 'i-gs-waermepumpe', wallbox: 'i-gs-wallbox', huehnerstall: 'i-gs-huhn', bienenstock: 'i-gs-biene', fischteich: 'i-gs-fisch' };
   var ctx = null, auswahl = null, loeschFrage = null, timer = null, teilweise = false, drag = null, hinweisZeigen = true, statusText = '';
   try { hinweisZeigen = localStorage.getItem('immo-gs-hinweis') !== '1'; } catch (e0) { hinweisZeigen = true; }
@@ -17134,7 +17361,122 @@ window.TEXTE = {
       return '<button type="button" class="es-var gs-art' + erst + '" data-gs="neu" data-wert="' + a.id + '" data-fk="neu-' + a.id + '" aria-label="' + esc(tr('gsSetzen', { name: artName(a.id) })) + '">' +
         '<span class="es-var-kopf">' + symbol(ICON[a.id]) + '<b>' + esc(artName(a.id)) + '</b></span></button>';
     }).join('') + '</div>';
+    /* Welle E, Teil 2: Garten-Bausteine (Gemüsebeet, Obstbaum), eigene Reihe, kein Gebäude */
+    h += '<h4 class="es-h5">' + symbol('i-gs-beet') + esc(tr('gsGartenTitel')) + '</h4><div class="ab-stufen gs-arten gs-garten" role="group" aria-label="' + esc(tr('gsGartenTitel')) + '">' + GK.GARTEN.map(function (a) {
+      return '<button type="button" class="es-var gs-gart" data-gs="neu" data-wert="' + a.id + '" data-fk="neu-' + a.id + '" aria-label="' + esc(tr('gsSetzen', { name: artName(a.id) })) + '">' +
+        '<span class="es-var-kopf">' + symbol(ICON[a.id]) + '<b>' + esc(artName(a.id)) + '</b></span></button>';
+    }).join('') + '</div>';
     return h;
+  }
+
+  /* ---------- Block „Wie autark ist Ihr Haus?“ (Welle E, Teil 2): liest Strom (GRUNDRISS_ENERGIE.autarkie), Wasser (HUELLE_KERN.wasserBilanz) und Wärme (waermeBedarf), rechnet nur Essen (AUTARKIE_KERN) ---------- */
+  var AU_ICON = { strom: 'i-blitz', wasser: 'i-tropfen', waerme: 'i-flamme', essen: 'i-gs-beet' };
+  var AU_KARTE = { strom: 'g-strom-details', wasser: 'g-wasser-details', daemmung: 'g-daemmung-details' };
+  function rng(a, b, f) { var x = f(a), y = f(b); return x === y ? x : x + ' ' + tr('auBis') + ' ' + y; }   /* eine Zahl, wenn Anfang und Ende gleich aussehen */
+  function pc(x) { return n0(Math.round(x * 10) / 10); }
+  function autarkDaten(c) {
+    var plan = G.plan(), pers = HK ? HK.personenPlan(plan) : { n: 3, explizit: false };
+    var E = window.GRUNDRISS_ENERGIE, H = window.GRUNDRISS_HUELLE;
+    var strom = E && E.autarkie ? E.autarkie() : { ok: false, grund: 'keineKarte' };
+    var wasser = H && H.wasserAutarkie ? H.wasserAutarkie() : null;
+    var waerme = H && H.waermeBedarf ? H.waermeBedarf() : null;
+    return { pers: pers, zeilen: AU.alle({ strom: strom, wasser: wasser, waerme: waerme, flaeche: c.flaechen.beet, personen: pers.n }), baeume: c.flaechen.baumAnzahl, beete: c.flaechen.beete, beet: c.flaechen.beet };
+  }
+  function auSprung(ziel, text) {
+    return '<button type="button" class="knopf mittel zweit au-sprung" data-gs="sprung" data-wert="' + ziel + '" data-fk="au-sp-' + ziel + '">' + symbol(ziel === 'beet' ? 'i-gs-beet' : 'i-pfeil-ab') + ' ' + esc(text) + '</button>';
+  }
+  function auHilfe(id, inhalt) {
+    return '<div class="klein au-hilfe" id="' + id + '"' + (hilfeOffen[id] ? '' : ' hidden') + '>' + inhalt + '</div>';
+  }
+  function auZeile(z, d) {
+    var id = z.id, name = tr('au_' + id), keine = z.status === 'keine', fehlt = z.status === 'fehlt', hid = 'au-h-' + id;
+    var zahlTxt = keine ? tr('auKeineAngabe') : pc(z.prozent) + ' %';
+    var aria = keine ? name + ': ' + tr('auKeineAngabe') : tr('auAria', { name: name, p: pc(z.prozent) });
+    var h = '<div class="au-zeile au-' + z.status + '" data-au="' + id + '" data-status="' + z.status + '" data-prozent="' + (z.prozent == null ? '' : z.prozent.toFixed(2)) + '">';
+    h += '<span class="au-name">' + symbol(AU_ICON[id]) + '<b>' + esc(name) + '</b></span>';
+    h += '<span class="au-spur" role="img" aria-label="' + esc(aria) + '">' + (keine ? '' : '<span class="au-fuell" style="width:' + klemme100(z.prozent) + '%"></span>');
+    if (id === 'essen' && z.essen && z.essen.ok) h += '<span class="au-marke" style="left:' + z.essen.skala.gemuese.toFixed(2) + '%" data-marke="gemuese"></span><span class="au-marke" style="left:' + z.essen.skala.kartoffeln.toFixed(2) + '%" data-marke="kartoffeln"></span>';
+    h += '</span>';
+    h += '<span class="au-zahl-box"><b class="au-zahl es-zahl" data-au-zahl="' + id + '" data-prozent="' + (z.prozent == null ? '' : z.prozent.toFixed(2)) + '">' + esc(zahlTxt) + '</b>' + hilfeKnopf(hid) + '</span>';
+    h += '<div class="au-text">';
+    var q = '', rechnung = '';
+    if (id === 'strom') {
+      if (fehlt) h += '<p data-au-satz="strom">' + esc(tr('auFehltStrom')) + ' <span class="klein">' + esc(tr('auGrund', { grund: z.grund })) + '</span></p>' + auSprung('strom', tr('auZu_strom'));
+      else {
+        h += '<p class="klein" data-au-satz="strom">' + esc(tr('auQuelleStrom')) + '</p>';
+        if (z.personen !== d.pers.n) h += '<p class="klein" data-au-pers-abw="1">' + annahmeSchild() + ' ' + esc(tr('auStromPers', { n: z.personen, m: d.pers.n })) + '</p>';
+        h += auSprung('strom', tr('auZu_strom'));
+      }
+      rechnung = fehlt ? tr('auFehltStrom') : tr('auStromRechnung', { n: z.personen, kwp: n1(z.kwp), auto: z.mitAuto ? tr('auMitAuto') : '' });
+    } else if (id === 'wasser') {
+      if (fehlt) h += '<p data-au-satz="wasser">' + esc(tr('auFehltWasser_' + z.grund, { grund: z.grund })) + '</p>' + auSprung('wasser', tr('auZu_wasser'));
+      else if (keine) h += '<p data-au-satz="wasser">' + esc(tr('auWasserGruen')) + '</p>' + auSprung('wasser', tr('auZu_wasser'));
+      else { h += '<p class="klein" data-au-satz="wasser">' + esc(tr('auQuelleWasser')) + '</p>' + auSprung('wasser', tr('auZu_wasser')); }
+      if (z.rw) { rechnung = tr('auWasserRechnung', { mitte: pc(z.prozent), von: pc(z.von), bis: pc(z.bis), n: z.personen, ges: n0(z.rw.gesamtbedarf), ntw: n0(z.rw.bedarfNtw) }); q = quelleHtml(z.rw.belegVerbrauch) + ' ' + quelleHtml(z.rw.niederschlag && z.rw.niederschlag.beleg); }
+      else rechnung = tr('auQuelleWasser');
+    } else if (id === 'waerme') {
+      if (z.bedarfKwh != null) h += '<p data-au-satz="waerme"><span class="es-zahl" data-bedarf="' + z.bedarfKwh.toFixed(0) + '">' + esc(tr('auWaermeBedarf', { kwh: n0(z.bedarfKwh), m2: n0(z.bedarfKwhM2) })) + '</span> ' + esc(tr('auWaermeKeine')) + '</p>';
+      else h += '<p data-au-satz="waerme">' + esc(tr('auWaermeOffen', { grund: z.grund })) + '</p>';
+      h += auSprung('daemmung', tr('auZu_daemmung'));
+      rechnung = tr('auWaermeRechnung');
+    } else {
+      var e = z.essen;
+      if (!e || !e.ok) h += '<p data-au-satz="essen">' + esc(tr('auEssenKeineDaten')) + '</p>';
+      else {
+        if (!(e.flaeche > 0)) h += '<p data-au-satz="essen">' + esc(tr('auEssenLeer')) + '</p>' + auSprung('beet', tr('auZu_beet'));
+        else h += '<p data-au-satz="essen" class="es-zahl" data-flaeche="' + e.flaeche + '">' + esc(tr('auEssenSatz', { a: m2(e.flaeche), n: e.personen })) + '</p>';
+        h += '<ul class="au-stufen">' + ['gemuese', 'kartoffeln', 'voll'].map(function (k) {
+          var s = e.stufen[k], spanne = rng(s.von, s.bis, pc) + ' %';
+          return '<li data-au-stufe="' + k + '" data-von="' + s.von + '" data-bis="' + s.bis + '" data-mitte="' + s.mitte + '"' + (e.erreicht === k ? ' data-erreicht="1"' : '') + '><i class="au-pkt au-pkt-' + k + '" aria-hidden="true"></i><b>' + esc(tr('auStufe_' + k)) + '</b>: <span class="es-zahl">' + esc(spanne) + '</span> ' +
+            '<span class="klein">' + esc(tr('auStufeFlaeche', { fl: rng(s.jeP.von, s.jeP.bis, nz), n: e.personen, bed: rng(s.bedarf.von, s.bedarf.bis, n0) })) + '</span></li>';
+        }).join('') + '</ul>';
+        if (d.baeume > 0) h += '<p class="klein" data-au-baum="1">' + esc(tr('auObstNichtGezaehlt', { n: d.baeume })) + '</p>';
+        rechnung = tr('auEssenRechnung', { vm: nz(e.stufen.voll.jeP.mitte) });
+        q = quelleHtml(e.stufen.voll.beleg);
+      }
+    }
+    h += '</div>';
+    h += auHilfe(hid, '<p>' + esc(rechnung) + '</p>' + (id === 'essen' ? '<p>' + annahmeSchild() + ' ' + esc(tr('auEssenAnnahme')) + '</p><p>' + esc(tr('auEssenNicht')) + '</p>' : '') + (q ? '<p>' + q + '</p>' : ''));
+    return h + '</div>';
+  }
+  function klemme100(p) { return Math.max(0, Math.min(100, p || 0)).toFixed(2); }
+  function autarkHtml(c) {
+    if (!AU || !HK) return '<p class="ab-meldung fehler" role="alert">' + esc(tr('gsFehlerDaten', { grund: 'autarkie_kern.js oder huelle_kern.js fehlt.' })) + '</p>';
+    var d = autarkDaten(c), h = '<div class="au-block" data-au-block="1">';
+    h += '<div class="g-kopfzeile"><h4 class="es-h5">' + symbol('i-sonne') + esc(tr('auTitel')) + '</h4></div>';
+    h += '<p class="klein" data-au-erkl="1">' + esc(tr('auErkl')) + '</p>';
+    h += '<div class="au-pers" data-au-pers="' + d.pers.n + '"><span class="au-pers-name">' + symbol('i-bett') + esc(tr('auPersonen')) + '</span>' +
+      '<span class="au-pers-k"><button type="button" class="knopf mittel zweit au-pm" data-gs="pers-" data-fk="au-pers-minus" aria-label="' + esc(tr('auPersMinus')) + '"' + (d.pers.n <= 1 ? ' disabled' : '') + '>−</button>' +
+      '<b class="au-pers-zahl es-zahl" aria-live="polite">' + d.pers.n + '</b>' +
+      '<button type="button" class="knopf mittel zweit au-pm" data-gs="pers+" data-fk="au-pers-plus" aria-label="' + esc(tr('auPersPlus')) + '"' + (d.pers.n >= 12 ? ' disabled' : '') + '>+</button></span></div>';
+    if (!d.pers.explizit) h += '<p class="klein" data-au-annahme="personen">' + annahmeSchild() + ' ' + esc(tr('auPersAnnahme')) + '</p>';
+    d.zeilen.forEach(function (z) { h += auZeile(z, d); });
+    h += '<p class="klein" data-au-hinweis="1">' + annahmeSchild() + ' ' + esc(tr('auEinordnung')) + '</p>';
+    return h + '</div>';
+  }
+  var tAutark = null;
+  function autarkieNeu() {
+    clearTimeout(tAutark);
+    tAutark = setTimeout(function () {
+      var d = byId('g-grund-details');
+      if (!d || !d.open || !byId('gs-autark')) return;
+      try { zeichneTeil('gs-autark', autarkHtml, ctx || rechne()); meldeFehler('g-grund-fehler', ''); }
+      catch (e) { meldeFehler('g-grund-fehler', tr('gsFehlerRechnen', { grund: e && e.message ? e.message : e })); }
+    }, 40);
+  }
+  /* Sprung zur zuständigen Karte: Karte aufklappen, in den Blick holen, Fokus auf ihre Kopfzeile (kein heimliches Umschalten) */
+  function sprung(ziel) {
+    if (ziel === 'beet') {
+      var b = document.querySelector('.gs-gart[data-wert=gemuesebeet]');
+      if (b) { b.scrollIntoView({ block: 'center', behavior: 'auto' }); b.focus({ preventScroll: true }); }
+      return;
+    }
+    var det = byId(AU_KARTE[ziel]);
+    if (!det) { sage(tr('auSprungFehlt')); return; }
+    det.open = true;
+    var sm = det.querySelector('summary');
+    det.scrollIntoView({ block: 'start', behavior: 'auto' });
+    if (sm) sm.focus({ preventScroll: true });
   }
 
   /* ---------- Plan (SVG) ---------- */
@@ -17334,6 +17676,19 @@ window.TEXTE = {
     return '<li data-gs-' + art + '="' + esc(z.id) + '">' + zahl + (art === 'pflichten' ? '<b>' : '') + esc(z.name) + (art === 'pflichten' ? '</b>' : '') +
       (z.hinweis ? ' <span class="klein">' + esc(z.hinweis) + '</span>' : '') + ' <span class="klein">' + quelleHtml(b) + '</span></li>';
   }
+  /* Regenwassertank, Wallbox und Wärmepumpe: Stand der zuständigen Karte anzeigen und dorthin springen; hier wird nichts umgeschaltet */
+  function verknuepftHtml(it) {
+    var s = '', sp = '';
+    if (it.art === 'regentank' && HK) {
+      var ja = HK.planWasser(G.plan()).regenwasser;
+      s = tr(ja ? 'gsVerkn_regentank_ja' : 'gsVerkn_regentank_nein'); sp = auSprung('wasser', tr('auZu_wasser'));
+    } else if (it.art === 'wallbox' && window.GRUNDRISS_ENERGIE && window.GRUNDRISS_ENERGIE.zustand) {
+      var au = window.GRUNDRISS_ENERGIE.zustand().auto || {}, jaW = !!(au.an && au.wallbox);
+      s = tr(jaW ? 'gsVerkn_wallbox_ja' : 'gsVerkn_wallbox_nein'); sp = auSprung('strom', tr('auZu_strom'));
+    } else if (it.art === 'waermepumpe') s = tr('gsVerkn_waermepumpe');
+    if (!s) return '';
+    return '<div class="gs-verkn" data-gs-verkn="' + it.art + '"><p>' + esc(s) + '</p>' + (it.art === 'waermepumpe' ? '' : '<p class="klein">' + esc(tr('gsVerknSatz')) + '</p>') + sp + '</div>';
+  }
   function listeHtml(c) {
     var h = '<h4 class="es-h5">' + symbol('i-paragraf') + esc(tr('gsListeTitel')) + '</h4>';
     if (!c.items.length) return h + '<p class="klein" data-gs-liste="leer">' + esc(tr('gsListeLeer')) + '</p>';
@@ -17343,6 +17698,11 @@ window.TEXTE = {
       h += '<article class="gs-baustein gs-k-' + a + '" data-gs-item="' + it.id + '" data-art="' + it.art + '" data-ampel="' + a + '">';
       h += '<div class="gs-k-kopf">' + symbol(ICON[it.art]) + '<b>' + esc(artName(it.art)) + '</b> <span class="klein es-zahl" data-gs-groesse="' + it.flaeche + '">' + esc(tr('gsGroesseZeile', { b: m2(it.b), t: m2(it.t), f: m2(it.flaeche) })) + '</span>' +
         ' <button type="button" class="knopf mittel zweit gs-zeigen" data-gs="zeigen" data-wert="' + it.id + '" data-fk="z-' + it.id + '">' + esc(tr('gsZeigen')) + '</button></div>';
+      if (it.garten) {   /* Welle E, Teil 2: Beet und Obstbaum sind kein Gebäude: keine Ampel, keine Kosten, keine Pflichten */
+        h += '<p class="klein" data-gs-garten="' + it.art + '">' + esc(tr('gsGartenKarte_' + it.art, { f: m2(it.flaeche) })) + '</p><p class="klein">' + annahmeSchild() + ' ' + esc(tr('gsGartenAnnahme')) + '</p></article>';
+        return;
+      }
+      h += verknuepftHtml(it);
       h += '<h5 class="es-h5 gs-h5">' + symbol('i-paragraf') + esc(tr('gsAntragTitel')) + '</h5>';
       if (!summe) h += '<p class="ab-meldung fehler" role="alert">' + esc(tr('anKeineDaten', { grund: v ? v.grund : '' })) + '</p>';
       else {
@@ -17383,6 +17743,7 @@ window.TEXTE = {
       var d = byId('g-grund-details');
       if (d && d.open) {
         if (!nurErgebnis) { zeichneTeil('gs-steuer', steuerHtml, c); zeichneTeil('gs-auswahl', auswahlHtml, c); }
+        zeichneTeil('gs-autark', autarkHtml, c);
         zeichneTeil('gs-plan', planHtml, c); zeichneTeil('gs-balken', balkenHtml, c); zeichneTeil('gs-liste', listeHtml, c);
       }
       kopf(c);
@@ -17452,6 +17813,12 @@ window.TEXTE = {
     if (!t || t.tagName === 'INPUT') return;
     var a = t.getAttribute('data-gs'), w = t.getAttribute('data-wert');
     if (a === 'hilfe') { var id = t.getAttribute('aria-controls'), p = byId(id), auf = t.getAttribute('aria-expanded') !== 'true'; t.setAttribute('aria-expanded', auf ? 'true' : 'false'); hilfeOffen[id] = auf; if (p) p.hidden = !auf; return; }
+    if (a === 'sprung') { sprung(w); return; }
+    if (a === 'pers+' || a === 'pers-') {
+      var pn = HK.personenPlan(G.plan()).n, np = Math.max(1, Math.min(12, pn + (a === 'pers+' ? 1 : -1)));
+      if (np !== pn) { G.plan().personen = np; geaendert(false); sage(tr('auPersGesetzt', { n: np })); }
+      return;
+    }
     if (a === 'neu') {
       try { localStorage.setItem('immo-gs-hinweis', '1'); } catch (e) { /* nur der Hinweis fällt weg */ }
       hinweisZeigen = false;
@@ -17460,7 +17827,7 @@ window.TEXTE = {
       auswahl = r.id; loeschFrage = null;
       geaendert(false);
       var c = rechne(), it = itemById(r.id);
-      sage((r.frei ? '' : tr('gsStatusVoll') + '. ') + tr('gsStatusGesetzt', { name: artName(w), ampel: it ? tr('anA_' + it.ampel) : '' }));
+      sage((r.frei ? '' : tr('gsStatusVoll') + '. ') + (it && it.garten ? tr('gsStatusGesetztGarten', { name: artName(w) }) : tr('gsStatusGesetzt', { name: artName(w), ampel: it ? tr('anA_' + it.ampel) : '' })));
       /* liegt der Plan außerhalb des Bildes, zeigt die Seite ihn (ohne Animation); der Fokus bleibt auf dem Bildknopf */
       var sv = byId('gs-plan') ? byId('gs-plan').getBoundingClientRect() : null;
       if (sv && (sv.top > window.innerHeight - 140 || sv.bottom < 120)) byId('gs-plan').scrollIntoView({ block: 'start', behavior: 'auto' });
@@ -17568,7 +17935,7 @@ window.TEXTE = {
     resizeT = setTimeout(function () { var b = byId('gs-plan') ? byId('gs-plan').clientWidth : 0; if (b !== letzteBreite) { letzteBreite = b; jetzt(true); } }, 200);
   });
 
-  window.GRUNDRISS_GRUNDSTUECK = { aktualisieren: aktualisieren, jetzt: jetzt, ergebnis: function () { return ctx; }, auswaehlen: function (id) { auswahl = id; loeschFrage = null; jetzt(false); } };
+  window.GRUNDRISS_GRUNDSTUECK = { aktualisieren: aktualisieren, jetzt: jetzt, autarkieNeu: autarkieNeu, autarkie: function () { var c = ctx || rechne(); return autarkDaten(c); }, ergebnis: function () { return ctx; }, auswaehlen: function (id) { auswahl = id; loeschFrage = null; jetzt(false); } };
   setTimeout(function () { jetzt(); }, 0);
 })();
 

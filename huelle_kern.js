@@ -82,10 +82,19 @@
     else res.neubau = !!(plan && (plan.vorlage || plan.beispiel));   /* Annahme: ein Plan aus einer Vorlage gilt als Neubau */
     return res;
   }
+  /* Welle E, Teil 2: Personen im Haus, eine gemeinsame Stelle im Plan (plan.personen, 1 bis 12). Fehlt sie, gilt der ältere Wert plan.wasser.personen (alte Pläne), sonst die Annahme 3. */
+  function personenPlan(plan) {
+    var kandidaten = [plan && plan.personen, plan && plan.wasser && typeof plan.wasser === 'object' ? plan.wasser.personen : undefined];
+    for (var i = 0; i < kandidaten.length; i++) {
+      var p = Number(kandidaten[i]);
+      if (kandidaten[i] != null && kandidaten[i] !== '' && isFinite(p) && p >= 1 && p <= 12) return { n: Math.round(p), explizit: true };
+    }
+    return { n: ANNAHMEN.personen, explizit: false };
+  }
   function planWasser(plan) {
     var pw = plan && plan.wasser && typeof plan.wasser === 'object' ? plan.wasser : {}, res = { personen: ANNAHMEN.personen, regenwasser: true, gruendach: false, haerte: 'mittel', enthaertung: false, preis: null, meldung: null, explizit: {} };
-    var p = Number(pw.personen);
-    if (isFinite(p) && p >= 1 && p <= 12) { res.personen = Math.round(p); res.explizit.personen = true; }
+    var pp = personenPlan(plan);
+    if (pp.explizit) { res.personen = pp.n; res.explizit.personen = true; }
     if (typeof pw.regenwasser === 'boolean') { res.regenwasser = pw.regenwasser; res.explizit.regenwasser = true; }
     if (typeof pw.gruendach === 'boolean') res.gruendach = pw.gruendach;
     if (typeof pw.enthaertung === 'boolean') res.enthaertung = pw.enthaertung;
@@ -499,7 +508,27 @@
     return res;
   }
 
+  /* Welle E, Teil 2: Regenwasser des Plans in einem Rechenweg (Wasser-Karte und Autarkie-Block). status: aus | keinDach | gruen | fehler | ok; Anteil am Wasserbedarf = rw.autarkie.mitte */
+  function wasserBilanz(plan, pwIn) {
+    var pw = pwIn || planWasser(plan), land = (plan && plan.land) || 'HB';
+    if (!pw.regenwasser) return { status: 'aus', pw: pw, land: land };
+    var dr = dachflaecheRegen(plan);
+    if (!dr.ok) return { status: 'keinDach', pw: pw, dr: dr, land: land };
+    var rw = regenwasser(dr.projektion, land, pw.personen, { gruendach: pw.gruendach, preisEurM3: pw.preis });
+    if (!rw.ok) return { status: 'fehler', pw: pw, dr: dr, rw: rw, land: land };
+    if (rw.gruendach) return { status: 'gruen', pw: pw, dr: dr, rw: rw, land: land };
+    return { status: 'ok', pw: pw, dr: dr, rw: rw, land: land };
+  }
+  /* Heizwärmebedarf des Hauses im Jahr mit dem gewählten Dämmstandard und der gewählten Lüftung (dieselben Parameter wie die Dämm-Karte) */
+  function waermeBedarf(plan) {
+    if (!plan || !AK) return { ok: false, grund: 'keinPlan' };
+    var hw = heizwaermeMitStandard(plan, { standard: planStandard(plan).id, lueftungsart: planLueftung(plan).art });
+    if (!hw.ok || !hw.gesamt) return { ok: false, grund: hw.grund || 'keineHuelle' };
+    return { ok: true, kwh: hw.gesamt.kwh, kwhM2: hw.gesamt.kwhM2, wohnflaeche: hw.wohnflaeche, standard: hw.standard };
+  }
+
   var api = {
+    personenPlan: personenPlan, wasserBilanz: wasserBilanz, waermeBedarf: waermeBedarf,
     ANNAHMEN: ANNAHMEN, STANDARDS: STANDARDS, KFW_STUFEN: KFW_STUFEN, LUEFTUNG_ARTEN: LUEFTUNG_ARTEN, HAERTEN: HAERTEN, TRAEGER: TRAEGER,
     planStandard: planStandard, planLueftung: planLueftung, planWasser: planWasser, energiepreise: energiepreise, oelCtProKwh: oelCtProKwh, heizkosten: heizkosten,
     daemmstandards: daemmstandards, luftVolumen: luftVolumen, lueftungsverlust: lueftungsverlust, wrgGrad: wrgGrad, heizwaermeMitStandard: heizwaermeMitStandard,

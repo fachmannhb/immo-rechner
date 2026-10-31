@@ -167,6 +167,8 @@
       if (typeof p.lueftung.neubau === 'boolean') lu.neubau = p.lueftung.neubau;
       if (Object.keys(lu).length) neu.lueftung = lu;
     }
+    /* Welle E, Teil 2: Personen im Haus, gemeinsame Stelle für Wasser-Karte und Autarkie-Block (1 bis 12); ältere Pläne haben nur plan.wasser.personen, das bleibt gültig */
+    if (typeof p.personen === 'number' && isFinite(p.personen)) neu.personen = Math.round(klemme(p.personen, 1, 12));
     if (p.wasser && typeof p.wasser === 'object' && !Array.isArray(p.wasser)) {
       var wa = {}, pw0 = p.wasser;
       if (typeof pw0.personen === 'number' && isFinite(pw0.personen)) wa.personen = Math.round(klemme(pw0.personen, 1, 12));

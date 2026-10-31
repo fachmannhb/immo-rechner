@@ -1388,6 +1388,32 @@ __PALETTE_CSS__
   .gs-ul { margin: 4px 0 8px; padding-left: 20px; }
   .gs-ul li { margin: 6px 0; }
   .gs-weg svg.sym { width: 1.2em; height: 1.2em; vertical-align: -3px; }
+  .au-block { margin: 8px 0 16px; padding: 12px 16px; border: 2px solid var(--linie); border-radius: 14px; background: var(--karte); min-width: 0; }
+  .au-pers { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 8px 0; }
+  .au-pers-name svg.sym, .au-name svg.sym { width: 1.5em; height: 1.5em; vertical-align: -4px; margin-right: 6px; color: var(--akzent-text); }
+  .au-pm { min-width: 44px; min-height: 44px; font-size: 1.3rem; padding: 0 12px; }
+  .au-pers-k { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; }
+  .au-pers-zahl { min-width: 2ch; text-align: center; font-size: 1.2rem; }
+  .au-zeile { display: grid; grid-template-columns: minmax(110px, 150px) minmax(0, 1fr) auto; gap: 6px 14px; align-items: center; margin: 14px 0; padding-top: 10px; border-top: 1px solid var(--linie); min-width: 0; }
+  .au-spur { position: relative; display: block; height: 24px; border-radius: 999px; background: var(--linie); border: 1px solid var(--linie2); overflow: hidden; }
+  .au-fuell { display: block; height: 100%; background: var(--c1); }
+  .au-keine .au-spur { background: none; border: 2px dashed var(--leise); }
+  .au-marke, .au-pkt { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1px; background: var(--text); opacity: .8; }
+  .au-zahl-box { display: inline-flex; align-items: center; gap: 8px; }
+  .au-zahl { font-size: 1.15rem; white-space: nowrap; }
+  .au-text, .au-hilfe { grid-column: 1 / -1; min-width: 0; overflow-wrap: anywhere; }
+  .au-text p, .au-stufen li { margin: 4px 0; }
+  .au-sprung svg.sym { width: 1.1em; height: 1.1em; vertical-align: -2px; }
+  .au-stufen { list-style: none; margin: 6px 0; padding: 0; }
+  .au-pkt { position: static; display: inline-block; width: 4px; height: 14px; margin: 0 8px -2px 0; }
+  .au-pkt-voll { width: 14px; border-radius: 4px; background: var(--c1); opacity: 1; }
+  .gs-verkn { margin: 8px 0; padding: 8px 12px; border-left: 4px solid var(--c3); background: var(--leer-fl); border-radius: 8px; }
+  .gs-verkn p { margin: 4px 0; }
+  .gs-a-keine .gs-form { stroke: var(--c3); }
+  .gs-k-keine { border-left-color: var(--c3); }
+  .gs-gart { min-height: 64px; }
+  .gs-gart .es-var-kopf svg.sym { width: 2em; height: 2em; }
+  @media (max-width: 760px) { .au-zeile { grid-template-columns: minmax(0, 1fr) auto; } .au-name { grid-column: 1 / -1; } .au-spur { grid-column: 1; } }
   @media (max-width: 760px) { .an-reihe { grid-template-columns: minmax(0, 1fr); } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 </style>
@@ -1496,6 +1522,8 @@ __PALETTE_CSS__
   <symbol id="i-gs-brunnen" viewBox="0 0 24 24"><path d="M5 20h14M6 20v-9M18 20v-9M4 11h16M7 11V6h10v5M12 6V3M12 11v6M10 17h4"/></symbol>
   <symbol id="i-gs-regentank" viewBox="0 0 24 24"><path d="M6 20V8c0-2.5 12-2.5 12 0v12c0 2.5-12 2.5-12 0M6 8c0 2.5 12 2.5 12 0M12 11c-1.5 2-2 3-2 4a2 2 0 0 0 4 0c0-1-.5-2-2-4z"/></symbol>
   <symbol id="i-gs-kleinwind" viewBox="0 0 24 24"><path d="M12 11v10M9 21h6M12 11V3M12 11l6.5 4M12 11l-6.5 4"/><circle cx="12" cy="11" r="1.2"/></symbol>
+  <symbol id="i-gs-beet" viewBox="0 0 24 24"><path d="M3 20h18M5 20c0-3 2-5 4-5M19 20c0-3-2-5-4-5M12 20v-9M12 14c-3 0-5-2-5-5 3 0 5 2 5 5zM12 12c0-3 2-5 5-5 0 3-2 5-5 5z"/></symbol>
+  <symbol id="i-gs-baum" viewBox="0 0 24 24"><path d="M12 21v-7M12 14c-4 0-7-3-7-6.5a7 7 0 0 1 14 0C19 11 16 14 12 14zM9.5 8h.01M14 6.5h.01M13.5 10h.01"/></symbol>
   <symbol id="i-gs-wr" viewBox="0 0 24 24"><path d="M3 20h18M6 20v-7l6-5 6 5v7M10 20v-4h4v4"/></symbol>
   <symbol id="i-gs-wa" viewBox="0 0 24 24"><path d="M2 20h20M3 20v-6l4-4 4 4v6M13 20v-8l4-4 4 4v8M5.5 20v-3h3v3"/></symbol>
   <symbol id="i-gs-gewerbe" viewBox="0 0 24 24"><path d="M3 20h18M4 20v-8l5 3v-3l5 3V6h5v14M7 17h2M12 17h2"/></symbol>
@@ -2791,6 +2819,7 @@ __PALETTE_CSS__
         <p class="klein" data-t="gsKurz">Stellen Sie das Grundstück ein, schieben Sie Ihr Haus darauf und setzen Sie Bausteine wie Gartenhaus, Pool oder Wallbox. Unten steht, ob es einen Bauantrag braucht und was es ungefähr kostet.</p>
         <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="gsKeineBeratung">Eigene Einordnung aus den gelesenen Landesbauordnungen, keine Rechts- oder Bauberatung. Abstände sind nur gemessen. Bebauungsplan und Landesbauordnung bei der Bauaufsicht prüfen.</span></p>
         <div id="g-grund-inhalt">
+          <div id="gs-autark"></div>
           <div id="gs-steuer"></div>
           <div id="gs-plan"></div>
           <div id="gs-auswahl" aria-live="polite"></div>
@@ -3623,6 +3652,7 @@ __PALETTE_CSS__
 <script src="huelle_kern.js"></script>
 <script src="anbau_kern.js"></script>
 <script src="grundstueck_kern.js"></script>
+<script src="autarkie_kern.js"></script>
 <script src="rechner.js"></script>
 <script src="grafik.js"></script>
 <script src="haus3d.js"></script>

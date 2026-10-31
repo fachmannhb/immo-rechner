@@ -18,7 +18,8 @@
   function m(x) { return nz(Math.round(x * 10) / 10); }   /* Meter mit höchstens einer Stelle */
   function m2(x) { return new Intl.NumberFormat(W.lang(), { maximumFractionDigits: 2 }).format(x); }
 
-  var ICON = { gartenhaus: 'i-an-gartenhaus', garage_carport: 'i-an-garage', terrassendach: 'i-an-terrasse', sauna: 'i-gs-sauna', pool: 'i-gs-pool', gewaechshaus: 'i-gs-gewaechshaus', brunnen: 'i-gs-brunnen', regentank: 'i-gs-regentank',
+  var AU = window.AUTARKIE_KERN, HK = window.HUELLE_KERN;
+  var ICON = { gemuesebeet: 'i-gs-beet', obstbaum: 'i-gs-baum', gartenhaus: 'i-an-gartenhaus', garage_carport: 'i-an-garage', terrassendach: 'i-an-terrasse', sauna: 'i-gs-sauna', pool: 'i-gs-pool', gewaechshaus: 'i-gs-gewaechshaus', brunnen: 'i-gs-brunnen', regentank: 'i-gs-regentank',
     kleinwind: 'i-gs-kleinwind', waermepumpe: 'i-gs-waermepumpe', wallbox: 'i-gs-wallbox', huehnerstall: 'i-gs-huhn', bienenstock: 'i-gs-biene', fischteich: 'i-gs-fisch' };
   var ctx = null, auswahl = null, loeschFrage = null, timer = null, teilweise = false, drag = null, hinweisZeigen = true, statusText = '';
   try { hinweisZeigen = localStorage.getItem('immo-gs-hinweis') !== '1'; } catch (e0) { hinweisZeigen = true; }
@@ -51,7 +52,122 @@
       return '<button type="button" class="es-var gs-art' + erst + '" data-gs="neu" data-wert="' + a.id + '" data-fk="neu-' + a.id + '" aria-label="' + esc(tr('gsSetzen', { name: artName(a.id) })) + '">' +
         '<span class="es-var-kopf">' + symbol(ICON[a.id]) + '<b>' + esc(artName(a.id)) + '</b></span></button>';
     }).join('') + '</div>';
+    /* Welle E, Teil 2: Garten-Bausteine (Gemüsebeet, Obstbaum), eigene Reihe, kein Gebäude */
+    h += '<h4 class="es-h5">' + symbol('i-gs-beet') + esc(tr('gsGartenTitel')) + '</h4><div class="ab-stufen gs-arten gs-garten" role="group" aria-label="' + esc(tr('gsGartenTitel')) + '">' + GK.GARTEN.map(function (a) {
+      return '<button type="button" class="es-var gs-gart" data-gs="neu" data-wert="' + a.id + '" data-fk="neu-' + a.id + '" aria-label="' + esc(tr('gsSetzen', { name: artName(a.id) })) + '">' +
+        '<span class="es-var-kopf">' + symbol(ICON[a.id]) + '<b>' + esc(artName(a.id)) + '</b></span></button>';
+    }).join('') + '</div>';
     return h;
+  }
+
+  /* ---------- Block „Wie autark ist Ihr Haus?“ (Welle E, Teil 2): liest Strom (GRUNDRISS_ENERGIE.autarkie), Wasser (HUELLE_KERN.wasserBilanz) und Wärme (waermeBedarf), rechnet nur Essen (AUTARKIE_KERN) ---------- */
+  var AU_ICON = { strom: 'i-blitz', wasser: 'i-tropfen', waerme: 'i-flamme', essen: 'i-gs-beet' };
+  var AU_KARTE = { strom: 'g-strom-details', wasser: 'g-wasser-details', daemmung: 'g-daemmung-details' };
+  function rng(a, b, f) { var x = f(a), y = f(b); return x === y ? x : x + ' ' + tr('auBis') + ' ' + y; }   /* eine Zahl, wenn Anfang und Ende gleich aussehen */
+  function pc(x) { return n0(Math.round(x * 10) / 10); }
+  function autarkDaten(c) {
+    var plan = G.plan(), pers = HK ? HK.personenPlan(plan) : { n: 3, explizit: false };
+    var E = window.GRUNDRISS_ENERGIE, H = window.GRUNDRISS_HUELLE;
+    var strom = E && E.autarkie ? E.autarkie() : { ok: false, grund: 'keineKarte' };
+    var wasser = H && H.wasserAutarkie ? H.wasserAutarkie() : null;
+    var waerme = H && H.waermeBedarf ? H.waermeBedarf() : null;
+    return { pers: pers, zeilen: AU.alle({ strom: strom, wasser: wasser, waerme: waerme, flaeche: c.flaechen.beet, personen: pers.n }), baeume: c.flaechen.baumAnzahl, beete: c.flaechen.beete, beet: c.flaechen.beet };
+  }
+  function auSprung(ziel, text) {
+    return '<button type="button" class="knopf mittel zweit au-sprung" data-gs="sprung" data-wert="' + ziel + '" data-fk="au-sp-' + ziel + '">' + symbol(ziel === 'beet' ? 'i-gs-beet' : 'i-pfeil-ab') + ' ' + esc(text) + '</button>';
+  }
+  function auHilfe(id, inhalt) {
+    return '<div class="klein au-hilfe" id="' + id + '"' + (hilfeOffen[id] ? '' : ' hidden') + '>' + inhalt + '</div>';
+  }
+  function auZeile(z, d) {
+    var id = z.id, name = tr('au_' + id), keine = z.status === 'keine', fehlt = z.status === 'fehlt', hid = 'au-h-' + id;
+    var zahlTxt = keine ? tr('auKeineAngabe') : pc(z.prozent) + ' %';
+    var aria = keine ? name + ': ' + tr('auKeineAngabe') : tr('auAria', { name: name, p: pc(z.prozent) });
+    var h = '<div class="au-zeile au-' + z.status + '" data-au="' + id + '" data-status="' + z.status + '" data-prozent="' + (z.prozent == null ? '' : z.prozent.toFixed(2)) + '">';
+    h += '<span class="au-name">' + symbol(AU_ICON[id]) + '<b>' + esc(name) + '</b></span>';
+    h += '<span class="au-spur" role="img" aria-label="' + esc(aria) + '">' + (keine ? '' : '<span class="au-fuell" style="width:' + klemme100(z.prozent) + '%"></span>');
+    if (id === 'essen' && z.essen && z.essen.ok) h += '<span class="au-marke" style="left:' + z.essen.skala.gemuese.toFixed(2) + '%" data-marke="gemuese"></span><span class="au-marke" style="left:' + z.essen.skala.kartoffeln.toFixed(2) + '%" data-marke="kartoffeln"></span>';
+    h += '</span>';
+    h += '<span class="au-zahl-box"><b class="au-zahl es-zahl" data-au-zahl="' + id + '" data-prozent="' + (z.prozent == null ? '' : z.prozent.toFixed(2)) + '">' + esc(zahlTxt) + '</b>' + hilfeKnopf(hid) + '</span>';
+    h += '<div class="au-text">';
+    var q = '', rechnung = '';
+    if (id === 'strom') {
+      if (fehlt) h += '<p data-au-satz="strom">' + esc(tr('auFehltStrom')) + ' <span class="klein">' + esc(tr('auGrund', { grund: z.grund })) + '</span></p>' + auSprung('strom', tr('auZu_strom'));
+      else {
+        h += '<p class="klein" data-au-satz="strom">' + esc(tr('auQuelleStrom')) + '</p>';
+        if (z.personen !== d.pers.n) h += '<p class="klein" data-au-pers-abw="1">' + annahmeSchild() + ' ' + esc(tr('auStromPers', { n: z.personen, m: d.pers.n })) + '</p>';
+        h += auSprung('strom', tr('auZu_strom'));
+      }
+      rechnung = fehlt ? tr('auFehltStrom') : tr('auStromRechnung', { n: z.personen, kwp: n1(z.kwp), auto: z.mitAuto ? tr('auMitAuto') : '' });
+    } else if (id === 'wasser') {
+      if (fehlt) h += '<p data-au-satz="wasser">' + esc(tr('auFehltWasser_' + z.grund, { grund: z.grund })) + '</p>' + auSprung('wasser', tr('auZu_wasser'));
+      else if (keine) h += '<p data-au-satz="wasser">' + esc(tr('auWasserGruen')) + '</p>' + auSprung('wasser', tr('auZu_wasser'));
+      else { h += '<p class="klein" data-au-satz="wasser">' + esc(tr('auQuelleWasser')) + '</p>' + auSprung('wasser', tr('auZu_wasser')); }
+      if (z.rw) { rechnung = tr('auWasserRechnung', { mitte: pc(z.prozent), von: pc(z.von), bis: pc(z.bis), n: z.personen, ges: n0(z.rw.gesamtbedarf), ntw: n0(z.rw.bedarfNtw) }); q = quelleHtml(z.rw.belegVerbrauch) + ' ' + quelleHtml(z.rw.niederschlag && z.rw.niederschlag.beleg); }
+      else rechnung = tr('auQuelleWasser');
+    } else if (id === 'waerme') {
+      if (z.bedarfKwh != null) h += '<p data-au-satz="waerme"><span class="es-zahl" data-bedarf="' + z.bedarfKwh.toFixed(0) + '">' + esc(tr('auWaermeBedarf', { kwh: n0(z.bedarfKwh), m2: n0(z.bedarfKwhM2) })) + '</span> ' + esc(tr('auWaermeKeine')) + '</p>';
+      else h += '<p data-au-satz="waerme">' + esc(tr('auWaermeOffen', { grund: z.grund })) + '</p>';
+      h += auSprung('daemmung', tr('auZu_daemmung'));
+      rechnung = tr('auWaermeRechnung');
+    } else {
+      var e = z.essen;
+      if (!e || !e.ok) h += '<p data-au-satz="essen">' + esc(tr('auEssenKeineDaten')) + '</p>';
+      else {
+        if (!(e.flaeche > 0)) h += '<p data-au-satz="essen">' + esc(tr('auEssenLeer')) + '</p>' + auSprung('beet', tr('auZu_beet'));
+        else h += '<p data-au-satz="essen" class="es-zahl" data-flaeche="' + e.flaeche + '">' + esc(tr('auEssenSatz', { a: m2(e.flaeche), n: e.personen })) + '</p>';
+        h += '<ul class="au-stufen">' + ['gemuese', 'kartoffeln', 'voll'].map(function (k) {
+          var s = e.stufen[k], spanne = rng(s.von, s.bis, pc) + ' %';
+          return '<li data-au-stufe="' + k + '" data-von="' + s.von + '" data-bis="' + s.bis + '" data-mitte="' + s.mitte + '"' + (e.erreicht === k ? ' data-erreicht="1"' : '') + '><i class="au-pkt au-pkt-' + k + '" aria-hidden="true"></i><b>' + esc(tr('auStufe_' + k)) + '</b>: <span class="es-zahl">' + esc(spanne) + '</span> ' +
+            '<span class="klein">' + esc(tr('auStufeFlaeche', { fl: rng(s.jeP.von, s.jeP.bis, nz), n: e.personen, bed: rng(s.bedarf.von, s.bedarf.bis, n0) })) + '</span></li>';
+        }).join('') + '</ul>';
+        if (d.baeume > 0) h += '<p class="klein" data-au-baum="1">' + esc(tr('auObstNichtGezaehlt', { n: d.baeume })) + '</p>';
+        rechnung = tr('auEssenRechnung', { vm: nz(e.stufen.voll.jeP.mitte) });
+        q = quelleHtml(e.stufen.voll.beleg);
+      }
+    }
+    h += '</div>';
+    h += auHilfe(hid, '<p>' + esc(rechnung) + '</p>' + (id === 'essen' ? '<p>' + annahmeSchild() + ' ' + esc(tr('auEssenAnnahme')) + '</p><p>' + esc(tr('auEssenNicht')) + '</p>' : '') + (q ? '<p>' + q + '</p>' : ''));
+    return h + '</div>';
+  }
+  function klemme100(p) { return Math.max(0, Math.min(100, p || 0)).toFixed(2); }
+  function autarkHtml(c) {
+    if (!AU || !HK) return '<p class="ab-meldung fehler" role="alert">' + esc(tr('gsFehlerDaten', { grund: 'autarkie_kern.js oder huelle_kern.js fehlt.' })) + '</p>';
+    var d = autarkDaten(c), h = '<div class="au-block" data-au-block="1">';
+    h += '<div class="g-kopfzeile"><h4 class="es-h5">' + symbol('i-sonne') + esc(tr('auTitel')) + '</h4></div>';
+    h += '<p class="klein" data-au-erkl="1">' + esc(tr('auErkl')) + '</p>';
+    h += '<div class="au-pers" data-au-pers="' + d.pers.n + '"><span class="au-pers-name">' + symbol('i-bett') + esc(tr('auPersonen')) + '</span>' +
+      '<span class="au-pers-k"><button type="button" class="knopf mittel zweit au-pm" data-gs="pers-" data-fk="au-pers-minus" aria-label="' + esc(tr('auPersMinus')) + '"' + (d.pers.n <= 1 ? ' disabled' : '') + '>−</button>' +
+      '<b class="au-pers-zahl es-zahl" aria-live="polite">' + d.pers.n + '</b>' +
+      '<button type="button" class="knopf mittel zweit au-pm" data-gs="pers+" data-fk="au-pers-plus" aria-label="' + esc(tr('auPersPlus')) + '"' + (d.pers.n >= 12 ? ' disabled' : '') + '>+</button></span></div>';
+    if (!d.pers.explizit) h += '<p class="klein" data-au-annahme="personen">' + annahmeSchild() + ' ' + esc(tr('auPersAnnahme')) + '</p>';
+    d.zeilen.forEach(function (z) { h += auZeile(z, d); });
+    h += '<p class="klein" data-au-hinweis="1">' + annahmeSchild() + ' ' + esc(tr('auEinordnung')) + '</p>';
+    return h + '</div>';
+  }
+  var tAutark = null;
+  function autarkieNeu() {
+    clearTimeout(tAutark);
+    tAutark = setTimeout(function () {
+      var d = byId('g-grund-details');
+      if (!d || !d.open || !byId('gs-autark')) return;
+      try { zeichneTeil('gs-autark', autarkHtml, ctx || rechne()); meldeFehler('g-grund-fehler', ''); }
+      catch (e) { meldeFehler('g-grund-fehler', tr('gsFehlerRechnen', { grund: e && e.message ? e.message : e })); }
+    }, 40);
+  }
+  /* Sprung zur zuständigen Karte: Karte aufklappen, in den Blick holen, Fokus auf ihre Kopfzeile (kein heimliches Umschalten) */
+  function sprung(ziel) {
+    if (ziel === 'beet') {
+      var b = document.querySelector('.gs-gart[data-wert=gemuesebeet]');
+      if (b) { b.scrollIntoView({ block: 'center', behavior: 'auto' }); b.focus({ preventScroll: true }); }
+      return;
+    }
+    var det = byId(AU_KARTE[ziel]);
+    if (!det) { sage(tr('auSprungFehlt')); return; }
+    det.open = true;
+    var sm = det.querySelector('summary');
+    det.scrollIntoView({ block: 'start', behavior: 'auto' });
+    if (sm) sm.focus({ preventScroll: true });
   }
 
   /* ---------- Plan (SVG) ---------- */
@@ -251,6 +367,19 @@
     return '<li data-gs-' + art + '="' + esc(z.id) + '">' + zahl + (art === 'pflichten' ? '<b>' : '') + esc(z.name) + (art === 'pflichten' ? '</b>' : '') +
       (z.hinweis ? ' <span class="klein">' + esc(z.hinweis) + '</span>' : '') + ' <span class="klein">' + quelleHtml(b) + '</span></li>';
   }
+  /* Regenwassertank, Wallbox und Wärmepumpe: Stand der zuständigen Karte anzeigen und dorthin springen; hier wird nichts umgeschaltet */
+  function verknuepftHtml(it) {
+    var s = '', sp = '';
+    if (it.art === 'regentank' && HK) {
+      var ja = HK.planWasser(G.plan()).regenwasser;
+      s = tr(ja ? 'gsVerkn_regentank_ja' : 'gsVerkn_regentank_nein'); sp = auSprung('wasser', tr('auZu_wasser'));
+    } else if (it.art === 'wallbox' && window.GRUNDRISS_ENERGIE && window.GRUNDRISS_ENERGIE.zustand) {
+      var au = window.GRUNDRISS_ENERGIE.zustand().auto || {}, jaW = !!(au.an && au.wallbox);
+      s = tr(jaW ? 'gsVerkn_wallbox_ja' : 'gsVerkn_wallbox_nein'); sp = auSprung('strom', tr('auZu_strom'));
+    } else if (it.art === 'waermepumpe') s = tr('gsVerkn_waermepumpe');
+    if (!s) return '';
+    return '<div class="gs-verkn" data-gs-verkn="' + it.art + '"><p>' + esc(s) + '</p>' + (it.art === 'waermepumpe' ? '' : '<p class="klein">' + esc(tr('gsVerknSatz')) + '</p>') + sp + '</div>';
+  }
   function listeHtml(c) {
     var h = '<h4 class="es-h5">' + symbol('i-paragraf') + esc(tr('gsListeTitel')) + '</h4>';
     if (!c.items.length) return h + '<p class="klein" data-gs-liste="leer">' + esc(tr('gsListeLeer')) + '</p>';
@@ -260,6 +389,11 @@
       h += '<article class="gs-baustein gs-k-' + a + '" data-gs-item="' + it.id + '" data-art="' + it.art + '" data-ampel="' + a + '">';
       h += '<div class="gs-k-kopf">' + symbol(ICON[it.art]) + '<b>' + esc(artName(it.art)) + '</b> <span class="klein es-zahl" data-gs-groesse="' + it.flaeche + '">' + esc(tr('gsGroesseZeile', { b: m2(it.b), t: m2(it.t), f: m2(it.flaeche) })) + '</span>' +
         ' <button type="button" class="knopf mittel zweit gs-zeigen" data-gs="zeigen" data-wert="' + it.id + '" data-fk="z-' + it.id + '">' + esc(tr('gsZeigen')) + '</button></div>';
+      if (it.garten) {   /* Welle E, Teil 2: Beet und Obstbaum sind kein Gebäude: keine Ampel, keine Kosten, keine Pflichten */
+        h += '<p class="klein" data-gs-garten="' + it.art + '">' + esc(tr('gsGartenKarte_' + it.art, { f: m2(it.flaeche) })) + '</p><p class="klein">' + annahmeSchild() + ' ' + esc(tr('gsGartenAnnahme')) + '</p></article>';
+        return;
+      }
+      h += verknuepftHtml(it);
       h += '<h5 class="es-h5 gs-h5">' + symbol('i-paragraf') + esc(tr('gsAntragTitel')) + '</h5>';
       if (!summe) h += '<p class="ab-meldung fehler" role="alert">' + esc(tr('anKeineDaten', { grund: v ? v.grund : '' })) + '</p>';
       else {
@@ -300,6 +434,7 @@
       var d = byId('g-grund-details');
       if (d && d.open) {
         if (!nurErgebnis) { zeichneTeil('gs-steuer', steuerHtml, c); zeichneTeil('gs-auswahl', auswahlHtml, c); }
+        zeichneTeil('gs-autark', autarkHtml, c);
         zeichneTeil('gs-plan', planHtml, c); zeichneTeil('gs-balken', balkenHtml, c); zeichneTeil('gs-liste', listeHtml, c);
       }
       kopf(c);
@@ -369,6 +504,12 @@
     if (!t || t.tagName === 'INPUT') return;
     var a = t.getAttribute('data-gs'), w = t.getAttribute('data-wert');
     if (a === 'hilfe') { var id = t.getAttribute('aria-controls'), p = byId(id), auf = t.getAttribute('aria-expanded') !== 'true'; t.setAttribute('aria-expanded', auf ? 'true' : 'false'); hilfeOffen[id] = auf; if (p) p.hidden = !auf; return; }
+    if (a === 'sprung') { sprung(w); return; }
+    if (a === 'pers+' || a === 'pers-') {
+      var pn = HK.personenPlan(G.plan()).n, np = Math.max(1, Math.min(12, pn + (a === 'pers+' ? 1 : -1)));
+      if (np !== pn) { G.plan().personen = np; geaendert(false); sage(tr('auPersGesetzt', { n: np })); }
+      return;
+    }
     if (a === 'neu') {
       try { localStorage.setItem('immo-gs-hinweis', '1'); } catch (e) { /* nur der Hinweis fällt weg */ }
       hinweisZeigen = false;
@@ -377,7 +518,7 @@
       auswahl = r.id; loeschFrage = null;
       geaendert(false);
       var c = rechne(), it = itemById(r.id);
-      sage((r.frei ? '' : tr('gsStatusVoll') + '. ') + tr('gsStatusGesetzt', { name: artName(w), ampel: it ? tr('anA_' + it.ampel) : '' }));
+      sage((r.frei ? '' : tr('gsStatusVoll') + '. ') + (it && it.garten ? tr('gsStatusGesetztGarten', { name: artName(w) }) : tr('gsStatusGesetzt', { name: artName(w), ampel: it ? tr('anA_' + it.ampel) : '' })));
       /* liegt der Plan außerhalb des Bildes, zeigt die Seite ihn (ohne Animation); der Fokus bleibt auf dem Bildknopf */
       var sv = byId('gs-plan') ? byId('gs-plan').getBoundingClientRect() : null;
       if (sv && (sv.top > window.innerHeight - 140 || sv.bottom < 120)) byId('gs-plan').scrollIntoView({ block: 'start', behavior: 'auto' });
@@ -485,6 +626,6 @@
     resizeT = setTimeout(function () { var b = byId('gs-plan') ? byId('gs-plan').clientWidth : 0; if (b !== letzteBreite) { letzteBreite = b; jetzt(true); } }, 200);
   });
 
-  window.GRUNDRISS_GRUNDSTUECK = { aktualisieren: aktualisieren, jetzt: jetzt, ergebnis: function () { return ctx; }, auswaehlen: function (id) { auswahl = id; loeschFrage = null; jetzt(false); } };
+  window.GRUNDRISS_GRUNDSTUECK = { aktualisieren: aktualisieren, jetzt: jetzt, autarkieNeu: autarkieNeu, autarkie: function () { var c = ctx || rechne(); return autarkDaten(c); }, ergebnis: function () { return ctx; }, auswaehlen: function (id) { auswahl = id; loeschFrage = null; jetzt(false); } };
   setTimeout(function () { jetzt(); }, 0);
 })();

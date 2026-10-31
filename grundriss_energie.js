@@ -608,7 +608,17 @@
   }
   function alle(voll, struktur) {
     instanzen.forEach(function (inst) { if (inst.gebaut) aktualisiere(inst, !!struktur || !!voll); });
+    autarkieMelden();
   }
+  /* Welle E, Teil 2: Lese-Funktion für den Autarkie-Block (Karte Grundstück): Autarkiegrad der gewählten Variante, derselbe Wert wie in dieser Karte (Haus plus Auto) */
+  function autarkieLesen() {
+    if (!planInst) return { ok: false, grund: 'keineKarte' };
+    var ein = eingaben(planInst), res = K.rechne(ein.rechnung);
+    if (!res.ok) return { ok: false, grund: res.fehler ? res.fehler.code : 'unbekannt', personen: S.personen };
+    var x = res.varianten[res.gewaehlteVariante];
+    return { ok: true, anteil: x.autarkie, kwp: res.kwp, erzeugung: res.erzeugung, verbrauch: res.verbrauch.gesamt, personen: res.verbrauch.personen, variante: res.gewaehlteVariante, mitAuto: !!(res.auto && res.auto.an) };
+  }
+  function autarkieMelden() { if (window.GRUNDRISS_GRUNDSTUECK && window.GRUNDRISS_GRUNDSTUECK.autarkieNeu) window.GRUNDRISS_GRUNDSTUECK.autarkieNeu(); }
 
   function bauen(inst) {
     if (inst.gebaut || !inst.wurzel) return;
@@ -646,6 +656,7 @@
         inst.kopfEl.textContent = res.ok ? tr('esKopfZeile', { kwp: n1(res.kwp), kwh: n0(res.erzeugung) }) : tr('esKopfLeer');
       }
     });
+    autarkieMelden();
   }
   function aktualisieren() { clearTimeout(timer); timer = setTimeout(jetzt, 150); }
   window.addEventListener('sprachegewechselt', function () { instanzen.forEach(function (i) { if (i.gebaut) { i.wurzel.innerHTML = geruestHtml(i); i.landHtml = null; i.sigFl = null; i.sigStruktur = null; } }); jetzt(); });
@@ -654,6 +665,7 @@
     aktualisieren: aktualisieren, jetzt: jetzt,
     ergebnis: function (modus) { var i = instanzen.filter(function (x) { return x.modus === (modus || 'plan'); })[0]; return i ? i.letzte : null; },
     zustand: function () { return JSON.parse(JSON.stringify(S)); },
+    autarkie: autarkieLesen,
     setze: function (o) { Object.keys(o || {}).forEach(function (k) { if (k === 'auto') Object.keys(o.auto).forEach(function (a) { S.auto[a] = o.auto[a]; }); else S[k] = o[k]; }); speichern(); alle(false, true); },
     auswahl: function (liste) { if (liste) { planAuswahl = liste.slice(); alle(false, true); } return planAuswahl && planAuswahl.slice(); },
     ausPlan: function () { if (freiInst) planInFrei(freiInst); speichern(); alle(false, true); }

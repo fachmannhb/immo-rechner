@@ -411,16 +411,16 @@
   function wasserErgebnisHtml(c) {
     if (c.leer || c.fehler) return '';
     var pw = c.pw, plan = c.plan, land = plan.land || 'HB', h = '';
-    var dr = HK.dachflaecheRegen(plan);
-    if (!pw.regenwasser) {
+    var wb = HK.wasserBilanz(plan, pw), dr = wb.dr;   /* Welle E, Teil 2: ein Rechenweg für diese Karte und den Autarkie-Block */
+    if (wb.status === 'aus') {
       h += '<p class="es-satz klein-satz" data-wasser-satz="aus">' + esc(tr('hwAus')) + '</p>' + enthaertungHtml(c);
       c.rw = null;
       return h;
     }
-    if (!dr.ok) { h += '<p class="ab-meldung fehler" role="alert" data-fehler="dach">' + esc(tr('hwKeinDach')) + '</p>'; c.rw = null; return h + enthaertungHtml(c); }
-    var rw = HK.regenwasser(dr.projektion, land, pw.personen, { gruendach: pw.gruendach, preisEurM3: pw.preis });
+    if (wb.status === 'keinDach') { h += '<p class="ab-meldung fehler" role="alert" data-fehler="dach">' + esc(tr('hwKeinDach')) + '</p>'; c.rw = null; return h + enthaertungHtml(c); }
+    var rw = wb.rw;
     c.rw = rw; c.dr = dr;
-    if (!rw.ok) { h += '<p class="ab-meldung fehler" role="alert" data-fehler="regen">' + esc(tr('hwFehler', { grund: rw.grund })) + '</p>'; return h + enthaertungHtml(c); }
+    if (wb.status === 'fehler') { h += '<p class="ab-meldung fehler" role="alert" data-fehler="regen">' + esc(tr('hwFehler', { grund: rw.grund })) + '</p>'; return h + enthaertungHtml(c); }
     var nd = rw.niederschlag;
     if (rw.gruendach) {
       h += '<p class="es-satz klein-satz" data-wasser-satz="gruen">' + esc(tr('hwGruenSatz')) + '</p><p class="klein">' + luecke('hdKeineAngabe') + ' ' + esc(tr('hwGruenLuecke')) + ' ' + quelleHtml(rw.belegGruen) + '</p>';
@@ -490,6 +490,7 @@
       FEHLER_IDS.forEach(function (id) { meldeFehler(id, t); });
     }
     teilweise = false;
+    if (window.GRUNDRISS_GRUNDSTUECK && window.GRUNDRISS_GRUNDSTUECK.autarkieNeu) window.GRUNDRISS_GRUNDSTUECK.autarkieNeu();   /* Autarkie-Block liest Wasser und Wärme von dieser Karte */
   }
   function aktualisieren() { clearTimeout(timer); var nur = teilweise; timer = setTimeout(function () { jetzt(nur); }, 150); }
 
@@ -519,7 +520,8 @@
     var a = t.getAttribute('data-hu');
     if (a === 'personen') {
       var p = Math.round(+t.value), lab = byId('hw-personen-wert'); if (lab) lab.textContent = p; t.setAttribute('aria-valuetext', tr('hwPersonenText', { n: p }));
-      teilweise = true; planFeld('wasser', 'personen', p); return;
+      /* Welle E, Teil 2: Personen im Haus liegen an einer gemeinsamen Stelle (plan.personen); plan.wasser.personen bleibt für ältere Stände mit gleichem Wert */
+      teilweise = true; G.plan().personen = p; planFeld('wasser', 'personen', p); return;
     }
     if (ev.type !== 'change') return;
     if (a === 'gruendach') { planFeld('wasser', 'gruendach', !!t.checked); return; }
@@ -582,7 +584,10 @@
       var hw = HK.heizwaermeMitStandard(cc.plan, { bilanz: cc.bilanz });
       return hw.ok && hw.gesamt ? hw.gesamt.kwhM2 : null;
     },
-    ergebnis: function () { return ctx; }
+    ergebnis: function () { return ctx; },
+    /* Welle E, Teil 2: Lese-Funktionen für den Autarkie-Block der Karte Grundstück (rechnen nichts anderes als diese Karte: HK.wasserBilanz, HK.waermeBedarf, HK.planWasser) */
+    wasserAutarkie: function () { var plan = G.plan(); return hatRaeume(plan) ? HK.wasserBilanz(plan) : { status: 'keinPlan', pw: HK.planWasser(plan) }; },
+    waermeBedarf: function () { var plan = G.plan(); return hatRaeume(plan) ? HK.waermeBedarf(plan) : { ok: false, grund: 'keineRaeume' }; }
   };
   setTimeout(function () { jetzt(); }, 0);
 })();

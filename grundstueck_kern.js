@@ -30,7 +30,17 @@
     { id: 'bienenstock', b: 1, t: 1, h: 1, max: 3 },
     { id: 'fischteich', b: 4, t: 3, h: 1.5, max: 20 }
   ];
-  function artInfo(id) { for (var i = 0; i < ARTEN.length; i++) if (ARTEN[i].id === id) return ARTEN[i]; return null; }
+  /* Welle E, Teil 2: Garten-Bausteine (kein Gebäude, keine Bauantrag-Ampel, keine Kosten- oder Pflichtzeilen). Sie stehen nicht in ARTEN, damit die Bildleiste der Gebäude und Anlagen gleich bleibt.
+     Gemüsebeet: Fläche speist den Essen-Balken. Obstbaum: wird gezeigt, aber nicht gezählt (die Daten nennen keine Fläche je Baum). Startgrößen sind eigene Annahmen. */
+  var GARTEN = [
+    { id: 'gemuesebeet', b: 2, t: 3, h: 0.3, max: 30, garten: true },
+    { id: 'obstbaum', b: 3, t: 3, h: 3, max: 10, garten: true }
+  ];
+  function artInfo(id) {
+    for (var i = 0; i < ARTEN.length; i++) if (ARTEN[i].id === id) return ARTEN[i];
+    for (var j = 0; j < GARTEN.length; j++) if (GARTEN[j].id === id) return GARTEN[j];
+    return null;
+  }
   function zahlOk(x) { return typeof x === 'number' && isFinite(x); }
   function klemme(x, lo, hi) { return Math.min(hi, Math.max(lo, x)); }
   function r2(x) { return Math.round(x * 100) / 100; }
@@ -113,11 +123,16 @@
     return { links: r2(g.hausX), rechts: r2(g.breite - (g.hausX + h.b)), oben: r2(g.hausY), unten: r2(g.tiefe - (g.hausY + h.t)) };
   }
   function flaechen(s) {
-    var grund = r2(s.g.breite * s.g.tiefe), haus = s.haus ? s.haus.flaeche : 0, bs = 0;
-    s.items.forEach(function (it) { bs += it.b * it.t; });
+    var grund = r2(s.g.breite * s.g.tiefe), haus = s.haus ? s.haus.flaeche : 0, bs = 0, beet = 0, baeume = 0, nBeet = 0, nBaum = 0;
+    /* Welle E, Teil 2: Beete und Obstbäume sind nicht bebaut (kein Gebäude); sie zählen nicht zur bebauten Fläche, das Gemüsebeet speist den Essen-Balken */
+    s.items.forEach(function (it) {
+      if (it.art === 'gemuesebeet') { beet += it.b * it.t; nBeet++; }
+      else if (it.art === 'obstbaum') { baeume += it.b * it.t; nBaum++; }
+      else bs += it.b * it.t;
+    });
     bs = r2(bs);
     var bebaut = r2(haus + bs);
-    return { grund: grund, haus: haus, bausteine: bs, bebaut: bebaut, prozent: grund > 0 ? Math.round(bebaut / grund * 1000) / 10 : 0, frei: r2(grund - bebaut) };
+    return { grund: grund, haus: haus, bausteine: bs, bebaut: bebaut, prozent: grund > 0 ? Math.round(bebaut / grund * 1000) / 10 : 0, frei: r2(grund - bebaut), beet: r2(beet), beete: nBeet, baeume: r2(baeume), baumAnzahl: nBaum };
   }
 
   /* ---------- Daten zu einem Baustein ---------- */
@@ -147,6 +162,7 @@
     s.zaehlung = { gruen: 0, gelb: 0, rot: 0, grau: 0 };
     s.items.forEach(function (it) {
       it.flaeche = r2(it.b * it.t);
+      if (artInfo(it.art).garten) { it.garten = true; it.vf = null; it.ampel = 'keine'; it.daten = { kosten: [], pflichten: [], werte: [] }; return; }   /* Welle E, Teil 2: Garten-Baustein, keine Ampel, nicht in der Zählung */
       /* Tiefe nur für das Terrassendach (Bremen: Vorbau bis 3,50 m Tiefe); Annahme: die Tiefe des Bausteins (t) ist die Tiefe senkrecht zur Außenwand, der Text legt die Bezugsgröße nicht fest */
       it.vf = AK.verfahrensfrei(it.art, land, it.flaeche, it.h, it.art === 'terrassendach' ? it.t : null, { ofen: it.ofen, gebiet: it.gebiet });
       it.ampel = it.vf && it.vf.ok ? it.vf.summe.ampel : 'grau';
@@ -256,7 +272,7 @@
   }
 
   var API = {
-    ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, GRUND_MIN: GRUND_MIN, GRUND_MAX: GRUND_MAX, MASS_MIN: MASS_MIN, HOEHE_MAX: HOEHE_MAX, MAX_BAUSTEINE: MAX_BAUSTEINE,
+    ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, GARTEN: GARTEN, GRUND_MIN: GRUND_MIN, GRUND_MAX: GRUND_MAX, MASS_MIN: MASS_MIN, HOEHE_MAX: HOEHE_MAX, MAX_BAUSTEINE: MAX_BAUSTEINE,
     artInfo: artInfo, hausUmriss: hausUmriss, startGrund: startGrund, normalisiere: normalisiere, abstaende: abstaende, flaechen: flaechen, datenZu: datenZu, rechne: rechne,
     bausteinHinzu: bausteinHinzu, bausteinEntfernen: bausteinEntfernen, bausteinSetzen: bausteinSetzen, bausteinOption: bausteinOption, grundstueckSetzen: grundstueckSetzen, festschreiben: festschreiben, ueberlappt: ueberlappt,
     platzKasten: platzKasten
