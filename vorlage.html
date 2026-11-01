@@ -1041,6 +1041,8 @@ __PALETTE_CSS__
   .mh-tab .klein { display: block; font-size: 14px; color: var(--leise); }
   .mh-luecke { font-weight: 700; }
   .mh-heiz { margin: 0 0 12px; } .mh-heiz-knoepfe { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 8px; margin: 6px 0; }
+  .mh-hz-hilfe { display: inline-block; vertical-align: middle; } .mh-hz-hilfe > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border-radius: 999px; border: 2px solid var(--info); background: var(--info-fl); color: var(--info); font: 800 18px var(--display); }
+  .mh-hz-hilfe > summary::-webkit-details-marker { display: none; } .mh-hz-hilfe[open] > summary { background: var(--info); color: var(--karte); } .mh-hz-hilfe > summary:focus-visible { outline: 3px solid var(--akzent); outline-offset: 2px; } .mh-hz-hilfe > p { max-width: 38rem; }
   .mh-heiz-k { min-height: 48px; } .mh-heiz-k .es-var-kopf svg.sym { width: 1.6em; height: 1.6em; }
   .mh-tab .mh-aus td { color: var(--leise); }
   .mh-tab .mh-aus .z span.mh-wert { text-decoration: line-through; }
@@ -1501,6 +1503,8 @@ __PALETTE_CSS__
   .sa-bal i { display: block; height: 100%; background: var(--c1); }
   .sa-bal-preis i { background: var(--c2); }
   .sa-bal-leer { background: transparent; border: 1.5px dashed var(--leise); }
+  .sa-bal-nz i { background: repeating-linear-gradient(45deg, var(--leise) 0 3px, transparent 3px 6px); }
+  .sa-nz { display: inline-block; color: var(--leise); font-weight: 400; border: 1px dashed var(--leise); border-radius: 6px; padding: 0 6px; margin-left: 4px; }
   .sa-bal-gross { height: 16px; width: 100%; max-width: 260px; }
   .sa-pkte { display: inline-flex; gap: 4px; vertical-align: middle; }
   .sa-pkt { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--linie2); box-sizing: border-box; }
@@ -3843,6 +3847,7 @@ __PALETTE_CSS__
 <script src="daten/grundstueck.js"></script>
 <script src="daten/sauna.js"></script>
 <script src="daten/saunaholz.js"></script>
+<script src="daten/heizung.js"></script>
 <script src="daten/kleinhaus.js"></script>
 <div class="g-druck" id="g-druck" aria-hidden="true"></div>
 <div class="overlay" id="g-mappe-ov" role="dialog" aria-modal="true" aria-labelledby="mh-h" hidden>

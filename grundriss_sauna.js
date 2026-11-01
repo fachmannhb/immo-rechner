@@ -101,15 +101,15 @@
   }
   function hk(id) { return '<button type="button" class="hilfe-knopf" data-sa="hilfe" data-wert="' + id + '" aria-expanded="' + !!hilfe[id] + '" aria-controls="' + id + '" aria-label="' + T('hilfeKnopf') + '">?</button>'; }
   function hp(id, k) { return '<p class="klein" id="' + id + '"' + (hilfe[id] ? '' : ' hidden') + '>' + T(k) + '</p>'; }
-  function balZeile(key, art, s, bruch, text, qs, abg, name) {
-    var f = art === 'stufe' || art === 'preis', inner = f ? '<span class="sa-bal' + (art === 'preis' ? ' sa-bal-preis' : '') + '" aria-hidden="true"><i style="width:' + Math.round(bruch * 100) + '%"></i></span>' : '<span class="sa-bal sa-bal-leer" aria-hidden="true"></span>';
-    return '<li class="sa-kr" data-sa-krit="' + key + '" data-stufe="' + (art === 'stufe' ? s : art) + '"><span class="sa-kn">' + T(name) + '</span>' + inner + '<span class="sa-bt">' + text + (abg ? ' <span class="klein">(' + T('saBalAbg') + ')</span>' : '') + ' ' + kz(qs) + '</span></li>';
+  function balZeile(key, art, s, bruch, text, qs, abg, name, nz) {
+    var f = art === 'stufe' || art === 'preis', inner = f ? '<span class="sa-bal' + (art === 'preis' ? ' sa-bal-preis' : '') + (nz ? ' sa-bal-nz' : '') + '" aria-hidden="true"><i style="width:' + Math.round(bruch * 100) + '%"></i></span>' : '<span class="sa-bal sa-bal-leer" aria-hidden="true"></span>';
+    return '<li class="sa-kr' + (nz ? ' sa-kr-nz' : '') + '" data-sa-krit="' + key + '" data-stufe="' + (art === 'stufe' ? s : art) + '"' + (nz ? ' data-sa-zaehlt="0"' : '') + '><span class="sa-kn">' + T(name) + (nz ? ' <span class="sa-nz klein" data-sa-nz="1">' + T('saGeruchKein') + '</span>' : '') + '</span>' + inner + '<span class="sa-bt">' + text + (abg ? ' <span class="klein">(' + T('saBalAbg') + ')</span>' : '') + ' ' + kz(qs) + '</span></li>';
   }
   function kritZeilen(x, bal, ein) {
     var h = x.krit.map(function (k) {
-      if (k.art === 'stufe') return balZeile(k.key, 'stufe', k.s, k.s / 3, '<b>' + T('saStufe', { s: k.s }) + '</b>: ' + esc(k.t), k.q, k.abg, 'saKrit_' + k.key);
-      if (k.art === 'widerspruch') return balZeile(k.key, 'widerspruch', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalWiderspruch') + '</span>: ' + esc(k.t), k.q, false, 'saKrit_' + k.key);
-      return balZeile(k.key, 'luecke', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalLuecke') + '</span>', [], false, 'saKrit_' + k.key);
+      if (k.art === 'stufe') return balZeile(k.key, 'stufe', k.s, k.s / 3, '<b>' + T('saStufe', { s: k.s }) + '</b>: ' + esc(k.t), k.q, k.abg, 'saKrit_' + k.key, !k.zaehlt);
+      if (k.art === 'widerspruch') return balZeile(k.key, 'widerspruch', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalWiderspruch') + '</span>: ' + esc(k.t), k.q, false, 'saKrit_' + k.key, !k.zaehlt);
+      return balZeile(k.key, 'luecke', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalLuecke') + '</span>', [], false, 'saKrit_' + k.key, !k.zaehlt);
     }).join(''), b = bal.filter(function (y) { return y.id === x.id; })[0], p = SK.holzPreis(x.id, ein);
     return h + (b && b.anteil !== null ? balZeile('preis', 'preis', 0, b.anteil, '<b>' + T(ein === 'lfm' ? 'saPreisLfm' : 'saPreisM2', { p: p.von === p.bis ? eur(p.von) : eur(p.von) + ' – ' + eur(p.bis) }) + '</b>', [], false, 'saKrit_preis_' + ein) :
       balZeile('preis', 'luecke', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalLuecke') + '</span>', [], false, 'saKrit_preis_' + ein));
@@ -150,7 +150,7 @@
       (x.meist ? ' <span class="sa-abz" data-sa-meist="1">' + T('saMeist') + '</span>' : '') + (sel ? ' <span class="sa-abz sa-abz-gew" data-sa-gewaehlt="1">' + sym('i-wand') + ' ' + T('saGewaehlt') + '</span>' : '') + wahl + '</div><div class="sa-sp"><div>' +
       '<p class="sa-pz"><b data-sa-pz="' + x.punkte + '">' + T('saPunkte', { p: m2(x.punkte) }) + '</b><span class="sa-bal sa-bal-gross" aria-hidden="true"><i style="width:' + Math.min(100, x.punkte) + '%"></i></span></p>' +
       '<p class="sa-quellen" data-sa-quellen="' + x.n + '"><span class="sa-pkte" role="img" aria-label="' + T('saQuellenZahl', { n: x.n, m: x.gesamt }) + '">' + punkte + '</span> <b>' + T('saQuellenZahl', { n: x.n, m: x.gesamt }) + '</b>' + (un ? ' <span class="klein" data-sa-quellen-unsicher="' + un + '">' + T('saQuellenUn', { u: un }) + '</span>' : '') + ' ' + kz(x.q) + '</p>' +
-      '<p class="klein" data-sa-belegt="' + x.belegt + '">' + T('saBelegt', { b: x.belegt }) + '</p><ul class="sa-krits">' + kritZeilen(x, bal, ein) + '</ul><ul class="gs-ul sa-ul">' + rho + '</ul></div><div>' +
+      '<p class="klein" data-sa-belegt="' + x.belegt + '">' + T('saBelegt', { b: x.belegt, m: x.belegtVon }) + '</p><ul class="sa-krits">' + kritZeilen(x, bal, ein) + '</ul><ul class="gs-ul sa-ul">' + rho + '</ul></div><div>' +
       '<div class="sa-pm">' + pm(sd.plus, 'plus', 'saPlusTitel') + pm(sd.minus, 'minus', 'saMinusTitel') + '</div>' +
       (sd.widerspruch ? '<p class="ab-meldung" role="note" data-sa-widerspruch="1">' + T('saBalWiderspruch') + '. ' + esc(sd.widerspruch) + '</p>' : '') + (sd.hinweis ? '<p class="klein" data-sa-vorbehalt="1"><b>' + T('saVorbehalt') + ':</b> ' + esc(sd.hinweis) + '</p>' : '') +
       '<p class="klein">' + (ein === 'lfm' ? '€/lfm' : '€/m²') + '</p>' + preisBlock(hi, ein) + extraPreise(sd, ein) + importHtml(sd) +
@@ -161,14 +161,16 @@
     return r.eintraege.map(function (x) { return holzKarte(x, c, bal, ein); }).join('');
   }
   function gewText() { var e = Math.round(gewicht * 100); return T('saGewWert', { e: e, p: 100 - e }); }
+  /* S3: der Satz unter dem Regler folgt dem Regler: in der Mitte "Start: je zur Hälfte" (Annahme, mit Schild), sonst die gewählte Gewichtung in Alltagsworten; keine eigene Ansage (der Regler trägt aria-valuetext) */
+  function gewAnn() { var e = Math.round(gewicht * 100); return e === 50 ? schild() + ' ' + T('saGewAnn') : T('saGewAnnW', { e: e, p: 100 - e }); }
   function t2Html(c) {
     var h = kopfZeile('i-sa-holz', 'saT2', 't2') + '<div class="sa-reiter" role="tablist" aria-label="' + T('saZweckAria') + '">';
     ['wand', 'bank'].forEach(function (z) {
       h += '<button type="button" role="tab" class="es-var sa-opt sa-reiter-knopf" id="sa-reiter-' + z + '" data-sa="zweck" data-wert="' + z + '" data-fk="zweck-' + z + '" aria-selected="' + (zweck === z) + '" tabindex="' + (zweck === z ? 0 : -1) + '" aria-controls="sa-rang"><span class="es-var-kopf">' + sym(z === 'wand' ? 'i-wand' : 'i-bett') + '<b>' + T('saZweck_' + z) + '</b></span></button>';
     });
     h += '</div><p class="ab-meldung sa-satz" role="note" data-sa-rangsatz="1">' + T('saRangSatz') + '</p><div class="sa-gew"><label class="es-label" for="sa-gew">' + T('saGewTitel') + ' <b id="sa-gew-wert" class="es-zahl">' + gewText() + '</b> ' + hk('sa-h-rang') + '</label>' + hp('sa-h-rang', 'saHilfe_rang') +
-      '<input type="range" id="sa-gew" min="0" max="100" step="10" value="' + Math.round(gewicht * 100) + '" data-sa="gew" data-fk="gew" aria-valuetext="' + esc(tr('saGewWert', { e: Math.round(gewicht * 100), p: 100 - Math.round(gewicht * 100) })) + '"><span class="sa-gew-enden klein"><span>' + T('saGewP') + '</span><span>' + T('saGewE') + '</span></span><p class="klein" data-sa-annahme="gewicht">' + schild() + ' ' + T('saGewAnn') + '</p></div>' +
-      '<p class="klein sa-hk"><b>' + T('saBalkenTitel') + '</b> ' + hk('sa-h-krit') + ' <b>' + T('saImportTitel') + '</b> ' + hk('sa-h-imp') + '</p>' + hp('sa-h-krit', 'saHilfe_krit') + hp('sa-h-imp', 'saHilfe_imp') +
+      '<input type="range" id="sa-gew" min="0" max="100" step="10" value="' + Math.round(gewicht * 100) + '" data-sa="gew" data-fk="gew" aria-valuetext="' + esc(tr('saGewWert', { e: Math.round(gewicht * 100), p: 100 - Math.round(gewicht * 100) })) + '"><span class="sa-gew-enden klein"><span>' + T('saGewP') + '</span><span>' + T('saGewE') + '</span></span><p class="klein" id="sa-gew-ann" data-sa-annahme="gewicht">' + gewAnn() + '</p></div>' +
+      '<p class="klein sa-hk"><b>' + T('saBalkenTitel') + '</b> ' + hk('sa-h-krit') + ' <b>' + T('saGeruchTitel') + '</b> ' + hk('sa-h-geruch') + ' <b>' + T('saImportTitel') + '</b> ' + hk('sa-h-imp') + '</p>' + hp('sa-h-krit', 'saHilfe_krit') + hp('sa-h-geruch', 'saHilfe_geruch') + hp('sa-h-imp', 'saHilfe_imp') +
       '<ol class="sa-rang" id="sa-rang" role="tabpanel" aria-labelledby="sa-reiter-' + zweck + '" data-sa-zweck="' + zweck + '">' + listeHtml(c) + '</ol>';
     ['wand', 'bank'].forEach(function (f) { var z = SK.zaehlung(c.ps[f], f); if (z.n === 0) h += '<p class="ab-meldung" role="note" data-sa-warn="eignung-' + f + '">' + T('saEignungWarn', { name: SK.holzInfo(c.ps[f]).name, was: tr(f === 'wand' ? 'saWand' : 'saBank'), m: z.gesamt }) + '</p>'; });
     var ed = SH.eudr, q ='<ul class="gs-ul sa-ul">' + SH.gezaehlt.concat(['WE']).map(function (k) { var d = qdef(k); return '<li data-sa-quelle="' + k + '"><b>' + k + '</b>: ' + (/^https?:/.test(d.url || '') ? '<a href="' + esc(d.url) + '" target="_blank" rel="noopener">' + esc(d.titel) + '</a>' : esc(d.titel)) + ' <span class="klein">(' + esc(d.art) + ')</span></li>'; }).join('') + '</ul>';
@@ -176,7 +178,7 @@
       '<details class="an-bed sa-quellenliste"><summary>' + T('saQuellenListe') + '</summary>' + q + '</details>';
     return h + (c.ps.explizit.wand && c.ps.explizit.bank ? '' : '<p class="klein" data-sa-annahme="holz">' + schild() + ' ' + T('saStartHolz', { w: SK.holzInfo(c.ps.wand).name, b: SK.holzInfo(c.ps.bank).name }) + '</p>');
   }
-  function neuListe() { var l = byId('sa-rang'); if (l && ctx && ctx.ok) { l.innerHTML = listeHtml(ctx); } var w = byId('sa-gew-wert'); if (w) w.textContent = tr('saGewWert', { e: Math.round(gewicht * 100), p: 100 - Math.round(gewicht * 100) }); }
+  function neuListe() { var l = byId('sa-rang'); if (l && ctx && ctx.ok) { l.innerHTML = listeHtml(ctx); } var w = byId('sa-gew-wert'); if (w) w.textContent = tr('saGewWert', { e: Math.round(gewicht * 100), p: 100 - Math.round(gewicht * 100) }); var a = byId('sa-gew-ann'); if (a) a.innerHTML = gewAnn(); }
 
   /* ---------- Teil 3: Materialliste ---------- */
   function posHtml(p, mg) {

@@ -1049,6 +1049,8 @@
   .mh-tab .klein { display: block; font-size: 14px; color: var(--leise); }
   .mh-luecke { font-weight: 700; }
   .mh-heiz { margin: 0 0 12px; } .mh-heiz-knoepfe { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 8px; margin: 6px 0; }
+  .mh-hz-hilfe { display: inline-block; vertical-align: middle; } .mh-hz-hilfe > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border-radius: 999px; border: 2px solid var(--info); background: var(--info-fl); color: var(--info); font: 800 18px var(--display); }
+  .mh-hz-hilfe > summary::-webkit-details-marker { display: none; } .mh-hz-hilfe[open] > summary { background: var(--info); color: var(--karte); } .mh-hz-hilfe > summary:focus-visible { outline: 3px solid var(--akzent); outline-offset: 2px; } .mh-hz-hilfe > p { max-width: 38rem; }
   .mh-heiz-k { min-height: 48px; } .mh-heiz-k .es-var-kopf svg.sym { width: 1.6em; height: 1.6em; }
   .mh-tab .mh-aus td { color: var(--leise); }
   .mh-tab .mh-aus .z span.mh-wert { text-decoration: line-through; }
@@ -1509,6 +1511,8 @@
   .sa-bal i { display: block; height: 100%; background: var(--c1); }
   .sa-bal-preis i { background: var(--c2); }
   .sa-bal-leer { background: transparent; border: 1.5px dashed var(--leise); }
+  .sa-bal-nz i { background: repeating-linear-gradient(45deg, var(--leise) 0 3px, transparent 3px 6px); }
+  .sa-nz { display: inline-block; color: var(--leise); font-weight: 400; border: 1px dashed var(--leise); border-radius: 6px; padding: 0 6px; margin-left: 4px; }
   .sa-bal-gross { height: 16px; width: 100%; max-width: 260px; }
   .sa-pkte { display: inline-flex; gap: 4px; vertical-align: middle; }
   .sa-pkt { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--linie2); box-sizing: border-box; }
@@ -6168,6 +6172,15 @@ window.DATEN.saunaholz = {
 "eudr":{"gesetz":"VO (EU) 2023/1115 (EUDR), Art. 38 Abs. 2 und 3, Anhang I (ex 4407, ex 4409)","stand":"konsolidierte Fassung vom 18.09.2026","fund":"https://eur-lex.europa.eu/legal-content/DE/TXT/HTML/?uri=CELEX:02023R1115-20260918","abruf":"2026-10-31","status":"geprüft","text":"Gilt ab 30.12.2026; für Kleinst- und kleine Unternehmen ab 30.06.2027, aber nicht für Erzeugnisse, die schon unter die Holzhandelsverordnung (EU) Nr. 995/2010 fielen (Saunaholz wohl), daher wahrscheinlich 30.12.2026. Betroffen sind vor allem Händler und Importeure; ob ein Privatkauf „Inverkehrbringen“ ist, ist offen."}
 };
 </script>
+<script>/* daten/heizung.js */
+window.DATEN = window.DATEN || {};
+window.DATEN.heizung = {
+"stand":"2026-10-31",
+"bericht":"recherche/52_heizung_vergleich.md",
+"arten":{"waermepumpe":{"id":"H-20","name":"Luft-Wasser-Wärmepumpe","einheit":"€","basis":"Anschaffung inkl. Einbau","von":12500,"bis":29500,"von_status":"geprüft","von_text":"Seite co2online am Original gelesen: „Luft-Wasser: ab 12.500 €“","bis_status":"unsicher – prüfen vor Nutzung","bis_text":"Suchtreffer-Zusammenfassung der Seitenfamilie: „Luft-Wasser etwa 29.500 €“, nicht am Original gelesen","status":"prüfen vor Nutzung","widerspruch":"Bericht 52, Widerspruch 5: die gelesene Seite nennt „ab 12.500 €“; die Suchtreffer-Zusammenfassung ordnet 12.500 € der Luft-Luft- und 29.500 € der Luft-Wasser-Wärmepumpe zu. Nicht aufgelöst, die Seite vor Nutzung gegenlesen.","quelle":"co2online, „Wärmepumpe: Kosten, Funktion & Förderung 2026“","url":"https://www.co2online.de/modernisieren-und-bauen/waermepumpe/","abruf":"2026-10-31"},"gas":{"id":"H-22","name":"Gas-Brennwert","einheit":"€","basis":"Anschaffung inkl. Einbau","von":6000,"bis":9000,"status":"veraltet, nur Größenordnung","preisstand":"2023","quelle":"co2online, „Heizungsarten im Vergleich“ (veröffentlicht 26.09.2024, Preisbasis 2023)","url":"https://www.co2online.de/modernisieren-und-bauen/heizung/heizungsarten-im-vergleich/","abruf":"2026-10-31"}},
+"bio_treppe":{"id":"H-03","gesetz":"§ 43 GModG","stufen":[["2029",10],["2030",15],["2035",30],["2040",60]],"status":"Zahlen vor Nutzung am Volltext gegenlesen","quelle":"GModG § 43 (gesetze-im-internet.de)","url":"https://www.gesetze-im-internet.de/geg/__43.html","abruf":"2026-10-31"}
+};
+</script>
 <script>/* daten/kleinhaus.js */
 window.DATEN = window.DATEN || {};
 window.DATEN.kleinhaus = {
@@ -7891,18 +7904,22 @@ saZweckAria: { de: 'Wofür soll das Holz sein?', en: 'What is the wood for?', ru
 saRangSatz: { de: 'Eigene Einordnung aus gezählten Quellen, keine Empfehlung.', en: 'Own ranking from counted sources, not a recommendation.', ru: 'Собственная оценка по подсчитанным источникам, не рекомендация.' },
 saGewTitel: { de: 'Was zählt mehr?', en: 'What counts more?', ru: 'Что важнее?' }, saGewE: { de: 'Empfehlungen', en: 'Recommendations', ru: 'Рекомендации' }, saGewP: { de: 'Eigenschaften', en: 'Properties', ru: 'Свойства' },
 saGewWert: { de: '{e} % Empfehlungen, {p} % Eigenschaften', en: '{e} % recommendations, {p} % properties', ru: '{e} % рекомендации, {p} % свойства' },
+saGewAnnW: { de: 'Jetzt: Empfehlungen {e} %, Eigenschaften {p} %. Der Preis zählt nicht mit.', en: 'Now: recommendations {e} %, properties {p} %. Price does not count.', ru: 'Сейчас: рекомендации {e} %, свойства {p} %. Цена не учитывается.' },
 saGewAnn: { de: 'Start: je zur Hälfte. Der Preis zählt nicht mit.', en: 'Start: half and half. Price does not count.', ru: 'Старт: поровну. Цена не учитывается.' },
-saHilfe_rang: { de: 'Punktzahl (0 bis 100) = Empfehlungen × Gewicht + Eigenschaften × Rest. Empfehlungen: Zahl der Quellen, die das Holz für den Zweck ausdrücklich nennen, geteilt durch 8. Eigenschaften: Mittel der belegten Stufen (1 bis 3). Eine Lücke oder ein Widerspruch zählt nicht als 0, sie fehlt in der Rechnung; ohne belegte Eigenschaft zählen nur die Empfehlungen. Gleiche Punktzahl heißt geteilter Platz. Der Preis zählt nicht. Es sind nur 8 Quellen, und Hersteller verkaufen eigene Hölzer: die Rangfolge ist schwach.', en: 'Score (0 to 100) = recommendations × weight + properties × the rest. Recommendations: number of sources that name the wood explicitly for the purpose, divided by 8. Properties: mean of the documented levels (1 to 3). A gap or a contradiction does not count as 0, it is left out; without a documented property only recommendations count. Equal score means a shared rank. Price does not count. There are only 8 sources and makers sell their own woods: the ranking is weak.', ru: 'Баллы (0 до 100) = рекомендации × вес + свойства × остаток. Рекомендации: число источников, прямо называющих дерево для этой цели, делённое на 8. Свойства: среднее подтверждённых уровней (1 до 3). Пробел или противоречие не считается нулём, его нет в расчёте; без подтверждённых свойств учитываются только рекомендации. Равные баллы значат общее место. Цена не учитывается. Источников всего 8, производители продают своё дерево: рейтинг слабый.' },
-saHilfe_krit: { de: 'Die Balken sind unsere Einordnung aus den Textaussagen der Quellen; länger ist besser für die Sauna. Stufe 3: ausdrücklich genannt („kein Harz“, „splitterfrei“, „formstabil“). Stufe 2: abgeschwächt („harzarm“, „angenehmer Duft“). Stufe 1: ein genannter Nachteil. Ohne Quelle steht „Lücke“, nie ein geschätzter Wert. Gilt eine Angabe für Thermoholz allgemein, steht „abgeleitet“. Der Preisbalken ist länger = teurer und zählt nicht zur Rangfolge.', en: 'The bars are our own classification from the texts of the sources; longer is better for a sauna. Level 3: named explicitly ("no resin", "splinter free", "dimensionally stable"). Level 2: weaker ("low resin", "pleasant scent"). Level 1: a named drawback. Without a source it says "gap", never an estimate. If a statement covers thermo wood in general, it says "derived". The price bar is longer = more expensive and does not count towards the ranking.', ru: 'Полосы это наша оценка по текстам источников; длиннее значит лучше для сауны. Уровень 3: сказано прямо («без смолы», «без заноз», «стабильная форма»). Уровень 2: мягче («мало смолы», «приятный запах»). Уровень 1: названный недостаток. Без источника стоит «пробел», не оценка. Если утверждение относится к термодереву вообще, написано «выведено». Полоса цены длиннее значит дороже и не входит в рейтинг.' },
+saHilfe_rang: { de: 'Punktzahl (0 bis 100) = Empfehlungen × Gewicht + Eigenschaften × Rest. Empfehlungen: Zahl der Quellen, die das Holz für den Zweck ausdrücklich nennen, geteilt durch 8. Eigenschaften: Mittel der belegten Stufen (1 bis 3) von Harz, Hitze, Haltbarkeit und Splittern. Eine Lücke oder ein Widerspruch zählt nicht als 0, sie fehlt in der Rechnung; ohne belegte Eigenschaft zählen nur die Empfehlungen. Gleiche Punktzahl heißt geteilter Platz. Der Preis zählt nicht. Es sind nur 8 Quellen, und Hersteller verkaufen eigene Hölzer: die Rangfolge ist schwach.', en: 'Score (0 to 100) = recommendations × weight + properties × the rest. Recommendations: number of sources that name the wood explicitly for the purpose, divided by 8. Properties: mean of the documented levels (1 to 3) of resin, heat, durability and splintering. A gap or a contradiction does not count as 0, it is left out; without a documented property only recommendations count. Equal score means a shared rank. Price does not count. There are only 8 sources and makers sell their own woods: the ranking is weak.', ru: 'Баллы (0 до 100) = рекомендации × вес + свойства × остаток. Рекомендации: число источников, прямо называющих дерево для этой цели, делённое на 8. Свойства: среднее подтверждённых уровней (1 до 3) по смоле, жару, стойкости и занозам. Пробел или противоречие не считается нулём, его нет в расчёте; без подтверждённых свойств учитываются только рекомендации. Равные баллы значат общее место. Цена не учитывается. Источников всего 8, производители продают своё дерево: рейтинг слабый.' },
+saHilfe_krit: { de: 'Die Balken sind unsere Einordnung aus den Textaussagen der Quellen; länger ist besser für die Sauna. Stufe 3: ausdrücklich genannt („kein Harz“, „splitterfrei“, „formstabil“). Stufe 2: abgeschwächt („harzarm“, „gibt Wärme gleichmäßig ab“). Stufe 1: ein genannter Nachteil. Ohne Quelle steht „Lücke“, nie ein geschätzter Wert. Gilt eine Angabe für Thermoholz allgemein, steht „abgeleitet“. Der Preisbalken ist länger = teurer und zählt nicht zur Rangfolge.', en: 'The bars are our own classification from the texts of the sources; longer is better for a sauna. Level 3: named explicitly ("no resin", "splinter free", "dimensionally stable"). Level 2: weaker ("low resin", "releases heat evenly"). Level 1: a named drawback. Without a source it says "gap", never an estimate. If a statement covers thermo wood in general, it says "derived". The price bar is longer = more expensive and does not count towards the ranking.', ru: 'Полосы это наша оценка по текстам источников; длиннее значит лучше для сауны. Уровень 3: сказано прямо («без смолы», «без заноз», «стабильная форма»). Уровень 2: мягче («мало смолы», «отдаёт тепло равномерно»). Уровень 1: названный недостаток. Без источника стоит «пробел», не оценка. Если утверждение относится к термодереву вообще, написано «выведено». Полоса цены длиннее значит дороже и не входит в рейтинг.' },
 saHilfe_imp: { de: 'Russland und Belarus: Holz (Kapitel 44) darf nach EU-Recht nicht eingeführt werden, deshalb kein Preis und kein Weg darum herum. Polen und Ukraine: nur Suchtreffer-Preise in zł und UAH, keine Euro-Umrechnung, Fracht ist Lücke. Die EU-Entwaldungsverordnung (EUDR) gilt für Saunaholz voraussichtlich ab 30.12.2026, vor allem für Händler und Importeure; ob ein Privatkauf betroffen ist, ist offen.', en: 'Russia and Belarus: wood (chapter 44) may not be imported under EU law, so no price and no way around it. Poland and Ukraine: only search-hit prices in zł and UAH, no euro conversion, freight is a gap. The EU Deforestation Regulation (EUDR) is expected to apply to sauna wood from 30.12.2026, mainly to traders and importers; whether a private purchase is affected is open.', ru: 'Россия и Беларусь: ввоз древесины (глава 44) по праву ЕС запрещён, поэтому нет цены и обходного пути. Польша и Украина: только цены из поисковой выдачи в zł и UAH, без пересчёта в евро, доставка не известна. Регламент ЕС о вырубке лесов (EUDR) для дерева для сауны, вероятно, действует с 30.12.2026, прежде всего для торговцев и импортёров; затронута ли частная покупка, не ясно.' },
 saBalkenTitel: { de: 'Balken je Eigenschaft', en: 'Bars per property', ru: 'Полосы по свойствам' },
 saPlatz: { de: 'Platz {n}', en: 'Rank {n}', ru: 'Место {n}' }, saPlatzGeteilt: { de: 'Platz {n}, geteilt', en: 'Rank {n}, shared', ru: 'Место {n}, общее' },
 saMeist: { de: 'am häufigsten empfohlen', en: 'most often recommended', ru: 'чаще всего рекомендуют' }, saGewaehlt: { de: 'gewählt', en: 'chosen', ru: 'выбрано' },
 saPunkte: { de: '{p} Punkte', en: '{p} points', ru: '{p} баллов' },
 saQuellenZahl: { de: '{n} von {m} Quellen', en: '{n} of {m} sources', ru: '{n} из {m} источников' }, saQuellenUn: { de: 'davon {u} unsicher (Suchtreffer)', en: 'of these {u} uncertain (search hit)', ru: 'из них {u} неуверенно (поисковая выдача)' },
-saBelegt: { de: '{b} von 5 Eigenschaften belegt', en: '{b} of 5 properties documented', ru: 'подтверждено свойств: {b} из 5' },
+saGeruchKein: { de: 'zählt nicht zur Punktzahl', en: 'does not count towards the score', ru: 'не входит в баллы' },
+saGeruchTitel: { de: 'Geruch: warum ohne Punkte?', en: 'Smell: why no points?', ru: 'Запах: почему без баллов?' },
+saHilfe_geruch: { de: 'Geruch ist Geschmackssache und keine Eigenschaft des Holzes. Darum zeigt der gestreifte Balken ihn nur zur Information, er verändert weder Punkte noch Platz. Wer empfindlich auf Holz reagiert, liest die Nachteile der Karte: dort steht ein Allergie-Hinweis, sofern eine Quelle ihn nennt.', en: 'Smell is a matter of taste, not a property of the wood. The striped bar therefore shows it for information only; it changes neither points nor rank. If you react sensitively to wood, read the drawbacks on the card: an allergy note is shown there whenever a source names one.', ru: 'Запах это дело вкуса, а не свойство дерева. Поэтому полосатая полоса показывает его только для информации, она не меняет ни баллы, ни место. Если вы чувствительны к дереву, прочитайте недостатки на карточке: там есть указание об аллергии, если его называет источник.' },
+saBelegt: { de: '{b} von {m} Eigenschaften belegt', en: '{b} of {m} properties documented', ru: 'подтверждено свойств: {b} из {m}' },
 saKrit_harz: { de: 'Harz', en: 'Resin', ru: 'Смола' }, saKrit_hitze: { de: 'Hitze an der Haut', en: 'Heat on the skin', ru: 'Жар на коже' }, saKrit_halt: { de: 'Haltbarkeit', en: 'Durability', ru: 'Стойкость' },
-saKrit_splitter: { de: 'Splittern', en: 'Splintering', ru: 'Занозы' }, saKrit_geruch: { de: 'Geruch, Allergie', en: 'Smell, allergy', ru: 'Запах, аллергия' },
+saKrit_splitter: { de: 'Splittern', en: 'Splintering', ru: 'Занозы' }, saKrit_geruch: { de: 'Geruch', en: 'Smell', ru: 'Запах' },
 saKrit_preis_m2: { de: 'Preis je m² (länger = teurer)', en: 'Price per m² (longer = dearer)', ru: 'Цена за м² (длиннее = дороже)' }, saKrit_preis_lfm: { de: 'Preis je lfm (länger = teurer)', en: 'Price per m run (longer = dearer)', ru: 'Цена за пог. м (длиннее = дороже)' },
 saStufe: { de: 'Stufe {s} von 3', en: 'Level {s} of 3', ru: 'Уровень {s} из 3' }, saBalLuecke: { de: 'Lücke', en: 'Gap', ru: 'Пробел' },
 saBalWiderspruch: { de: 'Quellen widersprechen sich', en: 'Sources contradict each other', ru: 'Источники противоречат друг другу' }, saBalAbg: { de: 'abgeleitet', en: 'derived', ru: 'выведено' },
@@ -8088,11 +8105,18 @@ Object.keys(T).forEach(function (k) { window.TEXTE[k] = T[k]; });
     mpG_daemmung: ['Dämmstandard (Mehrkosten)', 'Insulation standard (extra)', 'Стандарт утепления (доплата)'],
     mpG_lueftung: ['Lüftung (einmalig)', 'Ventilation (one-off)', 'Вентиляция (разово)'],
     mpG_heizanlage: ['Heizanlage', 'Heating system', 'Система отопления'],
+    statusVeraltet: ['veraltet, nur Größenordnung', 'outdated, order of magnitude only', 'устарело, только порядок величины'],
+    mpHzHilfeKnopf: ['Erklärung zur Heizanlage', 'Explanation of the heating system', 'Пояснение к системе отопления'],
+    mpHzStat_waermepumpe: ['Untergrenze {von} € geprüft, Obergrenze {bis} € unsicher: prüfen vor Nutzung', 'Lower limit {von} € checked, upper limit {bis} € uncertain: check before use', 'Нижняя граница {von} € проверена, верхняя {bis} € неточна: проверить перед использованием'],
+    mpHzStat_gas: ['Preisstand 2023, nur Größenordnung', 'Price level 2023, order of magnitude only', 'Цены 2023 года, только порядок величины'],
+    mpHzHilfe_waermepumpe: ['Die gelesene Seite von co2online nennt für die Luft-Wasser-Wärmepumpe „ab {von} €“, die Obergrenze {bis} € steht nur in einem Suchtreffer, und dieser ordnet {von} € der Luft-Luft-Wärmepumpe zu: der Widerspruch ist nicht aufgelöst, vor Nutzung die Seite gegenlesen.', 'The co2online page we read says “from {von} €” for the air-to-water heat pump; the upper limit {bis} € appears only in a search hit, which assigns {von} € to the air-to-air heat pump: the contradiction is not resolved, so read the page again before use.', 'На прочитанной странице co2online для воздушно-водяного теплового насоса указано «от {von} €», верхняя граница {bis} € есть только в поисковом результате, а он относит {von} € к воздушно-воздушному насосу: противоречие не снято, перед использованием перечитайте страницу.'],
+    mpHzHilfe_gas: ['Preisstand 2023, nur eine Größenordnung. Hinweis ohne Kosten: Wer nach dem 29.07.2026 eine Gasheizung in ein Bestandsgebäude einbaut, muss nach § 43 GModG ab {j} einen erneuerbaren Anteil von {a} % nachweisen, steigend bis {b} % ab {k}; Zahlen vor Nutzung am Gesetzestext gegenlesen.', 'Price level 2023, order of magnitude only. Note without costs: whoever installs a gas heating system in an existing building after 29.07.2026 must show a renewable share of {a} % from {j} under § 43 GModG, rising to {b} % from {k}; check the figures against the statute before use.', 'Цены 2023 года, только порядок величины. Справка без расходов: кто после 29.07.2026 устанавливает газовое отопление в существующем здании, обязан по § 43 GModG с {j} подтверждать долю возобновляемых источников {a} %, до {b} % с {k}; цифры перед использованием сверьте с текстом закона.'],
+    mpSummeUnsicher: ['In der Summe steckt mindestens ein unsicherer oder veralteter Wert (Heizanlage): prüfen vor Nutzung.', 'The total contains at least one uncertain or outdated value (heating system): check before use.', 'В сумме есть хотя бы одно неточное или устаревшее значение (отопление): проверить перед использованием.'],
     mpHz_waermepumpe: ['Wärmepumpe', 'Heat pump', 'Тепловой насос'], mpHz_gas: ['Gas', 'Gas', 'Газ'], mpHz_offen: ['noch offen', 'still open', 'ещё не решено'],
     mpHzWahl: ['Heizanlage wählen:', 'Choose the heating system:', 'Выберите систему отопления:'],
     mpHzHinweis: ['Heizkörper und Fußbodenheizung stehen im Innenausbau, die Heizwärme ist nur eine Anzeige.', 'Radiators and underfloor heating are in the fit-out, the heating demand is only a display.', 'Радиаторы и тёплый пол входят в отделку, потребность в тепле только показана.'],
     mpHzOk: ['Gewählt: {art}, {preis}. Die Zeile steht jetzt unter den Kosten.', 'Chosen: {art}, {preis}. The line now appears in the costs.', 'Выбрано: {art}, {preis}. Строка теперь в расходах.'], mpHzWeg: ['Auswahl löschen', 'Clear choice', 'Сбросить выбор'], mpHzWegOk: ['Auswahl gelöscht. Die Zeile ist weg.', 'Choice cleared. The line is gone.', 'Выбор сброшен. Строка удалена.'],
-    mpHzFolgt: ['Keine Angabe, folgt mit der Heizungs-Karte.', 'No data, follows with the heating card.', 'Нет данных, появится в карте отопления.'], mpHzOffen: ['Noch offen: keine Summe.', 'Still open: no total.', 'Ещё не решено: итога нет.'],
+    mpHzOffen: ['Noch offen: keine Summe.', 'Still open: no total.', 'Ещё не решено: итога нет.'],
     mpHeizanlage: ['Heizanlage', 'Heating system', 'Система отопления'],
     mpZ_heizanlage_waermepumpe: ['Heizanlage → Wärmepumpe', 'Heating system → heat pump', 'Система отопления → тепловой насос'],
     mpSumme: ['Summe (Spanne)', 'Total (range)', 'Итого (диапазон)'],
@@ -11427,7 +11451,7 @@ if (!zs.length) return { id: id, luecke: true, n: 0, zeilen: z };
 var v = zs.map(function (r) { return r.v; });
 return { id: id, luecke: false, zeilen: z, n: n, einQuelle: n === 1, von: Math.min.apply(null, v), bis: Math.max.apply(null, v) };
 }
-var GEWICHT_START = 0.5, KRIT = ['harz', 'hitze', 'halt', 'splitter', 'geruch'];
+var GEWICHT_START = 0.5, KRIT = ['harz', 'hitze', 'halt', 'splitter', 'geruch'], ZAEHLT = ['harz', 'hitze', 'halt', 'splitter'];
 function gewichtOk(w) { return ok(w) ? klemme(w, 0, 1) : GEWICHT_START; }
 function zaehlung(id, zweck) {
 var h = holzDaten(id), s = SH(), z = h && h.z && h.z[zweck === 'bank' ? 'bank' : 'wand'];
@@ -11436,16 +11460,16 @@ return z ? { n: z.q.length, q: z.q, u: z.u, gesamt: s.anzahl_quellen } : { n: 0,
 function eigenschaften(id) {
 var h = holzDaten(id), st = [], out = [];
 KRIT.forEach(function (k) {
-var v = h && h.k[k], e = { key: k, art: !v || v.l ? 'luecke' : v.w ? 'widerspruch' : 'stufe', s: v && v.s || 0, q: v && v.q || [], t: v && v.t || '', abg: !!(v && v.abg) };
-if (e.art === 'stufe') st.push(e.s);
+var v = h && h.k[k], e = { key: k, art: !v || v.l ? 'luecke' : v.w ? 'widerspruch' : 'stufe', s: v && v.s || 0, q: v && v.q || [], t: v && v.t || '', abg: !!(v && v.abg), zaehlt: ZAEHLT.indexOf(k) >= 0 };
+if (e.art === 'stufe' && e.zaehlt) st.push(e.s);
 out.push(e);
 });
-return { liste: out, belegt: st.length, mittel: st.length ? st.reduce(function (a, b) { return a + b / 3; }, 0) / st.length : null };
+return { liste: out, belegt: st.length, von: ZAEHLT.length, mittel: st.length ? st.reduce(function (a, b) { return a + b / 3; }, 0) / st.length : null };
 }
 function bewerte(id, zweck, w) {
 var z = zaehlung(id, zweck), e = eigenschaften(id), E = z.gesamt ? z.n / z.gesamt : 0, P = e.mittel;
 var punkte = P === null ? E : w * E + (1 - w) * P;
-return { id: id, name: holzInfo(id).name, n: z.n, u: z.u, q: z.q, gesamt: z.gesamt, E: E, P: P, belegt: e.belegt, krit: e.liste, punkte: Math.floor(punkte * 1000 + 0.5 + 1e-7) / 10, roh: punkte };
+return { id: id, name: holzInfo(id).name, n: z.n, u: z.u, q: z.q, gesamt: z.gesamt, E: E, P: P, belegt: e.belegt, belegtVon: e.von, krit: e.liste, punkte: Math.floor(punkte * 1000 + 0.5 + 1e-7) / 10, roh: punkte };
 }
 function rangliste(zweck, gewicht) {
 var s = SH(), w = gewichtOk(gewicht), z = zweck === 'bank' ? 'bank' : 'wand';
@@ -11577,7 +11601,7 @@ if (feld === 'holz_wand' || feld === 'holz_bank') { if (!holzInfo(wert)) return 
 if (feld === 'stunden' && ok(wert)) { ps.stunden = r2(klemme(wert, S_MIN, S_MAX)); return true; }
 return false;
 }
-var API = { ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, H_MIN: H_MIN, H_MAX: H_MAX, B_MAX: B_MAX, T_MAX: T_MAX, S_MIN: S_MIN, S_MAX: S_MAX, holzInfo: holzInfo, holzDaten: holzDaten, GEWICHT_START: GEWICHT_START, KRIT: KRIT, zaehlung: zaehlung, eigenschaften: eigenschaften, rangliste: rangliste, preisBalken: preisBalken, gewichtOk: gewichtOk, planSauna: planSauna, volumen: volumen, ofenKlasse: ofenKlasse, holzPreis: holzPreis, strompreis: strompreis,
+var API = { ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, H_MIN: H_MIN, H_MAX: H_MAX, B_MAX: B_MAX, T_MAX: T_MAX, S_MIN: S_MIN, S_MAX: S_MAX, holzInfo: holzInfo, holzDaten: holzDaten, GEWICHT_START: GEWICHT_START, KRIT: KRIT, ZAEHLT: ZAEHLT, zaehlung: zaehlung, eigenschaften: eigenschaften, rangliste: rangliste, preisBalken: preisBalken, gewichtOk: gewichtOk, planSauna: planSauna, volumen: volumen, ofenKlasse: ofenKlasse, holzPreis: holzPreis, strompreis: strompreis,
 betrieb: betrieb, mengen: mengen, material: material, vergleich: vergleich, geometrie: geometrie, rechne: rechne, verknuepfen: verknuepfen, saunaAnlegen: saunaAnlegen, groesseSetzen: groesseSetzen, wahlSetzen: wahlSetzen };
 root.SAUNA_KERN = API;
 if (typeof module !== 'undefined' && module.exports) module.exports = API;
@@ -11820,17 +11844,19 @@ function planHeiz(plan) {
 var h = plan && plan.heizanlage && typeof plan.heizanlage === 'object' && !Array.isArray(plan.heizanlage) ? plan.heizanlage : null;
 return h ? { vorhanden: true, art: h.art === undefined ? 'offen' : h.art, bekannt: h.art === undefined || HEIZ_ARTEN.indexOf(h.art) >= 0 } : { vorhanden: false, art: '', bekannt: true };
 }
-function heizDaten() {
-var GK = root.GRUNDSTUECK_KERN;
-return (GK ? GK.datenZu('waermepumpe').kosten.filter(function (r) { return r.id === 'k_wp'; })[0] : null) || null;
+function heizDaten(art) {
+var d = root.DATEN && root.DATEN.heizung, a = d && d.arten && d.arten[art];
+return a && ok(a.von) && ok(a.bis) ? a : null;
 }
 function heizZeile(plan, z, lu, fe) {
-var h = planHeiz(plan), k;
+var h = planHeiz(plan), a;
 if (!h.vorhanden) return;
 if (!h.bekannt) { fe.push({ teil: 'heizanlage', grund: 'art ' + h.art }); return; }
-if (h.art === 'waermepumpe') {
-k = heizDaten();
-if (k && !k.luecke && ok(k.von) && ok(k.bis)) { z.push({ gruppe: 'heizanlage', id: 'waermepumpe', von: k.von, bis: k.bis, luecke: false, belege: belege([{ quelleTitel: k.quelle, url: k.url, abruf: k.abruf, status: k.status }]) }); return; }
+a = h.art === 'waermepumpe' || h.art === 'gas' ? heizDaten(h.art) : null;
+if (a) {
+z.push({ gruppe: 'heizanlage', id: h.art, von: a.von, bis: a.bis, luecke: false, heizId: a.id, unsicher: true, preisstand: a.preisstand || '',
+belege: belege([{ quelleTitel: a.quelle, url: a.url, abruf: a.abruf, status: a.status === 'prüfen vor Nutzung' ? a.status : 'veraltet' }]) });
+return;
 }
 z.push({ gruppe: 'heizanlage', id: h.art, von: null, bis: null, luecke: true, belege: [] });
 lu.push({ id: 'k:heizanlage:' + h.art, key: 'mLuecke', par: { heiz: h.art } });
@@ -11857,7 +11883,8 @@ if (r.inSumme === false) return;
 if (ok(r.von)) sum.von += r.von;
 if (ok(r.bis)) sum.bis += r.bis;
 });
-return { zeilen: z, summe: sum, summeRoh: roh, ueberlappungen: ue, luecken: lu.filter(function (l) { return !weg[l.id]; }), fehler: fe, heiz: ex.heiz, foerderung: ex.foerderung };
+var uns = z.filter(function (r) { return r.unsicher && r.inSumme !== false && preisig(r); }).map(function (r) { return r.gruppe + '/' + r.id; });
+return { zeilen: z, summe: sum, unsicherInSumme: uns, summeRoh: roh, ueberlappungen: ue, luecken: lu.filter(function (l) { return !weg[l.id]; }), fehler: fe, heiz: ex.heiz, foerderung: ex.foerderung };
 }
 function kostenBlock(plan, opt, B) {
 var K = root.AUSBAU_KERN, HK = root.HUELLE_KERN, z = [], lu = [], fe = [], ex = { heiz: null, foerderung: [] };
@@ -19164,15 +19191,15 @@ return qs && qs.length ? '<span class="sa-kz">(' + qs.map(function (k) { var q =
 }
 function hk(id) { return '<button type="button" class="hilfe-knopf" data-sa="hilfe" data-wert="' + id + '" aria-expanded="' + !!hilfe[id] + '" aria-controls="' + id + '" aria-label="' + T('hilfeKnopf') + '">?</button>'; }
 function hp(id, k) { return '<p class="klein" id="' + id + '"' + (hilfe[id] ? '' : ' hidden') + '>' + T(k) + '</p>'; }
-function balZeile(key, art, s, bruch, text, qs, abg, name) {
-var f = art === 'stufe' || art === 'preis', inner = f ? '<span class="sa-bal' + (art === 'preis' ? ' sa-bal-preis' : '') + '" aria-hidden="true"><i style="width:' + Math.round(bruch * 100) + '%"></i></span>' : '<span class="sa-bal sa-bal-leer" aria-hidden="true"></span>';
-return '<li class="sa-kr" data-sa-krit="' + key + '" data-stufe="' + (art === 'stufe' ? s : art) + '"><span class="sa-kn">' + T(name) + '</span>' + inner + '<span class="sa-bt">' + text + (abg ? ' <span class="klein">(' + T('saBalAbg') + ')</span>' : '') + ' ' + kz(qs) + '</span></li>';
+function balZeile(key, art, s, bruch, text, qs, abg, name, nz) {
+var f = art === 'stufe' || art === 'preis', inner = f ? '<span class="sa-bal' + (art === 'preis' ? ' sa-bal-preis' : '') + (nz ? ' sa-bal-nz' : '') + '" aria-hidden="true"><i style="width:' + Math.round(bruch * 100) + '%"></i></span>' : '<span class="sa-bal sa-bal-leer" aria-hidden="true"></span>';
+return '<li class="sa-kr' + (nz ? ' sa-kr-nz' : '') + '" data-sa-krit="' + key + '" data-stufe="' + (art === 'stufe' ? s : art) + '"' + (nz ? ' data-sa-zaehlt="0"' : '') + '><span class="sa-kn">' + T(name) + (nz ? ' <span class="sa-nz klein" data-sa-nz="1">' + T('saGeruchKein') + '</span>' : '') + '</span>' + inner + '<span class="sa-bt">' + text + (abg ? ' <span class="klein">(' + T('saBalAbg') + ')</span>' : '') + ' ' + kz(qs) + '</span></li>';
 }
 function kritZeilen(x, bal, ein) {
 var h = x.krit.map(function (k) {
-if (k.art === 'stufe') return balZeile(k.key, 'stufe', k.s, k.s / 3, '<b>' + T('saStufe', { s: k.s }) + '</b>: ' + esc(k.t), k.q, k.abg, 'saKrit_' + k.key);
-if (k.art === 'widerspruch') return balZeile(k.key, 'widerspruch', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalWiderspruch') + '</span>: ' + esc(k.t), k.q, false, 'saKrit_' + k.key);
-return balZeile(k.key, 'luecke', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalLuecke') + '</span>', [], false, 'saKrit_' + k.key);
+if (k.art === 'stufe') return balZeile(k.key, 'stufe', k.s, k.s / 3, '<b>' + T('saStufe', { s: k.s }) + '</b>: ' + esc(k.t), k.q, k.abg, 'saKrit_' + k.key, !k.zaehlt);
+if (k.art === 'widerspruch') return balZeile(k.key, 'widerspruch', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalWiderspruch') + '</span>: ' + esc(k.t), k.q, false, 'saKrit_' + k.key, !k.zaehlt);
+return balZeile(k.key, 'luecke', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalLuecke') + '</span>', [], false, 'saKrit_' + k.key, !k.zaehlt);
 }).join(''), b = bal.filter(function (y) { return y.id === x.id; })[0], p = SK.holzPreis(x.id, ein);
 return h + (b && b.anteil !== null ? balZeile('preis', 'preis', 0, b.anteil, '<b>' + T(ein === 'lfm' ? 'saPreisLfm' : 'saPreisM2', { p: p.von === p.bis ? eur(p.von) : eur(p.von) + ' – ' + eur(p.bis) }) + '</b>', [], false, 'saKrit_preis_' + ein) :
 balZeile('preis', 'luecke', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalLuecke') + '</span>', [], false, 'saKrit_preis_' + ein));
@@ -19213,7 +19240,7 @@ return '<li class="sa-holz' + (sel ? ' sa-gewaehlt' : '') + '" data-sa-holz="' +
 (x.meist ? ' <span class="sa-abz" data-sa-meist="1">' + T('saMeist') + '</span>' : '') + (sel ? ' <span class="sa-abz sa-abz-gew" data-sa-gewaehlt="1">' + sym('i-wand') + ' ' + T('saGewaehlt') + '</span>' : '') + wahl + '</div><div class="sa-sp"><div>' +
 '<p class="sa-pz"><b data-sa-pz="' + x.punkte + '">' + T('saPunkte', { p: m2(x.punkte) }) + '</b><span class="sa-bal sa-bal-gross" aria-hidden="true"><i style="width:' + Math.min(100, x.punkte) + '%"></i></span></p>' +
 '<p class="sa-quellen" data-sa-quellen="' + x.n + '"><span class="sa-pkte" role="img" aria-label="' + T('saQuellenZahl', { n: x.n, m: x.gesamt }) + '">' + punkte + '</span> <b>' + T('saQuellenZahl', { n: x.n, m: x.gesamt }) + '</b>' + (un ? ' <span class="klein" data-sa-quellen-unsicher="' + un + '">' + T('saQuellenUn', { u: un }) + '</span>' : '') + ' ' + kz(x.q) + '</p>' +
-'<p class="klein" data-sa-belegt="' + x.belegt + '">' + T('saBelegt', { b: x.belegt }) + '</p><ul class="sa-krits">' + kritZeilen(x, bal, ein) + '</ul><ul class="gs-ul sa-ul">' + rho + '</ul></div><div>' +
+'<p class="klein" data-sa-belegt="' + x.belegt + '">' + T('saBelegt', { b: x.belegt, m: x.belegtVon }) + '</p><ul class="sa-krits">' + kritZeilen(x, bal, ein) + '</ul><ul class="gs-ul sa-ul">' + rho + '</ul></div><div>' +
 '<div class="sa-pm">' + pm(sd.plus, 'plus', 'saPlusTitel') + pm(sd.minus, 'minus', 'saMinusTitel') + '</div>' +
 (sd.widerspruch ? '<p class="ab-meldung" role="note" data-sa-widerspruch="1">' + T('saBalWiderspruch') + '. ' + esc(sd.widerspruch) + '</p>' : '') + (sd.hinweis ? '<p class="klein" data-sa-vorbehalt="1"><b>' + T('saVorbehalt') + ':</b> ' + esc(sd.hinweis) + '</p>' : '') +
 '<p class="klein">' + (ein === 'lfm' ? '€/lfm' : '€/m²') + '</p>' + preisBlock(hi, ein) + extraPreise(sd, ein) + importHtml(sd) +
@@ -19224,14 +19251,15 @@ var r = SK.rangliste(zweck, gewicht), ein = zweck === 'wand' ? 'm2' : 'lfm', bal
 return r.eintraege.map(function (x) { return holzKarte(x, c, bal, ein); }).join('');
 }
 function gewText() { var e = Math.round(gewicht * 100); return T('saGewWert', { e: e, p: 100 - e }); }
+function gewAnn() { var e = Math.round(gewicht * 100); return e === 50 ? schild() + ' ' + T('saGewAnn') : T('saGewAnnW', { e: e, p: 100 - e }); }
 function t2Html(c) {
 var h = kopfZeile('i-sa-holz', 'saT2', 't2') + '<div class="sa-reiter" role="tablist" aria-label="' + T('saZweckAria') + '">';
 ['wand', 'bank'].forEach(function (z) {
 h += '<button type="button" role="tab" class="es-var sa-opt sa-reiter-knopf" id="sa-reiter-' + z + '" data-sa="zweck" data-wert="' + z + '" data-fk="zweck-' + z + '" aria-selected="' + (zweck === z) + '" tabindex="' + (zweck === z ? 0 : -1) + '" aria-controls="sa-rang"><span class="es-var-kopf">' + sym(z === 'wand' ? 'i-wand' : 'i-bett') + '<b>' + T('saZweck_' + z) + '</b></span></button>';
 });
 h += '</div><p class="ab-meldung sa-satz" role="note" data-sa-rangsatz="1">' + T('saRangSatz') + '</p><div class="sa-gew"><label class="es-label" for="sa-gew">' + T('saGewTitel') + ' <b id="sa-gew-wert" class="es-zahl">' + gewText() + '</b> ' + hk('sa-h-rang') + '</label>' + hp('sa-h-rang', 'saHilfe_rang') +
-'<input type="range" id="sa-gew" min="0" max="100" step="10" value="' + Math.round(gewicht * 100) + '" data-sa="gew" data-fk="gew" aria-valuetext="' + esc(tr('saGewWert', { e: Math.round(gewicht * 100), p: 100 - Math.round(gewicht * 100) })) + '"><span class="sa-gew-enden klein"><span>' + T('saGewP') + '</span><span>' + T('saGewE') + '</span></span><p class="klein" data-sa-annahme="gewicht">' + schild() + ' ' + T('saGewAnn') + '</p></div>' +
-'<p class="klein sa-hk"><b>' + T('saBalkenTitel') + '</b> ' + hk('sa-h-krit') + ' <b>' + T('saImportTitel') + '</b> ' + hk('sa-h-imp') + '</p>' + hp('sa-h-krit', 'saHilfe_krit') + hp('sa-h-imp', 'saHilfe_imp') +
+'<input type="range" id="sa-gew" min="0" max="100" step="10" value="' + Math.round(gewicht * 100) + '" data-sa="gew" data-fk="gew" aria-valuetext="' + esc(tr('saGewWert', { e: Math.round(gewicht * 100), p: 100 - Math.round(gewicht * 100) })) + '"><span class="sa-gew-enden klein"><span>' + T('saGewP') + '</span><span>' + T('saGewE') + '</span></span><p class="klein" id="sa-gew-ann" data-sa-annahme="gewicht">' + gewAnn() + '</p></div>' +
+'<p class="klein sa-hk"><b>' + T('saBalkenTitel') + '</b> ' + hk('sa-h-krit') + ' <b>' + T('saGeruchTitel') + '</b> ' + hk('sa-h-geruch') + ' <b>' + T('saImportTitel') + '</b> ' + hk('sa-h-imp') + '</p>' + hp('sa-h-krit', 'saHilfe_krit') + hp('sa-h-geruch', 'saHilfe_geruch') + hp('sa-h-imp', 'saHilfe_imp') +
 '<ol class="sa-rang" id="sa-rang" role="tabpanel" aria-labelledby="sa-reiter-' + zweck + '" data-sa-zweck="' + zweck + '">' + listeHtml(c) + '</ol>';
 ['wand', 'bank'].forEach(function (f) { var z = SK.zaehlung(c.ps[f], f); if (z.n === 0) h += '<p class="ab-meldung" role="note" data-sa-warn="eignung-' + f + '">' + T('saEignungWarn', { name: SK.holzInfo(c.ps[f]).name, was: tr(f === 'wand' ? 'saWand' : 'saBank'), m: z.gesamt }) + '</p>'; });
 var ed = SH.eudr, q ='<ul class="gs-ul sa-ul">' + SH.gezaehlt.concat(['WE']).map(function (k) { var d = qdef(k); return '<li data-sa-quelle="' + k + '"><b>' + k + '</b>: ' + (/^https?:/.test(d.url || '') ? '<a href="' + esc(d.url) + '" target="_blank" rel="noopener">' + esc(d.titel) + '</a>' : esc(d.titel)) + ' <span class="klein">(' + esc(d.art) + ')</span></li>'; }).join('') + '</ul>';
@@ -19239,7 +19267,7 @@ h += '<details class="an-bed sa-quellenliste"><summary>' + T('saEudrTitel') + '<
 '<details class="an-bed sa-quellenliste"><summary>' + T('saQuellenListe') + '</summary>' + q + '</details>';
 return h + (c.ps.explizit.wand && c.ps.explizit.bank ? '' : '<p class="klein" data-sa-annahme="holz">' + schild() + ' ' + T('saStartHolz', { w: SK.holzInfo(c.ps.wand).name, b: SK.holzInfo(c.ps.bank).name }) + '</p>');
 }
-function neuListe() { var l = byId('sa-rang'); if (l && ctx && ctx.ok) { l.innerHTML = listeHtml(ctx); } var w = byId('sa-gew-wert'); if (w) w.textContent = tr('saGewWert', { e: Math.round(gewicht * 100), p: 100 - Math.round(gewicht * 100) }); }
+function neuListe() { var l = byId('sa-rang'); if (l && ctx && ctx.ok) { l.innerHTML = listeHtml(ctx); } var w = byId('sa-gew-wert'); if (w) w.textContent = tr('saGewWert', { e: Math.round(gewicht * 100), p: 100 - Math.round(gewicht * 100) }); var a = byId('sa-gew-ann'); if (a) a.innerHTML = gewAnn(); }
 function posHtml(p, mg) {
 var name = tr(p.id === 'daemmung' ? 'maBt_daemmung' : 'saMat_' + p.id) + (p.holz ? ': ' + SK.holzInfo(p.holz).name : ''), pr, b = '', an = '';
 pr = p.luecke ? '<span class="ab-luecke" data-luecke="1">' + T('hdKeineAngabe') + '</span>' : p.imOfen ? '<span class="klein">' + T('saImOfen') + '</span>' : '<span data-von="' + p.von + '" data-bis="' + p.bis + '">' + esc(spanne(p.von, p.bis)) + '</span>';
@@ -19798,7 +19826,7 @@ var hat = function (k) { return !!(window.TEXTE && window.TEXTE[k]); };
 var cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
 var artName = function (a) { return hat('anArt_' + a) ? tr('anArt_' + a) : (hat('gsArt_' + a) ? tr('gsArt_' + a) : a); };
 var ART_KEY = { voll: 'artVoll', balkon: 'artBalkon', wintergarten: 'artWinter', zubehoer: 'artZubehoer' };
-var STATUS_KEY = { 'geprüft': 'statusGeprueft', 'geprüft (Landesportal)': 'statusPortal', 'prüfen vor Nutzung': 'statusPruefen' };
+var STATUS_KEY = { 'geprüft': 'statusGeprueft', 'geprüft (Landesportal)': 'statusPortal', 'prüfen vor Nutzung': 'statusPruefen', 'veraltet': 'statusVeraltet' };
 var gsName = function (art, n) { return /^Preis\s/i.test(n) ? n.replace(/^Preis\s+(für\s+)?/i, '') : artName(art) + ': ' + n; };
 function lueckeName(p) {
 return p.heiz ? tr('mpHz_' + p.heiz) : p.bauteil ? tr('maBt_' + p.bauteil) + ' (' + p.material + ')' : p.standard ? tr('mpStandard') + ' ' + tr('hdStd_' + p.standard) : p.name ? (p.art ? gsName(p.art, p.name) : p.name) : tr('mpAnbau') + ': ' + artName(p.art);
@@ -19895,6 +19923,13 @@ return '<button type="button" class="es-var mh-heiz-k" data-hz="' + x + '" aria-
 }).join('') + (a ? '<button type="button" class="es-var mh-heiz-k" data-hz="weg"><span class="es-var-kopf"><b>' + T('mpHzWeg') + '</b></span></button>' : '') + '</div>' +
 '<p class="klein" role="status" data-hz-status="1">' + (hzMeldung ? esc(hzMeldung) : '') + '</p></div>';
 }
+function heizHilfe(z) {
+var hd = window.DATEN && window.DATEN.heizung, a = hd && hd.arten && hd.arten[z.id], bt = hd && hd.bio_treppe;
+if (!a) return '';
+var par = { von: n0(a.von), bis: n0(a.bis) }, wp = z.id === 'waermepumpe';
+if (!wp && bt) par = { a: bt.stufen[0][1], j: bt.stufen[0][0], b: bt.stufen[bt.stufen.length - 1][1], k: bt.stufen[bt.stufen.length - 1][0] };
+return '<br><span class="klein mh-hz-stat" data-hz-stat="' + esc(z.id) + '">' + T(wp ? 'mpHzStat_waermepumpe' : 'mpHzStat_gas', par) + '</span> <details class="mh-hz-hilfe" data-hz-hilfe="' + esc(z.id) + '"><summary aria-label="' + T('mpHzHilfeKnopf') + '">?</summary><p class="klein">' + T(wp ? 'mpHzHilfe_waermepumpe' : 'mpHzHilfe_gas', par) + '</p></details>';
+}
 function kosten(m) {
 var k = m.kosten, h = '', gruppe = '', fertig = false, ohne = m.luecken.filter(function (l) { return /^k:/.test(l.id); }).length;
 var summe = function () { fertig = true; return '<tr class="summe" data-summe="kosten" data-von="' + k.summe.von + '" data-bis="' + k.summe.bis + '"><th>' + T('mpSumme') + '</th><td class="z">' + esc(spanne(k.summe.von, k.summe.bis)) + '</td><td></td></tr>'; };
@@ -19904,13 +19939,14 @@ if (z.gruppe !== gruppe) { gruppe = z.gruppe; h += '<tr class="gruppe"><th colsp
 var name = z.gruppe === 'innenausbau' ? tr('abGew_' + z.id) : z.gruppe === 'material' ? tr('maBt_' + z.id) + (z.material ? ': ' + z.material : '') : z.gruppe === 'daemmung' ? tr('hdStd_' + z.id) : z.gruppe === 'lueftung' ? tr('hlArt_' + z.id) : z.gruppe === 'grundstueck' ? gsName(z.art, z.name) : z.gruppe === 'sauna' ? tr('gsArt_sauna') + ': ' + tr('saT3') : z.gruppe === 'heizanlage' ? tr('mpHz_' + z.id) :z.gruppe === 'kleinhaus' ? tr('mpKleinhaus') + ': ' + tr('khTyp_' + z.art) : artName(z.id);
 var leer = z.luecke && !(z.von > 0 || z.bis > 0), no = '<span class="mh-luecke">' + T('mpKeineAngabe') + '</span>';
 var aus = z.inSumme === false, vermerk = aus ? '<span class="mh-enth" data-enthalten-in="' + esc(z.enthaltenIn) + '">' + T('mpEnthalten', { wo: tr('mpZ_' + z.enthaltenIn.replace('/', '_')) }) + (z.sicher ? '' : ' · ' + T('mpEnthaltenUnsicher')) + '</span>' : '';
-if (z.gruppe === 'heizanlage' && leer) vermerk = '<br><span class="klein" data-hz-folgt="' + esc(z.id) + '">' + T(z.id === 'offen' ? 'mpHzOffen' : 'mpHzFolgt') + '</span>';
+if (z.gruppe === 'heizanlage' && leer) vermerk = '<br><span class="klein" data-hz-folgt="' + esc(z.id) + '">' + T('mpHzOffen') + '</span>';
+else if (z.gruppe === 'heizanlage' && z.heizId) vermerk = heizHilfe(z);
 h += '<tr data-k="' + z.gruppe + '/' + esc(z.id) + '"' + (aus ? ' class="mh-aus" data-nicht-summe="1"' : '') + (leer ? ' data-luecke="1"' : ' data-von="' + z.von + '" data-bis="' + z.bis + '"') + '><td>' + esc(name) + vermerk + '</td><td class="z">' +
 (leer ? no : (aus ? '<span class="mh-wert">' : '') + esc(spanne(z.von, z.bis, z.einheit)) + (aus ? '</span>' : '') + (z.luecke ? '<span class="klein">+ ' + no + '</span>' : '')) + '</td><td>' + (leer ? '' : belege(z.belege)) + '</td></tr>';
 });
 if (!fertig) h += summe();
 return sect('kosten', true, 'mpKosten', heizWahl(m) + tab('<th>' + T('mpPosition') + '</th><th class="z">' + T('maSpanne') + '</th><th>' + T('regQuelle') + '</th>', h, ' data-kosten="1"') +
-(ohne ? '<p class="klein" data-ohne-preis="' + ohne + '">' + T('mpOhnePreis', { n: ohne }) + '</p>' : '') + heizwaerme(k.heiz) + foerderung(k.foerderung) + '<p class="mh-hinweis" data-ohne-doppelung="1">' + schild() + ' ' + T('mpUeberschneid') + '</p>');
+(k.unsicherInSumme && k.unsicherInSumme.length ? '<p class="mh-hinweis" data-summe-unsicher="' + k.unsicherInSumme.length + '"><b>' + T('mpSummeUnsicher') + '</b></p>' : '') + (ohne ? '<p class="klein" data-ohne-preis="' + ohne + '">' + T('mpOhnePreis', { n: ohne }) + '</p>' : '') + heizwaerme(k.heiz) + foerderung(k.foerderung) + '<p class="mh-hinweis" data-ohne-doppelung="1">' + schild() + ' ' + T('mpUeberschneid') + '</p>');
 }
 var r100 = function (x) { return Math.round(x / 100) * 100; };
 function heizwaerme(hz) {

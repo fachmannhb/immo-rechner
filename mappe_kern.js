@@ -48,18 +48,21 @@
     var h = plan && plan.heizanlage && typeof plan.heizanlage === 'object' && !Array.isArray(plan.heizanlage) ? plan.heizanlage : null;
     return h ? { vorhanden: true, art: h.art === undefined ? 'offen' : h.art, bekannt: h.art === undefined || HEIZ_ARTEN.indexOf(h.art) >= 0 } : { vorhanden: false, art: '', bekannt: true };
   }
-  /* Eine Quelle: dieselbe Zeile k_wp wie am Baustein im Grundstück (GRUNDSTUECK_KERN.datenZu), kein neuer Wert */
-  function heizDaten() {
-    var GK = root.GRUNDSTUECK_KERN;
-    return (GK ? GK.datenZu('waermepumpe').kosten.filter(function (r) { return r.id === 'k_wp'; })[0] : null) || null;
+  /* S3: die Anschaffungswerte der Heizanlage stehen an EINER Stelle: daten/heizung.js (Bericht 52, Zeilen H-20 und H-22), erzeugt von erzeuger/daten_heizung.py. Die Zeile k_wp am Baustein im Grundstück (Bericht 34) ist ein anderer Wert und bleibt unverändert. */
+  function heizDaten(art) {
+    var d = root.DATEN && root.DATEN.heizung, a = d && d.arten && d.arten[art];
+    return a && ok(a.von) && ok(a.bis) ? a : null;
   }
   function heizZeile(plan, z, lu, fe) {
-    var h = planHeiz(plan), k;
+    var h = planHeiz(plan), a;
     if (!h.vorhanden) return;
     if (!h.bekannt) { fe.push({ teil: 'heizanlage', grund: 'art ' + h.art }); return; }
-    if (h.art === 'waermepumpe') {
-      k = heizDaten();
-      if (k && !k.luecke && ok(k.von) && ok(k.bis)) { z.push({ gruppe: 'heizanlage', id: 'waermepumpe', von: k.von, bis: k.bis, luecke: false, belege: belege([{ quelleTitel: k.quelle, url: k.url, abruf: k.abruf, status: k.status }]) }); return; }
+    a = h.art === 'waermepumpe' || h.art === 'gas' ? heizDaten(h.art) : null;
+    if (a) {
+      /* unsicher = die Zahl steckt mit einem Vorbehalt in der Summe (Suchtreffer oder veraltet): die Mappe markiert die Summe dann mit „prüfen vor Nutzung“ */
+      z.push({ gruppe: 'heizanlage', id: h.art, von: a.von, bis: a.bis, luecke: false, heizId: a.id, unsicher: true, preisstand: a.preisstand || '',
+        belege: belege([{ quelleTitel: a.quelle, url: a.url, abruf: a.abruf, status: a.status === 'prüfen vor Nutzung' ? a.status : 'veraltet' }]) });
+      return;
     }
     z.push({ gruppe: 'heizanlage', id: h.art, von: null, bis: null, luecke: true, belege: [] });
     lu.push({ id: 'k:heizanlage:' + h.art, key: 'mLuecke', par: { heiz: h.art } });
@@ -86,7 +89,8 @@
       if (ok(r.von)) sum.von += r.von;
       if (ok(r.bis)) sum.bis += r.bis;
     });
-    return { zeilen: z, summe: sum, summeRoh: roh, ueberlappungen: ue, luecken: lu.filter(function (l) { return !weg[l.id]; }), fehler: fe, heiz: ex.heiz, foerderung: ex.foerderung };
+    var uns = z.filter(function (r) { return r.unsicher && r.inSumme !== false && preisig(r); }).map(function (r) { return r.gruppe + '/' + r.id; });
+    return { zeilen: z, summe: sum, unsicherInSumme: uns, summeRoh: roh, ueberlappungen: ue, luecken: lu.filter(function (l) { return !weg[l.id]; }), fehler: fe, heiz: ex.heiz, foerderung: ex.foerderung };
   }
 
   /* Kosten: Innenausbau, Material, Dämm-Mehrkosten, Lüftung einmalig, Anbau wie in den Karten; jede Leistung genau einmal in der Summe (ZUORDNUNG) */

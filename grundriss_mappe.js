@@ -20,7 +20,7 @@
   var cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
   var artName = function (a) { return hat('anArt_' + a) ? tr('anArt_' + a) : (hat('gsArt_' + a) ? tr('gsArt_' + a) : a); };
   var ART_KEY = { voll: 'artVoll', balkon: 'artBalkon', wintergarten: 'artWinter', zubehoer: 'artZubehoer' };
-  var STATUS_KEY = { 'geprüft': 'statusGeprueft', 'geprüft (Landesportal)': 'statusPortal', 'prüfen vor Nutzung': 'statusPruefen' };
+  var STATUS_KEY = { 'geprüft': 'statusGeprueft', 'geprüft (Landesportal)': 'statusPortal', 'prüfen vor Nutzung': 'statusPruefen', 'veraltet': 'statusVeraltet' };
   /* Namen für Lücken, Annahmen und Fragen aus den Parametern des Kerns (Ids und Zahlen), nur mit vorhandenen Texten */
   var gsName = function (art, n) { return /^Preis\s/i.test(n) ? n.replace(/^Preis\s+(für\s+)?/i, '') : artName(art) + ': ' + n; };
   function lueckeName(p) {
@@ -121,6 +121,14 @@
       }).join('') + (a ? '<button type="button" class="es-var mh-heiz-k" data-hz="weg"><span class="es-var-kopf"><b>' + T('mpHzWeg') + '</b></span></button>' : '') + '</div>' +
       '<p class="klein" role="status" data-hz-status="1">' + (hzMeldung ? esc(hzMeldung) : '') + '</p></div>';
   }
+  /* S3: Zeile Heizanlage mit Preis: kurzer Status in Alltagsworten und ein "?" mit der Begründung (Werte aus daten/heizung.js, Bericht 52) */
+  function heizHilfe(z) {
+    var hd = window.DATEN && window.DATEN.heizung, a = hd && hd.arten && hd.arten[z.id], bt = hd && hd.bio_treppe;
+    if (!a) return '';
+    var par = { von: n0(a.von), bis: n0(a.bis) }, wp = z.id === 'waermepumpe';
+    if (!wp && bt) par = { a: bt.stufen[0][1], j: bt.stufen[0][0], b: bt.stufen[bt.stufen.length - 1][1], k: bt.stufen[bt.stufen.length - 1][0] };
+    return '<br><span class="klein mh-hz-stat" data-hz-stat="' + esc(z.id) + '">' + T(wp ? 'mpHzStat_waermepumpe' : 'mpHzStat_gas', par) + '</span> <details class="mh-hz-hilfe" data-hz-hilfe="' + esc(z.id) + '"><summary aria-label="' + T('mpHzHilfeKnopf') + '">?</summary><p class="klein">' + T(wp ? 'mpHzHilfe_waermepumpe' : 'mpHzHilfe_gas', par) + '</p></details>';
+  }
   function kosten(m) {
     var k = m.kosten, h = '', gruppe = '', fertig = false, ohne = m.luecken.filter(function (l) { return /^k:/.test(l.id); }).length;
     var summe = function () { fertig = true; return '<tr class="summe" data-summe="kosten" data-von="' + k.summe.von + '" data-bis="' + k.summe.bis + '"><th>' + T('mpSumme') + '</th><td class="z">' + esc(spanne(k.summe.von, k.summe.bis)) + '</td><td></td></tr>'; };
@@ -130,13 +138,14 @@
       var name = z.gruppe === 'innenausbau' ? tr('abGew_' + z.id) : z.gruppe === 'material' ? tr('maBt_' + z.id) + (z.material ? ': ' + z.material : '') : z.gruppe === 'daemmung' ? tr('hdStd_' + z.id) : z.gruppe === 'lueftung' ? tr('hlArt_' + z.id) : z.gruppe === 'grundstueck' ? gsName(z.art, z.name) : z.gruppe === 'sauna' ? tr('gsArt_sauna') + ': ' + tr('saT3') : z.gruppe === 'heizanlage' ? tr('mpHz_' + z.id) :z.gruppe === 'kleinhaus' ? tr('mpKleinhaus') + ': ' + tr('khTyp_' + z.art) : artName(z.id);
       var leer = z.luecke && !(z.von > 0 || z.bis > 0), no = '<span class="mh-luecke">' + T('mpKeineAngabe') + '</span>';
       var aus = z.inSumme === false, vermerk = aus ? '<span class="mh-enth" data-enthalten-in="' + esc(z.enthaltenIn) + '">' + T('mpEnthalten', { wo: tr('mpZ_' + z.enthaltenIn.replace('/', '_')) }) + (z.sicher ? '' : ' · ' + T('mpEnthaltenUnsicher')) + '</span>' : '';
-      if (z.gruppe === 'heizanlage' && leer) vermerk = '<br><span class="klein" data-hz-folgt="' + esc(z.id) + '">' + T(z.id === 'offen' ? 'mpHzOffen' : 'mpHzFolgt') + '</span>';
+      if (z.gruppe === 'heizanlage' && leer) vermerk = '<br><span class="klein" data-hz-folgt="' + esc(z.id) + '">' + T('mpHzOffen') + '</span>';
+      else if (z.gruppe === 'heizanlage' && z.heizId) vermerk = heizHilfe(z);
       h += '<tr data-k="' + z.gruppe + '/' + esc(z.id) + '"' + (aus ? ' class="mh-aus" data-nicht-summe="1"' : '') + (leer ? ' data-luecke="1"' : ' data-von="' + z.von + '" data-bis="' + z.bis + '"') + '><td>' + esc(name) + vermerk + '</td><td class="z">' +
         (leer ? no : (aus ? '<span class="mh-wert">' : '') + esc(spanne(z.von, z.bis, z.einheit)) + (aus ? '</span>' : '') + (z.luecke ? '<span class="klein">+ ' + no + '</span>' : '')) + '</td><td>' + (leer ? '' : belege(z.belege)) + '</td></tr>';
     });
     if (!fertig) h += summe();
     return sect('kosten', true, 'mpKosten', heizWahl(m) + tab('<th>' + T('mpPosition') + '</th><th class="z">' + T('maSpanne') + '</th><th>' + T('regQuelle') + '</th>', h, ' data-kosten="1"') +
-      (ohne ? '<p class="klein" data-ohne-preis="' + ohne + '">' + T('mpOhnePreis', { n: ohne }) + '</p>' : '') + heizwaerme(k.heiz) + foerderung(k.foerderung) + '<p class="mh-hinweis" data-ohne-doppelung="1">' + schild() + ' ' + T('mpUeberschneid') + '</p>');
+      (k.unsicherInSumme && k.unsicherInSumme.length ? '<p class="mh-hinweis" data-summe-unsicher="' + k.unsicherInSumme.length + '"><b>' + T('mpSummeUnsicher') + '</b></p>' : '') + (ohne ? '<p class="klein" data-ohne-preis="' + ohne + '">' + T('mpOhnePreis', { n: ohne }) + '</p>' : '') + heizwaerme(k.heiz) + foerderung(k.foerderung) + '<p class="mh-hinweis" data-ohne-doppelung="1">' + schild() + ' ' + T('mpUeberschneid') + '</p>');
   }
   var r100 = function (x) { return Math.round(x / 100) * 100; };
   function heizwaerme(hz) {

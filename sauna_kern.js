@@ -60,10 +60,11 @@
   }
   /* ---------- Holzvergleich (S2): Rangliste aus gezählten Quellen und belegten Eigenschaften, der Preis zählt NICHT ----------
      Punktzahl (0 bis 100) = w × E + (1 − w) × P.  E = Zahl der empfehlenden Quellen für den Zweck ÷ 8 (alle gezählten Quellen, auch die unsichere, wie Abschnitt 7 des Berichts 58).
-     P = Mittel der belegten Eigenschaften (Stufe 1 bis 3, geteilt durch 3; Harz, Hitze, Haltbarkeit, Splittern, Geruch). Eine Lücke und ein Quellen-Widerspruch zählen weder im Zähler noch im Nenner (nie als 0).
+     P = Mittel der belegten Eigenschaften (Stufe 1 bis 3, geteilt durch 3; Harz, Hitze, Haltbarkeit, Splittern; Geruch zählt seit S3 nicht, er ist Geschmack). Eine Lücke und ein Quellen-Widerspruch zählen weder im Zähler noch im Nenner (nie als 0).
      Hat ein Holz keine einzige belegte Eigenschaft, entfällt P und die Punktzahl ist E allein (Regel, die Seite nennt „0 von 5 belegt“). Gleiche Punktzahl = geteilter Platz.
      Das Gewicht w ist Bedienzustand (Start 0,5 = Annahme), das bestplatzierte Holz wird nie von selbst gewählt. */
-  var GEWICHT_START = 0.5, KRIT = ['harz', 'hitze', 'halt', 'splitter', 'geruch'];
+  /* S3: Geruch ist Geschmack, keine Eigenschaft: er bleibt in KRIT (Anzeige, Balken, Allergie-Hinweis), zählt aber nicht zur Punktzahl (ZAEHLT). */
+  var GEWICHT_START = 0.5, KRIT = ['harz', 'hitze', 'halt', 'splitter', 'geruch'], ZAEHLT = ['harz', 'hitze', 'halt', 'splitter'];
   function gewichtOk(w) { return ok(w) ? klemme(w, 0, 1) : GEWICHT_START; }
   function zaehlung(id, zweck) {
     var h = holzDaten(id), s = SH(), z = h && h.z && h.z[zweck === 'bank' ? 'bank' : 'wand'];
@@ -72,16 +73,16 @@
   function eigenschaften(id) {
     var h = holzDaten(id), st = [], out = [];
     KRIT.forEach(function (k) {
-      var v = h && h.k[k], e = { key: k, art: !v || v.l ? 'luecke' : v.w ? 'widerspruch' : 'stufe', s: v && v.s || 0, q: v && v.q || [], t: v && v.t || '', abg: !!(v && v.abg) };
-      if (e.art === 'stufe') st.push(e.s);
+      var v = h && h.k[k], e = { key: k, art: !v || v.l ? 'luecke' : v.w ? 'widerspruch' : 'stufe', s: v && v.s || 0, q: v && v.q || [], t: v && v.t || '', abg: !!(v && v.abg), zaehlt: ZAEHLT.indexOf(k) >= 0 };
+      if (e.art === 'stufe' && e.zaehlt) st.push(e.s);
       out.push(e);
     });
-    return { liste: out, belegt: st.length, mittel: st.length ? st.reduce(function (a, b) { return a + b / 3; }, 0) / st.length : null };
+    return { liste: out, belegt: st.length, von: ZAEHLT.length, mittel: st.length ? st.reduce(function (a, b) { return a + b / 3; }, 0) / st.length : null };
   }
   function bewerte(id, zweck, w) {
     var z = zaehlung(id, zweck), e = eigenschaften(id), E = z.gesamt ? z.n / z.gesamt : 0, P = e.mittel;
     var punkte = P === null ? E : w * E + (1 - w) * P;
-    return { id: id, name: holzInfo(id).name, n: z.n, u: z.u, q: z.q, gesamt: z.gesamt, E: E, P: P, belegt: e.belegt, krit: e.liste, punkte: Math.floor(punkte * 1000 + 0.5 + 1e-7) / 10, roh: punkte };
+    return { id: id, name: holzInfo(id).name, n: z.n, u: z.u, q: z.q, gesamt: z.gesamt, E: E, P: P, belegt: e.belegt, belegtVon: e.von, krit: e.liste, punkte: Math.floor(punkte * 1000 + 0.5 + 1e-7) / 10, roh: punkte };
   }
   function rangliste(zweck, gewicht) {
     var s = SH(), w = gewichtOk(gewicht), z = zweck === 'bank' ? 'bank' : 'wand';
@@ -220,7 +221,7 @@
     if (feld === 'stunden' && ok(wert)) { ps.stunden = r2(klemme(wert, S_MIN, S_MAX)); return true; }
     return false;
   }
-  var API = { ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, H_MIN: H_MIN, H_MAX: H_MAX, B_MAX: B_MAX, T_MAX: T_MAX, S_MIN: S_MIN, S_MAX: S_MAX, holzInfo: holzInfo, holzDaten: holzDaten, GEWICHT_START: GEWICHT_START, KRIT: KRIT, zaehlung: zaehlung, eigenschaften: eigenschaften, rangliste: rangliste, preisBalken: preisBalken, gewichtOk: gewichtOk, planSauna: planSauna, volumen: volumen, ofenKlasse: ofenKlasse, holzPreis: holzPreis, strompreis: strompreis,
+  var API = { ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, H_MIN: H_MIN, H_MAX: H_MAX, B_MAX: B_MAX, T_MAX: T_MAX, S_MIN: S_MIN, S_MAX: S_MAX, holzInfo: holzInfo, holzDaten: holzDaten, GEWICHT_START: GEWICHT_START, KRIT: KRIT, ZAEHLT: ZAEHLT, zaehlung: zaehlung, eigenschaften: eigenschaften, rangliste: rangliste, preisBalken: preisBalken, gewichtOk: gewichtOk, planSauna: planSauna, volumen: volumen, ofenKlasse: ofenKlasse, holzPreis: holzPreis, strompreis: strompreis,
     betrieb: betrieb, mengen: mengen, material: material, vergleich: vergleich, geometrie: geometrie, rechne: rechne, verknuepfen: verknuepfen, saunaAnlegen: saunaAnlegen, groesseSetzen: groesseSetzen, wahlSetzen: wahlSetzen };
   root.SAUNA_KERN = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
