@@ -7,7 +7,7 @@
   function byId(i) { return document.getElementById(i); }
   function tr(k, v) { return window.TXT ? window.TXT.t(k, v) : k; }
   function melde(t) { var e = byId('g-sauna-fehler'); if (e) { e.textContent = t || ''; e.hidden = !t; } }
-  if (!SK || !GK || !G || !WZ || !SD || !D.verfahrensfrei) { melde(tr('saFehler', { grund: (!SK ? 'sauna_kern.js' : !WZ ? 'Karte Anbau' : !G ? 'Zeichnung' : 'Daten') + ' fehlt.' })); return; }
+  if (!SK || !GK || !G || !WZ || !SD || !D.verfahrensfrei || !D.saunaholz) { melde(tr('saFehler', { grund: (!SK ? 'sauna_kern.js' : !WZ ? 'Karte Anbau' : !G ? 'Zeichnung' : 'Daten') + ' fehlt.' })); return; }
   var esc = WZ.esc, sym = WZ.symbol, nz = WZ.nz, n0 = WZ.n0, schild = WZ.annahmeSchild;
   function T(k, v) { return esc(tr(k, v)); }
   function nf(x, d) { return new Intl.NumberFormat(WZ.lang(), { minimumFractionDigits: d, maximumFractionDigits: d }).format(x); }
@@ -87,28 +87,96 @@
   }
 
   /* ---------- Teil 2: Holz ---------- */
-  function eig(e, k) { return e && e.wert === 'ja' ? '<span class="sa-ja">✓ ' + T(k) + '</span>' : '<span class="sa-offen">' + T(k) + ': ' + T('saEignungOffen') + '</span>'; }
-  function wz(key, e, text) { return '<li data-sa-eig="' + key + '"><b>' + T('saEig_' + key) + ':</b> ' + (e && e.wert !== undefined ? esc(text || e.wert) + ' ' + beleg(e, e.ids) : T('hdKeineAngabe')) + '</li>'; }
   function preisBlock(x, ein) {
     var p = SK.holzPreis(x.id, ein), s = p.luecke ? '<span class="ab-luecke" data-luecke="1">' + T('saKeinPreis') + '</span>' :
       '<b data-von="' + p.von + '" data-bis="' + p.bis + '">' + T(ein === 'lfm' ? 'saPreisLfm' : 'saPreisM2', { p: p.von === p.bis ? eur(p.von) : eur(p.von) + ' – ' + eur(p.bis) }) + '</b>' + (p.einQuelle ? ' <span class="klein">(' + T('saEineQuelle') + ')</span>' : '');
     var l = p.zeilen.map(function (r) { return '<li>' + eur(r.v) + ' €' + (r.ab ? ' (' + T('saAb') + ')' : '') + (r.hinweis ? ' – ' + esc(r.hinweis) : '') + (r.ausser ? ' <b class="klein" data-sa-ausser="1">(' + T('saAusser') + ')</b>' : '') + ' ' + beleg(r) + '</li>'; }).join('');
     return '<div class="sa-preis" data-sa-preis="' + ein + '"><p>' + s + '</p>' + (l ? '<ul class="gs-ul sa-ul">' + l + '</ul>' : '') + '</div>';
   }
-  function t2Html(c) {
-    var h = kopfZeile('i-sa-holz', 'saT2', 't2') + '<div class="sa-holzliste">';
-    SD.holz.forEach(function (x) {
-      var sel = { wand: c.ps.wand === x.id, bank: c.ps.bank === x.id };
-      h += '<article class="sa-holz' + (sel.wand || sel.bank ? ' sa-gewaehlt' : '') + '" data-sa-holz="' + x.id + '"><div class="gs-k-kopf">' + sym('i-sa-holz') + '<b>' + esc(x.name) + '</b></div><p>' + eig(x.wand, 'saWand') + ' ' + eig(x.bank, 'saBank') + '</p><ul class="gs-ul sa-ul">' +
-        wz('harz', x.harz) + wz('splitter', x.splitter) + wz('rho', x.rho, x.rho.wert !== undefined ? x.rho.wert + ' kg/m³' : '') + '</ul><p class="klein">€/m²</p>' + preisBlock(x, 'm2') + '<p class="klein">€/lfm</p>' + preisBlock(x, 'lfm') + '<div class="ab-stufen sa-wahl">' +
-        ['wand', 'bank'].map(function (f) {
-          return '<button type="button" class="es-var sa-opt" data-sa="holz" data-feld="holz_' + f + '" data-wert="' + x.id + '" data-fk="holz-' + f + '-' + x.id + '" aria-pressed="' + sel[f] + '"><span class="es-var-kopf">' + sym(f === 'wand' ? 'i-wand' : 'i-bett') + '<b>' + T('saWaehlen_' + f, { name: x.name }) + '</b></span></button>';
-        }).join('') + '</div></article>';
+  /* S2: Rangliste je Zweck. Gewicht und Reiter sind Bedienzustand (nicht im Plan); gewählt wird nur per Knopf, nie von selbst. Daten: daten/saunaholz.js, Rechnung: sauna_kern.js (rangliste). */
+  var SH = D.saunaholz, zweck = 'wand', gewicht = SK.GEWICHT_START;
+  function qdef(k) { return (SH.quellen[k] || SH.zusatz[k] || {}); }
+  function kz(qs) {
+    return qs && qs.length ? '<span class="sa-kz">(' + qs.map(function (k) { var q = qdef(k); return '<abbr title="' + esc((q.titel || k) + (q.art ? ', ' + q.art : '')) + '">' + esc(k) + '</abbr>'; }).join(', ') + ')</span>' : '';
+  }
+  function hk(id) { return '<button type="button" class="hilfe-knopf" data-sa="hilfe" data-wert="' + id + '" aria-expanded="' + !!hilfe[id] + '" aria-controls="' + id + '" aria-label="' + T('hilfeKnopf') + '">?</button>'; }
+  function hp(id, k) { return '<p class="klein" id="' + id + '"' + (hilfe[id] ? '' : ' hidden') + '>' + T(k) + '</p>'; }
+  function balZeile(key, art, s, bruch, text, qs, abg, name) {
+    var f = art === 'stufe' || art === 'preis', inner = f ? '<span class="sa-bal' + (art === 'preis' ? ' sa-bal-preis' : '') + '" aria-hidden="true"><i style="width:' + Math.round(bruch * 100) + '%"></i></span>' : '<span class="sa-bal sa-bal-leer" aria-hidden="true"></span>';
+    return '<li class="sa-kr" data-sa-krit="' + key + '" data-stufe="' + (art === 'stufe' ? s : art) + '"><span class="sa-kn">' + T(name) + '</span>' + inner + '<span class="sa-bt">' + text + (abg ? ' <span class="klein">(' + T('saBalAbg') + ')</span>' : '') + ' ' + kz(qs) + '</span></li>';
+  }
+  function kritZeilen(x, bal, ein) {
+    var h = x.krit.map(function (k) {
+      if (k.art === 'stufe') return balZeile(k.key, 'stufe', k.s, k.s / 3, '<b>' + T('saStufe', { s: k.s }) + '</b>: ' + esc(k.t), k.q, k.abg, 'saKrit_' + k.key);
+      if (k.art === 'widerspruch') return balZeile(k.key, 'widerspruch', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalWiderspruch') + '</span>: ' + esc(k.t), k.q, false, 'saKrit_' + k.key);
+      return balZeile(k.key, 'luecke', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalLuecke') + '</span>', [], false, 'saKrit_' + k.key);
+    }).join(''), b = bal.filter(function (y) { return y.id === x.id; })[0], p = SK.holzPreis(x.id, ein);
+    return h + (b && b.anteil !== null ? balZeile('preis', 'preis', 0, b.anteil, '<b>' + T(ein === 'lfm' ? 'saPreisLfm' : 'saPreisM2', { p: p.von === p.bis ? eur(p.von) : eur(p.von) + ' – ' + eur(p.bis) }) + '</b>', [], false, 'saKrit_preis_' + ein) :
+      balZeile('preis', 'luecke', 0, 0, '<span class="ab-luecke" data-luecke="1">' + T('saBalLuecke') + '</span>', [], false, 'saKrit_preis_' + ein));
+  }
+  function extraPreise(sd, ein) {
+    var l = (sd.preise || []).filter(function (p) { return p.e === ein || (ein === 'lfm' && p.e === 'stk'); });
+    if (!l.length) return '';
+    return '<p class="klein sa-weitere"><b>' + T('saWeitere') + '</b></p><ul class="gs-ul sa-ul" data-sa-extra="' + l.length + '">' + l.map(function (p) {
+      var q = qdef(p.q), un = p.s === 'unsicher', eu = p.s === 'eu', et = p.e === 'stk' ? ' €/Stück' : (p.e === 'lfm' ? ' €/lfm' : ' €/m²');
+      return '<li data-sa-extra-status="' + p.s + '">' + (p.v === null ? '<b>' + T('saNichtRechenbar') + '</b>' : '<b>' + eur(p.v) + et + '</b>') + ' ' + esc(p.h) + ': ' + esc(p.hinweis || '') + ' ' + (un ? '<b class="sa-unsicher" data-sa-unsicher="1">' + T('saPreisUnsicher') + '</b> ' : '') + (eu ? '<b class="klein">' + T('saPreisEu') + '</b> ' : '') + (p.ausser ? '<b class="klein" data-sa-ausser="1">' + T('saAusser') + '</b> ' : '') +
+        WZ.quelleHtml({ id: 'S2-58', quelle: q.titel || p.q, url: /^https?:/.test(q.url || '') ? q.url : '', abruf: SH.stand, status: 'prüfen vor Nutzung' }) + '</li>';
+    }).join('') + '</ul>';
+  }
+  function verbotHtml(k) {
+    var v = SH.verbot[k], dt = v.abruf.split('-');
+    return '<div class="kh-verbot sa-verbot" role="note" data-sa-verbot="' + k + '"><p><b>' + T('saLand_' + k) + ': ' + T('khNichtErlaubt') + '</b> · ' + esc(v.stufe) + '</p><p>' + T('khRecht', { g: v.gesetz, w: v.ware, s: v.stand, f: v.fund, a: dt[2] + '.' + dt[1] + '.' + dt[0] }) + '</p><p>' + T('khKeinPreis') + ' ' +
+      WZ.quelleHtml({ id: 'S2-58-' + k, quelle: 'EUR-Lex', url: v.fund, abruf: v.abruf, status: v.status }) + '</p></div>';
+  }
+  function importHtml(sd) {
+    var im = SH['import'], h = '<details class="an-bed sa-imp" data-sa-import="' + sd.id + '"><summary>' + sym('i-karte') + ' ' + T('saImportTitel') + '</summary>';
+    [['pl', sd.pl, im.pl_hinweis, im.pl_q], ['ua', sd.ua, im.ua_hinweis, im.ua_q]].forEach(function (a) {
+      var q = qdef(a[3]);
+      h += '<div class="sa-land" data-sa-land-zeile="' + a[0] + '"><p><b>' + T('saLand_' + a[0]) + '</b></p>' + (a[1] ? '<ul class="gs-ul sa-ul">' + a[1].map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul><p class="klein"><b class="sa-unsicher">' + T('saPreisUnsicher') + ':</b> ' + esc(a[2]) + ' ' + WZ.quelleHtml({ id: 'S2-58-' + a[0], quelle: q.titel || a[3], url: /^https?:/.test(q.url || '') ? q.url : '', abruf: SH.stand, status: 'prüfen vor Nutzung' }) + '</p>' :
+        '<p><span class="ab-luecke" data-luecke="1">' + T('hdKeineAngabe') + '</span></p>') + '</div>';
     });
-    h += '</div>';
-    ['wand', 'bank'].forEach(function (f) { var x = SK.holzInfo(c.ps[f]); if (!(x[f] && x[f].wert === 'ja')) h += '<p class="ab-meldung" role="note" data-sa-warn="eignung-' + f + '">' + T('saEignungWarn', { name: x.name, was: tr(f === 'wand' ? 'saWand' : 'saBank') }) + '</p>'; });
+    if (sd.id === 'kelo' || sd.id === 'fichte') h += '<p class="klein">' + esc(im.kelo) + '</p>';
+    return h + verbotHtml('ru') + verbotHtml('by') + '</details>';
+  }
+  function holzKarte(x, c, bal, ein) {
+    var sd = SK.holzDaten(x.id), hi = SK.holzInfo(x.id), sel = c.ps[zweck] === x.id, un = x.u.length, rho = hi.rho && hi.rho.wert !== undefined ? '<li data-sa-eig="rho"><b>' + T('saEig_rho') + ':</b> ' + hi.rho.wert + ' kg/m³ ' + beleg(hi.rho, hi.rho.ids) + '</li>' : '';
+    var pm = function (l, kl, tk) {
+      return '<div class="sa-pm-' + kl + '"><p class="klein"><b>' + T(tk) + '</b></p>' + (l.length ? '<ul class="gs-ul sa-ul">' + l.map(function (e) { return '<li data-sa-' + kl + '="1">' + esc(e[0]) + ' ' + (e[2] ? '<b class="sa-unsicher" data-sa-unsicher="1">' + T('saUnsicher') + '</b> ' : '') + kz(e[1]) + '</li>'; }).join('') + '</ul>' : '<p class="klein">' + T('hdKeineAngabe') + '</p>') + '</div>';
+    };
+    var punkte = '';
+    SH.gezaehlt.forEach(function (k) { var an = x.q.indexOf(k) >= 0, u = x.u.indexOf(k) >= 0; punkte += '<i class="sa-pkt' + (an ? ' an' : '') + (u ? ' un' : '') + '" title="' + esc((qdef(k).titel || k) + (an ? '' : ': -')) + '"></i>'; });
+    var wahl = '<div class="ab-stufen sa-wahl sa-wahl-kopf"><button type="button" class="es-var sa-opt" data-sa="holz" data-feld="holz_' + zweck + '" data-wert="' + x.id + '" data-fk="holz-' + zweck + '-' + x.id + '" aria-pressed="' + sel + '"><span class="es-var-kopf">' + sym(zweck === 'wand' ? 'i-wand' : 'i-bett') + '<b>' + T('saWaehlen_' + zweck, { name: hi.name }) + '</b></span></button></div>';
+    return '<li class="sa-holz' + (sel ? ' sa-gewaehlt' : '') + '" data-sa-holz="' + x.id + '" data-platz="' + x.platz + '" data-punkte="' + x.punkte + '" data-quellen="' + x.n + '"><div class="sa-holz-kopf"><span class="sa-platz" data-sa-platz="' + x.platz + '">' + T(x.geteilt ? 'saPlatzGeteilt' : 'saPlatz', { n: x.platz }) + '</span>' + sym('i-sa-holz') + '<b class="sa-name">' + esc(hi.name) + '</b>' +
+      (x.meist ? ' <span class="sa-abz" data-sa-meist="1">' + T('saMeist') + '</span>' : '') + (sel ? ' <span class="sa-abz sa-abz-gew" data-sa-gewaehlt="1">' + sym('i-wand') + ' ' + T('saGewaehlt') + '</span>' : '') + wahl + '</div><div class="sa-sp"><div>' +
+      '<p class="sa-pz"><b data-sa-pz="' + x.punkte + '">' + T('saPunkte', { p: m2(x.punkte) }) + '</b><span class="sa-bal sa-bal-gross" aria-hidden="true"><i style="width:' + Math.min(100, x.punkte) + '%"></i></span></p>' +
+      '<p class="sa-quellen" data-sa-quellen="' + x.n + '"><span class="sa-pkte" role="img" aria-label="' + T('saQuellenZahl', { n: x.n, m: x.gesamt }) + '">' + punkte + '</span> <b>' + T('saQuellenZahl', { n: x.n, m: x.gesamt }) + '</b>' + (un ? ' <span class="klein" data-sa-quellen-unsicher="' + un + '">' + T('saQuellenUn', { u: un }) + '</span>' : '') + ' ' + kz(x.q) + '</p>' +
+      '<p class="klein" data-sa-belegt="' + x.belegt + '">' + T('saBelegt', { b: x.belegt }) + '</p><ul class="sa-krits">' + kritZeilen(x, bal, ein) + '</ul><ul class="gs-ul sa-ul">' + rho + '</ul></div><div>' +
+      '<div class="sa-pm">' + pm(sd.plus, 'plus', 'saPlusTitel') + pm(sd.minus, 'minus', 'saMinusTitel') + '</div>' +
+      (sd.widerspruch ? '<p class="ab-meldung" role="note" data-sa-widerspruch="1">' + T('saBalWiderspruch') + '. ' + esc(sd.widerspruch) + '</p>' : '') + (sd.hinweis ? '<p class="klein" data-sa-vorbehalt="1"><b>' + T('saVorbehalt') + ':</b> ' + esc(sd.hinweis) + '</p>' : '') +
+      '<p class="klein">' + (ein === 'lfm' ? '€/lfm' : '€/m²') + '</p>' + preisBlock(hi, ein) + extraPreise(sd, ein) + importHtml(sd) +
+      '</div></div></li>';
+  }
+  function listeHtml(c) {
+    var r = SK.rangliste(zweck, gewicht), ein = zweck === 'wand' ? 'm2' : 'lfm', bal = SK.preisBalken(ein);
+    return r.eintraege.map(function (x) { return holzKarte(x, c, bal, ein); }).join('');
+  }
+  function gewText() { var e = Math.round(gewicht * 100); return T('saGewWert', { e: e, p: 100 - e }); }
+  function t2Html(c) {
+    var h = kopfZeile('i-sa-holz', 'saT2', 't2') + '<div class="sa-reiter" role="tablist" aria-label="' + T('saZweckAria') + '">';
+    ['wand', 'bank'].forEach(function (z) {
+      h += '<button type="button" role="tab" class="es-var sa-opt sa-reiter-knopf" id="sa-reiter-' + z + '" data-sa="zweck" data-wert="' + z + '" data-fk="zweck-' + z + '" aria-selected="' + (zweck === z) + '" tabindex="' + (zweck === z ? 0 : -1) + '" aria-controls="sa-rang"><span class="es-var-kopf">' + sym(z === 'wand' ? 'i-wand' : 'i-bett') + '<b>' + T('saZweck_' + z) + '</b></span></button>';
+    });
+    h += '</div><p class="ab-meldung sa-satz" role="note" data-sa-rangsatz="1">' + T('saRangSatz') + '</p><div class="sa-gew"><label class="es-label" for="sa-gew">' + T('saGewTitel') + ' <b id="sa-gew-wert" class="es-zahl">' + gewText() + '</b> ' + hk('sa-h-rang') + '</label>' + hp('sa-h-rang', 'saHilfe_rang') +
+      '<input type="range" id="sa-gew" min="0" max="100" step="10" value="' + Math.round(gewicht * 100) + '" data-sa="gew" data-fk="gew" aria-valuetext="' + esc(tr('saGewWert', { e: Math.round(gewicht * 100), p: 100 - Math.round(gewicht * 100) })) + '"><span class="sa-gew-enden klein"><span>' + T('saGewP') + '</span><span>' + T('saGewE') + '</span></span><p class="klein" data-sa-annahme="gewicht">' + schild() + ' ' + T('saGewAnn') + '</p></div>' +
+      '<p class="klein sa-hk"><b>' + T('saBalkenTitel') + '</b> ' + hk('sa-h-krit') + ' <b>' + T('saImportTitel') + '</b> ' + hk('sa-h-imp') + '</p>' + hp('sa-h-krit', 'saHilfe_krit') + hp('sa-h-imp', 'saHilfe_imp') +
+      '<ol class="sa-rang" id="sa-rang" role="tabpanel" aria-labelledby="sa-reiter-' + zweck + '" data-sa-zweck="' + zweck + '">' + listeHtml(c) + '</ol>';
+    ['wand', 'bank'].forEach(function (f) { var z = SK.zaehlung(c.ps[f], f); if (z.n === 0) h += '<p class="ab-meldung" role="note" data-sa-warn="eignung-' + f + '">' + T('saEignungWarn', { name: SK.holzInfo(c.ps[f]).name, was: tr(f === 'wand' ? 'saWand' : 'saBank'), m: z.gesamt }) + '</p>'; });
+    var ed = SH.eudr, q ='<ul class="gs-ul sa-ul">' + SH.gezaehlt.concat(['WE']).map(function (k) { var d = qdef(k); return '<li data-sa-quelle="' + k + '"><b>' + k + '</b>: ' + (/^https?:/.test(d.url || '') ? '<a href="' + esc(d.url) + '" target="_blank" rel="noopener">' + esc(d.titel) + '</a>' : esc(d.titel)) + ' <span class="klein">(' + esc(d.art) + ')</span></li>'; }).join('') + '</ul>';
+    h += '<details class="an-bed sa-quellenliste"><summary>' + T('saEudrTitel') + '</summary><p>' + esc(ed.text) + '</p><p class="klein">' + esc(ed.gesetz) + ', ' + esc(ed.stand) + '. ' + WZ.quelleHtml({ id: 'S2-58-eudr', quelle: 'EUR-Lex', url: ed.fund, abruf: ed.abruf, status: ed.status }) + '</p></details>' +
+      '<details class="an-bed sa-quellenliste"><summary>' + T('saQuellenListe') + '</summary>' + q + '</details>';
     return h + (c.ps.explizit.wand && c.ps.explizit.bank ? '' : '<p class="klein" data-sa-annahme="holz">' + schild() + ' ' + T('saStartHolz', { w: SK.holzInfo(c.ps.wand).name, b: SK.holzInfo(c.ps.bank).name }) + '</p>');
   }
+  function neuListe() { var l = byId('sa-rang'); if (l && ctx && ctx.ok) { l.innerHTML = listeHtml(ctx); } var w = byId('sa-gew-wert'); if (w) w.textContent = tr('saGewWert', { e: Math.round(gewicht * 100), p: 100 - Math.round(gewicht * 100) }); }
 
   /* ---------- Teil 3: Materialliste ---------- */
   function posHtml(p, mg) {
@@ -288,6 +356,7 @@
     var t = ev.target, a = t.getAttribute && t.getAttribute('data-sa');
     if (!a || ev.type !== 'input' || t.type !== 'range') return;
     erstesMal();
+    if (a === 'gew') { gewicht = SK.gewichtOk(+t.value / 100); t.setAttribute('aria-valuetext', tr('saGewWert', { e: Math.round(gewicht * 100), p: 100 - Math.round(gewicht * 100) })); neuListe(); return; }   /* nur die Liste wird neu gezeichnet, der Regler bleibt stehen */
     var x = Math.round(+t.value * 100) / 100, lab = byId(t.id + '-wert');
     if (a === 'st') {
       if (lab) lab.textContent = m2(x) + ' h';
@@ -304,6 +373,7 @@
     erstesMal();
     var a = t.getAttribute('data-sa'), w = t.getAttribute('data-wert');
     if (a === 'hilfe') { var p = byId(w), auf = t.getAttribute('aria-expanded') !== 'true'; t.setAttribute('aria-expanded', auf); hilfe[w] = auf; if (p) p.hidden = !auf; }
+    else if (a === 'zweck') { if ((w === 'wand' || w === 'bank') && ctx && ctx.ok) { zweck = w; teil('sa-t2', t2Html, ctx); } }
     else if (a === 'anlegen') { if (SK.saunaAnlegen(plan).ok) geaendert(false); }
     else if (a === 'art') { if (SK.wahlSetzen(plan, 'art', w)) geaendert(false); }
     else if (a === 'holz') { if (SK.wahlSetzen(plan, t.getAttribute('data-feld'), w)) geaendert(false); }
@@ -318,7 +388,15 @@
     return true;
   }
   var wurzel = byId('g-sauna-inhalt'), det = byId('g-sauna-details');
-  if (wurzel) { wurzel.addEventListener('click', klick); wurzel.addEventListener('input', bei); }
+  function reiterTaste(ev) {   /* Reiter: Pfeil links/rechts, Pos1/Ende wechseln und setzen den Fokus (rollender Tabindex) */
+    var t = ev.target;
+    if (!t.closest || !t.closest('[data-sa=zweck]') || !ctx || !ctx.ok) return;
+    var k = ev.key, neu = k === 'ArrowLeft' || k === 'Home' ? 'wand' : k === 'ArrowRight' || k === 'End' ? 'bank' : null;
+    if (!neu) return;
+    ev.preventDefault(); zweck = neu; teil('sa-t2', t2Html, ctx);
+    var f = byId('sa-reiter-' + neu); if (f) f.focus({ preventScroll: true });
+  }
+  if (wurzel) { wurzel.addEventListener('click', klick); wurzel.addEventListener('input', bei); wurzel.addEventListener('keydown', reiterTaste); }
   if (det) det.addEventListener('toggle', function () { if (det.open) jetzt(false); });
   window.addEventListener('sprachegewechselt', function () { jetzt(false); });
   window.addEventListener('themagewechselt', function () { if (ctx && ctx.ok && gl.ok) bau3d(ctx); });

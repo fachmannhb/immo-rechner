@@ -224,6 +224,12 @@
       if (typeof sa0.stunden === 'number' && isFinite(sa0.stunden)) sa.stunden = klemme(sa0.stunden, 0.25, 4);
       neu.sauna = sa;
     }
+    /* Auftrag S2: plan.heizanlage = { art } (waermepumpe, gas, offen), optional; die Mappe nennt eine unbekannte Art sichtbar. */
+    if (p.heizanlage && typeof p.heizanlage === 'object' && !Array.isArray(p.heizanlage)) {
+      var ha0 = p.heizanlage, ha = {};
+      if (idOk(ha0.art)) ha.art = ha0.art;
+      neu.heizanlage = ha;
+    }
     /* Auftrag K1: plan.kleinhaus = { ref, typ, herkunft, regler 0..1, schnee, wind }, optional; unbekannte Werte bleiben stehen, die Karte meldet sie sichtbar. */
     if (p.kleinhaus && typeof p.kleinhaus === 'object' && !Array.isArray(p.kleinhaus)) {
       var kh0 = p.kleinhaus, kh = {};

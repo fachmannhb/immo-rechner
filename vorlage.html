@@ -1040,6 +1040,8 @@ __PALETTE_CSS__
   .mh-tab .summe th, .mh-tab .summe td { font-weight: 800; border-top: 2px solid var(--text); }
   .mh-tab .klein { display: block; font-size: 14px; color: var(--leise); }
   .mh-luecke { font-weight: 700; }
+  .mh-heiz { margin: 0 0 12px; } .mh-heiz-knoepfe { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 8px; margin: 6px 0; }
+  .mh-heiz-k { min-height: 48px; } .mh-heiz-k .es-var-kopf svg.sym { width: 1.6em; height: 1.6em; }
   .mh-tab .mh-aus td { color: var(--leise); }
   .mh-tab .mh-aus .z span.mh-wert { text-decoration: line-through; }
   .mh-tab .mh-enth { display: block; font-size: 14px; font-weight: 700; color: var(--text); }
@@ -1058,7 +1060,7 @@ __PALETTE_CSS__
     body.g-mappe-offen { background: #ffffff !important; }
     body.g-mappe-offen > *:not(#g-mappe-ov) { display: none !important; }
     #g-mappe-ov { position: static; overflow: visible; padding: 0; background: #ffffff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    #g-mappe-ov .overlay-kopf { display: none !important; }
+    #g-mappe-ov .overlay-kopf, #g-mappe-ov .mh-kein-druck { display: none !important; }
     #g-mappe-ov .blatt { max-width: none; margin: 0; padding: 0; border: 0; box-shadow: none; border-radius: 0; font-size: 11pt; }
     #g-mappe-ov .mh-neu { break-before: page; }
     #g-mappe-ov .mh-kasten { overflow: visible; }
@@ -1482,10 +1484,45 @@ __PALETTE_CSS__
   .sa-tuer { stroke: var(--c2); stroke-width: 4; fill: none; }
   .sa-t, .sa-dim text { font: 600 12px var(--display); fill: var(--text); }
   .sa-dim path { stroke: var(--c1); stroke-width: 1.2; fill: none; }
-  .sa-holzliste { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; margin: 8px 0; }
+  .sa-rang { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 14px; }
   .sa-holz { border: 2px solid var(--linie); border-radius: 14px; padding: 12px 14px; background: var(--karte); min-width: 0; overflow-wrap: anywhere; }
   .sa-holz.sa-gewaehlt { border-color: var(--akzent); }
-  .sa-ja { font-weight: 700; } .sa-offen { color: var(--leise); } .sa-ja, .sa-offen { margin-right: 12px; }
+  .sa-holz-kopf { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; margin-bottom: 6px; }
+  .sa-wahl-kopf { margin: 0 0 0 auto; width: min(100%, 300px); }
+  .sa-holz-kopf svg.sym { width: 1.4em; height: 1.4em; color: var(--akzent-text); }
+  .sa-name { font-size: 1.2rem; }
+  .sa-platz { font-weight: 800; padding: 2px 12px; border-radius: 999px; background: var(--akzent); color: var(--auf-akzent); }
+  .sa-abz { display: inline-block; font-size: .9rem; font-weight: 700; padding: 0 10px; border-radius: 999px; background: var(--viol-fl); color: var(--akzent-text); border: 1.5px solid var(--akzent); line-height: 1.6; }
+  .sa-abz-gew { background: var(--akzent-flaeche); } .sa-abz svg.sym { width: 1em; height: 1em; vertical-align: -2px; }
+  .sa-sp { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px 24px; }
+  @media (min-width: 1200px) { .sa-sp { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .sa-pz { display: flex; align-items: center; gap: 12px; margin: 4px 0; }
+  .sa-bal { display: block; height: 12px; border-radius: 6px; background: var(--linie); border: 1px solid var(--linie2); overflow: hidden; box-sizing: border-box; }
+  .sa-bal i { display: block; height: 100%; background: var(--c1); }
+  .sa-bal-preis i { background: var(--c2); }
+  .sa-bal-leer { background: transparent; border: 1.5px dashed var(--leise); }
+  .sa-bal-gross { height: 16px; width: 100%; max-width: 260px; }
+  .sa-pkte { display: inline-flex; gap: 4px; vertical-align: middle; }
+  .sa-pkt { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--linie2); box-sizing: border-box; }
+  .sa-pkt.an { background: var(--c1); border-color: var(--c1); }
+  .sa-pkt.an.un { background: repeating-linear-gradient(45deg, var(--c1) 0 3px, transparent 3px 6px); border-style: dashed; }
+  .sa-krits { list-style: none; padding: 0; margin: 6px 0; }
+  .sa-kr { display: grid; grid-template-columns: minmax(6.5rem, 8.5rem) 90px minmax(0, 1fr); gap: 4px 10px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--linie); }
+  .sa-kn { font-weight: 700; }
+  @media (max-width: 560px) { .sa-kr { grid-template-columns: minmax(0, 1fr); } .sa-bal { max-width: 160px; } }
+  .sa-pm { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; }
+  @media (max-width: 560px) { .sa-pm { grid-template-columns: minmax(0, 1fr); } }
+  .sa-kz { color: var(--leise); } .sa-kz abbr { text-decoration: underline dotted; cursor: help; }
+  .sa-unsicher { color: var(--warn); }
+  .sa-reiter-knopf[aria-selected="true"] { border-color: var(--akzent); background: var(--akzent-flaeche); box-shadow: inset 0 0 0 1px var(--akzent); }
+  .sa-reiter { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 8px 0; }
+  .sa-satz { margin: 8px 0; font-weight: 700; }
+  .sa-gew { display: grid; gap: 4px; margin: 8px 0; }
+  .sa-gew input[type="range"] { width: 100%; min-height: 44px; accent-color: var(--c1); }
+  .sa-gew-enden { display: flex; justify-content: space-between; gap: 8px; }
+  .sa-hk { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 6px 0 2px; }
+  .sa-imp .kh-verbot { margin: 8px 0; } .sa-land { margin: 6px 0; } .sa-weitere { margin: 8px 0 2px; }
+  .sa-holz :focus-visible, .sa-gew :focus-visible { outline: 3px solid var(--akzent); outline-offset: 2px; }
   #g-sauna-karte .tabelle-kasten, #g-kleinhaus-karte .tabelle-kasten { max-height: none; }
   .kh-balken { display: flex; gap: 2px; min-height: 34px; margin: 8px 0 4px; }
   .kh-seg { display: flex; align-items: center; justify-content: center; min-width: 14px; border-radius: 6px; color: var(--auf-akzent); font-weight: 700; font-size: .85rem; overflow: hidden; }
@@ -3805,6 +3842,7 @@ __PALETTE_CSS__
 <script src="daten/ausbau_entscheidungen.js"></script>
 <script src="daten/grundstueck.js"></script>
 <script src="daten/sauna.js"></script>
+<script src="daten/saunaholz.js"></script>
 <script src="daten/kleinhaus.js"></script>
 <div class="g-druck" id="g-druck" aria-hidden="true"></div>
 <div class="overlay" id="g-mappe-ov" role="dialog" aria-modal="true" aria-labelledby="mh-h" hidden>

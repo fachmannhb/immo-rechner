@@ -24,7 +24,7 @@
   /* Namen für Lücken, Annahmen und Fragen aus den Parametern des Kerns (Ids und Zahlen), nur mit vorhandenen Texten */
   var gsName = function (art, n) { return /^Preis\s/i.test(n) ? n.replace(/^Preis\s+(für\s+)?/i, '') : artName(art) + ': ' + n; };
   function lueckeName(p) {
-    return p.bauteil ? tr('maBt_' + p.bauteil) + ' (' + p.material + ')' : p.standard ? tr('mpStandard') + ' ' + tr('hdStd_' + p.standard) : p.name ? (p.art ? gsName(p.art, p.name) : p.name) : tr('mpAnbau') + ': ' + artName(p.art);
+    return p.heiz ? tr('mpHz_' + p.heiz) : p.bauteil ? tr('maBt_' + p.bauteil) + ' (' + p.material + ')' : p.standard ? tr('mpStandard') + ' ' + tr('hdStd_' + p.standard) : p.name ? (p.art ? gsName(p.art, p.name) : p.name) : tr('mpAnbau') + ': ' + artName(p.art);
   }
   function annahmeText(a) {
     var p = a.par, id = a.id.split(':')[0];
@@ -103,11 +103,23 @@
       var sa = a.sauna, so = sa.ofen === 'holz' ? tr('saOfenKurz_holz') : (sa.kw ? tr('saOfenKurz', { kw: nz(sa.kw) }) : tr('saOfenKurz_0'));
       zeile('gsArt_sauna', '<span data-sauna="1" data-von="' + sa.von + '" data-bis="' + sa.bis + '">' + esc(tr('mpSaunaZeile', { art: tr('saArt_' + sa.art), v: nz(sa.volumen), ofen: so, w: SK_holz(sa.wand), b: SK_holz(sa.bank) })) + '</span>');
     }
+    if (a.heizanlage) zeile('mpHeizanlage', '<span data-heizanlage="' + esc(a.heizanlage.art) + '">' + (a.heizanlage.bekannt ? T('mpHz_' + a.heizanlage.art) : esc(a.heizanlage.art)) + '</span>');
     if (a.kleinhaus) {   /* Auftrag K1: Typ, Standfläche, Herkunft und Summe bis zur Aufstellung */
       var kl = a.kleinhaus;
       zeile('mpKleinhaus', '<span data-kleinhaus="1" data-typ="' + esc(kl.typ) + '" data-von="' + kl.von + '" data-bis="' + kl.bis + '">' + esc(tr('mpKleinhausZeile', { typ: tr('khTyp_' + kl.typ), fl: nz(kl.flaeche), herk: tr('khH_' + kl.herkunft), sum: kl.erlaubt ? (kl.ohneKauf ? tr('khOhneKauf') : '') + (kl.mindestens ? tr('khMindestens') : '') + n0(kl.von) + ' bis ' + n0(kl.bis) + ' €' : tr('khNichtErlaubtKurz') })) + '</span>');
     }
     return sect('ausbau', false, 'mpAusbau', '<dl class="mh-dl">' + h + '</dl>');
+  }
+  /* S2: Auswahl der Heizanlage (nur am Bildschirm, nicht im Druck); schreibt plan.heizanlage, die Zeile unten erscheint sofort */
+  var hzMeldung = '';
+  var HZ_ICON = { waermepumpe: 'i-gs-waermepumpe', gas: 'i-flamme', offen: 'i-an-frage' };
+  function heizWahl(m) {
+    var a = m.ausbau.heizanlage, art = a ? a.art : '';
+    return '<div class="mh-heiz mh-kein-druck" role="group" aria-label="' + T('mpHzWahl') + '" data-heiz-wahl="' + esc(art) + '"><p class="klein"><b>' + T('mpHzWahl') + '</b> ' + T('mpHzHinweis') + '</p><div class="mh-heiz-knoepfe">' +
+      ['waermepumpe', 'gas', 'offen'].map(function (x) {
+        return '<button type="button" class="es-var mh-heiz-k" data-hz="' + x + '" aria-pressed="' + (art === x) + '"><span class="es-var-kopf"><svg class="sym" aria-hidden="true" focusable="false"><use href="#' + HZ_ICON[x] + '"/></svg><b>' + T('mpHz_' + x) + '</b></span></button>';
+      }).join('') + (a ? '<button type="button" class="es-var mh-heiz-k" data-hz="weg"><span class="es-var-kopf"><b>' + T('mpHzWeg') + '</b></span></button>' : '') + '</div>' +
+      '<p class="klein" role="status" data-hz-status="1">' + (hzMeldung ? esc(hzMeldung) : '') + '</p></div>';
   }
   function kosten(m) {
     var k = m.kosten, h = '', gruppe = '', fertig = false, ohne = m.luecken.filter(function (l) { return /^k:/.test(l.id); }).length;
@@ -115,14 +127,15 @@
     k.zeilen.forEach(function (z) {
       if (z.ohneSumme && !fertig) h += summe();
       if (z.gruppe !== gruppe) { gruppe = z.gruppe; h += '<tr class="gruppe"><th colspan="3">' + T(gruppe === 'anbau' ? 'mpAnbau' : 'mpG_' + gruppe) + '</th></tr>'; }
-      var name = z.gruppe === 'innenausbau' ? tr('abGew_' + z.id) : z.gruppe === 'material' ? tr('maBt_' + z.id) + (z.material ? ': ' + z.material : '') : z.gruppe === 'daemmung' ? tr('hdStd_' + z.id) : z.gruppe === 'lueftung' ? tr('hlArt_' + z.id) : z.gruppe === 'grundstueck' ? gsName(z.art, z.name) : z.gruppe === 'sauna' ? tr('gsArt_sauna') + ': ' + tr('saT3') : z.gruppe === 'kleinhaus' ? tr('mpKleinhaus') + ': ' + tr('khTyp_' + z.art) : artName(z.id);
+      var name = z.gruppe === 'innenausbau' ? tr('abGew_' + z.id) : z.gruppe === 'material' ? tr('maBt_' + z.id) + (z.material ? ': ' + z.material : '') : z.gruppe === 'daemmung' ? tr('hdStd_' + z.id) : z.gruppe === 'lueftung' ? tr('hlArt_' + z.id) : z.gruppe === 'grundstueck' ? gsName(z.art, z.name) : z.gruppe === 'sauna' ? tr('gsArt_sauna') + ': ' + tr('saT3') : z.gruppe === 'heizanlage' ? tr('mpHz_' + z.id) :z.gruppe === 'kleinhaus' ? tr('mpKleinhaus') + ': ' + tr('khTyp_' + z.art) : artName(z.id);
       var leer = z.luecke && !(z.von > 0 || z.bis > 0), no = '<span class="mh-luecke">' + T('mpKeineAngabe') + '</span>';
       var aus = z.inSumme === false, vermerk = aus ? '<span class="mh-enth" data-enthalten-in="' + esc(z.enthaltenIn) + '">' + T('mpEnthalten', { wo: tr('mpZ_' + z.enthaltenIn.replace('/', '_')) }) + (z.sicher ? '' : ' · ' + T('mpEnthaltenUnsicher')) + '</span>' : '';
+      if (z.gruppe === 'heizanlage' && leer) vermerk = '<br><span class="klein" data-hz-folgt="' + esc(z.id) + '">' + T(z.id === 'offen' ? 'mpHzOffen' : 'mpHzFolgt') + '</span>';
       h += '<tr data-k="' + z.gruppe + '/' + esc(z.id) + '"' + (aus ? ' class="mh-aus" data-nicht-summe="1"' : '') + (leer ? ' data-luecke="1"' : ' data-von="' + z.von + '" data-bis="' + z.bis + '"') + '><td>' + esc(name) + vermerk + '</td><td class="z">' +
         (leer ? no : (aus ? '<span class="mh-wert">' : '') + esc(spanne(z.von, z.bis, z.einheit)) + (aus ? '</span>' : '') + (z.luecke ? '<span class="klein">+ ' + no + '</span>' : '')) + '</td><td>' + (leer ? '' : belege(z.belege)) + '</td></tr>';
     });
     if (!fertig) h += summe();
-    return sect('kosten', true, 'mpKosten', tab('<th>' + T('mpPosition') + '</th><th class="z">' + T('maSpanne') + '</th><th>' + T('regQuelle') + '</th>', h, ' data-kosten="1"') +
+    return sect('kosten', true, 'mpKosten', heizWahl(m) + tab('<th>' + T('mpPosition') + '</th><th class="z">' + T('maSpanne') + '</th><th>' + T('regQuelle') + '</th>', h, ' data-kosten="1"') +
       (ohne ? '<p class="klein" data-ohne-preis="' + ohne + '">' + T('mpOhnePreis', { n: ohne }) + '</p>' : '') + heizwaerme(k.heiz) + foerderung(k.foerderung) + '<p class="mh-hinweis" data-ohne-doppelung="1">' + schild() + ' ' + T('mpUeberschneid') + '</p>');
   }
   var r100 = function (x) { return Math.round(x / 100) * 100; };
@@ -172,7 +185,7 @@
   }
   var msg = function (e) { return e && e.message ? e.message : '?'; };
   function oeffnen() {
-    fehler(''); status.textContent = tr('mpBauen');
+    fehler(''); hzMeldung = ''; status.textContent = tr('mpBauen');
     setTimeout(function () {
       var m, bilder = [], drei;
       status.textContent = '';
@@ -192,6 +205,18 @@
   knopf.addEventListener('click', function () {
     if (hinweis && !hinweis.hidden) { hinweis.hidden = true; knopf.classList.remove('mh-puls'); try { localStorage.setItem(MERKER, '1'); } catch (es) { /* kein Speicher: Hinweis kommt beim nächsten Laden wieder */ } }
     oeffnen();
+  });
+  inhalt.addEventListener('click', function (ev) {   /* S2: Heizanlage wählen oder entfernen, danach neu rechnen und zeichnen; der Fokus bleibt auf dem Knopf */
+    var b = ev.target.closest ? ev.target.closest('[data-hz]') : null;
+    if (!b || !letzte) return;
+    var w = b.getAttribute('data-hz'), p = G.plan();
+    if (w === 'weg') delete p.heizanlage; else p.heizanlage = { art: w };
+    try { G.geaendert(); } catch (e1) { fehler(tr('mpTeilFehler', { teil: 'Heizanlage', grund: msg(e1) })); }
+    try { letzte.m = M.sammle(p, optionen()); } catch (e2) { fehler(tr('mpTeilFehler', { teil: 'Heizanlage', grund: msg(e2) })); return; }
+    var hz = letzte.m.kosten.zeilen.filter(function (z) { return z.gruppe === 'heizanlage'; })[0];
+    hzMeldung = w === 'weg' ? tr('mpHzWegOk') : tr('mpHzOk', { art: tr('mpHz_' + w), preis: hz && !hz.luecke ? spanne(hz.von, hz.bis) : tr('mpKeineAngabe') });
+    zeigen();
+    var f = inhalt.querySelector('[data-hz="' + (w === 'weg' ? 'waermepumpe' : w) + '"]'); if (f) f.focus();
   });
   $('g-mappe-plandatei').addEventListener('click', function () {
     var ok = false;

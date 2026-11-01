@@ -38,9 +38,32 @@
   var ZUORDNUNG = [
     { id: 'boden', zaehlt: 'innenausbau/boden', deckt: ['material/boden'], sicher: true },
     { id: 'wanddaemmung', zaehlt: 'daemmung/wand', deckt: ['material/daemmung'], sicher: false },
-    { id: 'fenster', zaehlt: 'daemmung/fenster', deckt: ['material/fenster', 'material/verglasung'], sicher: false }
+    { id: 'fenster', zaehlt: 'daemmung/fenster', deckt: ['material/fenster', 'material/verglasung'], sicher: false },
+    /* S2: die Heizanlage (Wärmepumpe) zählt einmal; die Preiszeile desselben Geräts am Baustein „Wärmepumpe (außen)“ im Grundstück bleibt sichtbar, zählt nicht („grundstueck:“ = Zeilen der Grundstücks-Bausteine, Endung der Zeilen-Id). Heizkörper und Fußbodenheizung bleiben im Innenausbau, Heizwärme ist nur eine Anzeige. */
+    { id: 'waermepumpe', zaehlt: 'heizanlage/waermepumpe', deckt: ['grundstueck:k_wp'], sicher: true }
   ];
-  var SUMMEN_GRUPPEN = { innenausbau: 1, material: 1, daemmung: 1, lueftung: 1, anbau: 1 };
+  var SUMMEN_GRUPPEN = { innenausbau: 1, material: 1, daemmung: 1, lueftung: 1, anbau: 1, heizanlage: 1 };
+  var HEIZ_ARTEN = ['waermepumpe', 'gas', 'offen'];
+  function planHeiz(plan) {
+    var h = plan && plan.heizanlage && typeof plan.heizanlage === 'object' && !Array.isArray(plan.heizanlage) ? plan.heizanlage : null;
+    return h ? { vorhanden: true, art: h.art === undefined ? 'offen' : h.art, bekannt: h.art === undefined || HEIZ_ARTEN.indexOf(h.art) >= 0 } : { vorhanden: false, art: '', bekannt: true };
+  }
+  /* Eine Quelle: dieselbe Zeile k_wp wie am Baustein im Grundstück (GRUNDSTUECK_KERN.datenZu), kein neuer Wert */
+  function heizDaten() {
+    var GK = root.GRUNDSTUECK_KERN;
+    return (GK ? GK.datenZu('waermepumpe').kosten.filter(function (r) { return r.id === 'k_wp'; })[0] : null) || null;
+  }
+  function heizZeile(plan, z, lu, fe) {
+    var h = planHeiz(plan), k;
+    if (!h.vorhanden) return;
+    if (!h.bekannt) { fe.push({ teil: 'heizanlage', grund: 'art ' + h.art }); return; }
+    if (h.art === 'waermepumpe') {
+      k = heizDaten();
+      if (k && !k.luecke && ok(k.von) && ok(k.bis)) { z.push({ gruppe: 'heizanlage', id: 'waermepumpe', von: k.von, bis: k.bis, luecke: false, belege: belege([{ quelleTitel: k.quelle, url: k.url, abruf: k.abruf, status: k.status }]) }); return; }
+    }
+    z.push({ gruppe: 'heizanlage', id: h.art, von: null, bis: null, luecke: true, belege: [] });
+    lu.push({ id: 'k:heizanlage:' + h.art, key: 'mLuecke', par: { heiz: h.art } });
+  }
   function preisig(x) { return !!x && ((ok(x.von) && x.von > 0) || (ok(x.bis) && x.bis > 0)); }
   function abschlussMit(z, lu, fe, ex) {
     var idx = {}, ue = [], roh = { von: 0, bis: 0 }, sum = { von: 0, bis: 0 }, weg = {};
@@ -69,7 +92,7 @@
   /* Kosten: Innenausbau, Material, Dämm-Mehrkosten, Lüftung einmalig, Anbau wie in den Karten; jede Leistung genau einmal in der Summe (ZUORDNUNG) */
   function kostenBlock(plan, opt, B) {
     var K = root.AUSBAU_KERN, HK = root.HUELLE_KERN, z = [], lu = [], fe = [], ex = { heiz: null, foerderung: [] };
-    function abschluss(a, b, c) { return abschlussMit(a, b, c, ex); }
+    function abschluss(a, b, c) { heizZeile(plan, a, b, c); return abschlussMit(a, b, c, ex); }
     var pm = K.planMaterial(plan), mg = K.mengenAusPlan(plan), stufe = opt.stufe === 0 || opt.stufe === 2 ? opt.stufe : 1;
     if (mg.ok) {
       B.mg = mg;
@@ -156,6 +179,8 @@
       m.ausbau.kleinhaus = { typ: kh.ps.typ, herkunft: kh.ps.herkunft, flaeche: kh.flaeche, erlaubt: kc.erlaubt, von: ks ? ks.von : 0, bis: ks ? ks.bis : 0, mindestens: ks ? ks.mindestens : false, ohneKauf: ks ? ks.ohneKauf : false, luecken: ks ? ks.luecken : 0, ref: kh.ps.ref };
       if (kc.erlaubt) kb.zeilen.push({ gruppe: 'kleinhaus', id: 'summe', art: kh.ps.typ, name: 'Kleinhaus', einheit: '€', von: ks.von, bis: ks.bis, luecke: ks.mindestens, ohneSumme: true, belege: [{ titel: 'Berichte 45 bis 50 (Hersteller-, Händler- und Behördenangaben)', url: '', abruf: root.DATEN.kleinhaus.stand, status: 'prüfen vor Nutzung' }] });
     }
+    var hz = planHeiz(plan);
+    m.ausbau.heizanlage = hz.vorhanden ? { art: hz.art, bekannt: hz.bekannt, preis: kb.zeilen.some(function (r) { return r.gruppe === 'heizanlage' && !r.luecke; }) } : null;
     /* Grundstücks-Preise nicht addierbar (Alternativen, €/Jahr, €/kW): Zeilen mit ohneSumme */
     gc.items.forEach(function (it) {
       if (sk && sk.ok && it.id === sk.item.id) return;
@@ -163,6 +188,16 @@
       (it.daten.kosten || []).forEach(function (k) {
         kb.zeilen.push({ gruppe: 'grundstueck', id: it.id + ':' + k.id, art: it.art, name: k.name, einheit: k.einheit, von: k.von, bis: k.bis, luecke: !!k.luecke, ohneSumme: true, belege: k.luecke ? [] : belege([k]) });
         if (k.luecke) m.luecken.push({ id: 'k:gs:' + it.id + ':' + k.id, key: 'mLuecke', par: { art: it.art, name: k.name } });
+      });
+    });
+    /* S2: Zeilen der Grundstücks-Bausteine, die eine zählende Zeile (z. B. Heizanlage/Wärmepumpe) schon abdeckt: sichtbar mit Vermerk, nicht in der Summe */
+    ZUORDNUNG.forEach(function (u) {
+      var zr = kb.zeilen.filter(function (r) { return r.gruppe + '/' + r.id === u.zaehlt; })[0];
+      if (!zr || !preisig(zr)) return;
+      u.deckt.forEach(function (d) {
+        if (d.indexOf('grundstueck:') !== 0) return;
+        var suf = d.slice(11);
+        kb.zeilen.forEach(function (r) { if (r.gruppe === 'grundstueck' && r.id.slice(-suf.length) === suf) { r.inSumme = false; r.enthaltenIn = u.zaehlt; r.sicher = u.sicher; } });
       });
     });
     /* Regeln des Landes: RK.pruefe, nur gelbe und rote Zeilen */

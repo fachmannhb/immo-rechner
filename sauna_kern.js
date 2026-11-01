@@ -15,7 +15,15 @@
   function klemme(x, lo, hi) { return Math.min(hi, Math.max(lo, x)); }
   function r2(x) { return Math.round(x * 100) / 100; }
   function SD() { return root.DATEN && root.DATEN.sauna; }
-  function holzInfo(id) { var l = SD().holz; for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i]; return null; }
+  function SH() { return root.DATEN && root.DATEN.saunaholz; }
+  /* S2: vier Hölzer (Thermo-Kiefer, Thermo-Fichte, Thermo-Erle, Kelo) stehen nur in daten/saunaholz.js: ohne Händlerzeile, also alles Lücke in der Materialliste (Keine Angabe, nicht in der Summe) */
+  function holzInfo(id) {
+    var l = SD().holz, i, s = SH();
+    for (i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
+    for (i = 0; s && i < s.holz.length; i++) if (s.holz[i].id === id) { var L = { status: 'Lücke' }; return { id: id, name: s.holz[i].name, wand: L, bank: L, harz: L, splitter: L, rho: L, m2: [], lfm: [], nurSaunaholz: true }; }
+    return null;
+  }
+  function holzDaten(id) { var s = SH(), i; for (i = 0; s && i < s.holz.length; i++) if (s.holz[i].id === id) return s.holz[i]; return null; }
   function matInfo(id) { var l = SD().material; for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i]; return null; }
 
   function planSauna(plan) {
@@ -49,6 +57,51 @@
     if (!zs.length) return { id: id, luecke: true, n: 0, zeilen: z };
     var v = zs.map(function (r) { return r.v; });
     return { id: id, luecke: false, zeilen: z, n: n, einQuelle: n === 1, von: Math.min.apply(null, v), bis: Math.max.apply(null, v) };
+  }
+  /* ---------- Holzvergleich (S2): Rangliste aus gezählten Quellen und belegten Eigenschaften, der Preis zählt NICHT ----------
+     Punktzahl (0 bis 100) = w × E + (1 − w) × P.  E = Zahl der empfehlenden Quellen für den Zweck ÷ 8 (alle gezählten Quellen, auch die unsichere, wie Abschnitt 7 des Berichts 58).
+     P = Mittel der belegten Eigenschaften (Stufe 1 bis 3, geteilt durch 3; Harz, Hitze, Haltbarkeit, Splittern, Geruch). Eine Lücke und ein Quellen-Widerspruch zählen weder im Zähler noch im Nenner (nie als 0).
+     Hat ein Holz keine einzige belegte Eigenschaft, entfällt P und die Punktzahl ist E allein (Regel, die Seite nennt „0 von 5 belegt“). Gleiche Punktzahl = geteilter Platz.
+     Das Gewicht w ist Bedienzustand (Start 0,5 = Annahme), das bestplatzierte Holz wird nie von selbst gewählt. */
+  var GEWICHT_START = 0.5, KRIT = ['harz', 'hitze', 'halt', 'splitter', 'geruch'];
+  function gewichtOk(w) { return ok(w) ? klemme(w, 0, 1) : GEWICHT_START; }
+  function zaehlung(id, zweck) {
+    var h = holzDaten(id), s = SH(), z = h && h.z && h.z[zweck === 'bank' ? 'bank' : 'wand'];
+    return z ? { n: z.q.length, q: z.q, u: z.u, gesamt: s.anzahl_quellen } : { n: 0, q: [], u: [], gesamt: s ? s.anzahl_quellen : 0 };
+  }
+  function eigenschaften(id) {
+    var h = holzDaten(id), st = [], out = [];
+    KRIT.forEach(function (k) {
+      var v = h && h.k[k], e = { key: k, art: !v || v.l ? 'luecke' : v.w ? 'widerspruch' : 'stufe', s: v && v.s || 0, q: v && v.q || [], t: v && v.t || '', abg: !!(v && v.abg) };
+      if (e.art === 'stufe') st.push(e.s);
+      out.push(e);
+    });
+    return { liste: out, belegt: st.length, mittel: st.length ? st.reduce(function (a, b) { return a + b / 3; }, 0) / st.length : null };
+  }
+  function bewerte(id, zweck, w) {
+    var z = zaehlung(id, zweck), e = eigenschaften(id), E = z.gesamt ? z.n / z.gesamt : 0, P = e.mittel;
+    var punkte = P === null ? E : w * E + (1 - w) * P;
+    return { id: id, name: holzInfo(id).name, n: z.n, u: z.u, q: z.q, gesamt: z.gesamt, E: E, P: P, belegt: e.belegt, krit: e.liste, punkte: Math.floor(punkte * 1000 + 0.5 + 1e-7) / 10, roh: punkte };
+  }
+  function rangliste(zweck, gewicht) {
+    var s = SH(), w = gewichtOk(gewicht), z = zweck === 'bank' ? 'bank' : 'wand';
+    if (!s) return { zweck: z, w: w, eintraege: [], max: 0 };
+    var l = s.holz.map(function (h) { return bewerte(h.id, z, w); }), mx = 0;
+    l.forEach(function (x) { if (x.n > mx) mx = x.n; });
+    l.sort(function (a, b) { return Math.round(b.roh * 1e9) - Math.round(a.roh * 1e9) || b.n - a.n || a.name.localeCompare(b.name, 'de'); });
+    l.forEach(function (x) {
+      x.platz = 1 + l.filter(function (y) { return Math.round(y.roh * 1e9) > Math.round(x.roh * 1e9); }).length;
+      x.geteilt = l.filter(function (y) { return Math.round(y.roh * 1e9) === Math.round(x.roh * 1e9); }).length > 1;
+      x.meist = mx > 0 && x.n === mx;
+    });
+    return { zweck: z, w: w, eintraege: l, max: mx };
+  }
+  /* Preisbalken (zählt nicht zur Rangfolge): Mitte der Spanne aus holzPreis, geteilt durch die größte Mitte aller Hölzer; ohne belegten Preis null = Lücke */
+  function preisBalken(einheit) {
+    var l = SH() ? SH().holz.map(function (h) { var p = holzPreis(h.id, einheit); return { id: h.id, mitte: p.luecke ? null : (p.von + p.bis) / 2 }; }) : [], mx = 0;
+    l.forEach(function (x) { if (x.mitte !== null && x.mitte > mx) mx = x.mitte; });
+    l.forEach(function (x) { x.anteil = x.mitte === null || !mx ? null : x.mitte / mx; });
+    return l;
   }
   function strompreis() {
     var e = root.DATEN && root.DATEN.energiepreise && root.DATEN.energiepreise.eintraege, i;
@@ -167,7 +220,7 @@
     if (feld === 'stunden' && ok(wert)) { ps.stunden = r2(klemme(wert, S_MIN, S_MAX)); return true; }
     return false;
   }
-  var API = { ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, H_MIN: H_MIN, H_MAX: H_MAX, B_MAX: B_MAX, T_MAX: T_MAX, S_MIN: S_MIN, S_MAX: S_MAX, holzInfo: holzInfo, planSauna: planSauna, volumen: volumen, ofenKlasse: ofenKlasse, holzPreis: holzPreis, strompreis: strompreis,
+  var API = { ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, H_MIN: H_MIN, H_MAX: H_MAX, B_MAX: B_MAX, T_MAX: T_MAX, S_MIN: S_MIN, S_MAX: S_MAX, holzInfo: holzInfo, holzDaten: holzDaten, GEWICHT_START: GEWICHT_START, KRIT: KRIT, zaehlung: zaehlung, eigenschaften: eigenschaften, rangliste: rangliste, preisBalken: preisBalken, gewichtOk: gewichtOk, planSauna: planSauna, volumen: volumen, ofenKlasse: ofenKlasse, holzPreis: holzPreis, strompreis: strompreis,
     betrieb: betrieb, mengen: mengen, material: material, vergleich: vergleich, geometrie: geometrie, rechne: rechne, verknuepfen: verknuepfen, saunaAnlegen: saunaAnlegen, groesseSetzen: groesseSetzen, wahlSetzen: wahlSetzen };
   root.SAUNA_KERN = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
