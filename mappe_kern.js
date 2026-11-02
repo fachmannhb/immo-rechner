@@ -48,7 +48,8 @@
     var h = plan && plan.heizanlage && typeof plan.heizanlage === 'object' && !Array.isArray(plan.heizanlage) ? plan.heizanlage : null;
     return h ? { vorhanden: true, art: h.art === undefined ? 'offen' : h.art, bekannt: h.art === undefined || HEIZ_ARTEN.indexOf(h.art) >= 0 } : { vorhanden: false, art: '', bekannt: true };
   }
-  /* S3: die Anschaffungswerte der Heizanlage stehen an EINER Stelle: daten/heizung.js (Bericht 52, Zeilen H-20 und H-22), erzeugt von erzeuger/daten_heizung.py. Die Zeile k_wp am Baustein im Grundstück (Bericht 34) ist ein anderer Wert und bleibt unverändert. */
+  /* S3/S4: die Anschaffungswerte der Heizanlage stehen an EINER Stelle: daten/heizung.js (Wärmepumpe: Bericht 59, Verbraucherzentrale RLP; Gas: Bericht 52, H-22), erzeugt von erzeuger/daten_heizung.py.
+     Die Zeile k_wp am Baustein im Grundstück hat keine eigene Zahl mehr: sie verweist auf denselben Wert (grundstueck_kern.datenZu, Feld „aus“). */
   function heizDaten(art) {
     var d = root.DATEN && root.DATEN.heizung, a = d && d.arten && d.arten[art];
     return a && ok(a.von) && ok(a.bis) ? a : null;
@@ -60,8 +61,10 @@
     a = h.art === 'waermepumpe' || h.art === 'gas' ? heizDaten(h.art) : null;
     if (a) {
       /* unsicher = die Zahl steckt mit einem Vorbehalt in der Summe (Suchtreffer oder veraltet): die Mappe markiert die Summe dann mit „prüfen vor Nutzung“ */
-      z.push({ gruppe: 'heizanlage', id: h.art, von: a.von, bis: a.bis, luecke: false, heizId: a.id, unsicher: true, preisstand: a.preisstand || '',
-        belege: belege([{ quelleTitel: a.quelle, url: a.url, abruf: a.abruf, status: a.status === 'prüfen vor Nutzung' ? a.status : 'veraltet' }]) });
+      /* S4: Status kommt aus den Daten (Wärmepumpe: „geprüft (Angebotsauswertung, regional)“, Gas: „veraltet“); „unsicher“ steht ebenfalls in den Daten */
+      z.push({ gruppe: 'heizanlage', id: h.art, von: a.von, bis: a.bis, luecke: false, heizId: a.id, unsicher: a.unsicher !== false, preisstand: a.preisstand || '',
+        belege: belege([{ quelleTitel: a.quelle, url: a.url, abruf: a.abruf, status: a.status === 'veraltet, nur Größenordnung' ? 'veraltet' : a.status },
+          a.quelle2 ? { quelleTitel: a.quelle2, url: a.url2, abruf: a.abruf, status: '' } : null]) });
       return;
     }
     z.push({ gruppe: 'heizanlage', id: h.art, von: null, bis: null, luecke: true, belege: [] });

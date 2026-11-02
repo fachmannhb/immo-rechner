@@ -140,13 +140,21 @@
     var q = GD() && GD().quellen && GD().quellen[e.quelle];
     return { id: e.id, ref: e.ref || '', status: e.status, abruf: e.abruf, quelle: q ? q.titel : e.quelle, url: q ? q.url : '', hinweis: e.hinweis || '', grund: e.luecke_grund || '' };
   }
+  /* S4: eine Zeile mit „aus“ ('heizung:<art>') hat keine eigene Zahl; Zahl, Quelle, Abruf, Status und Hinweis kommen aus DATEN.heizung (ein Wert, eine Stelle).
+     Fehlt der Wert dort, wird die Zeile zur sichtbaren Lücke mit Grund (kein stilles Weglassen, keine alte Zahl). */
+  function ausHeizung(e) {
+    var m = /^heizung:(.+)$/.exec(e.aus || ''), h = root.DATEN && root.DATEN.heizung, a = m && h && h.arten && h.arten[m[1]];
+    if (!a || !zahlOk(a.von) || !zahlOk(a.bis)) return Object.assign({}, e, { status: 'Lücke', luecke_grund: 'Der Wert dieser Zeile steht in daten/heizung.js und wurde nicht geladen.' });
+    return Object.assign({}, e, { von: a.von, bis: a.bis, quelle: a.quelle, url: a.url, abruf: a.abruf, status: a.status,
+      hinweis: (a.hinweis || '') + (e.hinweis ? ' ' + e.hinweis : '') });
+  }
   function datenZu(artId) {
     var d = GD(), out = { kosten: [], pflichten: [], werte: [] };
     if (!d) return out;
     ['kosten', 'pflichten', 'werte'].forEach(function (k) {
-      (d[k] || []).forEach(function (e) {
-        if (e.baustein !== artId) return;
-        var b = beleg(e);
+      (d[k] || []).forEach(function (e0) {
+        if (e0.baustein !== artId) return;
+        var e = e0.aus ? ausHeizung(e0) : e0, b = e0.aus && e.status !== 'Lücke' ? { id: e.id, ref: e.ref || '', status: e.status, abruf: e.abruf, quelle: e.quelle, url: e.url, hinweis: e.hinweis || '', grund: '' } : beleg(e);
         out[k].push(Object.assign({ name: e.name, einheit: e.einheit || '', von: typeof e.von === 'number' ? e.von : null, bis: typeof e.bis === 'number' ? e.bis : null, luecke: e.status === 'Lücke' }, b));
       });
     });

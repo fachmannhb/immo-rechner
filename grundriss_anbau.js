@@ -27,7 +27,7 @@
   }
 
   /* ---------- Bausteine ---------- */
-  var STATUS_KEY = { 'geprüft': ['statusGeprueft', 'st-gepr'], 'prüfen vor Nutzung': ['statusPruefen', 'st-pruef'], 'Lücke': ['statusLuecke', 'st-luecke'], 'eigene Einordnung': ['esStatusEigen', 'st-eigen'] };
+  var STATUS_KEY = { 'geprüft': ['statusGeprueft', 'st-gepr'], 'prüfen vor Nutzung': ['statusPruefen', 'st-pruef'], 'Lücke': ['statusLuecke', 'st-luecke'], 'eigene Einordnung': ['esStatusEigen', 'st-eigen'], 'geprüft (Angebotsauswertung, regional)': ['statusAngebote', 'st-gepr'] };
   function badge(status) {
     var s = STATUS_KEY[status] || STATUS_KEY['prüfen vor Nutzung'];
     return '<span class="rg-status ' + s[1] + '" data-status="' + esc(status) + '">' + esc(tr(s[0])) + '</span>';

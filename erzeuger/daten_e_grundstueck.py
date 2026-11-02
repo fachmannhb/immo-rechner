@@ -29,7 +29,7 @@ QUELLEN = {
     'pool_ratgeber': {'titel': 'aroundhome.de und hausjournal.net (Ratgeber, Suchtreffer)', 'url': 'https://www.aroundhome.de/'},
     'energiemarie': {'titel': 'energiemarie.de, Windkraft (Vergleichsseite)', 'url': 'https://energiemarie.de/strompreisvergleich/oekostrom/windkraft'},
     'landtag_rlp': {'titel': 'Landtag Rheinland-Pfalz, Vorlage 947-V-18 nach Verbraucherzentrale (Suchtreffer)', 'url': 'https://dokumente.landtag.rlp.de/landtag/vorlagen/947-V-18.pdf'},
-    'reduco': {'titel': 'reduco.ai nach Verbraucherzentrale RLP, Wärmepumpe Kosten (Juli 2026)', 'url': 'https://reduco.ai/blog/waermepumpe-kosten-foerderung'},
+    'heizung_verweis': {'titel': 'Zahl und Quelle stehen in daten/heizung.js (Wärmepumpe, Bericht 59)', 'url': 'recherche/59_waermepumpe_preis_nachpruefung.md'},
     'fachzentrum_bienen': {'titel': 'Fachzentrum Bienen Mayen laut Presse (deutsche-wirtschafts-nachrichten.de, Suchtreffer)', 'url': 'https://www.deutsche-wirtschafts-nachrichten.de/'},
     'hornbach': {'titel': 'Ratgeberseiten (hornbach.de u. a.) und Hobby-Verband (Suchtreffer)', 'url': 'https://www.hornbach.de/'},
     'bdew': {'titel': 'BDEW, Wasserfakten im Überblick (PDF nicht lesbar, Wert aus Suchtreffer)', 'url': 'https://www.bdew.de/media/documents/Wasserfakten_im_Ueberblick_April_o_MW_05052025_1.pdf'},
@@ -64,7 +64,8 @@ KOSTEN = [
     z('k_pool_betrieb', 'Betrieb im Jahr (Wasser, Strom, Chemie, Pflege)', '€/Jahr', 300, 1200, 'pool_ratgeber', P, baustein='pool', ref='34:P02', hinweis='Ratgeber, Suchtreffer; Wasserpreis im Bericht aus 2019, veraltet'),
     z('k_pool_beheizt', 'Betrieb im Jahr, beheizt', '€/Jahr', 1500, 2500, 'pool_ratgeber', P, baustein='pool', ref='34:P02', hinweis='Ratgeber, Suchtreffer'),
     z('k_kleinwind', 'Anlage', '€/kW', 3000, 9000, 'energiemarie', P, baustein='kleinwind', ref='34:K02', hinweis='Vergleichsseite, unsicher'),
-    z('k_wp', 'Luft-Wasser-Wärmepumpe, brutto, Juli 2026', '€', 21099, 54168, 'reduco', P, baustein='waermepumpe', ref='34:K03', hinweis='Mittel 36.397 €; Verbraucherzentrale RLP über reduco.ai, Suchtreffer; Förderung steht im Bericht 16'),
+    # S4 (02.11.2026): keine eigene Zahl; die Seite führt EINEN Wärmepumpen-Wert in daten/heizung.js (Bericht 59). Ein Verweis ("aus") lässt grundstueck_kern.datenZu die Zahlen von dort holen. Bericht 34 K03 ist nur die frühere Herkunft.
+    z('k_wp', 'Luft-Wasser-Wärmepumpe, Anschaffung', '€', q='heizung_verweis', s=P, baustein='waermepumpe', ref='34:K03', aus='heizung:waermepumpe', hinweis=''),
     z('k_wallbox_gesamt', 'Wallbox 11 kW, Gerät und Installation', '€', 1200, 3500, 'adac_wallbox', G, baustein='wallbox', ref='39:14', hinweis='ADAC: „grob 1.200 bis 3.500“; brutto oder netto nicht genannt'),
     z('k_wallbox_geraet', 'Gerät (einfach 300 bis 600, Mittelklasse 600 bis 1.000, Premium 1.000 bis 2.000)', '€', 300, 2000, 'adac_wallbox', G, baustein='wallbox', ref='39:12', hinweis='brutto oder netto nicht genannt'),
     z('k_wallbox_install', 'Installation im Einfamilienhaus (gering 500 bis 800, mittel 800 bis 1.500, hoch ab 1.500)', '€', 500, 3000, 'adac_wallbox', G, baustein='wallbox', ref='39:13', hinweis='Standfuß 400 bis 1.000 € falls nötig'),
@@ -112,8 +113,8 @@ WIDERSPRUECHE = [
      'entscheidung': 'Zeilen „nur für Betriebe“ färben die Ampel nicht, sie stehen grau mit dem Hinweis „für Privatgärten bei der Bauaufsicht fragen“.'},
     {'id': 'wi_forum', 'thema': 'Preise aus Foren', 'inhalt': 'Brunnenbohrung 5.000 bis 15.000 € (34:K05) und Kleinkläranlage 8.000 bis 15.000 € (34:K04) stehen nur in einem Forum; der Bericht schreibt „nicht übernehmen“.',
      'entscheidung': 'Nicht übernommen. Die Karte zeigt „Keine Angabe“ mit Grund (R074).'},
-    {'id': 'wi_wp_preis', 'thema': 'Wärmepumpe: Preisspanne', 'inhalt': 'Der Bericht nennt neben 21.099 bis 54.168 € (34:K03) eine weitere, breit streuende Spanne von 13.000 bis 25.000 € (ohne Id).',
-     'entscheidung': 'Nur die Spanne mit Id wird gezeigt; die zweite Zahl ist ohne Id und wird nicht übernommen.'},
+    {'id': 'wi_wp_preis', 'thema': 'Wärmepumpe: Preisspanne', 'inhalt': 'Der Bericht nennt zur Wärmepumpe (34:K03) neben der Zeile mit Id eine weitere, breit streuende Spanne ohne Id.',
+     'entscheidung': 'Seit S4 (02.11.2026) führt die Seite nur einen Wärmepumpen-Wert: er steht in daten/heizung.js (Bericht 59, am Original geprüft). Dieser Baustein verweist darauf; die zweite Zahl wird nicht übernommen.'},
 ]
 
 HINWEISE = [

@@ -20,7 +20,7 @@
   var cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
   var artName = function (a) { return hat('anArt_' + a) ? tr('anArt_' + a) : (hat('gsArt_' + a) ? tr('gsArt_' + a) : a); };
   var ART_KEY = { voll: 'artVoll', balkon: 'artBalkon', wintergarten: 'artWinter', zubehoer: 'artZubehoer' };
-  var STATUS_KEY = { 'geprüft': 'statusGeprueft', 'geprüft (Landesportal)': 'statusPortal', 'prüfen vor Nutzung': 'statusPruefen', 'veraltet': 'statusVeraltet' };
+  var STATUS_KEY = { 'geprüft': 'statusGeprueft', 'geprüft (Landesportal)': 'statusPortal', 'prüfen vor Nutzung': 'statusPruefen', 'veraltet': 'statusVeraltet', 'geprüft (Angebotsauswertung, regional)': 'statusAngebote' };
   /* Namen für Lücken, Annahmen und Fragen aus den Parametern des Kerns (Ids und Zahlen), nur mit vorhandenen Texten */
   var gsName = function (art, n) { return /^Preis\s/i.test(n) ? n.replace(/^Preis\s+(für\s+)?/i, '') : artName(art) + ': ' + n; };
   function lueckeName(p) {
@@ -125,9 +125,12 @@
   function heizHilfe(z) {
     var hd = window.DATEN && window.DATEN.heizung, a = hd && hd.arten && hd.arten[z.id], bt = hd && hd.bio_treppe;
     if (!a) return '';
-    var par = { von: n0(a.von), bis: n0(a.bis) }, wp = z.id === 'waermepumpe';
-    if (!wp && bt) par = { a: bt.stufen[0][1], j: bt.stufen[0][0], b: bt.stufen[bt.stufen.length - 1][1], k: bt.stufen[bt.stufen.length - 1][0] };
-    return '<br><span class="klein mh-hz-stat" data-hz-stat="' + esc(z.id) + '">' + T(wp ? 'mpHzStat_waermepumpe' : 'mpHzStat_gas', par) + '</span> <details class="mh-hz-hilfe" data-hz-hilfe="' + esc(z.id) + '"><summary aria-label="' + T('mpHzHilfeKnopf') + '">?</summary><p class="klein">' + T(wp ? 'mpHzHilfe_waermepumpe' : 'mpHzHilfe_gas', par) + '</p></details>';
+    var par = { von: n0(a.von), bis: n0(a.bis) }, wp = z.id === 'waermepumpe', rw = wp && a.richtwert, extra = '';
+    if (wp) par = { von: n0(a.von), bis: n0(a.bis), mittel: n0(a.mittel), median: n0(a.median), n: a.angebote, z1: a.zeitraum_von, z2: a.zeitraum_bis, stand: a.berichtsstand };
+    if (!wp && bt) par = { a: bt.stufen[0][1], j: bt.stufen[0][0], b: bt.stufen[bt.stufen.length - 1][1], k: bt.stufen[bt.stufen.length - 1][0], ueb: bt.ueberschrift, abruf: datumDe(bt.abruf) };
+    /* S4: der co2online-Durchschnitt steht nur hier im „?“, getrennt beschriftet, nicht in der Spanne und nicht in der Summe */
+    if (rw) extra = '<p class="klein" data-hz-richtwert="' + esc(rw.wert) + '">' + T('mpHzRichtwert', { wert: n0(rw.wert), datum: datumDe(rw.stand) }) + '</p>';
+    return '<br><span class="klein mh-hz-stat" data-hz-stat="' + esc(z.id) + '">' + T(wp ? 'mpHzStat_waermepumpe' : 'mpHzStat_gas', par) + '</span> <details class="mh-hz-hilfe" data-hz-hilfe="' + esc(z.id) + '"><summary aria-label="' + T('mpHzHilfeKnopf') + '">?</summary><p class="klein">' + T(wp ? 'mpHzHilfe_waermepumpe' : 'mpHzHilfe_gas', par) + '</p>' + extra + '</details>';
   }
   function kosten(m) {
     var k = m.kosten, h = '', gruppe = '', fertig = false, ohne = m.luecken.filter(function (l) { return /^k:/.test(l.id); }).length;
