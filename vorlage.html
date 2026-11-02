@@ -1058,16 +1058,18 @@ __PALETTE_CSS__
   .mh-hinweis { border: 2px solid var(--linie2); background: var(--karte2); border-radius: 10px; padding: 8px 12px; margin: 10px 0; }
   @media screen { .mh-etage svg.planzeichnung { max-width: 100%; height: auto !important; } }
   @media (max-width: 640px) { .mh-3d, .mh-dl { grid-template-columns: 1fr; } .mh-tab { min-width: 520px; } }
-  /* S5: Kosten-Tabelle der Mappe am Handy (Bildschirm, nicht Druck): je Zeile Position, darunter Betrag, darunter Quelle(n); kein Seitwärts-Wischen */
+  /* S5/R1: Mappen-Tabellen (Kosten, Raumliste) am Handy (Bildschirm, nicht Druck): je Zeile eine Karte, Spaltenname über dem Wert; kein Seitwärts-Wischen */
   @media screen and (max-width: 600px) {
-    .mh-tab[data-kosten] { min-width: 0; }
-    .mh-tab[data-kosten] thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-    .mh-tab[data-kosten], .mh-tab[data-kosten] tbody, .mh-tab[data-kosten] tr, .mh-tab[data-kosten] th, .mh-tab[data-kosten] td { display: block; }
-    .mh-tab[data-kosten] tr { padding: 6px 0; border-bottom: 1px solid var(--linie); }
-    .mh-tab[data-kosten] th, .mh-tab[data-kosten] td { border: 0; padding: 2px 8px; overflow-wrap: anywhere; }
-    .mh-tab[data-kosten] td.z { text-align: left; white-space: normal; }
-    .mh-tab[data-kosten] td:empty { display: none; }
-    .mh-tab[data-kosten] td[data-l]::before { content: attr(data-l); display: block; font-size: 14px; font-weight: 700; color: var(--leise); }
+    .mh-tab[data-handy] { min-width: 0; }
+    .mh-tab[data-handy] thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .mh-tab[data-handy], .mh-tab[data-handy] tbody, .mh-tab[data-handy] tr, .mh-tab[data-handy] th, .mh-tab[data-handy] td { display: block; }
+    .mh-tab[data-handy] tr { padding: 6px 0; border-bottom: 1px solid var(--linie); }
+    .mh-tab[data-handy] th, .mh-tab[data-handy] td { border: 0; padding: 2px 8px; overflow-wrap: anywhere; }
+    .mh-tab[data-handy] td.z { text-align: left; white-space: normal; }
+    .mh-tab[data-handy] td:empty { display: none; }
+    .mh-tab[data-handy] td[data-l]::before { content: attr(data-l); display: block; font-size: 14px; font-weight: 700; color: var(--leise); }
+    .mh-tab[data-handy] tr[data-raum] { display: flex; flex-direction: column; }
+    .mh-tab[data-handy] td.mh-name { order: -1; font-weight: 700; }
   }
   @media print {
     body.g-mappe-offen { background: #ffffff !important; }

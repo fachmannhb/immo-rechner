@@ -72,18 +72,18 @@
     return sect('3d', true, 'mp3d', '<div class="mh-3d">' + drei.bilder.map(function (b) { return '<figure data-richtung="' + b.richtung + '"><img src="' + b.url + '" alt="' + T('mpRi_' + b.richtung) + '"><figcaption>' + T('mpRi_' + b.richtung) + '</figcaption></figure>'; }).join('') + '</div>');
   }
   function raumliste(m) {
-    var r = m.raeume, f = function (x) { return '<td class="z">' + n1(x) + ' m²</td>'; };
+    var r = m.raeume, f = function (x, l) { return '<td class="z" data-l="' + T(l) + '">' + n1(x) + ' m²</td>'; }, fg = function (x) { return f(x, 'druckGrund'); }, fw = function (x) { return f(x, 'druckWohn'); };
     var mehr = r.etagen.filter(function (e) { return e.raeume > 0; }).length > 1;   /* Teilsummen nur, wenn mehr als eine Etage Räume hat */
     var etSumme = function (i) {
       var e = r.etagen[i];
-      return mehr && e && e.raeume > 0 ? '<tr class="etage-summe" data-etage-summe="' + i + '" data-grund="' + e.grund + '" data-wohn="' + e.wohn + '"><th colspan="3">' + T('mpEtageSumme', { etage: e.name }) + '</th>' + f(e.grund) + f(e.wohn) + '</tr>' : '';
+      return mehr && e && e.raeume > 0 ? '<tr class="etage-summe" data-etage-summe="' + i + '" data-grund="' + e.grund + '" data-wohn="' + e.wohn + '"><th colspan="3">' + T('mpEtageSumme', { etage: e.name }) + '</th>' + fg(e.grund) + fw(e.wohn) + '</tr>' : '';
     };
     var h = r.zeilen.map(function (z, i) {
       var nxt = r.zeilen[i + 1], zu = !nxt || nxt.etageIndex !== z.etageIndex;
-      return '<tr data-raum="' + esc(z.id) + '" data-wohn="' + z.wohn + '"><td>' + esc(z.etage) + '</td><td>' + esc(z.name) + '</td><td>' + (z.nutzung && hat('nutz' + cap(z.nutzung)) ? T('nutz' + cap(z.nutzung)) : '–') +
-        (z.art !== 'voll' ? ' (' + T(ART_KEY[z.art] || 'artVoll') + ')' : '') + '</td>' + f(z.flaeche) + f(z.wohn) + '</tr>' + (zu ? etSumme(z.etageIndex) : '');
-    }).join('') + '<tr class="summe" data-summe="raeume" data-grund="' + r.grund + '" data-wohn="' + r.wohn + '"><th colspan="3">' + T('druckSumme') + '</th>' + f(r.grund) + f(r.wohn) + '</tr>';
-    return sect('raumliste', true, 'mpRaumliste', tab('<th>' + T('mpEtage') + '</th><th>' + T('druckRaum') + '</th><th>' + T('mpNutzung') + '</th><th class="z">' + T('druckGrund') + '</th><th class="z">' + T('druckWohn') + '</th>', h));
+      return '<tr data-raum="' + esc(z.id) + '" data-wohn="' + z.wohn + '"><td data-l="' + T('mpEtage') + '">' + esc(z.etage) + '</td><td class="mh-name">' + esc(z.name) + '</td><td data-l="' + T('mpNutzung') + '">' + (z.nutzung && hat('nutz' + cap(z.nutzung)) ? T('nutz' + cap(z.nutzung)) : '–') +
+        (z.art !== 'voll' ? ' (' + T(ART_KEY[z.art] || 'artVoll') + ')' : '') + '</td>' + fg(z.flaeche) + fw(z.wohn) + '</tr>' + (zu ? etSumme(z.etageIndex) : '');
+    }).join('') + '<tr class="summe" data-summe="raeume" data-grund="' + r.grund + '" data-wohn="' + r.wohn + '"><th colspan="3">' + T('druckSumme') + '</th>' + fg(r.grund) + fw(r.wohn) + '</tr>';
+    return sect('raumliste', true, 'mpRaumliste', tab('<th>' + T('mpEtage') + '</th><th>' + T('druckRaum') + '</th><th>' + T('mpNutzung') + '</th><th class="z">' + T('druckGrund') + '</th><th class="z">' + T('druckWohn') + '</th>', h, ' data-handy="1"'));
   }
   function SK_holz(id) { var x = window.SAUNA_KERN && window.SAUNA_KERN.holzInfo(id); return x ? x.name : id; }
   function ausbau(m) {
@@ -147,7 +147,7 @@
         (leer ? no : (aus ? '<span class="mh-wert">' : '') + esc(spanne(z.von, z.bis, z.einheit)) + (aus ? '</span>' : '') + (z.luecke ? '<span class="klein">+ ' + no + '</span>' : '')) + '</td><td data-l="' + T('regQuelle') + '">' + (leer ? '' : belege(z.belege)) + '</td></tr>';
     });
     if (!fertig) h += summe();
-    return sect('kosten', true, 'mpKosten', heizWahl(m) + tab('<th>' + T('mpPosition') + '</th><th class="z">' + T('maSpanne') + '</th><th>' + T('regQuelle') + '</th>', h, ' data-kosten="1"') +
+    return sect('kosten', true, 'mpKosten', heizWahl(m) + tab('<th>' + T('mpPosition') + '</th><th class="z">' + T('maSpanne') + '</th><th>' + T('regQuelle') + '</th>', h, ' data-kosten="1" data-handy="1"') +
       (k.unsicherInSumme && k.unsicherInSumme.length ? '<p class="mh-hinweis" data-summe-unsicher="' + k.unsicherInSumme.length + '"><b>' + T('mpSummeUnsicher') + '</b></p>' : '') + (ohne ? '<p class="klein" data-ohne-preis="' + ohne + '">' + T('mpOhnePreis', { n: ohne }) + '</p>' : '') + heizwaerme(k.heiz) + foerderung(k.foerderung) + '<p class="mh-hinweis" data-ohne-doppelung="1">' + schild() + ' ' + T('mpUeberschneid') + '</p>');
   }
   var r100 = function (x) { return Math.round(x / 100) * 100; };
