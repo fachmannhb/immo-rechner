@@ -1,5 +1,5 @@
 /* Oberfläche „Heizarten im Vergleich“ (H1, 02.11.2026): Karte #hv-karte im Bereich Umbau, direkt unter dem Heizungs-Check (#hz-karte). Rechnung: heizung_kern.js, Daten: daten/heizung.js (vergleich), Texte: daten/texte_heizung.js.
-   Das Haus liefert die Heizwärme (GRUNDRISS_HUELLE.waermeBedarf); ohne Haus rechnet die Karte mit dem Beispielhaus und sagt das sichtbar. Die Annahmen sind Bedienzustand (nicht im Plan, nicht gespeichert).
+   Das Haus liefert die Heizwärme (GRUNDRISS_HUELLE.waermeBedarf); ohne Haus rechnet die Karte mit dem Beispielhaus und sagt das sichtbar. Die Annahmen sind Bedienzustand (nicht im Plan), seit H1b im Browser-Speicher „immo-heizvergleich“.
    In den Plan geschrieben wird nur die Wahl „Für die Mappe übernehmen“ (plan.heizanlage.art). Keine Empfehlung, kein Sieger (R078).
    Bei der Auslieferung werden Kommentare und Einrückung entfernt (bau.py, SCHLANK). */
 (function () {
@@ -55,12 +55,28 @@
     return '<div class="ab-meldung" role="status" data-hv-haus="nein"><p>' + T('hvBeispiel', Object.assign({ grund: tr(window.TEXTE[g] ? g : 'hvG_x') }, p)) + '</p><div class="knopfreihe"><button type="button" class="knopf mittel" data-hv="zeichnen" id="hv-zeichnen">' + sym('i-grundriss') + ' ' + T('hvZeichnen') + '</button></div></div>';
   }
   function werkzeugHtml() {
-    return '<div class="knopfreihe hv-werk"><button type="button" class="knopf mittel" data-hv="check" id="hv-check">' + sym('i-paragraf') + ' ' + T('hvCheck') + '</button>' +
+    return '<div class="knopfreihe hv-werk"><button type="button" class="knopf mittel zweit" data-hv="check" id="hv-check">' + sym('i-paragraf') + ' ' + T('hvCheck') + '</button>' +
       '<button type="button" class="knopf mittel zweit' + (hinweis ? ' gs-puls' : '') + '" data-hv="sort" data-fk="t-sort" aria-pressed="' + ST.sort + '">' + sym('i-pfeil-ab') + ' ' + T(ST.sort ? 'hvSortAus' : 'hvSort') + '</button>' +
       '<button type="button" class="knopf mittel zweit" data-hv="foerd" data-fk="t-foerd" aria-pressed="' + ST.foerd + '">' + sym(ST.foerd ? 'i-an-ok' : 'i-an-stopp') + ' ' + T('hvFoerd') + ': ' + T(ST.foerd ? 'hvAn' : 'hvAus') + '</button>' + hk('hv-h-foerd') + '</div>' +
       hp('hv-h-foerd', T('hvHilfeFoerd')) + '<p class="klein" data-hv-foerdkurz="1">' + T('hvFoerdKurz') + '</p><p class="klein" data-hv-sorthinweis="1">' + schild() + ' ' + T('hvSortHinweis') + '</p>';
   }
   var RW = [0, 12000, 100], RH = [2000, 40000, 500];
+  /* H1b: Annahmen bleiben erhalten (R020), eigener Speicher wie beim Heizungs-Check. Ungültiges oder beschädigtes fällt still auf die Vorgabe zurück; „Zurück auf Vorgaben“ löscht den Speicher. */
+  var SPEICHER = 'immo-heizvergleich';
+  function zahlIn(x, r) { return typeof x === 'number' && isFinite(x) && x >= r[0] && x <= r[1]; }
+  function laden() {
+    var s = neuST(), o = null;
+    try { o = JSON.parse(localStorage.getItem(SPEICHER)); } catch (e4) { o = null; }
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return s;
+    ['sort', 'foerd', 'wptarif'].forEach(function (k) { if (typeof o[k] === 'boolean') s[k] = o[k]; });
+    if (zahlIn(o.heiz, RH)) s.heiz = o.heiz;
+    if (zahlIn(o.ww, RW)) s.ww = o.ww;
+    ['preis', 'nutz'].forEach(function (g) { if (o[g] && typeof o[g] === 'object') Object.keys(REG[g]).forEach(function (k) { if (zahlIn(o[g][k], REG[g][k])) s[g][k] = o[g][k]; }); });
+    return s;
+  }
+  var merkt = true;
+  function speichern() { try { localStorage.setItem(SPEICHER, JSON.stringify(ST)); merkt = true; } catch (e5) { merkt = false; /* nur das Merken fällt weg, die Rechnung geht weiter; der Hinweis unter den Annahmen sagt es */ } }
+  ST = laden();
   function dez(r) { return r[2] >= 1 ? 0 : r[2] >= 0.1 ? 1 : 2; }
   function reg(pfad, lab, a, r, extra) {
     var p = pfad.split('.'), id = 'hv-' + p.join('-'), w = p.length === 2 ? ST[p[0]][p[1]] : ST[pfad];
@@ -75,7 +91,7 @@
     Object.keys(REG.preis).forEach(function (k) { s += reg('preis.' + k, 'hvP_' + k, A.preis[k], REG.preis[k], k === 'oel' ? '<button type="button" class="knopf mittel zweit hv-alt" data-hv="oelalt">' + T('hvOelAlt') + '</button>' : ''); });
     s += '<div class="es-feld hv-reg"><button type="button" class="es-var" data-hv="wptarif" data-fk="t-wp" aria-pressed="' + ST.wptarif + '"><span class="es-var-kopf">' + sym(ST.wptarif ? 'i-an-ok' : 'i-an-frage') + '<b>' + T('hvWpTarif') + ': ' + T(ST.wptarif ? 'hvAn' : 'hvAus') + '</b></span></button></div>';
     Object.keys(REG.nutz).forEach(function (k) { s += reg('nutz.' + k, 'hvN_' + k, A.nutz[k], REG.nutz[k]); });
-    return s + '</div><div class="knopfreihe"><button type="button" class="knopf mittel zweit" data-hv="reset">' + sym('i-dreh') + ' ' + T('hvAnnReset') + '</button></div><p class="klein">' + T('hvAnnGemerkt') + '</p></details>';
+    return s + '</div><div class="knopfreihe"><button type="button" class="knopf mittel zweit" data-hv="reset">' + sym('i-dreh') + ' ' + T('hvAnnReset') + '</button></div><p class="klein" data-hv-gemerkt="' + (merkt ? 'ja' : 'nein') + '">' + T(merkt ? 'hvAnnGemerkt' : 'hvAnnNichtGemerkt') + '</p></details>';
   }
   function balken(klasse, von, bis, max, label) {
     var a = Math.min(100, Math.max(0, von / max * 100)), b = Math.min(100, Math.max(a, bis / max * 100));
@@ -171,6 +187,7 @@
   function setzeWert(pfad, x) {
     var p = pfad.split('.');
     if (p.length === 2) ST[p[0]][p[1]] = x; else ST[p[0]] = x;
+    speichern();
   }
   function bereich(pfad) { var p = pfad.split('.'); return p.length === 2 ? REG[p[0]][p[1]] : pfad === 'ww' ? RW : RH; }
   function bei(ev) {
@@ -212,9 +229,9 @@
     if (a === 'hilfe') { var p = byId(w), auf = t.getAttribute('aria-expanded') !== 'true'; t.setAttribute('aria-expanded', auf); hilfe[w] = auf; if (p) p.hidden = !auf; return; }
     if (a === 'check') { zuCheck(); return; }
     if (a === 'zeichnen') { var tg = byId('tab-grundriss'); if (tg) tg.click(); return; }
-    if (a === 'sort' || a === 'foerd' || a === 'wptarif') { ST[a] = !ST[a]; jetzt(); return; }
-    if (a === 'reset') { ST = neuST(); jetzt(); return; }
-    if (a === 'oelalt') { ST.preis.oel = V.annahmen.oel_alt.w; jetzt(); var ob = wurzel.querySelector('[data-hv-z="preis.oel"]'); if (ob) ob.focus({ preventScroll: true }); return; }
+    if (a === 'sort' || a === 'foerd' || a === 'wptarif') { ST[a] = !ST[a]; speichern(); jetzt(); return; }
+    if (a === 'reset') { ST = neuST(); try { localStorage.removeItem(SPEICHER); merkt = true; } catch (e6) { merkt = false; } jetzt(); return; }
+    if (a === 'oelalt') { ST.preis.oel = V.annahmen.oel_alt.w; speichern(); jetzt(); var ob = wurzel.querySelector('[data-hv-z="preis.oel"]'); if (ob) ob.focus({ preventScroll: true }); return; }
     if (a === 'mappe') {
       alt = plan.heizanlage && plan.heizanlage.art;
       if (alt === w) return;

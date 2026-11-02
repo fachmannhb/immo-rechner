@@ -40,8 +40,10 @@
     { id: 'wanddaemmung', zaehlt: 'daemmung/wand', deckt: ['material/daemmung'], sicher: false },
     { id: 'fenster', zaehlt: 'daemmung/fenster', deckt: ['material/fenster', 'material/verglasung'], sicher: false },
     /* S2: die Heizanlage (Wärmepumpe) zählt einmal; die Preiszeile desselben Geräts am Baustein „Wärmepumpe (außen)“ im Grundstück bleibt sichtbar, zählt nicht („grundstueck:“ = Zeilen der Grundstücks-Bausteine, Endung der Zeilen-Id). Heizkörper und Fußbodenheizung bleiben im Innenausbau, Heizwärme ist nur eine Anzeige. */
-    { id: 'waermepumpe', zaehlt: 'heizanlage/waermepumpe', deckt: ['grundstueck:k_wp'], sicher: true }
+    /* H1b: „auch“ = weitere zählende Zeilen derselben Leistung: jede Heizart mit Wärmepumpe (Erdwärme, Hybrid) deckt den Baustein ebenso; Gas, Öl, Pellets, Holz, Fernwärme, Infrarot nicht */
+    { id: 'waermepumpe', zaehlt: 'heizanlage/waermepumpe', auch: ['heizanlage/sole', 'heizanlage/hybrid'], deckt: ['grundstueck:k_wp'], sicher: true }
   ];
+  function zaehlKeys(u) { return [u.zaehlt].concat(u.auch || []); }
   var SUMMEN_GRUPPEN = { innenausbau: 1, material: 1, daemmung: 1, lueftung: 1, anbau: 1, heizanlage: 1 };
   var HEIZ_ARTEN = ['waermepumpe', 'gas', 'offen'];
   function planHeiz(plan) {
@@ -80,11 +82,13 @@
       if (r.gruppe === 'daemmung') (r.teile || []).forEach(function (t) { idx['daemmung/' + t.bauteil] = t; });
     });
     ZUORDNUNG.forEach(function (u) {
-      if (!preisig(idx[u.zaehlt])) return;
-      var da = u.deckt.filter(function (k) { return idx[k] && !idx[k].teile; });
-      if (!da.length) return;
-      da.forEach(function (k) { idx[k].inSumme = false; idx[k].enthaltenIn = u.zaehlt; idx[k].sicher = u.sicher; weg['k:' + k.replace('/', ':')] = 1; });
-      ue.push({ id: u.id, zaehlt: u.zaehlt, deckt: da, sicher: u.sicher });
+      zaehlKeys(u).forEach(function (zk) {
+        if (!preisig(idx[zk])) return;
+        var da = u.deckt.filter(function (k) { return idx[k] && !idx[k].teile; });
+        if (!da.length) return;
+        da.forEach(function (k) { idx[k].inSumme = false; idx[k].enthaltenIn = zk; idx[k].sicher = u.sicher; weg['k:' + k.replace('/', ':')] = 1; });
+        ue.push({ id: u.id, zaehlt: zk, deckt: da, sicher: u.sicher });
+      });
     });
     z.forEach(function (r) {
       if (!SUMMEN_GRUPPEN[r.gruppe]) return;
@@ -201,12 +205,12 @@
     });
     /* S2: Zeilen der Grundstücks-Bausteine, die eine zählende Zeile (z. B. Heizanlage/Wärmepumpe) schon abdeckt: sichtbar mit Vermerk, nicht in der Summe */
     ZUORDNUNG.forEach(function (u) {
-      var zr = kb.zeilen.filter(function (r) { return r.gruppe + '/' + r.id === u.zaehlt; })[0];
+      var zr = kb.zeilen.filter(function (r) { return zaehlKeys(u).indexOf(r.gruppe + '/' + r.id) >= 0; })[0];
       if (!zr || !preisig(zr)) return;
       u.deckt.forEach(function (d) {
         if (d.indexOf('grundstueck:') !== 0) return;
         var suf = d.slice(11);
-        kb.zeilen.forEach(function (r) { if (r.gruppe === 'grundstueck' && r.id.slice(-suf.length) === suf) { r.inSumme = false; r.enthaltenIn = u.zaehlt; r.sicher = u.sicher; } });
+        kb.zeilen.forEach(function (r) { if (r.gruppe === 'grundstueck' && r.id.slice(-suf.length) === suf) { r.inSumme = false; r.enthaltenIn = zr.gruppe + '/' + zr.id; r.sicher = u.sicher; } });
       });
     });
     /* Regeln des Landes: RK.pruefe, nur gelbe und rote Zeilen */
