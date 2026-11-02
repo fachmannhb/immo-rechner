@@ -46,19 +46,21 @@
   var HEIZ_ARTEN = ['waermepumpe', 'gas', 'offen'];
   function planHeiz(plan) {
     var h = plan && plan.heizanlage && typeof plan.heizanlage === 'object' && !Array.isArray(plan.heizanlage) ? plan.heizanlage : null;
-    return h ? { vorhanden: true, art: h.art === undefined ? 'offen' : h.art, bekannt: h.art === undefined || HEIZ_ARTEN.indexOf(h.art) >= 0 } : { vorhanden: false, art: '', bekannt: true };
+    return h ? { vorhanden: true, art: h.art === undefined ? 'offen' : h.art, bekannt: h.art === undefined || HEIZ_ARTEN.indexOf(h.art) >= 0 || !!heizDaten(h.art) } : { vorhanden: false, art: '', bekannt: true };
   }
   /* S3/S4: die Anschaffungswerte der Heizanlage stehen an EINER Stelle: daten/heizung.js (Wärmepumpe: Bericht 59, Verbraucherzentrale RLP; Gas: Bericht 52, H-22), erzeugt von erzeuger/daten_heizung.py.
      Die Zeile k_wp am Baustein im Grundstück hat keine eigene Zahl mehr: sie verweist auf denselben Wert (grundstueck_kern.datenZu, Feld „aus“). */
   function heizDaten(art) {
     var d = root.DATEN && root.DATEN.heizung, a = d && d.arten && d.arten[art];
-    return a && ok(a.von) && ok(a.bis) ? a : null;
+    if (!(a && ok(a.von) && ok(a.bis))) return null;
+    var q = a.q && d.vergleich && d.vergleich.quellen && d.vergleich.quellen[a.q];   /* H1: die neuen Heizarten tragen nur die Quellen-Id, Titel, Adresse und Abruf stehen einmal in vergleich.quellen */
+    return q ? Object.assign({}, a, { quelle: q.t, url: q.u, abruf: q.a }) : a;
   }
   function heizZeile(plan, z, lu, fe) {
     var h = planHeiz(plan), a;
     if (!h.vorhanden) return;
     if (!h.bekannt) { fe.push({ teil: 'heizanlage', grund: 'art ' + h.art }); return; }
-    a = h.art === 'waermepumpe' || h.art === 'gas' ? heizDaten(h.art) : null;
+    a = heizDaten(h.art);   /* H1: jede Heizart aus daten/heizung.js (Anschaffung von/bis); offen und unbekannt haben keine Daten */
     if (a) {
       /* unsicher = die Zahl steckt mit einem Vorbehalt in der Summe (Suchtreffer oder veraltet): die Mappe markiert die Summe dann mit „prüfen vor Nutzung“ */
       /* S4: Status kommt aus den Daten (Wärmepumpe: „geprüft (Angebotsauswertung, regional)“, Gas: „veraltet“); „unsicher“ steht ebenfalls in den Daten */

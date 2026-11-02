@@ -119,7 +119,9 @@
       ['waermepumpe', 'gas', 'offen'].map(function (x) {
         return '<button type="button" class="es-var mh-heiz-k" data-hz="' + x + '" aria-pressed="' + (art === x) + '"><span class="es-var-kopf"><svg class="sym" aria-hidden="true" focusable="false"><use href="#' + HZ_ICON[x] + '"/></svg><b>' + T('mpHz_' + x) + '</b></span></button>';
       }).join('') + (a ? '<button type="button" class="es-var mh-heiz-k" data-hz="weg"><span class="es-var-kopf"><b>' + T('mpHzWeg') + '</b></span></button>' : '') + '</div>' +
-      '<p class="klein" role="status" data-hz-status="1">' + (hzMeldung ? esc(hzMeldung) : '') + '</p></div>';
+      (a && a.bekannt && ['waermepumpe', 'gas', 'offen'].indexOf(art) < 0 ? '<p class="klein" data-hz-andere="' + esc(art) + '"><b>' + T('mpHzAndere', { art: tr('mpHz_' + art) }) + '</b></p>' : '') +
+      '<p class="klein" role="status" data-hz-status="1">' + (hzMeldung ? esc(hzMeldung) : '') + '</p>' +
+      '<p class="mh-kein-druck"><button type="button" class="knopf zweit mittel" data-hz-karte="1">' + T('hvVergleichen') + '</button></p></div>';
   }
   /* S3: Zeile Heizanlage mit Preis: kurzer Status in Alltagsworten und ein "?" mit der Begründung (Werte aus daten/heizung.js, Bericht 52) */
   function heizHilfe(z) {
@@ -127,10 +129,12 @@
     if (!a) return '';
     var par = { von: n0(a.von), bis: n0(a.bis) }, wp = z.id === 'waermepumpe', rw = wp && a.richtwert, extra = '';
     if (wp) par = { von: n0(a.von), bis: n0(a.bis), mittel: n0(a.mittel), median: n0(a.median), n: a.angebote, z1: a.zeitraum_von, z2: a.zeitraum_bis, stand: a.berichtsstand };
-    if (!wp && bt) par = { a: bt.stufen[0][1], j: bt.stufen[0][0], b: bt.stufen[bt.stufen.length - 1][1], k: bt.stufen[bt.stufen.length - 1][0], ueb: bt.ueberschrift, abruf: datumDe(bt.abruf) };
+    var sfx = wp ? 'waermepumpe' : z.id === 'gas' ? 'gas' : 'x';   /* H1: alle anderen Heizarten bekommen den allgemeinen Text (Status, Basis, Hinweis aus daten/heizung.js), nicht den Gas-Text mit der Bio-Treppe */
+    if (sfx === 'x') par = { von: n0(a.von), bis: n0(a.bis), basis: a.basis || '', hinweis: a.hinweis || '', status: tr(STATUS_KEY[a.status === 'veraltet, nur Größenordnung' ? 'veraltet' : a.status] || 'statusPruefen') };
+    if (sfx === 'gas' && bt) par = { a: bt.stufen[0][1], j: bt.stufen[0][0], b: bt.stufen[bt.stufen.length - 1][1], k: bt.stufen[bt.stufen.length - 1][0], ueb: bt.ueberschrift, abruf: datumDe(bt.abruf) };
     /* S4: der co2online-Durchschnitt steht nur hier im „?“, getrennt beschriftet, nicht in der Spanne und nicht in der Summe */
     if (rw) extra = '<p class="klein" data-hz-richtwert="' + esc(rw.wert) + '">' + T('mpHzRichtwert', { wert: n0(rw.wert), datum: datumDe(rw.stand) }) + '</p>';
-    return '<br><span class="klein mh-hz-stat" data-hz-stat="' + esc(z.id) + '">' + T(wp ? 'mpHzStat_waermepumpe' : 'mpHzStat_gas', par) + '</span> <details class="mh-hz-hilfe" data-hz-hilfe="' + esc(z.id) + '"><summary aria-label="' + T('mpHzHilfeKnopf') + '">?</summary><p class="klein">' + T(wp ? 'mpHzHilfe_waermepumpe' : 'mpHzHilfe_gas', par) + '</p>' + extra + '</details>';
+    return '<br><span class="klein mh-hz-stat" data-hz-stat="' + esc(z.id) + '">' + T('mpHzStat_' + sfx, par) + '</span> <details class="mh-hz-hilfe" data-hz-hilfe="' + esc(z.id) + '"><summary aria-label="' + T('mpHzHilfeKnopf') + '">?</summary><p class="klein">' + T('mpHzHilfe_' + sfx, par) + '</p>' + extra + '</details>';
   }
   function kosten(m) {
     var k = m.kosten, h = '', gruppe = '', fertig = false, ohne = m.luecken.filter(function (l) { return /^k:/.test(l.id); }).length;
@@ -219,6 +223,8 @@
     oeffnen();
   });
   inhalt.addEventListener('click', function (ev) {   /* S2: Heizanlage wählen oder entfernen, danach neu rechnen und zeichnen; der Fokus bleibt auf dem Knopf */
+    var lk = ev.target.closest ? ev.target.closest('[data-hz-karte]') : null;
+    if (lk) { if (window.GRUNDRISS_HEIZUNG) window.GRUNDRISS_HEIZUNG.oeffnen(); return; }   /* H1: Link zur Karte Heizarten im Vergleich (schließt die Mappe zuerst) */
     var b = ev.target.closest ? ev.target.closest('[data-hz]') : null;
     if (!b || !letzte) return;
     var w = b.getAttribute('data-hz'), p = G.plan();

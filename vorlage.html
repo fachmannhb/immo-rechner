@@ -1565,6 +1565,41 @@ __PALETTE_CSS__
   @media (max-width: 900px) { .sa-eins { grid-template-columns: minmax(0, 1fr); } }
   @media (max-width: 760px) { .au-zeile { grid-template-columns: minmax(0, 1fr) auto; } .au-name { grid-column: 1 / -1; } .au-spur { grid-column: 1; } }
   @media (max-width: 760px) { .an-reihe { grid-template-columns: minmax(0, 1fr); } }
+  /* H1: Heizarten im Vergleich (Farben nur aus der Palette: Kosten c1, CO2 c2, Aufwand c3) */
+  .hv-zurueck-reihe { margin: 0; padding: 0 24px 22px; }
+  .hv-zurueck-reihe .knopf svg.sym, .hv-werk .knopf svg.sym { width: 1.3em; height: 1.3em; flex: none; }
+  .hv-grund { display: flex; align-items: center; gap: 10px; margin: 6px 0 10px; font-weight: 600; }
+  .hv-grund svg.sym { width: 1.6em; height: 1.6em; flex: none; color: var(--akzent-text); }
+  .hv-werk { align-items: center; margin: 10px 0 6px; }
+  .hv-werk .knopf[aria-pressed="true"] { background: var(--akzent-flaeche); color: var(--akzent-text); }
+  .hv-regeln { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px 20px; margin: 10px 0; }
+  .hv-reg { gap: 4px; align-content: start; }
+  .hv-reg-z { display: grid; grid-template-columns: minmax(0, 1fr) 6.5rem; gap: 10px; align-items: center; }
+  .hv-reg-z input[type="range"] { accent-color: var(--c1); min-height: 44px; }
+  .hv-reg-z input[type="text"] { min-height: 44px; text-align: right; }
+  .hv-alt { align-self: flex-start; }
+  .hv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; margin: 14px 0; }
+  .hv-k { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 14px; border: 2px solid var(--linie); border-radius: 16px; background: var(--karte); overflow-wrap: anywhere; }
+  .hv-k-kopf { display: flex; align-items: center; gap: 10px; }
+  .hv-k-kopf svg.sym { width: 2.4em; height: 2.4em; flex: none; color: var(--akzent-text); }
+  .hv-name { margin: 0; font: 700 1.2rem/1.2 var(--display); }
+  .hv-zeile { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; margin-top: 6px; }
+  .hv-zeile b { font-variant-numeric: tabular-nums; }
+  .hv-bal { height: 14px; border: 1px solid var(--linie2); }
+  .es-b.hv-hell.c1 { background: repeating-linear-gradient(45deg, var(--c1) 0 3px, transparent 3px 6px); }
+  .es-b.hv-hell.c2 { background: repeating-linear-gradient(45deg, var(--c2) 0 3px, transparent 3px 6px); }
+  .hv-mappe { margin-top: 8px; min-height: 48px; }
+  .hv-mappe .es-var-kopf svg.sym { width: 1.4em; height: 1.4em; }
+  .hv-det { margin-top: 6px; border-top: 1px solid var(--linie); padding-top: 4px; }
+  .hv-ul, .hv-erl { margin: 4px 0 8px; padding-left: 20px; }
+  .hv-erl li, .hv-ul li { margin: 6px 0; }
+  .hv-bio { margin-top: 6px; padding: 8px 10px; border-radius: 12px; background: var(--info-fl); border-left: 5px solid var(--info); font-size: 16px; }
+  .hv-stufen { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .hv-stufe { padding: 0 10px; border-radius: 999px; border: 1.5px solid var(--info); font-weight: 700; }
+  .hv-platz { margin: 14px 0; padding: 12px 16px; border: 2px dashed var(--leise); border-radius: 14px; }
+  .hv-platz h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font: 700 1.1rem var(--display); }
+  .hv-platz svg.sym { width: 1.3em; height: 1.3em; color: var(--akzent-text); }
+  @media (max-width: 560px) { .hv-reg-z { grid-template-columns: minmax(0, 1fr) 5.5rem; } .hv-zurueck-reihe { padding: 0 16px 20px; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -2454,7 +2489,20 @@ __PALETTE_CSS__
       <ul class="pf-liste" id="hz-liste"></ul>
       <p class="klein" id="hz-fuss"></p>
     </div>
+    <p class="knopfreihe hv-zurueck-reihe"><button type="button" class="knopf mittel zweit" id="hv-zurueck"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-waage"/></svg><span data-t="hvVergleichen">Heizarten vergleichen</span></button></p>
   </details>
+
+  <!-- Auftrag H1: Heizarten im Vergleich (Kosten über 20 Jahre, CO2, Aufwand), direkt unter dem Heizungs-Check -->
+  <div class="karte g-sauna" id="hv-karte">
+    <details id="hv-details">
+      <summary class="es-karte-summary" id="hv-summary"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-flamme"/></svg><span class="es-karte-frage" data-t="hvTitel">Heizung: Heizarten im Vergleich</span><b class="es-karte-kopf" data-t="hvKopf">9 Heizarten: Kosten, CO₂, Aufwand</b><span class="es-karte-auf" data-t="esAufklappen">Ansehen</span></summary>
+      <div class="es-karte-koerper">
+        <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="hvKeine">Planungshilfe, keine Beratung und keine Empfehlung.</span></p>
+        <div id="hv-inhalt"></div>
+      </div>
+    </details>
+    <p class="fehler" id="hv-fehler" role="alert" hidden></p>
+  </div>
 
   <ol class="schritte" id="u-schritte" aria-label="Schritte beim Umbau">
     <li><button type="button" data-schritt="1" aria-current="step"><b>1</b>Bauteile</button></li>
@@ -3883,6 +3931,7 @@ __PALETTE_CSS__
 <script src="daten/texte_sauna.js"></script>
 <script src="daten/texte_kleinhaus.js"></script>
 <script src="daten/texte_mappe.js"></script>
+<script src="daten/texte_heizung.js"></script>
 <script src="sprache.js"></script>
 <script src="grundriss_geo.js"></script>
 <script src="grundriss_dach.js"></script>
@@ -3893,6 +3942,7 @@ __PALETTE_CSS__
 <script src="anbau_kern.js"></script>
 <script src="grundstueck_kern.js"></script>
 <script src="sauna_kern.js"></script>
+<script src="heizung_kern.js"></script>
 <script src="kleinhaus_kern.js"></script>
 <script src="autarkie_kern.js"></script>
 <script src="mappe_kern.js"></script>
@@ -3909,6 +3959,7 @@ __PALETTE_CSS__
 <script src="grundriss_anbau.js"></script>
 <script src="grundriss_grundstueck.js"></script>
 <script src="grundriss_sauna.js"></script>
+<script src="grundriss_heizung.js"></script>
 <script src="grundriss_kleinhaus.js"></script>
 <script src="grundriss_mappe.js"></script>
 <script src="karte3d.js"></script>

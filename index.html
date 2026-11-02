@@ -1573,6 +1573,41 @@
   @media (max-width: 900px) { .sa-eins { grid-template-columns: minmax(0, 1fr); } }
   @media (max-width: 760px) { .au-zeile { grid-template-columns: minmax(0, 1fr) auto; } .au-name { grid-column: 1 / -1; } .au-spur { grid-column: 1; } }
   @media (max-width: 760px) { .an-reihe { grid-template-columns: minmax(0, 1fr); } }
+  /* H1: Heizarten im Vergleich (Farben nur aus der Palette: Kosten c1, CO2 c2, Aufwand c3) */
+  .hv-zurueck-reihe { margin: 0; padding: 0 24px 22px; }
+  .hv-zurueck-reihe .knopf svg.sym, .hv-werk .knopf svg.sym { width: 1.3em; height: 1.3em; flex: none; }
+  .hv-grund { display: flex; align-items: center; gap: 10px; margin: 6px 0 10px; font-weight: 600; }
+  .hv-grund svg.sym { width: 1.6em; height: 1.6em; flex: none; color: var(--akzent-text); }
+  .hv-werk { align-items: center; margin: 10px 0 6px; }
+  .hv-werk .knopf[aria-pressed="true"] { background: var(--akzent-flaeche); color: var(--akzent-text); }
+  .hv-regeln { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px 20px; margin: 10px 0; }
+  .hv-reg { gap: 4px; align-content: start; }
+  .hv-reg-z { display: grid; grid-template-columns: minmax(0, 1fr) 6.5rem; gap: 10px; align-items: center; }
+  .hv-reg-z input[type="range"] { accent-color: var(--c1); min-height: 44px; }
+  .hv-reg-z input[type="text"] { min-height: 44px; text-align: right; }
+  .hv-alt { align-self: flex-start; }
+  .hv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; margin: 14px 0; }
+  .hv-k { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 14px; border: 2px solid var(--linie); border-radius: 16px; background: var(--karte); overflow-wrap: anywhere; }
+  .hv-k-kopf { display: flex; align-items: center; gap: 10px; }
+  .hv-k-kopf svg.sym { width: 2.4em; height: 2.4em; flex: none; color: var(--akzent-text); }
+  .hv-name { margin: 0; font: 700 1.2rem/1.2 var(--display); }
+  .hv-zeile { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; margin-top: 6px; }
+  .hv-zeile b { font-variant-numeric: tabular-nums; }
+  .hv-bal { height: 14px; border: 1px solid var(--linie2); }
+  .es-b.hv-hell.c1 { background: repeating-linear-gradient(45deg, var(--c1) 0 3px, transparent 3px 6px); }
+  .es-b.hv-hell.c2 { background: repeating-linear-gradient(45deg, var(--c2) 0 3px, transparent 3px 6px); }
+  .hv-mappe { margin-top: 8px; min-height: 48px; }
+  .hv-mappe .es-var-kopf svg.sym { width: 1.4em; height: 1.4em; }
+  .hv-det { margin-top: 6px; border-top: 1px solid var(--linie); padding-top: 4px; }
+  .hv-ul, .hv-erl { margin: 4px 0 8px; padding-left: 20px; }
+  .hv-erl li, .hv-ul li { margin: 6px 0; }
+  .hv-bio { margin-top: 6px; padding: 8px 10px; border-radius: 12px; background: var(--info-fl); border-left: 5px solid var(--info); font-size: 16px; }
+  .hv-stufen { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .hv-stufe { padding: 0 10px; border-radius: 999px; border: 1.5px solid var(--info); font-weight: 700; }
+  .hv-platz { margin: 14px 0; padding: 12px 16px; border: 2px dashed var(--leise); border-radius: 14px; }
+  .hv-platz h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font: 700 1.1rem var(--display); }
+  .hv-platz svg.sym { width: 1.3em; height: 1.3em; color: var(--akzent-text); }
+  @media (max-width: 560px) { .hv-reg-z { grid-template-columns: minmax(0, 1fr) 5.5rem; } .hv-zurueck-reihe { padding: 0 16px 20px; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -2462,7 +2497,20 @@
       <ul class="pf-liste" id="hz-liste"></ul>
       <p class="klein" id="hz-fuss"></p>
     </div>
+    <p class="knopfreihe hv-zurueck-reihe"><button type="button" class="knopf mittel zweit" id="hv-zurueck"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-waage"/></svg><span data-t="hvVergleichen">Heizarten vergleichen</span></button></p>
   </details>
+
+  <!-- Auftrag H1: Heizarten im Vergleich (Kosten über 20 Jahre, CO2, Aufwand), direkt unter dem Heizungs-Check -->
+  <div class="karte g-sauna" id="hv-karte">
+    <details id="hv-details">
+      <summary class="es-karte-summary" id="hv-summary"><svg class="sym" aria-hidden="true" focusable="false"><use href="#i-flamme"/></svg><span class="es-karte-frage" data-t="hvTitel">Heizung: Heizarten im Vergleich</span><b class="es-karte-kopf" data-t="hvKopf">9 Heizarten: Kosten, CO₂, Aufwand</b><span class="es-karte-auf" data-t="esAufklappen">Ansehen</span></summary>
+      <div class="es-karte-koerper">
+        <p class="g-kein-baurecht" role="note"><span class="annahme" data-t="annahme">Annahme</span> <span data-t="hvKeine">Planungshilfe, keine Beratung und keine Empfehlung.</span></p>
+        <div id="hv-inhalt"></div>
+      </div>
+    </details>
+    <p class="fehler" id="hv-fehler" role="alert" hidden></p>
+  </div>
 
   <ol class="schritte" id="u-schritte" aria-label="Schritte beim Umbau">
     <li><button type="button" data-schritt="1" aria-current="step"><b>1</b>Bauteile</button></li>
@@ -6190,8 +6238,9 @@ window.DATEN = window.DATEN || {};
 window.DATEN.heizung = {
 "stand":"2026-11-02",
 "bericht":"recherche/59_waermepumpe_preis_nachpruefung.md",
-"arten":{"waermepumpe":{"id":"WP-59","name":"Luft-Wasser-Wärmepumpe","einheit":"€","basis":"Anschaffung, Angebotspreise für Ein- und Zweifamilienhäuser in Rheinland-Pfalz","von":21099,"bis":54168,"mittel":36397,"median":34898,"angebote":160,"zeitraum_von":"09/2025","zeitraum_bis":"04/2026","berichtsstand":"07/2026","status":"geprüft (Angebotsauswertung, regional)","unsicher":true,"hinweis":"160 Angebote aus Rheinland-Pfalz, nicht repräsentativ; Montage nicht in jedem Angebot vollständig; brutto im zweiten Bericht nicht ausdrücklich. Mittel 36.397 €, Median 34.898 €.","quelle":"Verbraucherzentrale Rheinland-Pfalz, „Luft-Wasser-Wärmepumpen: Zweiter Check von 160 Angeboten aus Rheinland-Pfalz“ (Tabelle 1, Stand 07/2026)","url":"https://www.verbraucherzentrale-rlp.de/media/34390/download","quelle2":"Verbraucherzentrale Rheinland-Pfalz, Pressemitteilung vom 02.07.2026","url2":"https://www.verbraucherzentrale-rlp.de/pressemitteilungen/waermepumpenangebote-im-check-grosse-preisunterschiede-und-versteckte-kosten-bleiben-123787","abruf":"2026-11-02","richtwert":{"wert":29500,"einheit":"€","stand":"2026-09-29","text":"Durchschnitt Luft-Wasser laut co2online (Quelle Bundesverband Wärmepumpe, 29.09.2026); Einbau und brutto nicht angegeben","status":"unsicher – Einbau und brutto nicht angegeben","quelle":"co2online, „Wärmepumpen im Vergleich: Kosten & Wirkungsgrad“","url":"https://www.co2online.de/modernisieren-und-bauen/waermepumpe/waermepumpe-arten-im-vergleich/","abruf":"2026-11-02"}},"gas":{"id":"H-22","name":"Gas-Brennwert","einheit":"€","basis":"Anschaffung inkl. Einbau","von":6000,"bis":9000,"status":"veraltet, nur Größenordnung","preisstand":"2023","unsicher":true,"quelle":"co2online, „Heizungsarten im Vergleich“ (veröffentlicht 26.09.2024, Preisbasis 2023)","url":"https://www.co2online.de/modernisieren-und-bauen/heizung/heizungsarten-im-vergleich/","abruf":"2026-10-31"}},
-"bio_treppe":{"id":"H-03","gesetz":"§ 43 GModG","ueberschrift":"§ 43 Einbau einer Heizungsanlage, die mit Gas, Heizöl oder Flüssiggas beschickt wird","stichtag":"2026-07-29","stufen":[["2029",10],["2030",15],["2035",30],["2040",60]],"status":"am Gesetzestext geprüft 02.11.2026","quelle":"GModG § 43 (gesetze-im-internet.de)","url":"https://www.gesetze-im-internet.de/geg/__43.html","abruf":"2026-11-02"}
+"arten":{"waermepumpe":{"id":"WP-59","name":"Luft-Wasser-Wärmepumpe","einheit":"€","basis":"Anschaffung, Angebotspreise für Ein- und Zweifamilienhäuser in Rheinland-Pfalz","von":21099,"bis":54168,"mittel":36397,"median":34898,"angebote":160,"zeitraum_von":"09/2025","zeitraum_bis":"04/2026","berichtsstand":"07/2026","status":"geprüft (Angebotsauswertung, regional)","unsicher":true,"hinweis":"160 Angebote aus Rheinland-Pfalz, nicht repräsentativ; Montage nicht in jedem Angebot vollständig; brutto im zweiten Bericht nicht ausdrücklich. Mittel 36.397 €, Median 34.898 €.","quelle":"Verbraucherzentrale Rheinland-Pfalz, „Luft-Wasser-Wärmepumpen: Zweiter Check von 160 Angeboten aus Rheinland-Pfalz“ (Tabelle 1, Stand 07/2026)","url":"https://www.verbraucherzentrale-rlp.de/media/34390/download","quelle2":"Verbraucherzentrale Rheinland-Pfalz, Pressemitteilung vom 02.07.2026","url2":"https://www.verbraucherzentrale-rlp.de/pressemitteilungen/waermepumpenangebote-im-check-grosse-preisunterschiede-und-versteckte-kosten-bleiben-123787","abruf":"2026-11-02","richtwert":{"wert":29500,"einheit":"€","stand":"2026-09-29","text":"Durchschnitt Luft-Wasser laut co2online (Quelle Bundesverband Wärmepumpe, 29.09.2026); Einbau und brutto nicht angegeben","status":"unsicher – Einbau und brutto nicht angegeben","quelle":"co2online, „Wärmepumpen im Vergleich: Kosten & Wirkungsgrad“","url":"https://www.co2online.de/modernisieren-und-bauen/waermepumpe/waermepumpe-arten-im-vergleich/","abruf":"2026-11-02"}},"gas":{"id":"H-22","name":"Gas-Brennwert","einheit":"€","basis":"Anschaffung inkl. Einbau","von":6000,"bis":9000,"status":"veraltet, nur Größenordnung","preisstand":"2023","unsicher":true,"quelle":"co2online, „Heizungsarten im Vergleich“ (veröffentlicht 26.09.2024, Preisbasis 2023)","url":"https://www.co2online.de/modernisieren-und-bauen/heizung/heizungsarten-im-vergleich/","abruf":"2026-10-31"},"oel":{"id":"H-23","name":"Öl-Brennwert","basis":"Anschaffung inkl. Einbau, ohne Tank.","von":6000,"bis":18000,"status":"veraltet, nur Größenordnung","unsicher":true,"q":"arten","hinweis":"Preisbasis 2023, nur Größenordnung.","preisstand":"2023"},"sole":{"id":"H-21","name":"Sole-/Erdwärmepumpe","basis":"Gerät 30.500 € plus Bohrung oder Kollektoren 8.000 bis 16.000 €.","von":38500,"bis":46500,"status":"prüfen vor Nutzung","unsicher":true,"q":"wp26","hinweis":"Die Seite nennt im Text im Schnitt 46.500 € und widerspricht sich bei Förderbeispielen; Bohrung ist genehmigungspflichtig (nicht geprüft)."},"pellets":{"id":"H-24","name":"Pelletkessel","basis":"Kessel mit Lager, Puffer und Einbau.","von":14000,"bis":21000,"status":"prüfen vor Nutzung","unsicher":true,"q":"pellet","hinweis":"Größenordnung; die Seite von 2024 nennt 17.000 bis 25.000 €."},"scheitholz":{"id":"H-25","name":"Scheitholzkessel (Vergaser)","basis":"Anschaffung inkl. Einbau, ohne Förderung.","von":12000,"bis":20000,"status":"prüfen vor Nutzung","unsicher":true,"q":"ratgeber","hinweis":"Ratgeber-Zusammenfassung, nicht am Original gelesen; Puffer 1.500 bis 3.000 € extra."},"fernwaerme":{"id":"H-26","name":"Fernwärme","basis":"Einbau der Übergabestation (2024).","von":3000,"bis":8000,"status":"veraltet, nur Größenordnung","unsicher":true,"q":"arten","hinweis":"Der Hausanschluss (5.000 bis 20.000 €, reduco.ai, unsicher) ist NICHT in der Spanne.","preisstand":"2024"},"infrarot":{"id":"H-27","name":"Infrarot / Elektro","basis":"Geräte für ein Haus, Fachkraft kommt dazu.","von":1200,"bis":1800,"status":"prüfen vor Nutzung","unsicher":true,"q":"ir","hinweis":"Gerät 100 bis 600 €; Gesamtpreis eigene Überschlagsrechnung (10 bis 15 Geräte)."},"hybrid":{"id":"H-28","name":"Hybrid Gas + Wärmepumpe","basis":"Anschaffung inkl. Einbau.","von":17000,"bis":35000,"status":"prüfen vor Nutzung","unsicher":true,"q":"hyb","hinweis":"Der Fördertext der Quelle (65-%-Bedingung) ist veraltet."}},
+"bio_treppe":{"id":"H-03","gesetz":"§ 43 GModG","ueberschrift":"§ 43 Einbau einer Heizungsanlage, die mit Gas, Heizöl oder Flüssiggas beschickt wird","stichtag":"2026-07-29","stufen":[["2029",10],["2030",15],["2035",30],["2040",60]],"status":"am Gesetzestext geprüft 02.11.2026","quelle":"GModG § 43 (gesetze-im-internet.de)","url":"https://www.gesetze-im-internet.de/geg/__43.html","abruf":"2026-11-02"},
+"vergleich":{"stand":"2026-11-02","bericht":"recherche/52_heizung_vergleich.md","bericht_recht":"recherche/61_gmodg_heizung_wortlaut.md","reihe":["gas","oel","waermepumpe","sole","pellets","scheitholz","fernwaerme","infrarot","hybrid"],"jahre":20,"annahmen":{"heiz0":{"w":10000,"id":"H-Beispiel","q":"wp26","s":"Annahme","n":"Beispielhaus ohne Zeichnung: 10.000 kWh Heizwärme (co2online); mit Haus kommt sie aus der Karte Dämmung."},"ww":{"w":5000,"id":"H-Beispiel","q":"wp26","s":"Annahme","n":"Warmwasser 5.000 kWh im Jahr (co2online-Beispiel); die Heizwärme des Hauses enthält keines."},"preis":{"gas":{"w":11.93,"id":"H-40","q":"bdew","s":"geprüft","n":"Erdgas, 20.000 kWh, 2026 bisher (August: 12,45 ct)."},"oel":{"w":14.06,"id":"H-41","q":"ct1","s":"prüfen vor Nutzung","n":"Juli 2026 mit USt.; andere Quelle 17,9 ct (H-42)."},"strom":{"w":37.97,"id":"H-43","q":"destatis","s":"geprüft","n":"1. Halbjahr 2026, „inkl. Steuern“ nicht ausdrücklich."},"wpstrom":{"w":27.44,"id":"H-44","q":"bnetza","s":"veraltet","n":"Stand 01.04.2025, Sekundärquelle: vor Nutzung prüfen."},"pellets":{"w":9.29,"id":"H-45","q":"depi","s":"prüfen vor Nutzung","n":"464,61 €/t durch 5.000 kWh/t (Annahme); Portale melden 439 bis 444 €/t."},"holz":{"w":7.6743,"id":"H-46","q":"holz","s":"prüfen vor Nutzung","n":"Buche 144,66 €/Rm durch 1.885 kWh/Rm; Zeit nicht bepreist; Waldholz 40 bis 50 €/Rm."},"fernwaerme":{"w":15.6,"id":"H-48","q":"fw","s":"prüfen vor Nutzung","n":"Mischpreis brutto, meiste Kunden 12,5 bis 17,5 ct; Mehrfamilienhaus-Preis, hier Näherung."}},"oel_alt":{"w":17.9,"id":"H-42","q":"tec","s":"prüfen vor Nutzung","n":"Heizöl-Tagespreis 27.10.2026, 3.000 l."},"nutz":{"gas":{"w":0.9,"id":"H-74","q":"ct1","s":"prüfen vor Nutzung","n":"Brennwertkessel (laut cleanthinking, unsicher)."},"oel":{"w":0.9,"id":"H-74","q":"ct1","s":"prüfen vor Nutzung","n":"Brennwertkessel (laut cleanthinking, unsicher)."},"jaz_luft":{"w":3.4,"id":"H-71","q":"wpqs","s":"prüfen vor Nutzung","n":"Feld 2,6 bis 4,9; Mittel nur aus Suchtreffer."},"jaz_sole":{"w":4.3,"id":"H-71","q":"wpqs","s":"prüfen vor Nutzung","n":"Feld 3,6 bis 5,4; Quellen uneinig."},"pellets":{"w":0.85,"id":"H-74","q":"eigen","s":"Annahme","n":"Eigene Annahme ohne Quelle (Mindestwert Pelletöfen 85 %)."},"scheitholz":{"w":0.8,"id":"H-74","q":"eigen","s":"Annahme","n":"Eigene Annahme ohne Quelle."},"fernwaerme":{"w":1.0,"id":"H-56","q":"eigen","s":"Annahme","n":"Übergabe ohne Verluste; Netzverluste nicht gerechnet."},"infrarot":{"w":1.0,"id":"H-57","q":"ir","s":"Annahme","n":"Hersteller nahezu 100 %, Messung bei Strahlung nur 40 bis 70 % (Widerspruch)."},"hybrid_wp":{"w":0.7,"id":"H-58","q":"eigen","s":"Annahme","n":"70 % der Wärme aus der Wärmepumpe, 30 % Gas; eigene Annahme."}}},"arten":{"gas":{"tr":"gas","nutz":"gas","co2":[240,240],"wart":[220,220,"H-61","arten","veraltet"],"auf":1,"foerd":"nein","bio":true,"vor":[["niedrige Anschaffung","arten"],["Bio-Treppe erst ab 2029","gmodg"]],"nach":[["keine Förderung für neue Anlagen","arten"],["Bio-Treppe: 10 % ab 2029 bis 60 % ab 2040","gmodg"],["CO2-Preis steckt im Gaspreis (Bericht 40)",""]],"erl":["gas42","bio43","bu108"]},"oel":{"tr":"oel","nutz":"oel","co2":[310,310],"wart":[175,175,"H-62","arten","veraltet"],"auf":1,"foerd":"nein","bio":true,"vor":[["niedrige bis mittlere Anschaffung","arten"]],"nach":[["keine Förderung für neue Anlagen","arten"],["Bio-Treppe wie bei Gas","gmodg"],["hoher, schwankender Ölpreis (14,06 oder 17,9 ct)","ct1"],["Tank und Platz nötig (Bericht 51 fehlt)",""]],"erl":["gas42","bio43","bu108"],"hinweis":"Aufwand gering, aber Tank und Platz nötig."},"waermepumpe":{"tr":"strom","nutz":"jaz_luft","co2":[560,560],"wart":[100,400,"H-60","wp26","geprüft"],"auf":2,"foerd":"ja","wp":true,"vor":[["günstiger und weniger aufwendig als Erdwärme, fast überall umsetzbar","vz"],["Jahresarbeitszahl im Feld 2,6 bis 5,4","ise"],["förderfähig (Grundförderung 30 %)","kfw"]],"nach":[["weniger effizient als Erdwärme, Ventilatoren machen Geräusche, Aufstellort bestimmt den Schallschutz","vz"],["Preis streut stark (regionale Angebotsauswertung)","eigen"]],"erl":["wp42","laerm","lbo"]},"sole":{"tr":"strom","nutz":"jaz_sole","co2":[560,560],"wart":[100,400,"H-60","wp26","geprüft"],"auf":3,"foerd":"ja","wp":true,"vor":[["Erdtemperatur schwankt kaum, sparsamer Betrieb","vz"],["höhere Jahresarbeitszahl (4,3, unsicher)","wpqs"],["förderfähig (Grundförderung 30 %)","kfw"]],"nach":[["Bohrungen nicht überall erlaubt, nicht jeder Boden gibt genug Wärme, Erweiterung teuer, Kollektoren brauchen große aufgegrabene Flächen","vz"],["hohe Kosten","wp26"]],"erl":["wp42","bohr"],"hinweis":"Aufwand hoch: Bohrung genehmigungspflichtig (nicht geprüft)."},"pellets":{"tr":"pellets","nutz":"pellets","co2":[20,20],"wart":[280,500,"H-63","pellet","prüfen vor Nutzung"],"auf":2.5,"foerd":"ja","vor":[["niedrigere Betriebskosten als Öl, gut mit Solarthermie kombinierbar, hohe KfW-Förderung","pellet"],["niedriger CO2-Faktor (20 g/kWh)","a9"]],"nach":[["hohe Anschaffung, Lager 3 bis 10 m², Asche 3- bis 5-mal im Jahr, Feinstaub, mehr Wartung","pellet"]],"erl":["bm42","bm45","bim"]},"scheitholz":{"tr":"holz","nutz":"scheitholz","co2":[20,20],"wart":null,"auf":3,"foerd":"luecke","vor":[["günstiger Brennstoff in der Rechnung","holz"],["niedriger CO2-Faktor (20 g/kWh)","a9"]],"nach":[["Zeit- und Platzbedarf für Holz (eigene Einordnung)","eigen"],["Trocknung 1 bis 3 Jahre","b33"],["Pufferspeicher nötig (unsicher)","ratgeber"]],"erl":["bm42","bm45","bim"],"hinweis":"Kaminofen: nur Zusatz, kein Ersatz der Heizung (Ersparnis im Beispiel rund 90 € im Jahr vor Ofen, Schornsteinfeger und Zeit). Ob er unter § 45 fällt: Auslegung, Anwalt oder Schornsteinfeger fragen."},"fernwaerme":{"tr":"fernwaerme","nutz":"fernwaerme","co2":[180,300],"wart":[0,0,"H-64","arten","veraltet"],"auf":1,"foerd":"luecke","vor":[["geringer Einbauaufwand, keine Wartung","arten"]],"nach":[["Preis hoch (15,6 ct, unsicher)","fw"],["Hausanschluss 5.000 bis 20.000 € kommt dazu (unsicher)","reduco"],["nur wo ein Netz liegt","eigen"]],"erl":["fw42","fw109"],"hinweis":"Der Hausanschluss (5.000 bis 20.000 €) ist in der Spanne nicht enthalten."},"infrarot":{"tr":"strom","nutz":"infrarot","co2":[560,560],"wart":[0,0,"H-65","ir","geprüft"],"auf":1,"foerd":"nein","ww":false,"vor":[["geringe Anschaffung, kaum Wartung, platzsparend","ir"]],"nach":[["hohe Betriebskosten","ir"],["keine Warmwasserbereitung","ir"],["keine Förderprogramme","ir"],["Wirkungsgrad umstritten (Hersteller nahezu 100 %, Messung 40 bis 70 %)","ir"]],"erl":["ir46","ir46a","ir10"]},"hybrid":{"tr":"hybrid","nutz":"hybrid_wp","co2":null,"wart":[470,470,"H-58","eigen","Annahme"],"auf":2.5,"foerd":"luecke","hy":true,"vor":[["hoher erneuerbarer Anteil, sicher bei Frost, sinnvoll im Altbau","hyb"]],"nach":[["höhere Investition, aufwendigere Planung und Wartung, mehr Platz","hyb"],["Förderlage im Artikel veraltet (65-%-Bedingung)","hyb"]],"erl":["hy42","hy43","hy43a"],"hinweis":"Wartung 470 € = Wärmepumpe 250 € plus Gas 220 € (eigene Summe)."}},"foerderung":{"satz":0.3,"max":28000,"arten":["waermepumpe","sole","pellets"],"q":"kfw"},"quellen":{"arten":{"t":"co2online, „Heizungsarten im Vergleich“ (26.09.2024, Preisbasis 2023)","u":"https://www.co2online.de/modernisieren-und-bauen/heizung/heizungsarten-im-vergleich/","a":"2026-10-31","s":"veraltet"},"pellet":{"t":"co2online, „Pelletheizung“ (ohne Datum)","u":"https://www.co2online.de/modernisieren-und-bauen/heizung/pelletheizung/","a":"2026-10-31","s":"prüfen vor Nutzung"},"wp26":{"t":"co2online, „Wärmepumpe: Kosten, Funktion & Förderung 2026“","u":"https://www.co2online.de/modernisieren-und-bauen/waermepumpe/","a":"2026-10-31","s":"geprüft"},"ratgeber":{"t":"Ratgeber (wohnglück, hausjournal), nur Suchtreffer","u":"","a":"2026-10-31","s":"prüfen vor Nutzung"},"reduco":{"t":"reduco.ai, „Fernwärme 2026“ (Blog)","u":"https://reduco.ai/blog/heizung/fernwaerme-kosten-anschluss-2026","a":"2026-10-31","s":"prüfen vor Nutzung"},"ir":{"t":"co2online, „Infrarotheizung“ (Oktober 2026)","u":"https://www.co2online.de/modernisieren-und-bauen/heizung/infrarotheizung/","a":"2026-10-31","s":"geprüft"},"hyb":{"t":"co2online, „Hybridheizung“ (05.08.2025)","u":"https://www.co2online.de/modernisieren-und-bauen/heizung/hybridheizung/","a":"2026-10-31","s":"prüfen vor Nutzung"},"bdew":{"t":"BDEW-Gaspreisanalyse August 2026 (Bericht 40)","u":"https://www.bdew.de/media/documents/BDEW_Gaspreisanalyse_082026.pdf","a":"2026-10-27","s":"geprüft"},"ct1":{"t":"cleanthinking.de, „Was Heizen im Winter 2026/27 wirklich kostet“ (zitiert Destatis)","u":"https://www.cleanthinking.de/?p=1073584","a":"2026-10-31","s":"prüfen vor Nutzung"},"tec":{"t":"tecson.de, Heizöl-Tagespreis 27.10.2026 (Bericht 40)","u":"","a":"2026-10-27","s":"prüfen vor Nutzung"},"destatis":{"t":"Destatis, Pressemitteilung Nr. 345 vom 30.09.2026","u":"https://www.destatis.de/DE/Presse/Pressemitteilungen/2026/09/PD26_345_61243.html","a":"2026-10-31","s":"geprüft"},"bnetza":{"t":"Bundesnetzagentur, Monitoringbericht 2025, zitiert von cleanthinking.de","u":"","a":"2026-10-31","s":"veraltet"},"depi":{"t":"Deutsches Pelletinstitut über topagrar.com, Oktober 2026","u":"https://www.topagrar.com/energie/news/pelletspreis-steigt-im-oktober-2026-weniger-stark-an-a-20030280.html","a":"2026-10-31","s":"prüfen vor Nutzung"},"holz":{"t":"Buche 144,66 €/Rm (Ratgeber, Bericht 33); 1.885 kWh/Rm: LWF Bayern, Merkblatt 20","u":"https://lwf.bayern.de/mam/cms04/service/dateien/mb20_scheitholz_2025_rz_web_bf.pdf","a":"2026-10-31","s":"prüfen vor Nutzung"},"fw":{"t":"Wärmepreis-Transparenzplattform, zitiert von cleanthinking.de (01.04.2026)","u":"","a":"2026-10-31","s":"prüfen vor Nutzung"},"ise":{"t":"Fraunhofer ISE, Pressemitteilung vom 03.11.2025 (Feldmessung)","u":"https://www.ise.fraunhofer.de/content/dam/ise/de/documents/presseinformationen/2025/3025_ISE_PI_Waermepumpen-heizen-auch-im-Altbau-klimafreundlich.pdf","a":"2026-10-31","s":"geprüft"},"wpqs":{"t":"Fraunhofer ISE, WP-QS Schlussbericht (Mittel nur aus Suchtreffer)","u":"https://www.ise.fraunhofer.de/content/dam/ise/de/documents/projekte/WP-QS_Schlussbericht.pdf","a":"2026-10-31","s":"prüfen vor Nutzung"},"a9":{"t":"GModG Anlage 9, Treibhausgas-Faktoren (Bericht 52; nicht in Bericht 61)","u":"https://www.gesetze-im-internet.de/geg/anlage_9.html","a":"2026-10-31","s":"prüfen vor Nutzung"},"kfw":{"t":"KfW Merkblatt 458, Stand 09/2026 (Bericht 16)","u":"https://www.kfw.de/PDF/Download-Center/F%C3%B6rderprogramme-(Inlandsf%C3%B6rderung)/PDF-Dokumente/6000005131_M_458.pdf","a":"2026-10-09","s":"geprüft"},"gmodg":{"t":"GModG am amtlichen Wortlaut (Bericht 61)","u":"https://www.gesetze-im-internet.de/geg/","a":"2026-11-02","s":"geprüft"},"b33":{"t":"Bericht 33 (Holzfeuerung, Zusammenfassung)","u":"","a":"2026-10-27","s":"prüfen vor Nutzung"},"eigen":{"t":"eigene Annahme (kein Beleg)","u":"","a":"2026-10-31","s":"Annahme"},"vz":{"t":"Verbraucherzentrale, Wärmepumpen-Seiten (Bericht 52, Abschnitt 7)","u":"","a":"2026-10-31","s":"geprüft"}},"erlx":{"gas42":{"t":"Einbau im Bestand ist eine zulässige Option.","p":"§ 42 Abs. 2 Nr. 1","s":"g","u":"https://www.gesetze-im-internet.de/geg/__42.html"},"bio43":{"t":"Bei Einbau nach dem 29.07.2026 muss die Wärme ab 2029 zu 10 %, ab 2030 zu 15 %, ab 2035 zu 30 %, ab 2040 zu 60 % aus Biomethan, Bioöl, biogenem Flüssiggas oder Wasserstoff stammen; erfüllbar auch durch Solarthermie, Lüftung mit Wärmerückgewinnung oder Hybrid.","p":"§ 43 Abs. 1, 3 bis 5","s":"g","u":"https://www.gesetze-im-internet.de/geg/__43.html"},"bu108":{"t":"Bußgeld bis 5.000 € bei Vorsatz oder Leichtfertigkeit.","p":"§ 108","s":"g","u":"https://www.gesetze-im-internet.de/geg/__108.html"},"wp42":{"t":"Elektrisch angetriebene Wärmepumpe ist eine zulässige Option.","p":"§ 42 Abs. 2 Nr. 2","s":"g","u":"https://www.gesetze-im-internet.de/geg/__42.html"},"laerm":{"t":"Schall außen: allgemeines Wohngebiet tags 55 / nachts 40 dB(A), reines Wohngebiet 50 / 35; Buchstabenzuordnung unsicher.","p":"TA Lärm Nr. 6.1","s":"p"},"lbo":{"t":"Abstände zur Grenze und Verfahrensfreiheit hängen vom Bundesland ab; nicht für alle Länder geprüft.","p":"Landesbauordnung","s":"n"},"bohr":{"t":"Bohrung ist genehmigungspflichtig; Genehmigung und Landesrecht nicht geprüft.","p":"Wasser- und Bergrecht","s":"n"},"bm42":{"t":"Biomasse ist eine zulässige Option.","p":"§ 42 Abs. 2 Nr. 4","s":"g","u":"https://www.gesetze-im-internet.de/geg/__42.html"},"bm45":{"t":"Im Bestand nur Biomassekessel oder Biomasseofen mit Wasser als Wärmeträger; nur Brennstoffe nach § 3 Abs. 1 Nr. 4, 5, 5a, 6, 7, 8 oder 13 der 1. BImSchV.","p":"§ 45 Abs. 1","s":"g","u":"https://www.gesetze-im-internet.de/geg/__45.html"},"bim":{"t":"Typprüfung des Herstellers, Grenzwerte der 1. BImSchV: Wortlaut nicht geprüft.","p":"1. BImSchV","s":"n"},"fw42":{"t":"Hausübergabestation zum Anschluss an ein Wärmenetz ist eine zulässige Option.","p":"§ 42 Abs. 2 Nr. 9","s":"g","u":"https://www.gesetze-im-internet.de/geg/__42.html"},"fw109":{"t":"Anschlusszwang je Gemeinde möglich: § 109 begründet ihn nicht selbst, er verweist auf Landesrecht; Landesrecht nicht geprüft.","p":"§ 109","s":"g","u":"https://www.gesetze-im-internet.de/geg/__109.html"},"ir46":{"t":"Stromdirektheizung im Bestand nur, wenn der Wärmeschutz die Werte der §§ 16 und 19 um mindestens 30 % unterschreitet; Austausch einer Einzelraum-Stromdirektheizung ausgenommen.","p":"§ 46 Abs. 1 und 2","s":"g","u":"https://www.gesetze-im-internet.de/geg/__46.html"},"ir46a":{"t":"Ausnahme: höchstens zwei Wohnungen, Eigentümer bewohnt eine selbst. Ob ein vermietetes Haus darunter fällt, ist Auslegung.","p":"§ 46 Satz 2","s":"a","u":"https://www.gesetze-im-internet.de/geg/__46.html"},"ir10":{"t":"Im Neubau mindestens 45 % Unterschreitung, gleiche Ausnahme.","p":"§ 10 Abs. 4","s":"g","u":"https://www.gesetze-im-internet.de/geg/__10.html"},"hy42":{"t":"Wärmepumpen-Hybridheizung ist eine zulässige Option.","p":"§ 42 Abs. 2 Nr. 5","s":"g","u":"https://www.gesetze-im-internet.de/geg/__42.html"},"hy43":{"t":"Die Bio-Treppe gilt als erfüllt, wenn die Wärmepumpe beim Teillastpunkt A (DIN EN 14825) mindestens 30 % bzw. bei bivalent alternativem Betrieb 40 % der Leistung des Spitzenlasterzeugers erreicht; der Satz ist im Wortlaut verschachtelt.","p":"§ 43 Abs. 5 Satz 1","s":"g","u":"https://www.gesetze-im-internet.de/geg/__43.html"},"hy43a":{"t":"Was „bivalent alternativer Betrieb“ hier heißt und dass sonst die Bio-Treppe gilt, ist Auslegung.","p":"§ 43 Abs. 5","s":"a","u":"https://www.gesetze-im-internet.de/geg/__43.html"}},"import":[{"l":"PL","s":"Polen","g":"Lücke","t":"Kein Zoll, kein Sanktionsrecht (EU-Binnenmarkt). Preise vor Ort nicht gefunden. Nur deutsche Händlerpreise für polnische Marken, mit Händlermarge und ohne Vor-Ort-Preis: Defro Bioslim 20 kW Pelletkessel 4.661,96 € (gemashop.de), ohne ausgewiesene 1.-BImSchV-Zertifizierung. Typprüfung bzw. Prüfnummer des Herstellers verlangen."},{"l":"UA","s":"Ukraine","g":"Lücke","t":"Kein Sanktionsverbot für diese Waren gefunden. Preise (Hrywnja), Zoll nach Handelsabkommen und Einfuhrumsatzsteuer 19 % für Kessel und Öfen nicht recherchiert."},{"l":"RU","s":"Russland","g":"ungeklärt","t":"Einfuhrverbote sind für Kapitel 44 und 9406 belegt (Bericht 46); für Heizkessel und Öfen (vermutlich Zolltarif 7321, 8403) und Eisen und Stahl wurde der Wortlaut nicht gelesen (EUR-Lex nicht lesbar). „Nicht zulässig“ erst nach Lesen des Originals. Preise vor Ort nicht recherchiert."},{"l":"BY","s":"Weißrussland","g":"ungeklärt","t":"Eisen- und Stahlerzeugnisse sind verboten (Art. 1q, Anhang XII, VO 765/2006); die Zolltarifnummern für Kessel und Öfen wurden nicht geprüft. Preise vor Ort nicht recherchiert."}]}
 };
 </script>
 <script>/* daten/kleinhaus.js */
@@ -8178,6 +8227,100 @@ Object.keys(T).forEach(function (k) { window.TEXTE[k] = T[k]; });
   Object.keys(T).forEach(function (k) { window.TEXTE[k] = { de: T[k][0], en: T[k][1], ru: T[k][2] }; });
 })();
 
+</script>
+<script>/* daten/texte_heizung.js */
+(function () {
+var T = {
+hvTitel: ['Heizung: Heizarten im Vergleich', 'Heating: comparing the types', 'Отопление: сравнение видов'],
+hvKopf: ['9 Heizarten: Kosten, CO₂, Aufwand', '9 types: cost, CO₂, effort', '9 видов: затраты, CO₂, усилия'],
+hvKeine: ['Planungshilfe nach den Berichten 52 und 61 (Okt./Nov. 2026), keine Beratung, keine Empfehlung. Jede Zahl trägt Quelle, Abruf und Status.', 'Planning aid from reports 52 and 61 (Oct./Nov. 2026), no advice, no recommendation. Each figure shows source, date, status.', 'Помощь в планировании по отчётам 52 и 61 (окт.–нояб. 2026), не совет и не рекомендация. У каждой цифры источник, дата, статус.'],
+hvHaus: ['Gerechnet mit Ihrem gezeichneten Haus: {heiz} kWh Heizwärme im Jahr + {ww} kWh Warmwasser = {nutz} kWh Nutzwärme.', 'Based on your drawn house: {heiz} kWh heating per year + {ww} kWh hot water = {nutz} kWh useful heat.', 'По вашему дому: {heiz} кВт·ч отопления в год + {ww} кВт·ч горячей воды = {nutz} кВт·ч тепла.'],
+hvBeispiel: ['Noch kein Haus gezeichnet ({grund}). Gerechnet wird mit dem Beispielhaus: {heiz} kWh Heizwärme + {ww} kWh Warmwasser = {nutz} kWh Nutzwärme.', 'No house drawn yet ({grund}). Using the example house: {heiz} kWh heating + {ww} kWh hot water = {nutz} kWh useful heat.', 'Дом ещё не нарисован ({grund}). Расчёт по примеру: {heiz} кВт·ч отопления + {ww} кВт·ч горячей воды = {nutz} кВт·ч тепла.'],
+hvG_keineRaeume: ['im Plan gibt es noch keine Räume', 'the plan has no rooms yet', 'в плане нет комнат'],
+hvG_keinPlan: ['es gibt keinen Plan', 'there is no plan', 'плана нет'],
+hvG_x: ['kein Wärmebedarf berechenbar', 'no heat demand calculable', 'потребность в тепле не рассчитать'],
+hvZeichnen: ['Haus zeichnen', 'Draw a house', 'Нарисовать дом'],
+hvCheck: ['Pflichten prüfen (Heizungs-Check)', 'Check duties (heating check)', 'Проверить обязанности'],
+hvVergleichen: ['Heizarten vergleichen', 'Compare heating types', 'Сравнить виды отопления'],
+hvSort: ['Nach 20-Jahres-Kosten ordnen', 'Order by 20-year cost', 'Порядок по затратам за 20 лет'],
+hvSortAus: ['Wieder feste Reihenfolge', 'Back to fixed order', 'Обычный порядок'],
+hvSortHinweis: ['Sortierung: eigene Einordnung, keine Empfehlung.', 'Sorting: own classification, not a recommendation.', 'Сортировка: собственная оценка, не рекомендация.'],
+hvFoerd: ['Förderung einrechnen', 'Include subsidy', 'Учесть субсидию'],
+hvAnn: ['Annahmen ändern (Preise, Wirkungsgrade, Warmwasser)', 'Change assumptions (prices, efficiency, hot water)', 'Изменить допущения (цены, КПД, вода)'],
+hvAnnReset: ['Zurück auf Vorgaben', 'Reset to defaults', 'Вернуть значения'],
+hvAnnGemerkt: ['Änderungen gelten nur, solange die Seite offen ist.', 'Changes last only while the page is open.', 'Изменения действуют, пока страница открыта.'],
+hvWpTarif: ['Wärmepumpen-Tarif statt Haushaltsstrom', 'Heat pump tariff instead of household power', 'Тариф для насоса вместо бытового'],
+hvWW: ['Warmwasser (kWh im Jahr)', 'Hot water (kWh per year)', 'Горячая вода (кВт·ч/год)'],
+hvHeiz: ['Heizwärme Beispielhaus (kWh im Jahr)', 'Heating example house (kWh per year)', 'Отопление примера (кВт·ч/год)'],
+hvP_gas: ['Gaspreis (ct/kWh)', 'Gas price (ct/kWh)', 'Цена газа (цент/кВт·ч)'], hvP_oel: ['Heizölpreis (ct/kWh)', 'Oil price (ct/kWh)', 'Цена мазута (цент/кВт·ч)'],
+hvP_strom: ['Haushaltsstrom (ct/kWh)', 'Household power (ct/kWh)', 'Бытовой ток (цент/кВт·ч)'], hvP_wpstrom: ['Wärmepumpen-Tarif (ct/kWh)', 'Heat pump tariff (ct/kWh)', 'Тариф насоса (цент/кВт·ч)'],
+hvP_pellets: ['Pelletpreis (ct/kWh)', 'Pellet price (ct/kWh)', 'Цена пеллет (цент/кВт·ч)'], hvP_holz: ['Scheitholzpreis (ct/kWh)', 'Firewood price (ct/kWh)', 'Цена дров (цент/кВт·ч)'],
+hvP_fernwaerme: ['Fernwärmepreis (ct/kWh)', 'District heat price (ct/kWh)', 'Цена теплосети (цент/кВт·ч)'],
+hvOelAlt: ['Andere Quelle: 17,9 ct nehmen', 'Other source: use 17.9 ct', 'Другой источник: 17,9'],
+hvN_gas: ['Nutzungsgrad Gas', 'Efficiency gas', 'КПД газ'], hvN_oel: ['Nutzungsgrad Öl', 'Efficiency oil', 'КПД мазут'],
+hvN_jaz_luft: ['Jahresarbeitszahl Luft-Wärmepumpe', 'Seasonal factor air heat pump', 'Сезонный коэфф. воздушного насоса'], hvN_jaz_sole: ['Jahresarbeitszahl Erdwärme', 'Seasonal factor ground source', 'Сезонный коэфф. геотермального'],
+hvN_pellets: ['Nutzungsgrad Pellets', 'Efficiency pellets', 'КПД пеллеты'], hvN_scheitholz: ['Nutzungsgrad Scheitholz', 'Efficiency firewood', 'КПД дрова'],
+hvN_fernwaerme: ['Übergabe Fernwärme', 'District heat transfer', 'Передача теплосети'], hvN_infrarot: ['Wirkungsgrad Infrarot', 'Efficiency infrared', 'КПД инфракрасный'],
+hvN_hybrid_wp: ['Wärmeanteil der Wärmepumpe im Hybrid', 'Heat share of the pump in the hybrid', 'Доля насоса в гибриде'],
+hvA_gas: ['Gas', 'Gas', 'Газ'], hvA_oel: ['Öl', 'Oil', 'Мазут'], hvA_waermepumpe: ['Luft-Wärmepumpe', 'Air heat pump', 'Воздушный насос'],
+hvA_sole: ['Erdwärme-Pumpe', 'Ground source pump', 'Геотермальный насос'], hvA_pellets: ['Pellets', 'Pellets', 'Пеллеты'], hvA_scheitholz: ['Holz (Scheitholz)', 'Firewood', 'Дрова'],
+hvA_fernwaerme: ['Fernwärme', 'District heating', 'Теплосеть'], hvA_infrarot: ['Infrarot (Strom)', 'Infrared (electric)', 'Инфракрасный'], hvA_hybrid: ['Hybrid Gas + Wärmepumpe', 'Hybrid gas + heat pump', 'Гибрид газ + насос'],
+hvB_kosten: ['Kosten über 20 Jahre', 'Cost over 20 years', 'Затраты за 20 лет'], hvB_co2: ['CO₂ im Jahr', 'CO₂ per year', 'CO₂ в год'], hvB_auf: ['Aufwand', 'Effort', 'Усилия'],
+hvAuf_1: ['gering', 'low', 'малые'], hvAuf_2: ['mittel', 'medium', 'средние'], hvAuf_25: ['mittel bis hoch', 'medium to high', 'средние–большие'], hvAuf_3: ['hoch', 'high', 'большие'],
+hvEigen: ['eigene Einordnung', 'own classification', 'собственная оценка'],
+hvSkala: ['Eine Skala für alle Balken; gestreift = bis zum oberen Ende der Spanne. Der Aufwand ist eine eigene Einordnung, keine Empfehlung.', 'One scale for all bars; striped = up to the upper end of the range. Effort is our own classification, not a recommendation.', 'Одна шкала для всех; штриховка – до верхнего конца диапазона. Усилия – наша оценка, не рекомендация.'],
+hvKostenZ: ['{von} bis {bis} €', '{von} to {bis} €', 'от {von} до {bis} €'], hvCo2Z: ['{von} bis {bis} t', '{von} to {bis} t', 'от {von} до {bis} т'], hvCo2Z1: ['{von} t', '{von} t', '{von} т'],
+hvInfrarotWW: ['Kein Warmwasser mit Infrarot: hier trotzdem als Strom gerechnet.', 'No hot water with infrared: counted here as electricity.', 'Инфракрасное не греет воду: здесь учтено как электричество.'],
+hvMappe: ['Für die Mappe übernehmen', 'Use for the folder', 'Взять в папку'], hvMappeIst: ['In der Mappe gewählt', 'Chosen for the folder', 'Выбрано в папке'],
+hvMappeOk: ['Übernommen: {art}. Sie steht jetzt in der „Mappe für den Hausbauer“ (Bereich Grundriss) als Kostenzeile.', 'Taken over: {art}. It now appears in the "Folder for the builder" (Floor plan area) as a cost line.', 'Принято: {art}. Теперь это строка расходов в «Папке для строителя» (раздел «План»).'],
+hvMappeFrage: ['In der Mappe ist schon „{alt}“ gewählt. Durch „{neu}“ ersetzen?', 'The folder already has "{alt}". Replace with "{neu}"?', 'В папке уже «{alt}». Заменить на «{neu}»?'],
+hvErsetzen: ['Ersetzen', 'Replace', 'Заменить'], hvBehalten: ['Behalten', 'Keep', 'Оставить'],
+hvMappeBehalten: ['Die Mappe behält „{alt}“.', 'The folder keeps "{alt}".', 'В папке остаётся «{alt}».'],
+hvMehr: ['Rechenweg, Vor- und Nachteile, Recht', 'Calculation, pros and cons, law', 'Расчёт, плюсы и минусы, право'],
+hvRwA: ['Anschaffung: {von} bis {bis} €', 'Purchase: {von} to {bis} €', 'Покупка: от {von} до {bis} €'],
+hvRwF: ['Förderung abgezogen (30 % von höchstens 28.000 €): {von} bis {bis} €', 'Subsidy deducted (30 % of at most 28,000 €): {von} to {bis} €', 'Субсидия вычтена (30 % от макс. 28 000 €): от {von} до {bis} €'],
+hvRwF0: ['Keine Förderung eingerechnet', 'No subsidy included', 'Субсидия не учтена'],
+hvRwE: ['Energie im Jahr: {kwh} kWh Endenergie → {eur} €', 'Energy per year: {kwh} kWh final → {eur} €', 'Энергия в год: {kwh} кВт·ч → {eur} €'],
+hvRwW1: ['Wartung im Jahr: {von} €', 'Maintenance per year: {von} €', 'Обслуживание в год: {von} €'],
+hvAn: ['an', 'on', 'вкл.'], hvAus: ['aus', 'off', 'выкл.'],
+hvRwW: ['Wartung im Jahr: {von} bis {bis} €', 'Maintenance per year: {von} to {bis} €', 'Обслуживание в год: от {von} до {bis} €'],
+hvRwW0: ['Wartung im Jahr: Lücke (keine Quelle), nicht mitgerechnet', 'Maintenance per year: gap (no source), not included', 'Обслуживание в год: пробел (нет источника), не учтено'],
+hvRwC: ['CO₂-Faktor: {f} g je kWh Endenergie', 'CO₂ factor: {f} g per kWh final energy', 'Коэффициент CO₂: {f} г/кВт·ч'],
+hvRwCh: ['CO₂-Faktor: Mischung aus Wärmepumpe (560 g) und Gas (240 g) je kWh, nach Anteil', 'CO₂ factor: mix of pump (560 g) and gas (240 g) per kWh, by share', 'Коэффициент CO₂: смесь насоса (560 г) и газа (240 г)'],
+hvFoerdKurz: ['Lücke: Boni für Selbstnutzer fehlen. Ab 2027 laut Richtlinie 15 % plus EU-Bonus statt 30 %.', 'Gap: owner-occupier bonuses are missing. From 2027 15 % plus EU bonus instead of 30 % per guideline.', 'Пробел: бонусов для владельцев-жильцов нет. С 2027 по директиве 15 % плюс бонус ЕС вместо 30 %.'],
+hvIrAnwalt: ['Vermietetes Haus: Auslegung, Anwalt fragen (§ 46 Satz 2).', 'Rented house: interpretation, ask a lawyer (§ 46 sentence 2).', 'Сдаваемый дом: толкование, спросить юриста (§ 46 предл. 2).'],
+hvFoerdLuecke: ['Förderung: Lücke, nicht geprüft', 'Subsidy: gap, not checked', 'Субсидия: пробел'], hvFoerdNein: ['Keine Förderung für diese Heizart', 'No subsidy for this type', 'Субсидии для этого вида нет'],
+hvVor: ['Vorteile', 'Pros', 'Плюсы'], hvNach: ['Nachteile', 'Cons', 'Минусы'], hvErl: ['Erlaubt im Bestand (GModG)', 'Allowed in existing buildings (GModG)', 'Разрешено в существующих зданиях (GModG)'],
+hvRecht: ['Es gilt deutsches Recht, auch auf Englisch oder Russisch.', 'German law applies, also in English or Russian.', 'Действует немецкое право, в том числе на английском и русском.'],
+hvS_g: ['Wortlaut gelesen', 'wording read', 'текст прочитан'], hvS_n: ['Wortlaut nicht geprüft', 'wording not checked', 'текст не проверен'],
+hvS_p: ['prüfen vor Nutzung', 'check before use', 'проверить перед использованием'], hvS_a: ['Auslegung, Anwalt fragen', 'interpretation, ask a lawyer', 'толкование, спросить юриста'],
+hvSt_gepr: ['geprüft', 'verified', 'проверено'], hvSt_pruef: ['prüfen vor Nutzung', 'check before use', 'проверить перед использованием'], hvSt_veralt: ['veraltet', 'outdated', 'устарело'],
+hvSt_annahme: ['Annahme', 'assumption', 'допущение'], hvSt_luecke: ['Lücke', 'gap', 'пробел'], hvSt_ungeklaert: ['ungeklärt', 'unclear', 'не выяснено'],
+hvAbruf: ['Abruf {datum}', 'retrieved {datum}', 'получено {datum}'],
+hvBio: ['Bio-Treppe (§ 43 GModG) bei Neueinbau nach dem {d}', 'Bio staircase (§ 43 GModG) for new installation after {d}', 'Био-лестница (§ 43 GModG) при установке после {d}'],
+hvBioStufe: ['ab {j}: {p} %', 'from {j}: {p} %', 'с {j}: {p} %'],
+hvBioHilfe: ['Anteil der Wärme aus Biomethan, Bioöl, biogenem Flüssiggas oder Wasserstoff („{ueb}“). Ist der Eigentümer nicht Betreiber, erfüllt der Betreiber die Pflicht (§ 43 Abs. 6, Wortlaut gelesen {abruf}).', 'Share of heat from biomethane, bio-oil, biogenic LPG or hydrogen ("{ueb}"). If the owner is not the operator, the operator meets the duty (§ 43 para. 6, read {abruf}).', 'Доля тепла из биометана, биомасла, биогенного газа или водорода («{ueb}»). Если собственник не оператор, обязанность у оператора (§ 43 абз. 6, прочитано {abruf}).'],
+hvHilfeRechnung: ['Nutzwärme = Heizwärme + Warmwasser. Endenergie = Nutzwärme / Nutzungsgrad. 20 Jahre = Anschaffung − Förderung + 20 × (Energie + Wartung), jedes Ende der Spanne mit seinem Ende. Nicht gerechnet: Preissteigerung, Zins, Grundpreise, Zähler, Ersatzteile, Bio-Treppe, CO₂-Preis. CO₂ = Faktor / Nutzungsgrad × Nutzwärme.', 'Useful heat = heating + hot water. Final energy = useful heat / efficiency. 20 years = purchase − subsidy + 20 × (energy + maintenance), each end of the range with its own end. Not included: price rises, interest, base charges, meters, spare parts, bio staircase, CO₂ price. CO₂ = factor / efficiency × useful heat.', 'Тепло = отопление + горячая вода. Энергия = тепло / КПД. 20 лет = покупка − субсидия + 20 × (энергия + обслуживание), каждый конец со своим. Не учтены: рост цен, проценты, базовые платежи, счётчики, запчасти, био-лестница, цена CO₂.'],
+hvHilfeFoerd: ['Vermieter (natürliche Person): 30 % auf höchstens 28.000 €, nur Wärmepumpe, Erdwärme, Pellets, Anträge 2026; ab 2027 laut Richtlinie 15 % plus EU-Bonus (Bericht 16). Selbstnutzer-Boni: Lücke. Gas, Öl, Infrarot: keine; Holz, Fernwärme, Hybrid: nicht geprüft (Lücke).', 'Landlord (private person): 30 % of at most 28,000 €, only heat pump, ground source, pellets, applications 2026; from 2027 15 % plus EU bonus per guideline (report 16). Owner-occupier bonuses: gap. Gas, oil, infrared: none; firewood, district heat, hybrid: not checked (gap).', 'Арендодатель (физлицо): 30 % от макс. 28 000 €, только насос, геотермальный, пеллеты, заявки 2026; с 2027 15 % плюс бонус ЕС (отчёт 16). Бонусы владельцев: пробел. Газ, мазут, инфракрасный: нет; дрова, теплосеть, гибрид: не проверено (пробел).'],
+hvPlatz: ['Klimaanlage, Strom, Speicher – folgt', 'Air conditioning, power, storage – coming', 'Кондиционер, ток, накопитель – позже'],
+hvPlatzT: ['Kommt später. Bis dahin steht hier nichts Gerechnetes.', 'Comes later. Nothing calculated is shown until then.', 'Появится позже. До тех пор ничего не рассчитано.'],
+hvImport: ['Import aus Polen, Ukraine, Russland, Weißrussland (überwiegend Lücken)', 'Import from Poland, Ukraine, Russia, Belarus (mostly gaps)', 'Импорт из Польши, Украины, России, Беларуси (в основном пробелы)'],
+hvImportT: ['Preis bis zur Montage, Qualität, Eignung: überwiegend Lücken (Bericht 52, Abschnitt 6).', 'Price to installation, quality, suitability: mostly gaps (report 52, section 6).', 'Цена до монтажа, качество, пригодность: в основном пробелы (отчёт 52, разд. 6).'],
+hvKarteKnopf: ['Heizung vergleichen', 'Compare heating', 'Сравнить отопление'],
+hvFehler: ['Heizarten-Vergleich: {grund}', 'Heating comparison: {grund}', 'Сравнение отопления: {grund}'],
+hvFehlerRechnen: ['Die Rechnung ist fehlgeschlagen ({grund}). Bitte Annahmen zurücksetzen.', 'The calculation failed ({grund}). Please reset the assumptions.', 'Расчёт не удался ({grund}). Сбросьте допущения.'],
+hvFeld: ['Bitte eine Zahl von {min} bis {max} eingeben; bis dahin gilt der letzte gültige Wert.', 'Please enter a number from {min} to {max}; until then the last valid value applies.', 'Введите число от {min} до {max}; пока действует последнее верное значение.'],
+hvMeld: ['Ungültiger Wert „{was}“: es gilt die Vorgabe.', 'Invalid value "{was}": the default applies.', 'Недопустимое значение «{was}»: действует стандарт.'],
+mpHz_oel: ['Öl', 'Oil', 'Мазут'], mpHz_sole: ['Erdwärme-Pumpe', 'Ground source pump', 'Геотермальный насос'], mpHz_pellets: ['Pelletkessel', 'Pellet boiler', 'Пеллетный котёл'],
+mpHz_scheitholz: ['Scheitholzkessel', 'Firewood boiler', 'Дровяной котёл'], mpHz_fernwaerme: ['Fernwärme', 'District heating', 'Теплосеть'], mpHz_infrarot: ['Infrarot (Strom)', 'Infrared (electric)', 'Инфракрасный'],
+mpHz_hybrid: ['Hybrid Gas + Wärmepumpe', 'Hybrid gas + heat pump', 'Гибрид газ + насос'],
+mpHzStat_x: ['{status}', '{status}', '{status}'],
+mpHzHilfe_x: ['Spanne {von} bis {bis} €: {basis} {hinweis} Rechenweg, Quellen und Recht: Karte „Heizarten im Vergleich“ im Bereich Umbau.', 'Range {von} to {bis} €: {basis} {hinweis} Calculation, sources and law: card "Comparing heating types" in the renovation area.', 'Диапазон от {von} до {bis} €: {basis} {hinweis} Расчёт, источники, право: карта сравнения отопления.'],
+mpHzAndere: ['Gewählt in der Karte Heizarten im Vergleich: {art}. Die Knöpfe oben gelten nur für Wärmepumpe, Gas und noch offen.', 'Chosen in the heating comparison card: {art}. The buttons above only cover heat pump, gas, open.', 'Выбрано в карте сравнения: {art}. Кнопки выше только для насоса, газа и «не решено».']
+};
+window.TEXTE = window.TEXTE || {};
+Object.keys(T).forEach(function (k) { window.TEXTE[k] = { de: T[k][0], en: T[k][1], ru: T[k][2] }; });
+})();
 </script>
 <script>/* sprache.js */
 /* Sprachwahl DE/EN/RU für die neuen Planungsfunktionen. Texte stehen in daten/texte.js ({schlüssel:{de,en,ru}}).
@@ -10341,548 +10484,490 @@ Object.keys(T).forEach(function (k) { window.TEXTE[k] = T[k]; });
 
 </script>
 <script>/* huelle_kern.js */
-/* Rechenkern für „Wie gut gedämmt?“, „Frische Luft“, „Wasser“ und die Energiepreise (Welle D, Teil 2b): reine Rechnung ohne Oberfläche, läuft auch in Node
-   (tmp/huelle_kern_test.js lädt die Daten wie der Browser). Die Oberfläche steht in grundriss_huelle.js.
-   Baut auf ausbau_kern.js auf (Mengen, U-Werte, Transmissionsrechnung) und nutzt dieselbe Gradtagzahl; es gibt keine zweite Heizwärme-Rechnung.
-   Daten: daten/daemmung_seite.js (Standards, Förderung, Lüftung), daten/material_seite.js (anlage7), daten/wasser.js, daten/energiepreise.js, daten/sanierung.js (Fassade, Fenster).
-   Jede recherchierte Zahl kommt mit Beleg (Quelle, Abruf, Status) aus den Daten; was nicht in den Daten steht, ist eine ANNAHME (unten) und wird in der Seite als Annahme gezeigt.
-   Keine Bau-, Förder- oder Rechtsberatung (R006, R078): Fördersätze nur als Zahl mit Beleg, „vor Antrag am Original prüfen“. */
 (function (root) {
-  'use strict';
-  var AK = root.AUSBAU_KERN || (typeof require === 'function' ? require('./ausbau_kern.js') : null);
-  var DACH = root.GRUNDRISS_DACH || (typeof require === 'function' ? require('./grundriss_dach.js') : null);
-  var EK = root.ENERGIE_KERN || (typeof require === 'function' ? require('./energie_kern.js') : null);
-
-  /* ---------- Annahmen (eigene Wahl; in der Seite als Annahme gekennzeichnet) ---------- */
-  var ANNAHMEN = {
-    luftwechsel: 0.5,        /* 1/h: Mindestluftwechsel-Größenordnung; die Daten nennen keinen Wert (gm_dichtheit hat keine Zahl, n50 0,6 des Passivhauses ist ein Drucktestwert bei 50 Pa) */
-    luftwaerme: 0.34,        /* Wh/(m³·K): volumenbezogene Wärmekapazität der Luft (Lehrbuchwert; keine Fundstelle in daten/ oder recherche/31) */
-    wrgMitte: 0.85,          /* Mitte von lu_wrg_praxis (80 bis 90 %, Herstellerangabe) */
-    wirkungsgrad: { gas: 0.9, oel: 0.85 },   /* Heizkessel; keine Zeile in den Daten */
-    personen: 3,
-    ph: { wand: 0.15, dach: 0.15, glas: 0.7, boden: 0.15 },   /* Passivhaus: Faustwerte; das Institut legt Bauteil-U nicht fest (Kriterium ist der Heizwärmebedarf 15) */
-    ntwProPersonTag: { wc: 24, waschmaschine: 10 },           /* l: nur aus dem Satzungsbeispiel rw_satzung, keine Norm */
-    filter: 0.9,             /* Filterwirkungsgrad: nur aus dem Satzungsbeispiel rw_satzung (rw_filter ist eine Lücke) */
-    beiwertVon: 0.75,        /* Ertragsbeiwert: Satzungsbeispiel Ziegeldach 75 % bis Baunetzwissen 0,8 bis 0,9 (Spanne, die beide umfasst; w_wa_03) */
-    beiwertBis: 0.9,
-    bezugFlaecheZentral: 150 /* m²: lu_zentral nennt „Haus ca. 150 m²“; die Kosten werden proportional zur Wohnfläche umgerechnet (Annahme) */
-  };
-  var STANDARDS = ['bestand', 'gmodg', 'kfw', 'passivhaus'];
-  var KFW_STUFEN = ['eh85', 'eh70', 'eh55', 'eh40'];
-  var LUEFTUNG_ARTEN = ['keine', 'dez_abluft', 'dez_wrg', 'zentral'];
-  var HAERTEN = ['weich', 'mittel', 'hart'];
-  var TRAEGER = ['gas', 'oel'];
-
-  function DL() { return root.DATEN && root.DATEN.daemmung_seite; }
-  function WA() { return root.DATEN && root.DATEN.wasser; }
-  function EP() { return root.DATEN && root.DATEN.energiepreise; }
-  function SA() { return root.DATEN && root.DATEN.sanierung; }
-  function MAT() { return root.DATEN && root.DATEN.material; }
-  function zahlOk(x) { return typeof x === 'number' && isFinite(x); }
-  function runde(x, n) { var f = Math.pow(10, n || 0); return Math.round(x * f) / f; }
-  function klemme(x, lo, hi) { return Math.min(hi, Math.max(lo, x)); }
-
-  /* ---------- Belege ---------- */
-  function quelleInfo(id) {
-    var kandidaten = [DL(), WA(), EP(), MAT()];
-    for (var i = 0; i < kandidaten.length; i++) { var q = kandidaten[i] && kandidaten[i].quellen && kandidaten[i].quellen[id]; if (q) return q; }
-    return null;
-  }
-  function beleg(e, extra) {
-    if (!e) return null;
-    var q = quelleInfo(e.quelle);
-    var b = { id: e.id, name: e.name || '', status: e.status || '', abruf: e.abruf || '', quelle: q ? q.titel : (e.quelle || ''), url: q ? q.url : '', hinweis: e.hinweis || '',
-      von: e.von, bis: e.bis, einheit: e.einheit || '', gilt_ab: e.gilt_ab || '', gilt_bis: e.gilt_bis || '' };
-    if (extra) Object.keys(extra).forEach(function (k) { b[k] = extra[k]; });
-    return b;
-  }
-  function eintrag(daten, liste, id) {
-    var l = daten && daten[liste]; if (!l) return null;
-    for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
-    return null;
-  }
-  function dl(liste, id) { return eintrag(DL(), liste, id); }
-  function wa(liste, id) { return eintrag(WA(), liste, id); }
-
-  /* ====================================================================== Plan-Felder (tolerant: fehlt ein Feld, gilt der Standard; eine unbekannte Id ergibt eine Meldung) */
-  function planStandard(plan) {
-    var v = plan && plan.daemmstandard, res = { id: 'bestand', meldung: null, explizit: false, kfwStufe: 'eh55', kfwExplizit: false };
-    if (typeof v === 'string' && v !== '') {
-      if (STANDARDS.indexOf(v) >= 0) { res.id = v; res.explizit = true; } else res.meldung = { feld: 'daemmstandard', id: v };
-    }
-    var k = plan && plan.kfwstufe;
-    if (typeof k === 'string' && k !== '') { if (KFW_STUFEN.indexOf(k) >= 0) { res.kfwStufe = k; res.kfwExplizit = true; } else res.meldung = res.meldung || { feld: 'kfwstufe', id: k }; }
-    var m = plan && plan.mehrkosten_eigen;
-    res.mehrkostenEigen = zahlOk(m) && m >= 0 ? m : null;
-    return res;
-  }
-  function planLueftung(plan) {
-    var pl = plan && plan.lueftung && typeof plan.lueftung === 'object' ? plan.lueftung : {}, res = { art: 'keine', meldung: null, explizit: false, neubau: false, neubauExplizit: false };
-    if (typeof pl.art === 'string' && pl.art !== '') {
-      if (LUEFTUNG_ARTEN.indexOf(pl.art) >= 0) { res.art = pl.art; res.explizit = true; } else res.meldung = { feld: 'lueftung', id: pl.art };
-    }
-    if (typeof pl.neubau === 'boolean') { res.neubau = pl.neubau; res.neubauExplizit = true; }
-    else res.neubau = !!(plan && (plan.vorlage || plan.beispiel));   /* Annahme: ein Plan aus einer Vorlage gilt als Neubau */
-    return res;
-  }
-  /* Welle E, Teil 2: Personen im Haus, eine gemeinsame Stelle im Plan (plan.personen, 1 bis 12). Fehlt sie, gilt der ältere Wert plan.wasser.personen (alte Pläne), sonst die Annahme 3. */
-  function personenPlan(plan) {
-    var kandidaten = [plan && plan.personen, plan && plan.wasser && typeof plan.wasser === 'object' ? plan.wasser.personen : undefined];
-    for (var i = 0; i < kandidaten.length; i++) {
-      var p = Number(kandidaten[i]);
-      if (kandidaten[i] != null && kandidaten[i] !== '' && isFinite(p) && p >= 1 && p <= 12) return { n: Math.round(p), explizit: true };
-    }
-    return { n: ANNAHMEN.personen, explizit: false };
-  }
-  function planWasser(plan) {
-    var pw = plan && plan.wasser && typeof plan.wasser === 'object' ? plan.wasser : {}, res = { personen: ANNAHMEN.personen, regenwasser: true, gruendach: false, haerte: 'mittel', enthaertung: false, preis: null, meldung: null, explizit: {} };
-    var pp = personenPlan(plan);
-    if (pp.explizit) { res.personen = pp.n; res.explizit.personen = true; }
-    if (typeof pw.regenwasser === 'boolean') { res.regenwasser = pw.regenwasser; res.explizit.regenwasser = true; }
-    if (typeof pw.gruendach === 'boolean') res.gruendach = pw.gruendach;
-    if (typeof pw.enthaertung === 'boolean') res.enthaertung = pw.enthaertung;
-    if (typeof pw.haerte === 'string' && pw.haerte !== '') { if (HAERTEN.indexOf(pw.haerte) >= 0) { res.haerte = pw.haerte; res.explizit.haerte = true; } else res.meldung = { feld: 'haerte', id: pw.haerte }; }
-    var pr = Number(pw.preis);
-    if (isFinite(pr) && pr > 0 && pr < 50) res.preis = pr;
-    return res;
-  }
-  /* Gas- und Ölpreis: Startwerte aus daten/energiepreise.js, Eingabe überschreibt (plan.energiepreise = { traeger, gas_ct, oel_eur100l }) */
-  function energiepreise(plan) {
-    var d = EP(), pe = plan && plan.energiepreise && typeof plan.energiepreise === 'object' ? plan.energiepreise : {};
-    var gasE = eintrag({ e: d && d.eintraege }, 'e', 'gas_destatis_alle'), oelE = eintrag({ e: d && d.eintraege }, 'e', 'oel_tecson'), hwE = eintrag({ e: d && d.eintraege }, 'e', 'oel_heizwert_kwh'), bwE = eintrag({ e: d && d.eintraege }, 'e', 'oel_brennwert');
-    var res = { traeger: 'gas', meldung: null, gasEigen: false, oelEigen: false };
-    if (typeof pe.traeger === 'string' && pe.traeger !== '') { if (TRAEGER.indexOf(pe.traeger) >= 0) res.traeger = pe.traeger; else res.meldung = { feld: 'energiepreise', id: pe.traeger }; }
-    res.gasCt = zahlOk(pe.gas_ct) && pe.gas_ct > 0 && pe.gas_ct < 200 ? pe.gas_ct : (gasE ? gasE.wert : 11.58); res.gasEigen = zahlOk(pe.gas_ct) && pe.gas_ct > 0 && pe.gas_ct < 200;
-    res.oelEur100 = zahlOk(pe.oel_eur100l) && pe.oel_eur100l > 0 && pe.oel_eur100l < 1000 ? pe.oel_eur100l : (oelE ? oelE.wert : 180); res.oelEigen = zahlOk(pe.oel_eur100l) && pe.oel_eur100l > 0 && pe.oel_eur100l < 1000;
-    res.oelKwhProL = hwE ? hwE.wert : 10.05;
-    res.oelCt = oelCtProKwh(res.oelEur100, res.oelKwhProL);
-    res.oelCtBrennwert = bwE ? oelCtProKwh(res.oelEur100, bwE.wert) : null;
-    res.ct = res.traeger === 'oel' ? res.oelCt : res.gasCt;
-    res.wirkungsgrad = ANNAHMEN.wirkungsgrad[res.traeger];
-    res.belegGas = beleg(gasE); res.belegOel = beleg(oelE); res.belegOelKwh = beleg(hwE); res.belegOelBrennwert = beleg(bwE);
-    return res;
-  }
-  /* €/100 l durch kWh/l: 1 € je 100 l sind 1 ct je l, also ergibt die Teilung durch kWh/l direkt ct/kWh */
-  function oelCtProKwh(eur100l, kwhProL) { return zahlOk(eur100l) && zahlOk(kwhProL) && kwhProL > 0 ? eur100l / kwhProL : null; }
-  /* Heizkosten je Jahr aus Nutzenergie: Q / Wirkungsgrad × Preis */
-  function heizkosten(qKwh, ep) { return zahlOk(qKwh) ? qKwh / ep.wirkungsgrad * ep.ct / 100 : null; }
-
-  /* ====================================================================== A: Dämmstandards */
-  function a7(k) { var m = MAT(); return m && m.anlage7 && m.anlage7[k] ? m.anlage7[k] : null; }
-  function uZeile(wert, e, annahme, extra) {
-    var o = { wert: wert, annahme: !!annahme, beleg: e ? beleg(e) : null };
-    if (extra) Object.keys(extra).forEach(function (k) { o[k] = extra[k]; });
-    return o;
-  }
-  function a7Zeile(k) {
-    var z = a7(k);
-    if (!z) return null;
-    return { wert: z.u, annahme: false, beleg: beleg({ id: z.id, name: z.name, quelle: z.quelle, abruf: z.abruf, status: z.status, einheit: 'W/(m²·K)', von: z.u, bis: z.u }) };
-  }
-  /* Vier Standards. u = Zielwerte je Bauteil (nur wo die Daten sie hergeben oder eine sichtbare Annahme gilt), heizRef = Heizwärme-Referenz, foerderung = Zeilen der Daten. */
-  function daemmstandards() {
-    var ph = ANNAHMEN.ph, ist = dl('altbau_heizwaerme', 'ab_efh_ist'), phHz = dl('passivhaus', 'ph_heizwaerme'), phLuft = dl('passivhaus', 'ph_luft');
-    var res = {};
-    res.bestand = { id: 'bestand', u: null, heizRef: ist ? { wert: ist.von, einheit: ist.einheit, beleg: beleg(ist) } : null,
-      hinweis: 'ohneZiel' };
-    res.gmodg = { id: 'gmodg', u: { wand: a7Zeile('wand'), dach: a7Zeile('dach'), glas: a7Zeile('glas'), boden: a7Zeile('decke_unten') },
-      heizRef: null };
-    res.kfw = { id: 'kfw', u: null, heizRef: null, stufen: {}, boni: beleg(dl('kfw', 'kfw261_boni')), stand: beleg(dl('kfw', 'kfw261_stand')), kredit297: beleg(dl('kfw', 'kfw297')), mehrkosten: beleg(dl('kfw', 'kfw_mehrkosten')) };
-    KFW_STUFEN.forEach(function (s) {
-      var e = dl('kfw', 'kfw261_' + s);
-      res.kfw.stufen[s] = e ? { id: s, eeProz: e.ee_proz, nhProz: e.nh_proz, eeEur: e.ee_eur, nhEur: e.nh_eur, beleg: beleg(e) } : null;
-    });
-    res.passivhaus = { id: 'passivhaus', u: { wand: uZeile(ph.wand, null, true), dach: uZeile(ph.dach, null, true), glas: uZeile(ph.glas, null, true), boden: uZeile(ph.boden, null, true) },
-      heizRef: phHz ? { wert: phHz.von, einheit: phHz.einheit, beleg: beleg(phHz) } : null, luftdicht: phLuft ? beleg(phLuft) : null, mehrkosten: beleg(dl('passivhaus', 'ph_mehrkosten')) };
-    return res;
-  }
-
-  /* Transmissionsanteil bei gegebenem Ziel: je Bauteil gilt der kleinere U-Wert aus Ist (Materialwahl) und Ziel. v: 'mitte' | 'lo' | 'hi' */
-  function uVariante(b, v) {
-    var w = b.wand, f = b.fenster, au = b.annahmeU;
-    var sw = v === 'lo' ? w.uNiedrig : (v === 'hi' ? w.uHoch : w.u), sf = v === 'lo' ? f.uNiedrig : (v === 'hi' ? f.uHoch : f.u);
-    return { wand: sw, fenster: sf, tuer: au.tuer, dach: au.dach, boden: au.boden };
-  }
-  function uMitZiel(ist, ziel) {
-    var u = { wand: ist.wand, fenster: ist.fenster, tuer: ist.tuer, dach: ist.dach, boden: ist.boden };
-    if (ziel) {
-      if (ziel.wand) u.wand = Math.min(ist.wand, ziel.wand.wert);
-      if (ziel.glas) u.fenster = Math.min(ist.fenster, ziel.glas.wert);
-      if (ziel.dach) u.dach = Math.min(ist.dach, ziel.dach.wert);
-      if (ziel.boden) u.boden = Math.min(ist.boden, ziel.boden.wert);
-    }
-    return u;
-  }
-
-  /* Netto-Luftvolumen: Grundfläche der Wohnräume mal Raumhöhe, ohne Keller (Annahme; nicht das Außenvolumen der Kompaktheit) */
-  function luftVolumen(mg) {
-    var v = 0, fl = 0;
-    (mg.etagen || []).forEach(function (E) {
-      if (E.keller) return;
-      E.raeume.forEach(function (r) { v += r.grund * E.hoehe; fl += r.grund; });
-    });
-    return { m3: v, grundflaeche: fl };
-  }
-  /* Lüftungsverlust: H_V = 0,34 Wh/(m³·K) × n × V; Q_V = H_V × Gradtagzahl × 24 / 1000; mit Wärmerückgewinnung × (1 − Wärmebereitstellungsgrad) */
-  function lueftungsverlust(volumen_m3, luftwechsel, wrg, gradtagzahl) {
-    var n = zahlOk(luftwechsel) ? luftwechsel : ANNAHMEN.luftwechsel, hv = ANNAHMEN.luftwaerme * n * volumen_m3;
-    var eta = zahlOk(wrg) ? wrg : 0;
-    return { HV: hv * (1 - eta), HVohne: hv, kwh: hv * (1 - eta) * gradtagzahl * 24 / 1000, kwhOhne: hv * gradtagzahl * 24 / 1000, eta: eta, n: n };
-  }
-  function wrgGrad(art) {
-    if (art !== 'dez_wrg' && art !== 'zentral') return null;
-    var e = dl('lueftung', 'lu_wrg_praxis');
-    return { mitte: ANNAHMEN.wrgMitte, von: e ? e.von / 100 : 0.8, bis: e ? e.bis / 100 : 0.9, beleg: beleg(e) };
-  }
-
-  /* Heizwärme des gezeichneten Hauses mit Standard und Lüftung: Transmission (ausbau_kern, mit Zielwerten des Standards) plus Lüftung. */
-  function heizwaermeMitStandard(plan, optionen) {
-    var opt = optionen || {}, std = opt.standard || planStandard(plan).id, art = opt.lueftungsart != null ? opt.lueftungsart : planLueftung(plan).art;
-    var b = opt.bilanz || AK.hausBilanz(plan);
-    if (!b.ok) return { ok: false, grund: b.fehler || 'keinPlan', standard: std };
-    var sd = daemmstandards()[std] || daemmstandards().bestand, res = { ok: true, standard: std, art: art, gradtage: b.gradtage, bilanz: b };
-    var mg = b.mengen, wfl = mg.summe.wohnflaeche, vol = luftVolumen(mg), g = b.gradtage.wert;
-    res.wohnflaeche = wfl;
-    /* Lüftung: unabhängig von der Transmission rechenbar */
-    var wrg = wrgGrad(art);
-    var vMitte = lueftungsverlust(vol.m3, ANNAHMEN.luftwechsel, wrg ? wrg.mitte : 0, g);
-    var vLo = lueftungsverlust(vol.m3, ANNAHMEN.luftwechsel, wrg ? wrg.bis : 0, g), vHi = lueftungsverlust(vol.m3, ANNAHMEN.luftwechsel, wrg ? wrg.von : 0, g);
-    var vOhne = lueftungsverlust(vol.m3, ANNAHMEN.luftwechsel, 0, g);
-    res.lueftung = { volumen: vol.m3, n: vMitte.n, wrg: wrg, kwh: vMitte.kwh, kwhLo: vLo.kwh, kwhHi: vHi.kwh, kwhOhneWrg: vOhne.kwh, kwhM2: wfl > 0 ? vMitte.kwh / wfl : null,
-      kwhM2Lo: wfl > 0 ? vLo.kwh / wfl : null, kwhM2Hi: wfl > 0 ? vHi.kwh / wfl : null, kwhM2Ohne: wfl > 0 ? vOhne.kwh / wfl : null, HV: vMitte.HV };
-    if (!b.heizung || !b.heizung.ok) { res.transmission = null; res.gesamt = null; res.grund = b.heizung ? b.heizung.grund : 'keineHuelle'; res.ok = true; res.ohneTransmission = true; return res; }
-    var h = b.heizung, fl = h.flaechen;
-    function lauf(v, ziel) { return AK.heizwaermeBedarf(fl, uMitZiel(uVariante(b, v), ziel), g); }
-    var zl = sd.u, mitte = lauf('mitte', zl), lo = lauf('lo', zl), hi = lauf('hi', zl);
-    var istM = lauf('mitte', null), istLo = lauf('lo', null), istHi = lauf('hi', null);
-    function m2(x) { return wfl > 0 ? x / wfl : null; }
-    res.transmission = { kwh: mitte.kwh, kwhLo: lo.kwh, kwhHi: hi.kwh, kwhM2: m2(mitte.kwh), kwhM2Lo: m2(lo.kwh), kwhM2Hi: m2(hi.kwh), HT: mitte.HT,
-      istKwh: istM.kwh, istKwhLo: istLo.kwh, istKwhHi: istHi.kwh, istKwhM2: m2(istM.kwh) };
-    res.gesamt = { kwh: mitte.kwh + vMitte.kwh, kwhLo: lo.kwh + vLo.kwh, kwhHi: hi.kwh + vHi.kwh, kwhM2: m2(mitte.kwh + vMitte.kwh), kwhM2Lo: m2(lo.kwh + vLo.kwh), kwhM2Hi: m2(hi.kwh + vHi.kwh) };
-    /* Bauteile über dem Ziel (Materialwahl gegen Zielwert); Dach und Boden sind Annahmen der Rechnung (Anlage 7), nicht gewählt */
-    var ist = uVariante(b, 'mitte'), ueber = [];
-    if (zl) {
-      [['wand', 'wand', ist.wand, false], ['fenster', 'glas', ist.fenster, false], ['dach', 'dach', ist.dach, true], ['boden', 'boden', ist.boden, true]].forEach(function (x) {
-        var z = zl[x[1]];
-        if (z && x[2] > z.wert + 1e-9) ueber.push({ bauteil: x[0], ist: x[2], ziel: z.wert, annahmeIst: x[3], zielAnnahme: !!z.annahme });
-      });
-    }
-    res.ueberZiel = ueber; res.ziel = zl; res.uIst = ist; res.uWirk = uMitZiel(ist, zl);
-    return res;
-  }
-
-  /* ---------- Förderung nach BEG Einzelmaßnahmen (Hülle und Lüftung: 15 %, iSFP +5 Prozentpunkte nur auf den Teil über 30.000 €) ---------- */
-  function begFoerderung(kosten, mitIsfp, satzId) {
-    var sz = dl('beg_einzelmassnahmen', satzId || 'beg_huelle'), hoe = dl('beg_einzelmassnahmen', 'beg_hoechst');
-    if (!sz || !hoe || !zahlOk(kosten) || kosten <= 0) return 0;
-    var satz = sz.von / 100, bonus = (sz.isfp_bonus || 0) / 100, h1 = hoe.we1, h2 = hoe.isfp_we1;
-    if (!mitIsfp) return satz * Math.min(kosten, h1);
-    var k = Math.min(kosten, h2), f = satz * k;
-    if (kosten >= h1) f += bonus * Math.max(0, k - h1);
-    return f;
-  }
-  function begSpanne(kVon, kBis, satzId) { return { von: begFoerderung(kVon, false, satzId), bis: begFoerderung(kBis, true, satzId) }; }
-
-  /* Mehrkosten bis zum Ziel: Fassade und Fenster mit den Preisen aus daten/sanierung.js (Ratgeber, prüfen vor Nutzung); Dach und Boden haben keinen Preis (Lücke). */
-  function sanZeile(id) { var s = SA(); if (!s) return null; for (var i = 0; i < s.bauteile.length; i++) if (s.bauteile[i].id === id) return s.bauteile[i]; return null; }
-  function sanBeleg(z) { return z ? { id: z.id, name: z.name, quelle: z.quelle, abruf: (SA() && SA().abruf) || '', status: 'prüfen vor Nutzung', einheit: z.einheit, von: z.von, bis: z.bis, url: '' } : null; }
-  function mehrkostenUndFoerderung(plan, standardId, optionen) {
-    var opt = optionen || {}, ps = planStandard(plan), id = standardId || ps.id, pl = planLueftung(plan), neubau = opt.neubau != null ? opt.neubau : pl.neubau;
-    var stufe = opt.kfwStufe || ps.kfwStufe, eigen = opt.mehrkostenEigen !== undefined ? opt.mehrkostenEigen : ps.mehrkostenEigen;
-    var sds = daemmstandards(), hw = opt.heizwaerme || heizwaermeMitStandard(plan, { standard: id });
-    var res = { standard: id, neubau: neubau, mehrkosten: { von: 0, bis: 0, art: 'keine', teile: [], luecken: [] }, foerderung: { von: 0, bis: 0, art: 'keine', hinweise: [], belege: [] }, ok: true };
-    var mk = res.mehrkosten;
-    if (id === 'bestand') { mk.art = 'keine'; return res; }
-    if (eigen != null && eigen > 0) { mk.von = eigen; mk.bis = eigen; mk.art = 'eigen'; }
-    else if (id === 'kfw') { mk.art = 'luecke'; mk.luecken.push('kfw_mehrkosten'); mk.beleg = sds.kfw.mehrkosten; }
-    else if (hw && hw.ok && hw.ueberZiel && hw.bilanz.heizung && hw.bilanz.heizung.ok) {
-      var h = hw.bilanz.mengen.huelle, von = 0, bis = 0;
-      hw.ueberZiel.forEach(function (u) {
-        if (u.bauteil === 'wand') {
-          var z = sanZeile('fassade');
-          if (z && h) { var t = { bauteil: 'wand', menge: h.wandNetto, einheit: 'm²', von: h.wandNetto * z.von, bis: h.wandNetto * z.bis, preis: z, beleg: sanBeleg(z) }; mk.teile.push(t); von += t.von; bis += t.bis; }
-        } else if (u.bauteil === 'fenster') {
-          var zf = sanZeile('fenster');
-          if (zf && h) { var tf = { bauteil: 'fenster', menge: h.fensterStueck, einheit: 'Stück', von: h.fensterStueck * zf.von, bis: h.fensterStueck * zf.bis, preis: zf, beleg: sanBeleg(zf) }; mk.teile.push(tf); von += tf.von; bis += tf.bis; }
-        } else mk.luecken.push(u.bauteil);
-      });
-      mk.von = von; mk.bis = bis; mk.art = mk.teile.length || mk.luecken.length ? 'schaetzung' : 'erreicht';
-      if (mk.art === 'schaetzung' && !mk.teile.length) mk.art = 'luecke';
-    }
-    /* Förderung */
-    var fo = res.foerderung;
-    if (!neubau) {
-      if (id === 'gmodg' || id === 'passivhaus') {
-        var s = begSpanne(mk.von, mk.bis, 'beg_huelle');
-        if (mk.art === 'schaetzung' || mk.art === 'eigen') { fo.von = s.von; fo.bis = s.bis; fo.art = 'beg'; fo.belege.push(beleg(dl('beg_einzelmassnahmen', 'beg_huelle')), beleg(dl('beg_einzelmassnahmen', 'beg_hoechst'))); }
-        else { fo.art = 'beg_offen'; fo.belege.push(beleg(dl('beg_einzelmassnahmen', 'beg_huelle'))); }
-      } else if (id === 'kfw') {
-        var st = sds.kfw.stufen[stufe];
-        if (st) { fo.von = st.eeEur; fo.bis = st.nhEur; fo.art = 'kfw261'; fo.stufe = stufe; fo.belege.push(st.beleg, sds.kfw.boni, sds.kfw.stand); }
-      }
-    } else {
-      if (id === 'kfw') { fo.art = 'kfw297'; fo.belege.push(sds.kfw.kredit297); }
-      else fo.art = 'neubauKeine';
-    }
-    return res;
-  }
-
-  /* ---------- Amortisation ---------- */
-  /* Jahre = (Mehrkosten − Förderung) / (Ersparnis kWh × Preis ct / 100 / Wirkungsgrad − Zusatzkosten €/a). Keine Zinsen, Preis konstant (Annahmen, in der Seite genannt).
-     Nie Unendlich oder NaN: bei fehlenden Angaben, Ersparnis ≤ 0 oder ungültigen Zahlen { ok: false, grund }. */
-  function amortisation(mehrkostenNetto, ersparnisKwhProJahr, preisCtProKwh, wirkungsgrad, zusatzEurProJahr) {
-    if (!zahlOk(mehrkostenNetto) || !zahlOk(ersparnisKwhProJahr) || !zahlOk(preisCtProKwh) || !zahlOk(wirkungsgrad) || wirkungsgrad <= 0) return { ok: false, grund: 'eingabe' };
-    if (preisCtProKwh <= 0) return { ok: false, grund: 'keinPreis' };
-    var jahrEur = ersparnisKwhProJahr * preisCtProKwh / 100 / wirkungsgrad - (zahlOk(zusatzEurProJahr) ? zusatzEurProJahr : 0);
-    if (!(jahrEur > 1e-9)) return { ok: false, grund: 'keineErsparnis', ersparnisEur: jahrEur };
-    if (mehrkostenNetto <= 0) return { ok: true, jahre: 0, ersparnisEur: jahrEur, gedeckt: true };
-    return { ok: true, jahre: mehrkostenNetto / jahrEur, ersparnisEur: jahrEur };
-  }
-  /* Spanne: günstigster Fall (niedrige Kosten, hohe Förderung, hohe Ersparnis) bis ungünstigster Fall (hohe Kosten, niedrige Förderung, niedrige Ersparnis) */
-  function amortisationSpanne(p) {
-    var best = amortisation(p.kostenVon - p.foerderBis, p.kwhHi, p.ct, p.eta, p.zusatzLo);
-    var schlecht = amortisation(p.kostenBis - p.foerderVon, p.kwhLo, p.ct, p.eta, p.zusatzHi);
-    if (!best.ok) return { ok: false, grund: best.grund };
-    if (!schlecht.ok) return { ok: false, grund: schlecht.grund === 'keineErsparnis' ? 'ersparnisUnsicher' : schlecht.grund, von: best.jahre };
-    return { ok: true, von: best.jahre, bis: schlecht.jahre, ersparnisEurVon: schlecht.ersparnisEur, ersparnisEurBis: best.ersparnisEur };
-  }
-  /* Dämmstandard: Ersparnis aus dem Unterschied der Transmission (Ist gegen Standard), Preis aus den Energiepreisen */
-  function daemmAmortisation(plan, standardId, optionen) {
-    var opt = optionen || {}, ep = opt.energiepreise || energiepreise(plan);
-    var hw = opt.heizwaerme || heizwaermeMitStandard(plan, { standard: standardId, lueftungsart: 'keine' });
-    var mf = opt.mehrkosten || mehrkostenUndFoerderung(plan, standardId, { heizwaerme: hw });
-    var res = { ok: false, grund: 'keineAngabe', hw: hw, mf: mf, ep: ep };
-    if (!hw.ok || !hw.transmission) { res.grund = 'keineHeizwaerme'; return res; }
-    if (standardId === 'bestand') { res.grund = 'keinStandard'; return res; }
-    if (standardId === 'kfw') { res.grund = 'kfwOhneHeizwaerme'; return res; }   /* KfW legt keine U-Werte fest: die Daten geben keine Heizwärme für die Stufe her */
-    if (mf.mehrkosten.art === 'luecke' || mf.mehrkosten.art === 'keine') { res.grund = 'keineMehrkosten'; return res; }
-    var t = hw.transmission, ersMitte = t.istKwh - t.kwh, ersLo = Math.max(0, t.istKwhLo - t.kwhLo), ersHi = Math.max(0, t.istKwhHi - t.kwhHi);
-    var lo = Math.min(ersLo, ersHi), hi = Math.max(ersLo, ersHi);
-    res.ersparnisKwh = { mitte: ersMitte, von: lo, bis: hi };
-    if (mf.mehrkosten.art === 'erreicht') { res.grund = 'schonErreicht'; return res; }
-    var a = amortisationSpanne({ kostenVon: mf.mehrkosten.von, kostenBis: mf.mehrkosten.bis, foerderVon: mf.foerderung.von, foerderBis: mf.foerderung.bis, kwhLo: lo, kwhHi: hi, ct: ep.ct, eta: ep.wirkungsgrad });
-    res.amort = a; res.ok = a.ok; res.grund = a.ok ? null : a.grund;
-    return res;
-  }
-
-  /* ====================================================================== B: Lüftung */
-  function raeumeFuerLueftung(mg) {
-    var c = { aufenthalt: 0, kueche: 0, nass: 0 };
-    var zuluft = { wohnen: 1, schlafen: 1, kind: 1, arbeiten: 1, essen: 1, kueche: 1, '': 1 };
-    (mg.raeume || []).forEach(function (r) {
-      if (r.nutzung === 'bad' || r.nutzung === 'wc') { c.nass += 1; return; }
-      if (r.kueche || r.nutzung === 'kueche') c.kueche += 1;
-      if (zuluft[r.nutzung] || r.kueche) c.aufenthalt += 1;
-    });
-    return c;
-  }
-  function strompreisCt() {
-    var e = EK && EK.eint ? EK.eint('strompreis', 'strompreis_haushalt') : null;
-    return { ct: e ? e.von : 37, beleg: e && EK.beleg ? EK.beleg(e) : null };
-  }
-  function lueftungKosten(plan, art, optionen) {
-    var opt = optionen || {}, pl = planLueftung(plan), neubau = opt.neubau != null ? opt.neubau : pl.neubau, mg = opt.mengen || AK.mengenAusPlan(plan);
-    if (!mg.ok) return { ok: false, grund: mg.fehler || 'keinPlan' };
-    var wfl = mg.summe.wohnflaeche, r = raeumeFuerLueftung(mg), preisKey = neubau ? 'neubau' : 'altbau';
-    var res = { ok: true, art: art, neubau: neubau, raeume: r, wohnflaeche: wfl, einmalig: { von: 0, bis: 0 }, stueck: [], strom: null, luecken: [], hinweise: [], belege: [], foerderung: { von: 0, bis: 0, art: 'keine', belege: [] } };
-    var ab = dl('lueftung', 'lu_dez_abluft'), wrg = dl('lueftung', 'lu_dez_wrg'), z1 = dl('lueftung', 'lu_zentral'), z2 = dl('lueftung', 'lu_zentral2');
-    var sp = opt.strompreis || strompreisCt();
-    res.strompreis = sp;
-    if (art === 'keine') { res.filter = null; return res; }
-    if (art === 'dez_abluft') {
-      var n1 = r.nass + r.kueche, p1 = ab[preisKey];
-      res.stueck.push({ art: 'abluft', anzahl: n1, preis: p1, summe: n1 * p1, beleg: beleg(ab) });
-      res.einmalig.von = res.einmalig.bis = n1 * p1; res.belege.push(beleg(ab));
-    } else if (art === 'dez_wrg') {
-      var nz = r.aufenthalt, nn = r.nass, pz = wrg[preisKey], pn = ab[preisKey];
-      res.stueck.push({ art: 'wrg', anzahl: nz, preis: pz, summe: nz * pz, beleg: beleg(wrg) });
-      res.stueck.push({ art: 'abluft', anzahl: nn, preis: pn, summe: nn * pn, beleg: beleg(ab) });
-      res.einmalig.von = res.einmalig.bis = nz * pz + nn * pn; res.belege.push(beleg(wrg), beleg(ab));
-    } else if (art === 'zentral') {
-      var f = wfl / ANNAHMEN.bezugFlaecheZentral;
-      res.einmalig.von = z2.von * f; res.einmalig.bis = z2.bis * f; res.belege.push(beleg(z1), beleg(z2));
-      res.zentralFaktor = f; res.stueck.push({ art: 'zentral', anzahl: 1, von: z2.von * f, bis: z2.bis * f, beleg: beleg(z2) });
-      if (!neubau) res.hinweise.push('zentralAltbau');
-    }
-    /* Strom: bezogen auf die Wohnfläche. lu_strom nennt „hochwertige Anlage“, nicht die Bauart: nur Anlagen mit Wärmerückgewinnung bekommen eine Zahl. */
-    if (art === 'dez_wrg' || art === 'zentral') {
-      var s1 = dl('lueftung', 'lu_strom'), s2 = dl('lueftung', 'lu_strom2');
-      var jeM2Von = s1.von / 100, jeM2Bis = s2.von / 120, kwhVon = jeM2Von * wfl, kwhBis = jeM2Bis * wfl;
-      res.strom = { kwhVon: kwhVon, kwhBis: kwhBis, eurVon: kwhVon * sp.ct / 100, eurBis: kwhBis * sp.ct / 100, ct: sp.ct, belege: [beleg(s1), beleg(s2)], strompreisBeleg: sp.beleg };
-    } else res.luecken.push('strom');
-    res.filter = { monate: { von: dl('lueftung', 'lu_filter_wechsel').von, bis: dl('lueftung', 'lu_filter_wechsel').bis }, beleg: beleg(dl('lueftung', 'lu_filter_wechsel')), beispiel: beleg(dl('lueftung', 'lu_filter_preis')), luecke: beleg(dl('lueftung', 'lu_luecke')) };
-    /* Förderung: BEG Einzelmaßnahmen gelten für bestehende Gebäude; Neubau keine */
-    var fo = res.foerderung, satz = dl('beg_einzelmassnahmen', 'beg_lueftung_satz');
-    if (!neubau) {
-      var sps = begSpanne(res.einmalig.von, res.einmalig.bis, 'beg_lueftung_satz');
-      fo.von = sps.von; fo.bis = sps.bis; fo.art = 'beg';
-      fo.belege.push(beleg(satz), beleg(dl('beg_einzelmassnahmen', 'beg_lueftung_wbg')), beleg(dl('beg_einzelmassnahmen', 'beg_lueftung_nachweis')));
-    } else { fo.art = 'neubauKeine'; fo.belege.push(beleg(dl('beg_einzelmassnahmen', 'beg_alter'))); }
-    return res;
-  }
-  /* Lüftung gegen „keine“: Heizwärme-Ersparnis durch Wärmerückgewinnung, Strom dagegen, Amortisation (Spanne) */
-  function lueftungAmortisation(plan, art, optionen) {
-    var opt = optionen || {}, ep = opt.energiepreise || energiepreise(plan);
-    var hw = opt.heizwaerme || heizwaermeMitStandard(plan, { lueftungsart: art });
-    var k = opt.kosten || lueftungKosten(plan, art, opt);
-    var res = { ok: false, grund: 'keineAngabe', hw: hw, k: k, ep: ep };
-    if (!k.ok || !hw.ok) { res.grund = 'keinPlan'; return res; }
-    if (art === 'keine') { res.grund = 'keineLueftung'; return res; }
-    if (art === 'dez_abluft') { res.grund = 'keineErsparnis'; res.ersparnisKwh = { von: 0, bis: 0 }; return res; }
-    var L = hw.lueftung, lo = L.kwhOhneWrg - L.kwhHi, hi = L.kwhOhneWrg - L.kwhLo;
-    res.ersparnisKwh = { mitte: L.kwhOhneWrg - L.kwh, von: lo, bis: hi };
-    var s = k.strom;
-    var a = amortisationSpanne({ kostenVon: k.einmalig.von, kostenBis: k.einmalig.bis, foerderVon: k.foerderung.von, foerderBis: k.foerderung.bis, kwhLo: lo, kwhHi: hi, ct: ep.ct, eta: ep.wirkungsgrad,
-      zusatzLo: s ? s.eurVon : 0, zusatzHi: s ? s.eurBis : 0 });
-    res.amort = a; res.ok = a.ok; res.grund = a.ok ? null : a.grund;
-    return res;
-  }
-
-  /* ====================================================================== C: Wasser */
-  function shoelace(pts) {
-    var s = 0;
-    for (var i = 0; i < pts.length; i++) { var a = pts[i], b = pts[(i + 1) % pts.length]; s += a[0] * b[1] - b[0] * a[1]; }
-    return Math.abs(s) / 2;
-  }
-  /* Dachfläche für Regen: Regen fällt senkrecht, darum zählt die waagerechte Projektion (Grundfläche des Daches mit Überstand), nicht die geneigte Fläche */
-  function dachflaecheRegen(plan) {
-    if (!plan || !plan.dach || !DACH) return { ok: false, grund: 'keinDach' };
-    var ei = DACH.dachEtage(plan);
-    if (ei < 0) return { ok: false, grund: 'keineRaeume' };
-    var eb = DACH.ebenen(plan), rect = DACH.huellRechteck(plan.etagen[ei]);
-    if (!rect) return { ok: false, grund: 'keineRaeume' };
-    var df = DACH.dachFlaechen(plan.dach, rect, eb[ei].oben + eb[ei].decke), proj = 0;
-    df.faces.forEach(function (f) { proj += shoelace(f.pts.map(function (p) { return [p[0], p[1]]; })); });
-    var geneigt = null;
-    if (EK) { var d = EK.dachflaechen(plan, 'Bremen'); if (!d.fehler) { geneigt = 0; d.flaechen.forEach(function (f) { geneigt += f.flaeche; }); } }
-    return { ok: true, projektion: proj, geneigt: geneigt, form: df.form };
-  }
-  function niederschlag(land) {
-    var d = WA(); if (!d) return null;
-    var e = wa('niederschlag', 'nd_' + land) || null, fallback = false;
-    if (!e) { e = wa('niederschlag', 'nd_DE'); fallback = true; }
-    if (!e) return null;
-    return { mm: e.von, land: e.land, kuerzel: e.kuerzel, naeherung: !!e.naeherung, region: e.region_dwd || '', fallback: fallback, beleg: beleg(e), attribution: d.meta ? d.meta.dwd_attribution : '', lizenz: d.meta ? d.meta.dwd_lizenz : '',
-      j2024: e.j2024, j2025: e.j2025 };
-  }
-  function wasserpreis(land) {
-    var e = wa('wasserpreise', 'wp_tw_' + land);
-    if (!e) return null;
-    return { trinkwasser: e.von, abwasser: e.abwasser, land: e.land, beleg: beleg(e) };
-  }
-  function regenwasser(dachflaecheM2, land, personen, optionen) {
-    var opt = optionen || {}, nd = niederschlag(land), res = { ok: false };
-    if (!nd || !(dachflaecheM2 > 0)) return { ok: false, grund: !nd ? 'keinNiederschlag' : 'keineDachflaeche' };
-    var pers = personen > 0 ? personen : ANNAHMEN.personen;
-    res.niederschlag = nd; res.dachflaeche = dachflaecheM2; res.personen = pers;
-    if (opt.gruendach) { res.ok = true; res.gruendach = true; res.ertragNichtBerechenbar = true; res.belegGruen = beleg(wa('regenwasser', 'rw_ertragsbeiwert_gruen')); return res; }
-    var sat = wa('regenwasser', 'rw_satzung'), A = ANNAHMEN;
-    var bei = { von: A.beiwertVon, bis: A.beiwertBis }, f = A.filter;
-    res.formel = beleg(wa('regenwasser', 'rw_formel')); res.beiwert = { von: bei.von, bis: bei.bis, beleg: beleg(wa('regenwasser', 'rw_ertragsbeiwert')), satzung: beleg(sat) };
-    res.filter = { wert: f, beleg: beleg(sat), luecke: beleg(wa('regenwasser', 'rw_filter')) };
-    var basis = nd.mm * dachflaecheM2 * f;
-    res.ertrag = { von: basis * bei.von, bis: basis * bei.bis, mitte: basis * (bei.von + bei.bis) / 2 };   /* l/a */
-    var ntwTag = A.ntwProPersonTag.wc + A.ntwProPersonTag.waschmaschine, bedarfNtw = ntwTag * pers * 365;
-    res.bedarfNtw = bedarfNtw; res.bedarfWc = A.ntwProPersonTag.wc * pers * 365; res.bedarfWaesche = A.ntwProPersonTag.waschmaschine * pers * 365;
-    res.satzung = beleg(sat);
-    var vb = wa('wasserpreise', 'wp_verbrauch'), gesamt = (vb ? vb.von : 122) * pers * 365;
-    res.gesamtbedarf = gesamt; res.belegVerbrauch = beleg(vb);
-    function deck(e) { return Math.min(1, e / bedarfNtw); }
-    res.deckung = { von: deck(res.ertrag.von), bis: deck(res.ertrag.bis), mitte: deck(res.ertrag.mitte) };       /* Anteil von WC und Waschmaschine, bei 100 % gedeckelt */
-    res.gedeckt = { von: Math.min(res.ertrag.von, bedarfNtw), bis: Math.min(res.ertrag.bis, bedarfNtw), mitte: Math.min(res.ertrag.mitte, bedarfNtw) };   /* l/a */
-    res.autarkie = { von: res.gedeckt.von / gesamt, bis: res.gedeckt.bis / gesamt, mitte: res.gedeckt.mitte / gesamt };   /* Anteil des gesamten Wasserbedarfs */
-    res.ueberschuss = res.ertrag.mitte > bedarfNtw;
-    /* Speicher */
-    var sp = wa('regenwasser', 'rw_speicher');
-    res.speicher = { jeNutzer: { von: sp.l_je_nutzer_von * pers, bis: sp.l_je_nutzer_bis * pers }, jeM2: { von: sp.l_je_m2_von * dachflaecheM2, bis: sp.l_je_m2_bis * dachflaecheM2 }, beleg: beleg(sp) };
-    /* Kosten, Ersparnis */
-    var kosten = wa('regenwasser', 'rw_kosten');
-    res.kosten = { von: kosten.von, bis: kosten.bis, beleg: beleg(kosten), pumpe: beleg(wa('regenwasser', 'rw_pumpe')) };
-    var wp = wasserpreis(land), preis = null;
-    if (wp) preis = { von: wp.trinkwasser, bis: wp.trinkwasser + wp.abwasser, quelle: 'daten', beleg: wp.beleg };
-    else if (opt.preisEurM3 > 0) preis = { von: opt.preisEurM3, bis: opt.preisEurM3, quelle: 'eingabe' };
-    res.preis = preis; res.preisLuecke = !wp ? beleg(wa('wasserpreise', 'wp_luecke')) : null;
-    if (preis) {
-      /* Das Regenwasser im WC spart den Trinkwasserpreis; die Abwassergebühr fällt für das WC-Wasser meist trotzdem an (Bremen: Hausverbrauch über eigenen Zähler mit Abwassergebühr belegt). Darum Spanne: nur Trinkwasser bis Trinkwasser plus Abwasser. */
-      var m3Lo = res.gedeckt.von / 1000, m3Hi = res.gedeckt.bis / 1000;
-      res.ersparnis = { von: m3Lo * preis.von, bis: m3Hi * preis.bis, m3Von: m3Lo, m3Bis: m3Hi };
-    } else res.ersparnis = null;
-    /* Niederschlagswassergebühr nur wo die Daten eine Regel für das Land haben */
-    var geb = { art: 'satzung', beleg: beleg(wa('gebuehren', 'gb_zisterne')) };
-    if (land === 'HB') {
-      var gb = wa('gebuehren', 'gb_bremen'), gz = wa('gebuehren', 'gb_bremen_zisterne'), m3v = res.speicher.jeNutzer.von / 1000, m3b = res.speicher.jeNutzer.bis / 1000;
-      var abzugVon = Math.min(dachflaecheM2, gz.von * m3v), abzugBis = Math.min(dachflaecheM2, gz.von * m3b);
-      geb = { art: 'bremen', von: abzugVon * gb.von, bis: abzugBis * gb.von, abzugVon: abzugVon, abzugBis: abzugBis, satz: gb.von, beleg: beleg(gb), belegZisterne: beleg(gz) };
-    } else if (land === 'BE') {
-      var gbs = wa('gebuehren', 'gb_spanne'), gbe = wa('gebuehren', 'gb_berlin'), satzBe = gbs.staedte && gbs.staedte.Berlin, speicherOk = res.speicher.jeNutzer.von >= 20 * dachflaecheM2;
-      geb = { art: 'berlin', von: speicherOk ? dachflaecheM2 * satzBe * gbe.von / 100 : 0, bis: speicherOk ? dachflaecheM2 * satzBe * gbe.von / 100 : 0, satz: satzBe, prozent: gbe.von, speicherOk: speicherOk, beleg: beleg(gbe), belegSatz: beleg(gbs) };
-    }
-    res.gebuehr = geb;
-    var ersV = (res.ersparnis ? res.ersparnis.von : 0) + (geb.von || 0), ersB = (res.ersparnis ? res.ersparnis.bis : 0) + (geb.bis || 0);
-    res.ersparnisGesamt = res.ersparnis ? { von: ersV, bis: ersB } : null;
-    if (res.ersparnisGesamt) res.amort = amortisationEuro(kosten.von, kosten.bis, 0, 0, ersV, ersB);
-    else res.amort = { ok: false, grund: 'keinPreis' };
-    res.ok = true;
-    return res;
-  }
-  /* Amortisation in Euro: Jahre = Kosten / Ersparnis je Jahr (Spanne wie bei der Heizung) */
-  function amortisationEuro(kVon, kBis, fVon, fBis, eLo, eHi) {
-    function einzel(k, e) {
-      if (!zahlOk(k) || !zahlOk(e)) return { ok: false, grund: 'eingabe' };
-      if (!(e > 1e-9)) return { ok: false, grund: 'keineErsparnis' };
-      return { ok: true, jahre: Math.max(0, k) / e };
-    }
-    var best = einzel(kVon - fBis, eHi), schlecht = einzel(kBis - fVon, eLo);
-    if (!best.ok) return { ok: false, grund: best.grund };
-    if (!schlecht.ok) return { ok: false, grund: 'ersparnisUnsicher', von: best.jahre };
-    return { ok: true, von: best.jahre, bis: schlecht.jahre };
-  }
-  function enthaertung(haertebereich) {
-    var id = HAERTEN.indexOf(haertebereich) >= 0 ? haertebereich : 'mittel', h = wa('haerte', 'hr_' + id);
-    if (!h) return { ok: false };
-    var res = { ok: true, bereich: id, mmol: { von: h.von, bis: h.bis == null ? null : h.bis }, dh: { von: h.dh_von == null ? 0 : h.dh_von, bis: h.dh_bis == null ? null : h.dh_bis }, beleg: beleg(h) };
-    res.sinnvoll = id === 'hart';
-    res.warentest = beleg(wa('enthaertung', 'en_warentest')); res.verbraucherzentrale = beleg(wa('enthaertung', 'en_vz_nrw'));
-    res.kosten = { anschaffung: beleg(wa('enthaertung', 'en_anschaffung')), einbau: beleg(wa('enthaertung', 'en_einbau')), betrieb: beleg(wa('enthaertung', 'en_betrieb')), wartung: beleg(wa('enthaertung', 'en_wartung')), salz: beleg(wa('enthaertung', 'en_salz_vz')) };
-    res.kalkwandler = beleg(wa('enthaertung', 'en_kalkwandler')); res.natrium = beleg(wa('trinkwasserrecht', 'tw_natrium'));
-    var an = wa('enthaertung', 'en_anschaffung'), ei = wa('enthaertung', 'en_einbau');
-    res.einmalig = { von: an.von + ei.von, bis: an.bis + ei.bis };
-    res.anzeige = beleg(wa('trinkwasserrecht', 'tw_anzeige'));
-    return res;
-  }
-
-  /* Welle E, Teil 2: Regenwasser des Plans in einem Rechenweg (Wasser-Karte und Autarkie-Block). status: aus | keinDach | gruen | fehler | ok; Anteil am Wasserbedarf = rw.autarkie.mitte */
-  function wasserBilanz(plan, pwIn) {
-    var pw = pwIn || planWasser(plan), land = (plan && plan.land) || 'HB';
-    if (!pw.regenwasser) return { status: 'aus', pw: pw, land: land };
-    var dr = dachflaecheRegen(plan);
-    if (!dr.ok) return { status: 'keinDach', pw: pw, dr: dr, land: land };
-    var rw = regenwasser(dr.projektion, land, pw.personen, { gruendach: pw.gruendach, preisEurM3: pw.preis });
-    if (!rw.ok) return { status: 'fehler', pw: pw, dr: dr, rw: rw, land: land };
-    if (rw.gruendach) return { status: 'gruen', pw: pw, dr: dr, rw: rw, land: land };
-    return { status: 'ok', pw: pw, dr: dr, rw: rw, land: land };
-  }
-  /* Heizwärmebedarf des Hauses im Jahr mit dem gewählten Dämmstandard und der gewählten Lüftung (dieselben Parameter wie die Dämm-Karte) */
-  function waermeBedarf(plan) {
-    if (!plan || !AK) return { ok: false, grund: 'keinPlan' };
-    var hw = heizwaermeMitStandard(plan, { standard: planStandard(plan).id, lueftungsart: planLueftung(plan).art });
-    if (!hw.ok || !hw.gesamt) return { ok: false, grund: hw.grund || 'keineHuelle' };
-    return { ok: true, kwh: hw.gesamt.kwh, kwhM2: hw.gesamt.kwhM2, wohnflaeche: hw.wohnflaeche, standard: hw.standard };
-  }
-
-  var api = {
-    personenPlan: personenPlan, wasserBilanz: wasserBilanz, waermeBedarf: waermeBedarf,
-    ANNAHMEN: ANNAHMEN, STANDARDS: STANDARDS, KFW_STUFEN: KFW_STUFEN, LUEFTUNG_ARTEN: LUEFTUNG_ARTEN, HAERTEN: HAERTEN, TRAEGER: TRAEGER,
-    planStandard: planStandard, planLueftung: planLueftung, planWasser: planWasser, energiepreise: energiepreise, oelCtProKwh: oelCtProKwh, heizkosten: heizkosten,
-    daemmstandards: daemmstandards, luftVolumen: luftVolumen, lueftungsverlust: lueftungsverlust, wrgGrad: wrgGrad, heizwaermeMitStandard: heizwaermeMitStandard,
-    begFoerderung: begFoerderung, begSpanne: begSpanne, mehrkostenUndFoerderung: mehrkostenUndFoerderung, amortisation: amortisation, amortisationSpanne: amortisationSpanne,
-    amortisationEuro: amortisationEuro, daemmAmortisation: daemmAmortisation, raeumeFuerLueftung: raeumeFuerLueftung, lueftungKosten: lueftungKosten, lueftungAmortisation: lueftungAmortisation,
-    dachflaecheRegen: dachflaecheRegen, niederschlag: niederschlag, wasserpreis: wasserpreis, regenwasser: regenwasser, enthaertung: enthaertung, strompreisCt: strompreisCt, beleg: beleg
-  };
-  root.HUELLE_KERN = api;
-  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+'use strict';
+var AK = root.AUSBAU_KERN || (typeof require === 'function' ? require('./ausbau_kern.js') : null);
+var DACH = root.GRUNDRISS_DACH || (typeof require === 'function' ? require('./grundriss_dach.js') : null);
+var EK = root.ENERGIE_KERN || (typeof require === 'function' ? require('./energie_kern.js') : null);
+var ANNAHMEN = {
+luftwechsel: 0.5,
+luftwaerme: 0.34,
+wrgMitte: 0.85,
+wirkungsgrad: { gas: 0.9, oel: 0.85 },
+personen: 3,
+ph: { wand: 0.15, dach: 0.15, glas: 0.7, boden: 0.15 },
+ntwProPersonTag: { wc: 24, waschmaschine: 10 },
+filter: 0.9,
+beiwertVon: 0.75,
+beiwertBis: 0.9,
+bezugFlaecheZentral: 150
+};
+var STANDARDS = ['bestand', 'gmodg', 'kfw', 'passivhaus'];
+var KFW_STUFEN = ['eh85', 'eh70', 'eh55', 'eh40'];
+var LUEFTUNG_ARTEN = ['keine', 'dez_abluft', 'dez_wrg', 'zentral'];
+var HAERTEN = ['weich', 'mittel', 'hart'];
+var TRAEGER = ['gas', 'oel'];
+function DL() { return root.DATEN && root.DATEN.daemmung_seite; }
+function WA() { return root.DATEN && root.DATEN.wasser; }
+function EP() { return root.DATEN && root.DATEN.energiepreise; }
+function SA() { return root.DATEN && root.DATEN.sanierung; }
+function MAT() { return root.DATEN && root.DATEN.material; }
+function zahlOk(x) { return typeof x === 'number' && isFinite(x); }
+function runde(x, n) { var f = Math.pow(10, n || 0); return Math.round(x * f) / f; }
+function klemme(x, lo, hi) { return Math.min(hi, Math.max(lo, x)); }
+function quelleInfo(id) {
+var kandidaten = [DL(), WA(), EP(), MAT()];
+for (var i = 0; i < kandidaten.length; i++) { var q = kandidaten[i] && kandidaten[i].quellen && kandidaten[i].quellen[id]; if (q) return q; }
+return null;
+}
+function beleg(e, extra) {
+if (!e) return null;
+var q = quelleInfo(e.quelle);
+var b = { id: e.id, name: e.name || '', status: e.status || '', abruf: e.abruf || '', quelle: q ? q.titel : (e.quelle || ''), url: q ? q.url : '', hinweis: e.hinweis || '',
+von: e.von, bis: e.bis, einheit: e.einheit || '', gilt_ab: e.gilt_ab || '', gilt_bis: e.gilt_bis || '' };
+if (extra) Object.keys(extra).forEach(function (k) { b[k] = extra[k]; });
+return b;
+}
+function eintrag(daten, liste, id) {
+var l = daten && daten[liste]; if (!l) return null;
+for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
+return null;
+}
+function dl(liste, id) { return eintrag(DL(), liste, id); }
+function wa(liste, id) { return eintrag(WA(), liste, id); }
+function planStandard(plan) {
+var v = plan && plan.daemmstandard, res = { id: 'bestand', meldung: null, explizit: false, kfwStufe: 'eh55', kfwExplizit: false };
+if (typeof v === 'string' && v !== '') {
+if (STANDARDS.indexOf(v) >= 0) { res.id = v; res.explizit = true; } else res.meldung = { feld: 'daemmstandard', id: v };
+}
+var k = plan && plan.kfwstufe;
+if (typeof k === 'string' && k !== '') { if (KFW_STUFEN.indexOf(k) >= 0) { res.kfwStufe = k; res.kfwExplizit = true; } else res.meldung = res.meldung || { feld: 'kfwstufe', id: k }; }
+var m = plan && plan.mehrkosten_eigen;
+res.mehrkostenEigen = zahlOk(m) && m >= 0 ? m : null;
+return res;
+}
+function planLueftung(plan) {
+var pl = plan && plan.lueftung && typeof plan.lueftung === 'object' ? plan.lueftung : {}, res = { art: 'keine', meldung: null, explizit: false, neubau: false, neubauExplizit: false };
+if (typeof pl.art === 'string' && pl.art !== '') {
+if (LUEFTUNG_ARTEN.indexOf(pl.art) >= 0) { res.art = pl.art; res.explizit = true; } else res.meldung = { feld: 'lueftung', id: pl.art };
+}
+if (typeof pl.neubau === 'boolean') { res.neubau = pl.neubau; res.neubauExplizit = true; }
+else res.neubau = !!(plan && (plan.vorlage || plan.beispiel));
+return res;
+}
+function personenPlan(plan) {
+var kandidaten = [plan && plan.personen, plan && plan.wasser && typeof plan.wasser === 'object' ? plan.wasser.personen : undefined];
+for (var i = 0; i < kandidaten.length; i++) {
+var p = Number(kandidaten[i]);
+if (kandidaten[i] != null && kandidaten[i] !== '' && isFinite(p) && p >= 1 && p <= 12) return { n: Math.round(p), explizit: true };
+}
+return { n: ANNAHMEN.personen, explizit: false };
+}
+function planWasser(plan) {
+var pw = plan && plan.wasser && typeof plan.wasser === 'object' ? plan.wasser : {}, res = { personen: ANNAHMEN.personen, regenwasser: true, gruendach: false, haerte: 'mittel', enthaertung: false, preis: null, meldung: null, explizit: {} };
+var pp = personenPlan(plan);
+if (pp.explizit) { res.personen = pp.n; res.explizit.personen = true; }
+if (typeof pw.regenwasser === 'boolean') { res.regenwasser = pw.regenwasser; res.explizit.regenwasser = true; }
+if (typeof pw.gruendach === 'boolean') res.gruendach = pw.gruendach;
+if (typeof pw.enthaertung === 'boolean') res.enthaertung = pw.enthaertung;
+if (typeof pw.haerte === 'string' && pw.haerte !== '') { if (HAERTEN.indexOf(pw.haerte) >= 0) { res.haerte = pw.haerte; res.explizit.haerte = true; } else res.meldung = { feld: 'haerte', id: pw.haerte }; }
+var pr = Number(pw.preis);
+if (isFinite(pr) && pr > 0 && pr < 50) res.preis = pr;
+return res;
+}
+function energiepreise(plan) {
+var d = EP(), pe = plan && plan.energiepreise && typeof plan.energiepreise === 'object' ? plan.energiepreise : {};
+var gasE = eintrag({ e: d && d.eintraege }, 'e', 'gas_destatis_alle'), oelE = eintrag({ e: d && d.eintraege }, 'e', 'oel_tecson'), hwE = eintrag({ e: d && d.eintraege }, 'e', 'oel_heizwert_kwh'), bwE = eintrag({ e: d && d.eintraege }, 'e', 'oel_brennwert');
+var res = { traeger: 'gas', meldung: null, gasEigen: false, oelEigen: false };
+if (typeof pe.traeger === 'string' && pe.traeger !== '') { if (TRAEGER.indexOf(pe.traeger) >= 0) res.traeger = pe.traeger; else res.meldung = { feld: 'energiepreise', id: pe.traeger }; }
+res.gasCt = zahlOk(pe.gas_ct) && pe.gas_ct > 0 && pe.gas_ct < 200 ? pe.gas_ct : (gasE ? gasE.wert : 11.58); res.gasEigen = zahlOk(pe.gas_ct) && pe.gas_ct > 0 && pe.gas_ct < 200;
+res.oelEur100 = zahlOk(pe.oel_eur100l) && pe.oel_eur100l > 0 && pe.oel_eur100l < 1000 ? pe.oel_eur100l : (oelE ? oelE.wert : 180); res.oelEigen = zahlOk(pe.oel_eur100l) && pe.oel_eur100l > 0 && pe.oel_eur100l < 1000;
+res.oelKwhProL = hwE ? hwE.wert : 10.05;
+res.oelCt = oelCtProKwh(res.oelEur100, res.oelKwhProL);
+res.oelCtBrennwert = bwE ? oelCtProKwh(res.oelEur100, bwE.wert) : null;
+res.ct = res.traeger === 'oel' ? res.oelCt : res.gasCt;
+res.wirkungsgrad = ANNAHMEN.wirkungsgrad[res.traeger];
+res.belegGas = beleg(gasE); res.belegOel = beleg(oelE); res.belegOelKwh = beleg(hwE); res.belegOelBrennwert = beleg(bwE);
+return res;
+}
+function oelCtProKwh(eur100l, kwhProL) { return zahlOk(eur100l) && zahlOk(kwhProL) && kwhProL > 0 ? eur100l / kwhProL : null; }
+function heizkosten(qKwh, ep) { return zahlOk(qKwh) ? qKwh / ep.wirkungsgrad * ep.ct / 100 : null; }
+function a7(k) { var m = MAT(); return m && m.anlage7 && m.anlage7[k] ? m.anlage7[k] : null; }
+function uZeile(wert, e, annahme, extra) {
+var o = { wert: wert, annahme: !!annahme, beleg: e ? beleg(e) : null };
+if (extra) Object.keys(extra).forEach(function (k) { o[k] = extra[k]; });
+return o;
+}
+function a7Zeile(k) {
+var z = a7(k);
+if (!z) return null;
+return { wert: z.u, annahme: false, beleg: beleg({ id: z.id, name: z.name, quelle: z.quelle, abruf: z.abruf, status: z.status, einheit: 'W/(m²·K)', von: z.u, bis: z.u }) };
+}
+function daemmstandards() {
+var ph = ANNAHMEN.ph, ist = dl('altbau_heizwaerme', 'ab_efh_ist'), phHz = dl('passivhaus', 'ph_heizwaerme'), phLuft = dl('passivhaus', 'ph_luft');
+var res = {};
+res.bestand = { id: 'bestand', u: null, heizRef: ist ? { wert: ist.von, einheit: ist.einheit, beleg: beleg(ist) } : null,
+hinweis: 'ohneZiel' };
+res.gmodg = { id: 'gmodg', u: { wand: a7Zeile('wand'), dach: a7Zeile('dach'), glas: a7Zeile('glas'), boden: a7Zeile('decke_unten') },
+heizRef: null };
+res.kfw = { id: 'kfw', u: null, heizRef: null, stufen: {}, boni: beleg(dl('kfw', 'kfw261_boni')), stand: beleg(dl('kfw', 'kfw261_stand')), kredit297: beleg(dl('kfw', 'kfw297')), mehrkosten: beleg(dl('kfw', 'kfw_mehrkosten')) };
+KFW_STUFEN.forEach(function (s) {
+var e = dl('kfw', 'kfw261_' + s);
+res.kfw.stufen[s] = e ? { id: s, eeProz: e.ee_proz, nhProz: e.nh_proz, eeEur: e.ee_eur, nhEur: e.nh_eur, beleg: beleg(e) } : null;
+});
+res.passivhaus = { id: 'passivhaus', u: { wand: uZeile(ph.wand, null, true), dach: uZeile(ph.dach, null, true), glas: uZeile(ph.glas, null, true), boden: uZeile(ph.boden, null, true) },
+heizRef: phHz ? { wert: phHz.von, einheit: phHz.einheit, beleg: beleg(phHz) } : null, luftdicht: phLuft ? beleg(phLuft) : null, mehrkosten: beleg(dl('passivhaus', 'ph_mehrkosten')) };
+return res;
+}
+function uVariante(b, v) {
+var w = b.wand, f = b.fenster, au = b.annahmeU;
+var sw = v === 'lo' ? w.uNiedrig : (v === 'hi' ? w.uHoch : w.u), sf = v === 'lo' ? f.uNiedrig : (v === 'hi' ? f.uHoch : f.u);
+return { wand: sw, fenster: sf, tuer: au.tuer, dach: au.dach, boden: au.boden };
+}
+function uMitZiel(ist, ziel) {
+var u = { wand: ist.wand, fenster: ist.fenster, tuer: ist.tuer, dach: ist.dach, boden: ist.boden };
+if (ziel) {
+if (ziel.wand) u.wand = Math.min(ist.wand, ziel.wand.wert);
+if (ziel.glas) u.fenster = Math.min(ist.fenster, ziel.glas.wert);
+if (ziel.dach) u.dach = Math.min(ist.dach, ziel.dach.wert);
+if (ziel.boden) u.boden = Math.min(ist.boden, ziel.boden.wert);
+}
+return u;
+}
+function luftVolumen(mg) {
+var v = 0, fl = 0;
+(mg.etagen || []).forEach(function (E) {
+if (E.keller) return;
+E.raeume.forEach(function (r) { v += r.grund * E.hoehe; fl += r.grund; });
+});
+return { m3: v, grundflaeche: fl };
+}
+function lueftungsverlust(volumen_m3, luftwechsel, wrg, gradtagzahl) {
+var n = zahlOk(luftwechsel) ? luftwechsel : ANNAHMEN.luftwechsel, hv = ANNAHMEN.luftwaerme * n * volumen_m3;
+var eta = zahlOk(wrg) ? wrg : 0;
+return { HV: hv * (1 - eta), HVohne: hv, kwh: hv * (1 - eta) * gradtagzahl * 24 / 1000, kwhOhne: hv * gradtagzahl * 24 / 1000, eta: eta, n: n };
+}
+function wrgGrad(art) {
+if (art !== 'dez_wrg' && art !== 'zentral') return null;
+var e = dl('lueftung', 'lu_wrg_praxis');
+return { mitte: ANNAHMEN.wrgMitte, von: e ? e.von / 100 : 0.8, bis: e ? e.bis / 100 : 0.9, beleg: beleg(e) };
+}
+function heizwaermeMitStandard(plan, optionen) {
+var opt = optionen || {}, std = opt.standard || planStandard(plan).id, art = opt.lueftungsart != null ? opt.lueftungsart : planLueftung(plan).art;
+var b = opt.bilanz || AK.hausBilanz(plan);
+if (!b.ok) return { ok: false, grund: b.fehler || 'keinPlan', standard: std };
+var sd = daemmstandards()[std] || daemmstandards().bestand, res = { ok: true, standard: std, art: art, gradtage: b.gradtage, bilanz: b };
+var mg = b.mengen, wfl = mg.summe.wohnflaeche, vol = luftVolumen(mg), g = b.gradtage.wert;
+res.wohnflaeche = wfl;
+var wrg = wrgGrad(art);
+var vMitte = lueftungsverlust(vol.m3, ANNAHMEN.luftwechsel, wrg ? wrg.mitte : 0, g);
+var vLo = lueftungsverlust(vol.m3, ANNAHMEN.luftwechsel, wrg ? wrg.bis : 0, g), vHi = lueftungsverlust(vol.m3, ANNAHMEN.luftwechsel, wrg ? wrg.von : 0, g);
+var vOhne = lueftungsverlust(vol.m3, ANNAHMEN.luftwechsel, 0, g);
+res.lueftung = { volumen: vol.m3, n: vMitte.n, wrg: wrg, kwh: vMitte.kwh, kwhLo: vLo.kwh, kwhHi: vHi.kwh, kwhOhneWrg: vOhne.kwh, kwhM2: wfl > 0 ? vMitte.kwh / wfl : null,
+kwhM2Lo: wfl > 0 ? vLo.kwh / wfl : null, kwhM2Hi: wfl > 0 ? vHi.kwh / wfl : null, kwhM2Ohne: wfl > 0 ? vOhne.kwh / wfl : null, HV: vMitte.HV };
+if (!b.heizung || !b.heizung.ok) { res.transmission = null; res.gesamt = null; res.grund = b.heizung ? b.heizung.grund : 'keineHuelle'; res.ok = true; res.ohneTransmission = true; return res; }
+var h = b.heizung, fl = h.flaechen;
+function lauf(v, ziel) { return AK.heizwaermeBedarf(fl, uMitZiel(uVariante(b, v), ziel), g); }
+var zl = sd.u, mitte = lauf('mitte', zl), lo = lauf('lo', zl), hi = lauf('hi', zl);
+var istM = lauf('mitte', null), istLo = lauf('lo', null), istHi = lauf('hi', null);
+function m2(x) { return wfl > 0 ? x / wfl : null; }
+res.transmission = { kwh: mitte.kwh, kwhLo: lo.kwh, kwhHi: hi.kwh, kwhM2: m2(mitte.kwh), kwhM2Lo: m2(lo.kwh), kwhM2Hi: m2(hi.kwh), HT: mitte.HT,
+istKwh: istM.kwh, istKwhLo: istLo.kwh, istKwhHi: istHi.kwh, istKwhM2: m2(istM.kwh) };
+res.gesamt = { kwh: mitte.kwh + vMitte.kwh, kwhLo: lo.kwh + vLo.kwh, kwhHi: hi.kwh + vHi.kwh, kwhM2: m2(mitte.kwh + vMitte.kwh), kwhM2Lo: m2(lo.kwh + vLo.kwh), kwhM2Hi: m2(hi.kwh + vHi.kwh) };
+var ist = uVariante(b, 'mitte'), ueber = [];
+if (zl) {
+[['wand', 'wand', ist.wand, false], ['fenster', 'glas', ist.fenster, false], ['dach', 'dach', ist.dach, true], ['boden', 'boden', ist.boden, true]].forEach(function (x) {
+var z = zl[x[1]];
+if (z && x[2] > z.wert + 1e-9) ueber.push({ bauteil: x[0], ist: x[2], ziel: z.wert, annahmeIst: x[3], zielAnnahme: !!z.annahme });
+});
+}
+res.ueberZiel = ueber; res.ziel = zl; res.uIst = ist; res.uWirk = uMitZiel(ist, zl);
+return res;
+}
+function begFoerderung(kosten, mitIsfp, satzId) {
+var sz = dl('beg_einzelmassnahmen', satzId || 'beg_huelle'), hoe = dl('beg_einzelmassnahmen', 'beg_hoechst');
+if (!sz || !hoe || !zahlOk(kosten) || kosten <= 0) return 0;
+var satz = sz.von / 100, bonus = (sz.isfp_bonus || 0) / 100, h1 = hoe.we1, h2 = hoe.isfp_we1;
+if (!mitIsfp) return satz * Math.min(kosten, h1);
+var k = Math.min(kosten, h2), f = satz * k;
+if (kosten >= h1) f += bonus * Math.max(0, k - h1);
+return f;
+}
+function begSpanne(kVon, kBis, satzId) { return { von: begFoerderung(kVon, false, satzId), bis: begFoerderung(kBis, true, satzId) }; }
+function sanZeile(id) { var s = SA(); if (!s) return null; for (var i = 0; i < s.bauteile.length; i++) if (s.bauteile[i].id === id) return s.bauteile[i]; return null; }
+function sanBeleg(z) { return z ? { id: z.id, name: z.name, quelle: z.quelle, abruf: (SA() && SA().abruf) || '', status: 'prüfen vor Nutzung', einheit: z.einheit, von: z.von, bis: z.bis, url: '' } : null; }
+function mehrkostenUndFoerderung(plan, standardId, optionen) {
+var opt = optionen || {}, ps = planStandard(plan), id = standardId || ps.id, pl = planLueftung(plan), neubau = opt.neubau != null ? opt.neubau : pl.neubau;
+var stufe = opt.kfwStufe || ps.kfwStufe, eigen = opt.mehrkostenEigen !== undefined ? opt.mehrkostenEigen : ps.mehrkostenEigen;
+var sds = daemmstandards(), hw = opt.heizwaerme || heizwaermeMitStandard(plan, { standard: id });
+var res = { standard: id, neubau: neubau, mehrkosten: { von: 0, bis: 0, art: 'keine', teile: [], luecken: [] }, foerderung: { von: 0, bis: 0, art: 'keine', hinweise: [], belege: [] }, ok: true };
+var mk = res.mehrkosten;
+if (id === 'bestand') { mk.art = 'keine'; return res; }
+if (eigen != null && eigen > 0) { mk.von = eigen; mk.bis = eigen; mk.art = 'eigen'; }
+else if (id === 'kfw') { mk.art = 'luecke'; mk.luecken.push('kfw_mehrkosten'); mk.beleg = sds.kfw.mehrkosten; }
+else if (hw && hw.ok && hw.ueberZiel && hw.bilanz.heizung && hw.bilanz.heizung.ok) {
+var h = hw.bilanz.mengen.huelle, von = 0, bis = 0;
+hw.ueberZiel.forEach(function (u) {
+if (u.bauteil === 'wand') {
+var z = sanZeile('fassade');
+if (z && h) { var t = { bauteil: 'wand', menge: h.wandNetto, einheit: 'm²', von: h.wandNetto * z.von, bis: h.wandNetto * z.bis, preis: z, beleg: sanBeleg(z) }; mk.teile.push(t); von += t.von; bis += t.bis; }
+} else if (u.bauteil === 'fenster') {
+var zf = sanZeile('fenster');
+if (zf && h) { var tf = { bauteil: 'fenster', menge: h.fensterStueck, einheit: 'Stück', von: h.fensterStueck * zf.von, bis: h.fensterStueck * zf.bis, preis: zf, beleg: sanBeleg(zf) }; mk.teile.push(tf); von += tf.von; bis += tf.bis; }
+} else mk.luecken.push(u.bauteil);
+});
+mk.von = von; mk.bis = bis; mk.art = mk.teile.length || mk.luecken.length ? 'schaetzung' : 'erreicht';
+if (mk.art === 'schaetzung' && !mk.teile.length) mk.art = 'luecke';
+}
+var fo = res.foerderung;
+if (!neubau) {
+if (id === 'gmodg' || id === 'passivhaus') {
+var s = begSpanne(mk.von, mk.bis, 'beg_huelle');
+if (mk.art === 'schaetzung' || mk.art === 'eigen') { fo.von = s.von; fo.bis = s.bis; fo.art = 'beg'; fo.belege.push(beleg(dl('beg_einzelmassnahmen', 'beg_huelle')), beleg(dl('beg_einzelmassnahmen', 'beg_hoechst'))); }
+else { fo.art = 'beg_offen'; fo.belege.push(beleg(dl('beg_einzelmassnahmen', 'beg_huelle'))); }
+} else if (id === 'kfw') {
+var st = sds.kfw.stufen[stufe];
+if (st) { fo.von = st.eeEur; fo.bis = st.nhEur; fo.art = 'kfw261'; fo.stufe = stufe; fo.belege.push(st.beleg, sds.kfw.boni, sds.kfw.stand); }
+}
+} else {
+if (id === 'kfw') { fo.art = 'kfw297'; fo.belege.push(sds.kfw.kredit297); }
+else fo.art = 'neubauKeine';
+}
+return res;
+}
+function amortisation(mehrkostenNetto, ersparnisKwhProJahr, preisCtProKwh, wirkungsgrad, zusatzEurProJahr) {
+if (!zahlOk(mehrkostenNetto) || !zahlOk(ersparnisKwhProJahr) || !zahlOk(preisCtProKwh) || !zahlOk(wirkungsgrad) || wirkungsgrad <= 0) return { ok: false, grund: 'eingabe' };
+if (preisCtProKwh <= 0) return { ok: false, grund: 'keinPreis' };
+var jahrEur = ersparnisKwhProJahr * preisCtProKwh / 100 / wirkungsgrad - (zahlOk(zusatzEurProJahr) ? zusatzEurProJahr : 0);
+if (!(jahrEur > 1e-9)) return { ok: false, grund: 'keineErsparnis', ersparnisEur: jahrEur };
+if (mehrkostenNetto <= 0) return { ok: true, jahre: 0, ersparnisEur: jahrEur, gedeckt: true };
+return { ok: true, jahre: mehrkostenNetto / jahrEur, ersparnisEur: jahrEur };
+}
+function amortisationSpanne(p) {
+var best = amortisation(p.kostenVon - p.foerderBis, p.kwhHi, p.ct, p.eta, p.zusatzLo);
+var schlecht = amortisation(p.kostenBis - p.foerderVon, p.kwhLo, p.ct, p.eta, p.zusatzHi);
+if (!best.ok) return { ok: false, grund: best.grund };
+if (!schlecht.ok) return { ok: false, grund: schlecht.grund === 'keineErsparnis' ? 'ersparnisUnsicher' : schlecht.grund, von: best.jahre };
+return { ok: true, von: best.jahre, bis: schlecht.jahre, ersparnisEurVon: schlecht.ersparnisEur, ersparnisEurBis: best.ersparnisEur };
+}
+function daemmAmortisation(plan, standardId, optionen) {
+var opt = optionen || {}, ep = opt.energiepreise || energiepreise(plan);
+var hw = opt.heizwaerme || heizwaermeMitStandard(plan, { standard: standardId, lueftungsart: 'keine' });
+var mf = opt.mehrkosten || mehrkostenUndFoerderung(plan, standardId, { heizwaerme: hw });
+var res = { ok: false, grund: 'keineAngabe', hw: hw, mf: mf, ep: ep };
+if (!hw.ok || !hw.transmission) { res.grund = 'keineHeizwaerme'; return res; }
+if (standardId === 'bestand') { res.grund = 'keinStandard'; return res; }
+if (standardId === 'kfw') { res.grund = 'kfwOhneHeizwaerme'; return res; }
+if (mf.mehrkosten.art === 'luecke' || mf.mehrkosten.art === 'keine') { res.grund = 'keineMehrkosten'; return res; }
+var t = hw.transmission, ersMitte = t.istKwh - t.kwh, ersLo = Math.max(0, t.istKwhLo - t.kwhLo), ersHi = Math.max(0, t.istKwhHi - t.kwhHi);
+var lo = Math.min(ersLo, ersHi), hi = Math.max(ersLo, ersHi);
+res.ersparnisKwh = { mitte: ersMitte, von: lo, bis: hi };
+if (mf.mehrkosten.art === 'erreicht') { res.grund = 'schonErreicht'; return res; }
+var a = amortisationSpanne({ kostenVon: mf.mehrkosten.von, kostenBis: mf.mehrkosten.bis, foerderVon: mf.foerderung.von, foerderBis: mf.foerderung.bis, kwhLo: lo, kwhHi: hi, ct: ep.ct, eta: ep.wirkungsgrad });
+res.amort = a; res.ok = a.ok; res.grund = a.ok ? null : a.grund;
+return res;
+}
+function raeumeFuerLueftung(mg) {
+var c = { aufenthalt: 0, kueche: 0, nass: 0 };
+var zuluft = { wohnen: 1, schlafen: 1, kind: 1, arbeiten: 1, essen: 1, kueche: 1, '': 1 };
+(mg.raeume || []).forEach(function (r) {
+if (r.nutzung === 'bad' || r.nutzung === 'wc') { c.nass += 1; return; }
+if (r.kueche || r.nutzung === 'kueche') c.kueche += 1;
+if (zuluft[r.nutzung] || r.kueche) c.aufenthalt += 1;
+});
+return c;
+}
+function strompreisCt() {
+var e = EK && EK.eint ? EK.eint('strompreis', 'strompreis_haushalt') : null;
+return { ct: e ? e.von : 37, beleg: e && EK.beleg ? EK.beleg(e) : null };
+}
+function lueftungKosten(plan, art, optionen) {
+var opt = optionen || {}, pl = planLueftung(plan), neubau = opt.neubau != null ? opt.neubau : pl.neubau, mg = opt.mengen || AK.mengenAusPlan(plan);
+if (!mg.ok) return { ok: false, grund: mg.fehler || 'keinPlan' };
+var wfl = mg.summe.wohnflaeche, r = raeumeFuerLueftung(mg), preisKey = neubau ? 'neubau' : 'altbau';
+var res = { ok: true, art: art, neubau: neubau, raeume: r, wohnflaeche: wfl, einmalig: { von: 0, bis: 0 }, stueck: [], strom: null, luecken: [], hinweise: [], belege: [], foerderung: { von: 0, bis: 0, art: 'keine', belege: [] } };
+var ab = dl('lueftung', 'lu_dez_abluft'), wrg = dl('lueftung', 'lu_dez_wrg'), z1 = dl('lueftung', 'lu_zentral'), z2 = dl('lueftung', 'lu_zentral2');
+var sp = opt.strompreis || strompreisCt();
+res.strompreis = sp;
+if (art === 'keine') { res.filter = null; return res; }
+if (art === 'dez_abluft') {
+var n1 = r.nass + r.kueche, p1 = ab[preisKey];
+res.stueck.push({ art: 'abluft', anzahl: n1, preis: p1, summe: n1 * p1, beleg: beleg(ab) });
+res.einmalig.von = res.einmalig.bis = n1 * p1; res.belege.push(beleg(ab));
+} else if (art === 'dez_wrg') {
+var nz = r.aufenthalt, nn = r.nass, pz = wrg[preisKey], pn = ab[preisKey];
+res.stueck.push({ art: 'wrg', anzahl: nz, preis: pz, summe: nz * pz, beleg: beleg(wrg) });
+res.stueck.push({ art: 'abluft', anzahl: nn, preis: pn, summe: nn * pn, beleg: beleg(ab) });
+res.einmalig.von = res.einmalig.bis = nz * pz + nn * pn; res.belege.push(beleg(wrg), beleg(ab));
+} else if (art === 'zentral') {
+var f = wfl / ANNAHMEN.bezugFlaecheZentral;
+res.einmalig.von = z2.von * f; res.einmalig.bis = z2.bis * f; res.belege.push(beleg(z1), beleg(z2));
+res.zentralFaktor = f; res.stueck.push({ art: 'zentral', anzahl: 1, von: z2.von * f, bis: z2.bis * f, beleg: beleg(z2) });
+if (!neubau) res.hinweise.push('zentralAltbau');
+}
+if (art === 'dez_wrg' || art === 'zentral') {
+var s1 = dl('lueftung', 'lu_strom'), s2 = dl('lueftung', 'lu_strom2');
+var jeM2Von = s1.von / 100, jeM2Bis = s2.von / 120, kwhVon = jeM2Von * wfl, kwhBis = jeM2Bis * wfl;
+res.strom = { kwhVon: kwhVon, kwhBis: kwhBis, eurVon: kwhVon * sp.ct / 100, eurBis: kwhBis * sp.ct / 100, ct: sp.ct, belege: [beleg(s1), beleg(s2)], strompreisBeleg: sp.beleg };
+} else res.luecken.push('strom');
+res.filter = { monate: { von: dl('lueftung', 'lu_filter_wechsel').von, bis: dl('lueftung', 'lu_filter_wechsel').bis }, beleg: beleg(dl('lueftung', 'lu_filter_wechsel')), beispiel: beleg(dl('lueftung', 'lu_filter_preis')), luecke: beleg(dl('lueftung', 'lu_luecke')) };
+var fo = res.foerderung, satz = dl('beg_einzelmassnahmen', 'beg_lueftung_satz');
+if (!neubau) {
+var sps = begSpanne(res.einmalig.von, res.einmalig.bis, 'beg_lueftung_satz');
+fo.von = sps.von; fo.bis = sps.bis; fo.art = 'beg';
+fo.belege.push(beleg(satz), beleg(dl('beg_einzelmassnahmen', 'beg_lueftung_wbg')), beleg(dl('beg_einzelmassnahmen', 'beg_lueftung_nachweis')));
+} else { fo.art = 'neubauKeine'; fo.belege.push(beleg(dl('beg_einzelmassnahmen', 'beg_alter'))); }
+return res;
+}
+function lueftungAmortisation(plan, art, optionen) {
+var opt = optionen || {}, ep = opt.energiepreise || energiepreise(plan);
+var hw = opt.heizwaerme || heizwaermeMitStandard(plan, { lueftungsart: art });
+var k = opt.kosten || lueftungKosten(plan, art, opt);
+var res = { ok: false, grund: 'keineAngabe', hw: hw, k: k, ep: ep };
+if (!k.ok || !hw.ok) { res.grund = 'keinPlan'; return res; }
+if (art === 'keine') { res.grund = 'keineLueftung'; return res; }
+if (art === 'dez_abluft') { res.grund = 'keineErsparnis'; res.ersparnisKwh = { von: 0, bis: 0 }; return res; }
+var L = hw.lueftung, lo = L.kwhOhneWrg - L.kwhHi, hi = L.kwhOhneWrg - L.kwhLo;
+res.ersparnisKwh = { mitte: L.kwhOhneWrg - L.kwh, von: lo, bis: hi };
+var s = k.strom;
+var a = amortisationSpanne({ kostenVon: k.einmalig.von, kostenBis: k.einmalig.bis, foerderVon: k.foerderung.von, foerderBis: k.foerderung.bis, kwhLo: lo, kwhHi: hi, ct: ep.ct, eta: ep.wirkungsgrad,
+zusatzLo: s ? s.eurVon : 0, zusatzHi: s ? s.eurBis : 0 });
+res.amort = a; res.ok = a.ok; res.grund = a.ok ? null : a.grund;
+return res;
+}
+function shoelace(pts) {
+var s = 0;
+for (var i = 0; i < pts.length; i++) { var a = pts[i], b = pts[(i + 1) % pts.length]; s += a[0] * b[1] - b[0] * a[1]; }
+return Math.abs(s) / 2;
+}
+function dachflaecheRegen(plan) {
+if (!plan || !plan.dach || !DACH) return { ok: false, grund: 'keinDach' };
+var ei = DACH.dachEtage(plan);
+if (ei < 0) return { ok: false, grund: 'keineRaeume' };
+var eb = DACH.ebenen(plan), rect = DACH.huellRechteck(plan.etagen[ei]);
+if (!rect) return { ok: false, grund: 'keineRaeume' };
+var df = DACH.dachFlaechen(plan.dach, rect, eb[ei].oben + eb[ei].decke), proj = 0;
+df.faces.forEach(function (f) { proj += shoelace(f.pts.map(function (p) { return [p[0], p[1]]; })); });
+var geneigt = null;
+if (EK) { var d = EK.dachflaechen(plan, 'Bremen'); if (!d.fehler) { geneigt = 0; d.flaechen.forEach(function (f) { geneigt += f.flaeche; }); } }
+return { ok: true, projektion: proj, geneigt: geneigt, form: df.form };
+}
+function niederschlag(land) {
+var d = WA(); if (!d) return null;
+var e = wa('niederschlag', 'nd_' + land) || null, fallback = false;
+if (!e) { e = wa('niederschlag', 'nd_DE'); fallback = true; }
+if (!e) return null;
+return { mm: e.von, land: e.land, kuerzel: e.kuerzel, naeherung: !!e.naeherung, region: e.region_dwd || '', fallback: fallback, beleg: beleg(e), attribution: d.meta ? d.meta.dwd_attribution : '', lizenz: d.meta ? d.meta.dwd_lizenz : '',
+j2024: e.j2024, j2025: e.j2025 };
+}
+function wasserpreis(land) {
+var e = wa('wasserpreise', 'wp_tw_' + land);
+if (!e) return null;
+return { trinkwasser: e.von, abwasser: e.abwasser, land: e.land, beleg: beleg(e) };
+}
+function regenwasser(dachflaecheM2, land, personen, optionen) {
+var opt = optionen || {}, nd = niederschlag(land), res = { ok: false };
+if (!nd || !(dachflaecheM2 > 0)) return { ok: false, grund: !nd ? 'keinNiederschlag' : 'keineDachflaeche' };
+var pers = personen > 0 ? personen : ANNAHMEN.personen;
+res.niederschlag = nd; res.dachflaeche = dachflaecheM2; res.personen = pers;
+if (opt.gruendach) { res.ok = true; res.gruendach = true; res.ertragNichtBerechenbar = true; res.belegGruen = beleg(wa('regenwasser', 'rw_ertragsbeiwert_gruen')); return res; }
+var sat = wa('regenwasser', 'rw_satzung'), A = ANNAHMEN;
+var bei = { von: A.beiwertVon, bis: A.beiwertBis }, f = A.filter;
+res.formel = beleg(wa('regenwasser', 'rw_formel')); res.beiwert = { von: bei.von, bis: bei.bis, beleg: beleg(wa('regenwasser', 'rw_ertragsbeiwert')), satzung: beleg(sat) };
+res.filter = { wert: f, beleg: beleg(sat), luecke: beleg(wa('regenwasser', 'rw_filter')) };
+var basis = nd.mm * dachflaecheM2 * f;
+res.ertrag = { von: basis * bei.von, bis: basis * bei.bis, mitte: basis * (bei.von + bei.bis) / 2 };
+var ntwTag = A.ntwProPersonTag.wc + A.ntwProPersonTag.waschmaschine, bedarfNtw = ntwTag * pers * 365;
+res.bedarfNtw = bedarfNtw; res.bedarfWc = A.ntwProPersonTag.wc * pers * 365; res.bedarfWaesche = A.ntwProPersonTag.waschmaschine * pers * 365;
+res.satzung = beleg(sat);
+var vb = wa('wasserpreise', 'wp_verbrauch'), gesamt = (vb ? vb.von : 122) * pers * 365;
+res.gesamtbedarf = gesamt; res.belegVerbrauch = beleg(vb);
+function deck(e) { return Math.min(1, e / bedarfNtw); }
+res.deckung = { von: deck(res.ertrag.von), bis: deck(res.ertrag.bis), mitte: deck(res.ertrag.mitte) };
+res.gedeckt = { von: Math.min(res.ertrag.von, bedarfNtw), bis: Math.min(res.ertrag.bis, bedarfNtw), mitte: Math.min(res.ertrag.mitte, bedarfNtw) };
+res.autarkie = { von: res.gedeckt.von / gesamt, bis: res.gedeckt.bis / gesamt, mitte: res.gedeckt.mitte / gesamt };
+res.ueberschuss = res.ertrag.mitte > bedarfNtw;
+var sp = wa('regenwasser', 'rw_speicher');
+res.speicher = { jeNutzer: { von: sp.l_je_nutzer_von * pers, bis: sp.l_je_nutzer_bis * pers }, jeM2: { von: sp.l_je_m2_von * dachflaecheM2, bis: sp.l_je_m2_bis * dachflaecheM2 }, beleg: beleg(sp) };
+var kosten = wa('regenwasser', 'rw_kosten');
+res.kosten = { von: kosten.von, bis: kosten.bis, beleg: beleg(kosten), pumpe: beleg(wa('regenwasser', 'rw_pumpe')) };
+var wp = wasserpreis(land), preis = null;
+if (wp) preis = { von: wp.trinkwasser, bis: wp.trinkwasser + wp.abwasser, quelle: 'daten', beleg: wp.beleg };
+else if (opt.preisEurM3 > 0) preis = { von: opt.preisEurM3, bis: opt.preisEurM3, quelle: 'eingabe' };
+res.preis = preis; res.preisLuecke = !wp ? beleg(wa('wasserpreise', 'wp_luecke')) : null;
+if (preis) {
+var m3Lo = res.gedeckt.von / 1000, m3Hi = res.gedeckt.bis / 1000;
+res.ersparnis = { von: m3Lo * preis.von, bis: m3Hi * preis.bis, m3Von: m3Lo, m3Bis: m3Hi };
+} else res.ersparnis = null;
+var geb = { art: 'satzung', beleg: beleg(wa('gebuehren', 'gb_zisterne')) };
+if (land === 'HB') {
+var gb = wa('gebuehren', 'gb_bremen'), gz = wa('gebuehren', 'gb_bremen_zisterne'), m3v = res.speicher.jeNutzer.von / 1000, m3b = res.speicher.jeNutzer.bis / 1000;
+var abzugVon = Math.min(dachflaecheM2, gz.von * m3v), abzugBis = Math.min(dachflaecheM2, gz.von * m3b);
+geb = { art: 'bremen', von: abzugVon * gb.von, bis: abzugBis * gb.von, abzugVon: abzugVon, abzugBis: abzugBis, satz: gb.von, beleg: beleg(gb), belegZisterne: beleg(gz) };
+} else if (land === 'BE') {
+var gbs = wa('gebuehren', 'gb_spanne'), gbe = wa('gebuehren', 'gb_berlin'), satzBe = gbs.staedte && gbs.staedte.Berlin, speicherOk = res.speicher.jeNutzer.von >= 20 * dachflaecheM2;
+geb = { art: 'berlin', von: speicherOk ? dachflaecheM2 * satzBe * gbe.von / 100 : 0, bis: speicherOk ? dachflaecheM2 * satzBe * gbe.von / 100 : 0, satz: satzBe, prozent: gbe.von, speicherOk: speicherOk, beleg: beleg(gbe), belegSatz: beleg(gbs) };
+}
+res.gebuehr = geb;
+var ersV = (res.ersparnis ? res.ersparnis.von : 0) + (geb.von || 0), ersB = (res.ersparnis ? res.ersparnis.bis : 0) + (geb.bis || 0);
+res.ersparnisGesamt = res.ersparnis ? { von: ersV, bis: ersB } : null;
+if (res.ersparnisGesamt) res.amort = amortisationEuro(kosten.von, kosten.bis, 0, 0, ersV, ersB);
+else res.amort = { ok: false, grund: 'keinPreis' };
+res.ok = true;
+return res;
+}
+function amortisationEuro(kVon, kBis, fVon, fBis, eLo, eHi) {
+function einzel(k, e) {
+if (!zahlOk(k) || !zahlOk(e)) return { ok: false, grund: 'eingabe' };
+if (!(e > 1e-9)) return { ok: false, grund: 'keineErsparnis' };
+return { ok: true, jahre: Math.max(0, k) / e };
+}
+var best = einzel(kVon - fBis, eHi), schlecht = einzel(kBis - fVon, eLo);
+if (!best.ok) return { ok: false, grund: best.grund };
+if (!schlecht.ok) return { ok: false, grund: 'ersparnisUnsicher', von: best.jahre };
+return { ok: true, von: best.jahre, bis: schlecht.jahre };
+}
+function enthaertung(haertebereich) {
+var id = HAERTEN.indexOf(haertebereich) >= 0 ? haertebereich : 'mittel', h = wa('haerte', 'hr_' + id);
+if (!h) return { ok: false };
+var res = { ok: true, bereich: id, mmol: { von: h.von, bis: h.bis == null ? null : h.bis }, dh: { von: h.dh_von == null ? 0 : h.dh_von, bis: h.dh_bis == null ? null : h.dh_bis }, beleg: beleg(h) };
+res.sinnvoll = id === 'hart';
+res.warentest = beleg(wa('enthaertung', 'en_warentest')); res.verbraucherzentrale = beleg(wa('enthaertung', 'en_vz_nrw'));
+res.kosten = { anschaffung: beleg(wa('enthaertung', 'en_anschaffung')), einbau: beleg(wa('enthaertung', 'en_einbau')), betrieb: beleg(wa('enthaertung', 'en_betrieb')), wartung: beleg(wa('enthaertung', 'en_wartung')), salz: beleg(wa('enthaertung', 'en_salz_vz')) };
+res.kalkwandler = beleg(wa('enthaertung', 'en_kalkwandler')); res.natrium = beleg(wa('trinkwasserrecht', 'tw_natrium'));
+var an = wa('enthaertung', 'en_anschaffung'), ei = wa('enthaertung', 'en_einbau');
+res.einmalig = { von: an.von + ei.von, bis: an.bis + ei.bis };
+res.anzeige = beleg(wa('trinkwasserrecht', 'tw_anzeige'));
+return res;
+}
+function wasserBilanz(plan, pwIn) {
+var pw = pwIn || planWasser(plan), land = (plan && plan.land) || 'HB';
+if (!pw.regenwasser) return { status: 'aus', pw: pw, land: land };
+var dr = dachflaecheRegen(plan);
+if (!dr.ok) return { status: 'keinDach', pw: pw, dr: dr, land: land };
+var rw = regenwasser(dr.projektion, land, pw.personen, { gruendach: pw.gruendach, preisEurM3: pw.preis });
+if (!rw.ok) return { status: 'fehler', pw: pw, dr: dr, rw: rw, land: land };
+if (rw.gruendach) return { status: 'gruen', pw: pw, dr: dr, rw: rw, land: land };
+return { status: 'ok', pw: pw, dr: dr, rw: rw, land: land };
+}
+function waermeBedarf(plan) {
+if (!plan || !AK) return { ok: false, grund: 'keinPlan' };
+var hw = heizwaermeMitStandard(plan, { standard: planStandard(plan).id, lueftungsart: planLueftung(plan).art });
+if (!hw.ok || !hw.gesamt) return { ok: false, grund: hw.grund || 'keineHuelle' };
+return { ok: true, kwh: hw.gesamt.kwh, kwhM2: hw.gesamt.kwhM2, wohnflaeche: hw.wohnflaeche, standard: hw.standard };
+}
+var api = {
+personenPlan: personenPlan, wasserBilanz: wasserBilanz, waermeBedarf: waermeBedarf,
+ANNAHMEN: ANNAHMEN, STANDARDS: STANDARDS, KFW_STUFEN: KFW_STUFEN, LUEFTUNG_ARTEN: LUEFTUNG_ARTEN, HAERTEN: HAERTEN, TRAEGER: TRAEGER,
+planStandard: planStandard, planLueftung: planLueftung, planWasser: planWasser, energiepreise: energiepreise, oelCtProKwh: oelCtProKwh, heizkosten: heizkosten,
+daemmstandards: daemmstandards, luftVolumen: luftVolumen, lueftungsverlust: lueftungsverlust, wrgGrad: wrgGrad, heizwaermeMitStandard: heizwaermeMitStandard,
+begFoerderung: begFoerderung, begSpanne: begSpanne, mehrkostenUndFoerderung: mehrkostenUndFoerderung, amortisation: amortisation, amortisationSpanne: amortisationSpanne,
+amortisationEuro: amortisationEuro, daemmAmortisation: daemmAmortisation, raeumeFuerLueftung: raeumeFuerLueftung, lueftungKosten: lueftungKosten, lueftungAmortisation: lueftungAmortisation,
+dachflaecheRegen: dachflaecheRegen, niederschlag: niederschlag, wasserpreis: wasserpreis, regenwasser: regenwasser, enthaertung: enthaertung, strompreisCt: strompreisCt, beleg: beleg
+};
+root.HUELLE_KERN = api;
+if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
-
 </script>
 <script>/* anbau_kern.js */
 /* Rechenkern „Anbau und Nebengebäude“ (Welle D, Teil 3), rein, läuft auch in Node (tmp/anbau_kern_test.js); Oberfläche: grundriss_anbau.js.
@@ -11130,297 +11215,256 @@ Object.keys(T).forEach(function (k) { window.TEXTE[k] = T[k]; });
 
 </script>
 <script>/* grundstueck_kern.js */
-/* Rechenkern „Grundstück“ (Welle E, Teil 1), rein, läuft auch in Node (tmp/grundstueck_kern_test.js); Oberfläche: grundriss_grundstueck.js.
-   Hausumriss = Hüllrechteck der Räume des untersten Geschosses (plan.etagen[0], Räume der Art „balkon“ ausgenommen) einschließlich Außenwand (etagen[0].aussenwand; fehlt der Wert, gilt 0,30 m wie in der Zeichnung, als sichtbare Annahme). Grundstück = Rechteck.
-   Neue Bausteine bekommen den ersten freien Platz (Raster 0,5 m, mindestens 0,5 m Abstand zu Haus, Grundstücksgrenze und anderen Bausteinen), zuerst im Garten unterhalb des Hauses (es gibt kein Straßenfeld: unterer Bereich des Bildes).
-   Plan-Felder (optional, alte Pläne laden unverändert): plan.grundstueck { breite_m, tiefe_m, haus_x_m, haus_y_m } und plan.aussen [ { id, art, x_m, y_m, breite_m, tiefe_m, hoehe_m } ].
-   Die Genehmigungs-Ampel kommt aus anbau_kern.js (AK.verfahrensfrei, dieselbe Rechnung und dieselben Texte wie in der Karte Anbau); Preise, Pflichten und Kennzahlen aus daten/grundstueck.js.
-   Es werden nur gemessene Abstände in Metern gezeigt, nie ein Urteil über Abstandsflächen (R078). */
 (function (root) {
-  'use strict';
-  var AK = root.ANBAU_KERN || (typeof require === 'function' ? require('./anbau_kern.js') : null);
-
-  /* Annahmen (in der Seite als Annahme gekennzeichnet) */
-  /* aussenwand: Standarddicke der Zeichnung (grundriss.js, neueEtage); abstand: Mindestabstand beim Setzen neuer Bausteine; platzMin: kleine Bausteine brauchen im Bild mindestens so viel Platz (Symbol und Fokus erkennbar) */
-  var ANNAHMEN = { rand: 3, minBreite: 15, minTiefe: 20, aussenwand: 0.3, abstand: 0.5, platzMin: 1.5 };
-  var RASTER = 0.5;
-  var GRUND_MIN = 5, GRUND_MAX = 300, MASS_MIN = 0.3, HOEHE_MAX = 30, MAX_BAUSTEINE = 40;
-  /* Startgrößen je Baustein in Metern (Annahme, eigene Wahl): b = Breite, t = Tiefe, h = Höhe (Pool: Wassertiefe; Kleinwind: freie Höhe), max = größte Breite und Tiefe am Regler */
-  var ARTEN = [
-    { id: 'gartenhaus', b: 3, t: 3, h: 2.5, max: 12 },
-    { id: 'garage_carport', b: 3, t: 6, h: 2.5, max: 20 },
-    { id: 'terrassendach', b: 4, t: 3, h: 2.5, max: 15 },
-    { id: 'sauna', b: 2.5, t: 2.5, h: 2.4, max: 8 },
-    { id: 'pool', b: 6, t: 3, h: 1.5, max: 20 },
-    { id: 'gewaechshaus', b: 3, t: 2.5, h: 2.5, max: 15 },
-    { id: 'brunnen', b: 1, t: 1, h: 1, max: 3 },
-    { id: 'regentank', b: 2, t: 2, h: 2, max: 8 },
-    { id: 'kleinwind', b: 1, t: 1, h: 9, max: 4 },
-    { id: 'waermepumpe', b: 1, t: 0.8, h: 1.2, max: 3 },
-    { id: 'wallbox', b: 0.5, t: 0.3, h: 1.5, max: 2 },
-    { id: 'huehnerstall', b: 2, t: 1.5, h: 1.5, max: 8 },
-    { id: 'bienenstock', b: 1, t: 1, h: 1, max: 3 },
-    { id: 'fischteich', b: 4, t: 3, h: 1.5, max: 20 }
-  ];
-  /* Welle E, Teil 2: Garten-Bausteine (kein Gebäude, keine Bauantrag-Ampel, keine Kosten- oder Pflichtzeilen). Sie stehen nicht in ARTEN, damit die Bildleiste der Gebäude und Anlagen gleich bleibt.
-     Gemüsebeet: Fläche speist den Essen-Balken. Obstbaum: wird gezeigt, aber nicht gezählt (die Daten nennen keine Fläche je Baum). Startgrößen sind eigene Annahmen. */
-  var GARTEN = [
-    { id: 'gemuesebeet', b: 2, t: 3, h: 0.3, max: 30, garten: true },
-    { id: 'obstbaum', b: 3, t: 3, h: 3, max: 10, garten: true }
-  ];
-  function artInfo(id) {
-    for (var i = 0; i < ARTEN.length; i++) if (ARTEN[i].id === id) return ARTEN[i];
-    for (var j = 0; j < GARTEN.length; j++) if (GARTEN[j].id === id) return GARTEN[j];
-    return null;
-  }
-  function zahlOk(x) { return typeof x === 'number' && isFinite(x); }
-  function klemme(x, lo, hi) { return Math.min(hi, Math.max(lo, x)); }
-  function r2(x) { return Math.round(x * 100) / 100; }
-  function GD() { return root.DATEN && root.DATEN.grundstueck; }
-
-  /* ---------- Haus ---------- */
-  function hausUmriss(plan) {
-    var e = plan && plan.etagen && plan.etagen[0];
-    if (!e || !Array.isArray(e.raeume)) return null;
-    var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, n = 0;
-    e.raeume.forEach(function (r) {
-      if (r && r.art === 'balkon') return;   /* Balkon, Loggia, Terrasse (art „balkon“) zählen nicht ins Hüllrechteck */
-      (r.punkte || []).forEach(function (p) {
-        if (!zahlOk(p[0]) || !zahlOk(p[1])) return;
-        n++; x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]);
-      });
-    });
-    if (!n || !(x1 > x0) || !(y1 > y0)) return null;
-    /* Außenwand liegt außen am Umriss (grundriss_geo.js): das Hüllrechteck wächst auf jeder Seite um die Wanddicke */
-    var wandPlan = zahlOk(e.aussenwand), d = wandPlan ? klemme(e.aussenwand, 0.05, 0.8) : ANNAHMEN.aussenwand;
-    var bb = x1 - x0 + 2 * d, tt = y1 - y0 + 2 * d;
-    return { x0: x0 - d, y0: y0 - d, b: r2(bb), t: r2(tt), flaeche: r2(bb * tt), etage: e.name || '', wand: d, wandAnnahme: !wandPlan, raumB: r2(x1 - x0), raumT: r2(y1 - y0) };
-  }
-  /* Start: Grundstück so groß, dass das Haus mit je 3 m Rand passt (mindestens 15 × 20 m), Haus in der Mitte */
-  function startGrund(haus) {
-    var hb = haus ? haus.b : 0, ht = haus ? haus.t : 0;
-    var b = Math.max(ANNAHMEN.minBreite, Math.ceil(hb + 2 * ANNAHMEN.rand)), t = Math.max(ANNAHMEN.minTiefe, Math.ceil(ht + 2 * ANNAHMEN.rand));
-    return { breite: b, tiefe: t, hausX: r2((b - hb) / 2), hausY: r2((t - ht) / 2) };
-  }
-
-  /* ---------- Plan lesen (tolerant) ---------- */
-  function normalisiere(plan) {
-    var haus = hausUmriss(plan), meld = [];
-    var pg = plan && plan.grundstueck && typeof plan.grundstueck === 'object' && !Array.isArray(plan.grundstueck) ? plan.grundstueck : null;
-    var st = startGrund(haus);
-    var g = { breite: st.breite, tiefe: st.tiefe, hausX: st.hausX, hausY: st.hausY, explizit: { groesse: false, lage: false } };
-    if (pg) {
-      if (zahlOk(pg.breite_m)) { g.breite = klemme(pg.breite_m, GRUND_MIN, GRUND_MAX); g.explizit.groesse = true; }
-      if (zahlOk(pg.tiefe_m)) { g.tiefe = klemme(pg.tiefe_m, GRUND_MIN, GRUND_MAX); g.explizit.groesse = true; }
-      if (zahlOk(pg.haus_x_m) || zahlOk(pg.haus_y_m)) g.explizit.lage = true;
-      /* Lage nur dann aus dem Plan, wenn die Größe nicht automatisch ist: fehlt eine Angabe, gilt die Mitte */
-      g.hausX = zahlOk(pg.haus_x_m) ? pg.haus_x_m : r2((g.breite - (haus ? haus.b : 0)) / 2);
-      g.hausY = zahlOk(pg.haus_y_m) ? pg.haus_y_m : r2((g.tiefe - (haus ? haus.t : 0)) / 2);
-    }
-    if (haus) {
-      if (haus.b > g.breite || haus.t > g.tiefe) meld.push({ typ: 'hausZuGross', hausB: haus.b, hausT: haus.t });
-      var mx = Math.max(0, g.breite - haus.b), my = Math.max(0, g.tiefe - haus.t);
-      var nx = r2(klemme(g.hausX, 0, mx)), ny = r2(klemme(g.hausY, 0, my));
-      if (g.explizit.lage && (Math.abs(nx - g.hausX) > 0.005 || Math.abs(ny - g.hausY) > 0.005)) meld.push({ typ: 'hausVerschoben' });
-      g.hausX = nx; g.hausY = ny;
-    }
-    var roh = plan && Array.isArray(plan.aussen) ? plan.aussen : [];
-    var items = [], ids = {};
-    roh.forEach(function (it, i) {
-      if (!it || typeof it !== 'object') return;
-      var a = typeof it.art === 'string' ? artInfo(it.art) : null;
-      if (!a) { meld.push({ typ: 'unbekannteArt', art: String(it && it.art), nr: i + 1 }); return; }
-      if (items.length >= MAX_BAUSTEINE) { if (!meld.some(function (m) { return m.typ === 'zuViele'; })) meld.push({ typ: 'zuViele', max: MAX_BAUSTEINE }); return; }
-      var id = typeof it.id === 'string' && /^[a-z0-9_]{1,12}$/.test(it.id) && !ids[it.id] ? it.id : 'a' + (i + 1) + 'x';
-      ids[id] = true;
-      var w = klemme(zahlOk(it.breite_m) ? it.breite_m : a.b, MASS_MIN, Math.min(a.max, g.breite));
-      var t = klemme(zahlOk(it.tiefe_m) ? it.tiefe_m : a.t, MASS_MIN, Math.min(a.max, g.tiefe));
-      var h = klemme(zahlOk(it.hoehe_m) ? it.hoehe_m : a.h, MASS_MIN, HOEHE_MAX);
-      var x0 = zahlOk(it.x_m) ? it.x_m : (g.breite - w) / 2, y0 = zahlOk(it.y_m) ? it.y_m : (g.tiefe - t) / 2;
-      var x = klemme(x0, 0, g.breite - w), y = klemme(y0, 0, g.tiefe - t);
-      var o = { id: id, art: a.id, x: r2(x), y: r2(y), b: r2(w), t: r2(t), h: r2(h), hoeheEigen: zahlOk(it.hoehe_m) };
-      /* Welle E, Teil 1c: Ofen der Sauna und Baugebiet der Kleinwindanlage (Start: Elektro-Ofen, allgemeines Wohngebiet; *Eigen = der Nutzer hat gewählt, sonst gilt die Annahme) */
-      if (a.id === 'sauna') { o.ofenEigen = it.ofen === 'holz' || it.ofen === 'elektro'; o.ofen = it.ofen === 'holz' ? 'holz' : AK.ANNAHMEN.ofen; }
-      if (a.id === 'kleinwind') { o.gebietEigen = it.gebiet === 'wr' || it.gebiet === 'wa' || it.gebiet === 'gw'; o.gebiet = it.gebiet === 'wr' || it.gebiet === 'gw' ? it.gebiet : AK.ANNAHMEN.gebiet; }
-      if (Math.abs(o.x - x0) > 0.005 || Math.abs(o.y - y0) > 0.005) { o.verschoben = true; meld.push({ typ: 'verschoben', id: id, art: a.id }); }
-      items.push(o);
-    });
-    return { haus: haus, g: g, items: items, meldungen: meld };
-  }
-
-  /* ---------- Abstände und Flächen ---------- */
-  function abstaende(s) {
-    if (!s.haus) return null;
-    var g = s.g, h = s.haus;
-    return { links: r2(g.hausX), rechts: r2(g.breite - (g.hausX + h.b)), oben: r2(g.hausY), unten: r2(g.tiefe - (g.hausY + h.t)) };
-  }
-  function flaechen(s) {
-    var grund = r2(s.g.breite * s.g.tiefe), haus = s.haus ? s.haus.flaeche : 0, bs = 0, beet = 0, baeume = 0, nBeet = 0, nBaum = 0;
-    /* Welle E, Teil 2: Beete und Obstbäume sind nicht bebaut (kein Gebäude); sie zählen nicht zur bebauten Fläche, das Gemüsebeet speist den Essen-Balken */
-    s.items.forEach(function (it) {
-      if (it.art === 'gemuesebeet') { beet += it.b * it.t; nBeet++; }
-      else if (it.art === 'obstbaum') { baeume += it.b * it.t; nBaum++; }
-      else bs += it.b * it.t;
-    });
-    bs = r2(bs);
-    var bebaut = r2(haus + bs);
-    return { grund: grund, haus: haus, bausteine: bs, bebaut: bebaut, prozent: grund > 0 ? Math.round(bebaut / grund * 1000) / 10 : 0, frei: r2(grund - bebaut), beet: r2(beet), beete: nBeet, baeume: r2(baeume), baumAnzahl: nBaum };
-  }
-
-  /* ---------- Daten zu einem Baustein ---------- */
-  function beleg(e) {
-    var q = GD() && GD().quellen && GD().quellen[e.quelle];
-    return { id: e.id, ref: e.ref || '', status: e.status, abruf: e.abruf, quelle: q ? q.titel : e.quelle, url: q ? q.url : '', hinweis: e.hinweis || '', grund: e.luecke_grund || '' };
-  }
-  /* S4: eine Zeile mit „aus“ ('heizung:<art>') hat keine eigene Zahl; Zahl, Quelle, Abruf, Status und Hinweis kommen aus DATEN.heizung (ein Wert, eine Stelle).
-     Fehlt der Wert dort, wird die Zeile zur sichtbaren Lücke mit Grund (kein stilles Weglassen, keine alte Zahl). */
-  function ausHeizung(e) {
-    var m = /^heizung:(.+)$/.exec(e.aus || ''), h = root.DATEN && root.DATEN.heizung, a = m && h && h.arten && h.arten[m[1]];
-    if (!a || !zahlOk(a.von) || !zahlOk(a.bis)) return Object.assign({}, e, { status: 'Lücke', luecke_grund: 'Der Wert dieser Zeile steht in daten/heizung.js und wurde nicht geladen.' });
-    return Object.assign({}, e, { von: a.von, bis: a.bis, quelle: a.quelle, url: a.url, abruf: a.abruf, status: a.status,
-      hinweis: (a.hinweis || '') + (e.hinweis ? ' ' + e.hinweis : '') });
-  }
-  function datenZu(artId) {
-    var d = GD(), out = { kosten: [], pflichten: [], werte: [] };
-    if (!d) return out;
-    ['kosten', 'pflichten', 'werte'].forEach(function (k) {
-      (d[k] || []).forEach(function (e0) {
-        if (e0.baustein !== artId) return;
-        var e = e0.aus ? ausHeizung(e0) : e0, b = e0.aus && e.status !== 'Lücke' ? { id: e.id, ref: e.ref || '', status: e.status, abruf: e.abruf, quelle: e.quelle, url: e.url, hinweis: e.hinweis || '', grund: '' } : beleg(e);
-        out[k].push(Object.assign({ name: e.name, einheit: e.einheit || '', von: typeof e.von === 'number' ? e.von : null, bis: typeof e.bis === 'number' ? e.bis : null, luecke: e.status === 'Lücke' }, b));
-      });
-    });
-    return out;
-  }
-
-  /* ---------- Alles zusammen ---------- */
-  function rechne(plan) {
-    var s = normalisiere(plan), land = AK.planLand(plan);
-    s.land = land; s.landName = AK.rechne({ land: land }).landName;
-    s.abstaende = abstaende(s);
-    s.flaechen = flaechen(s);
-    s.zaehlung = { gruen: 0, gelb: 0, rot: 0, grau: 0 };
-    s.items.forEach(function (it) {
-      it.flaeche = r2(it.b * it.t);
-      if (artInfo(it.art).garten) { it.garten = true; it.vf = null; it.ampel = 'keine'; it.daten = { kosten: [], pflichten: [], werte: [] }; return; }   /* Welle E, Teil 2: Garten-Baustein, keine Ampel, nicht in der Zählung */
-      /* Tiefe nur für das Terrassendach (Bremen: Vorbau bis 3,50 m Tiefe); Annahme: die Tiefe des Bausteins (t) ist die Tiefe senkrecht zur Außenwand, der Text legt die Bezugsgröße nicht fest */
-      it.vf = AK.verfahrensfrei(it.art, land, it.flaeche, it.h, it.art === 'terrassendach' ? it.t : null, { ofen: it.ofen, gebiet: it.gebiet });
-      it.ampel = it.vf && it.vf.ok ? it.vf.summe.ampel : 'grau';
-      s.zaehlung[it.ampel]++;
-      it.daten = datenZu(it.art);
-    });
-    return s;
-  }
-
-  /* ---------- Bearbeiten (schreibt direkt in den Plan; der Aufrufer ruft danach GRUNDRISS.geaendert()) ---------- */
-  function neueId(plan) {
-    var n = 0;
-    (plan.aussen || []).forEach(function (it) { var m = /^a(\d+)$/.exec(it && it.id || ''); if (m) n = Math.max(n, +m[1]); });
-    return 'a' + (n + 1);
-  }
-  function ueberlappt(a, b) { return a.x < b.x + b.b && b.x < a.x + a.b && a.y < b.y + b.t && b.y < a.y + a.t; }
-  /* Platzbedarf im Bild: kleine Bausteine werden mindestens platzMin groß gezeichnet; der Kasten liegt um die echte Lage zentriert */
-  function platzKasten(o) {
-    var eb = Math.max(o.b, ANNAHMEN.platzMin), et = Math.max(o.t, ANNAHMEN.platzMin);
-    return { x: o.x - (eb - o.b) / 2, y: o.y - (et - o.t) / 2, b: eb, t: et };
-  }
-  /* erster freier Platz: Raster 0,5 m, mindestens 0,5 m Abstand zu Haus, Grundstücksgrenze und anderen Bausteinen.
-     Zuerst der Garten unterhalb des Hauses (Zeilen von oben nach unten, von links nach rechts), dann der ganze Rest; sonst die Mitte (frei: false). */
-  function freiePosition(s, art) {
-    var w = Math.min(art.b, s.g.breite), t = Math.min(art.t, s.g.tiefe), ab = ANNAHMEN.abstand;
-    var eb = Math.max(w, ANNAHMEN.platzMin), et = Math.max(t, ANNAHMEN.platzMin), dx = (eb - w) / 2, dy = (et - t) / 2;
-    var sperr = [];
-    if (s.haus) sperr.push({ x: s.g.hausX, y: s.g.hausY, b: s.haus.b, t: s.haus.t });
-    s.items.forEach(function (it) { sperr.push(platzKasten(it)); });
-    sperr = sperr.map(function (o) { return { x: o.x - ab, y: o.y - ab, b: o.b + 2 * ab, t: o.t + 2 * ab }; });
-    var untenAb = s.haus ? s.g.hausY + s.haus.t + ab : 0;
-    function suche(nurUnten) {
-      var nx = Math.floor((s.g.breite - eb - 2 * ab) / RASTER + 1e-9), ny = Math.floor((s.g.tiefe - et - 2 * ab) / RASTER + 1e-9);
-      for (var j = 0; j <= ny; j++) {
-        var y = ab + j * RASTER;
-        if (nurUnten && y < untenAb - 1e-9) continue;
-        for (var i = 0; i <= nx; i++) {
-          var x = ab + i * RASTER, k = { x: x, y: y, b: eb, t: et };
-          if (!sperr.some(function (o) { return ueberlappt(k, o); })) return { x: r2(x + dx), y: r2(y + dy), frei: true };
-        }
-      }
-      return null;
-    }
-    return (s.haus ? suche(true) : null) || suche(false) || { x: r2((s.g.breite - w) / 2), y: r2((s.g.tiefe - t) / 2), frei: false };
-  }
-  function schreibeGrundstueck(plan, s) {
-    plan.grundstueck = { breite_m: r2(s.g.breite), tiefe_m: r2(s.g.tiefe), haus_x_m: r2(s.g.hausX), haus_y_m: r2(s.g.hausY) };
-  }
-  function bausteinHinzu(plan, artId) {
-    var a = artInfo(artId);
-    if (!a) return { ok: false, grund: 'unbekannteArt' };
-    var s = normalisiere(plan);
-    if (s.items.length >= MAX_BAUSTEINE) return { ok: false, grund: 'zuViele' };
-    if (!plan.grundstueck) schreibeGrundstueck(plan, s);
-    var p = freiePosition(s, a), id = neueId(plan);
-    if (!Array.isArray(plan.aussen)) plan.aussen = [];
-    /* hoehe_m bleibt weg, bis der Nutzer sie einstellt: bis dahin gilt die Startannahme der Art und die Seite zeigt das Annahme-Schild */
-    plan.aussen.push({ id: id, art: a.id, x_m: r2(p.x), y_m: r2(p.y), breite_m: Math.min(a.b, s.g.breite), tiefe_m: Math.min(a.t, s.g.tiefe) });
-    return { ok: true, id: id, frei: p.frei };
-  }
-  function bausteinEntfernen(plan, id) {
-    if (!Array.isArray(plan.aussen)) return false;
-    var n = plan.aussen.length;
-    plan.aussen = plan.aussen.filter(function (it) { return it && it.id !== id; });
-    if (!plan.aussen.length) delete plan.aussen;
-    return !plan.aussen || plan.aussen.length < n;
-  }
-  /* Feld eines Bausteins setzen (Meter); der Wert wird beim nächsten Lesen an den Rand geschoben */
-  function bausteinSetzen(plan, id, feld, wert) {
-    var it = (plan.aussen || []).filter(function (x) { return x && x.id === id; })[0];
-    if (!it || !zahlOk(wert)) return false;
-    it[feld] = r2(wert);
-    return true;
-  }
-  /* Auswahlfeld eines Bausteins setzen (Sauna: ofen = elektro | holz; Kleinwind: gebiet = wr | wa | gw); andere Werte werden abgelehnt */
-  var OPTIONEN = { ofen: { art: 'sauna', werte: ['elektro', 'holz'] }, gebiet: { art: 'kleinwind', werte: ['wr', 'wa', 'gw'] } };
-  function bausteinOption(plan, id, feld, wert) {
-    var o = OPTIONEN[feld], it = (plan.aussen || []).filter(function (x) { return x && x.id === id; })[0];
-    if (!o || !it || it.art !== o.art || o.werte.indexOf(wert) < 0) return false;
-    it[feld] = wert;
-    return true;
-  }
-  /* Rohwerte (auch nach dem Lesen unvollständige Bausteine) vollständig in den Plan schreiben, damit Ziehen und Tasten nur ein Feld ändern */
-  function festschreiben(plan) {
-    var s = normalisiere(plan);
-    schreibeGrundstueck(plan, s);
-    if (s.items.length || Array.isArray(plan.aussen)) {
-      plan.aussen = s.items.map(function (it) {
-        var o = { id: it.id, art: it.art, x_m: it.x, y_m: it.y, breite_m: it.b, tiefe_m: it.t };
-        if (it.hoeheEigen) o.hoehe_m = it.h;
-        if (it.ofenEigen) o.ofen = it.ofen;
-        if (it.gebietEigen) o.gebiet = it.gebiet;
-        return o;
-      });
-      if (!plan.aussen.length) delete plan.aussen;
-    }
-    return s;
-  }
-  function grundstueckSetzen(plan, feld, wert) {
-    if (!zahlOk(wert)) return false;
-    var s = festschreiben(plan);
-    if (feld === 'breite_m') plan.grundstueck.breite_m = r2(klemme(wert, GRUND_MIN, GRUND_MAX));
-    else if (feld === 'tiefe_m') plan.grundstueck.tiefe_m = r2(klemme(wert, GRUND_MIN, GRUND_MAX));
-    else if (feld === 'haus_x_m' || feld === 'haus_y_m') plan.grundstueck[feld] = r2(wert);
-    else return false;
-    return !!s;
-  }
-
-  var API = {
-    ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, GARTEN: GARTEN, GRUND_MIN: GRUND_MIN, GRUND_MAX: GRUND_MAX, MASS_MIN: MASS_MIN, HOEHE_MAX: HOEHE_MAX, MAX_BAUSTEINE: MAX_BAUSTEINE,
-    artInfo: artInfo, hausUmriss: hausUmriss, startGrund: startGrund, normalisiere: normalisiere, abstaende: abstaende, flaechen: flaechen, datenZu: datenZu, rechne: rechne,
-    bausteinHinzu: bausteinHinzu, bausteinEntfernen: bausteinEntfernen, bausteinSetzen: bausteinSetzen, bausteinOption: bausteinOption, grundstueckSetzen: grundstueckSetzen, festschreiben: festschreiben, ueberlappt: ueberlappt,
-    platzKasten: platzKasten
-  };
-  root.GRUNDSTUECK_KERN = API;
-  if (typeof module !== 'undefined' && module.exports) module.exports = API;
+'use strict';
+var AK = root.ANBAU_KERN || (typeof require === 'function' ? require('./anbau_kern.js') : null);
+var ANNAHMEN = { rand: 3, minBreite: 15, minTiefe: 20, aussenwand: 0.3, abstand: 0.5, platzMin: 1.5 };
+var RASTER = 0.5;
+var GRUND_MIN = 5, GRUND_MAX = 300, MASS_MIN = 0.3, HOEHE_MAX = 30, MAX_BAUSTEINE = 40;
+var ARTEN = [
+{ id: 'gartenhaus', b: 3, t: 3, h: 2.5, max: 12 },
+{ id: 'garage_carport', b: 3, t: 6, h: 2.5, max: 20 },
+{ id: 'terrassendach', b: 4, t: 3, h: 2.5, max: 15 },
+{ id: 'sauna', b: 2.5, t: 2.5, h: 2.4, max: 8 },
+{ id: 'pool', b: 6, t: 3, h: 1.5, max: 20 },
+{ id: 'gewaechshaus', b: 3, t: 2.5, h: 2.5, max: 15 },
+{ id: 'brunnen', b: 1, t: 1, h: 1, max: 3 },
+{ id: 'regentank', b: 2, t: 2, h: 2, max: 8 },
+{ id: 'kleinwind', b: 1, t: 1, h: 9, max: 4 },
+{ id: 'waermepumpe', b: 1, t: 0.8, h: 1.2, max: 3 },
+{ id: 'wallbox', b: 0.5, t: 0.3, h: 1.5, max: 2 },
+{ id: 'huehnerstall', b: 2, t: 1.5, h: 1.5, max: 8 },
+{ id: 'bienenstock', b: 1, t: 1, h: 1, max: 3 },
+{ id: 'fischteich', b: 4, t: 3, h: 1.5, max: 20 }
+];
+var GARTEN = [
+{ id: 'gemuesebeet', b: 2, t: 3, h: 0.3, max: 30, garten: true },
+{ id: 'obstbaum', b: 3, t: 3, h: 3, max: 10, garten: true }
+];
+function artInfo(id) {
+for (var i = 0; i < ARTEN.length; i++) if (ARTEN[i].id === id) return ARTEN[i];
+for (var j = 0; j < GARTEN.length; j++) if (GARTEN[j].id === id) return GARTEN[j];
+return null;
+}
+function zahlOk(x) { return typeof x === 'number' && isFinite(x); }
+function klemme(x, lo, hi) { return Math.min(hi, Math.max(lo, x)); }
+function r2(x) { return Math.round(x * 100) / 100; }
+function GD() { return root.DATEN && root.DATEN.grundstueck; }
+function hausUmriss(plan) {
+var e = plan && plan.etagen && plan.etagen[0];
+if (!e || !Array.isArray(e.raeume)) return null;
+var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, n = 0;
+e.raeume.forEach(function (r) {
+if (r && r.art === 'balkon') return;
+(r.punkte || []).forEach(function (p) {
+if (!zahlOk(p[0]) || !zahlOk(p[1])) return;
+n++; x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]);
+});
+});
+if (!n || !(x1 > x0) || !(y1 > y0)) return null;
+var wandPlan = zahlOk(e.aussenwand), d = wandPlan ? klemme(e.aussenwand, 0.05, 0.8) : ANNAHMEN.aussenwand;
+var bb = x1 - x0 + 2 * d, tt = y1 - y0 + 2 * d;
+return { x0: x0 - d, y0: y0 - d, b: r2(bb), t: r2(tt), flaeche: r2(bb * tt), etage: e.name || '', wand: d, wandAnnahme: !wandPlan, raumB: r2(x1 - x0), raumT: r2(y1 - y0) };
+}
+function startGrund(haus) {
+var hb = haus ? haus.b : 0, ht = haus ? haus.t : 0;
+var b = Math.max(ANNAHMEN.minBreite, Math.ceil(hb + 2 * ANNAHMEN.rand)), t = Math.max(ANNAHMEN.minTiefe, Math.ceil(ht + 2 * ANNAHMEN.rand));
+return { breite: b, tiefe: t, hausX: r2((b - hb) / 2), hausY: r2((t - ht) / 2) };
+}
+function normalisiere(plan) {
+var haus = hausUmriss(plan), meld = [];
+var pg = plan && plan.grundstueck && typeof plan.grundstueck === 'object' && !Array.isArray(plan.grundstueck) ? plan.grundstueck : null;
+var st = startGrund(haus);
+var g = { breite: st.breite, tiefe: st.tiefe, hausX: st.hausX, hausY: st.hausY, explizit: { groesse: false, lage: false } };
+if (pg) {
+if (zahlOk(pg.breite_m)) { g.breite = klemme(pg.breite_m, GRUND_MIN, GRUND_MAX); g.explizit.groesse = true; }
+if (zahlOk(pg.tiefe_m)) { g.tiefe = klemme(pg.tiefe_m, GRUND_MIN, GRUND_MAX); g.explizit.groesse = true; }
+if (zahlOk(pg.haus_x_m) || zahlOk(pg.haus_y_m)) g.explizit.lage = true;
+g.hausX = zahlOk(pg.haus_x_m) ? pg.haus_x_m : r2((g.breite - (haus ? haus.b : 0)) / 2);
+g.hausY = zahlOk(pg.haus_y_m) ? pg.haus_y_m : r2((g.tiefe - (haus ? haus.t : 0)) / 2);
+}
+if (haus) {
+if (haus.b > g.breite || haus.t > g.tiefe) meld.push({ typ: 'hausZuGross', hausB: haus.b, hausT: haus.t });
+var mx = Math.max(0, g.breite - haus.b), my = Math.max(0, g.tiefe - haus.t);
+var nx = r2(klemme(g.hausX, 0, mx)), ny = r2(klemme(g.hausY, 0, my));
+if (g.explizit.lage && (Math.abs(nx - g.hausX) > 0.005 || Math.abs(ny - g.hausY) > 0.005)) meld.push({ typ: 'hausVerschoben' });
+g.hausX = nx; g.hausY = ny;
+}
+var roh = plan && Array.isArray(plan.aussen) ? plan.aussen : [];
+var items = [], ids = {};
+roh.forEach(function (it, i) {
+if (!it || typeof it !== 'object') return;
+var a = typeof it.art === 'string' ? artInfo(it.art) : null;
+if (!a) { meld.push({ typ: 'unbekannteArt', art: String(it && it.art), nr: i + 1 }); return; }
+if (items.length >= MAX_BAUSTEINE) { if (!meld.some(function (m) { return m.typ === 'zuViele'; })) meld.push({ typ: 'zuViele', max: MAX_BAUSTEINE }); return; }
+var id = typeof it.id === 'string' && /^[a-z0-9_]{1,12}$/.test(it.id) && !ids[it.id] ? it.id : 'a' + (i + 1) + 'x';
+ids[id] = true;
+var w = klemme(zahlOk(it.breite_m) ? it.breite_m : a.b, MASS_MIN, Math.min(a.max, g.breite));
+var t = klemme(zahlOk(it.tiefe_m) ? it.tiefe_m : a.t, MASS_MIN, Math.min(a.max, g.tiefe));
+var h = klemme(zahlOk(it.hoehe_m) ? it.hoehe_m : a.h, MASS_MIN, HOEHE_MAX);
+var x0 = zahlOk(it.x_m) ? it.x_m : (g.breite - w) / 2, y0 = zahlOk(it.y_m) ? it.y_m : (g.tiefe - t) / 2;
+var x = klemme(x0, 0, g.breite - w), y = klemme(y0, 0, g.tiefe - t);
+var o = { id: id, art: a.id, x: r2(x), y: r2(y), b: r2(w), t: r2(t), h: r2(h), hoeheEigen: zahlOk(it.hoehe_m) };
+if (a.id === 'sauna') { o.ofenEigen = it.ofen === 'holz' || it.ofen === 'elektro'; o.ofen = it.ofen === 'holz' ? 'holz' : AK.ANNAHMEN.ofen; }
+if (a.id === 'kleinwind') { o.gebietEigen = it.gebiet === 'wr' || it.gebiet === 'wa' || it.gebiet === 'gw'; o.gebiet = it.gebiet === 'wr' || it.gebiet === 'gw' ? it.gebiet : AK.ANNAHMEN.gebiet; }
+if (Math.abs(o.x - x0) > 0.005 || Math.abs(o.y - y0) > 0.005) { o.verschoben = true; meld.push({ typ: 'verschoben', id: id, art: a.id }); }
+items.push(o);
+});
+return { haus: haus, g: g, items: items, meldungen: meld };
+}
+function abstaende(s) {
+if (!s.haus) return null;
+var g = s.g, h = s.haus;
+return { links: r2(g.hausX), rechts: r2(g.breite - (g.hausX + h.b)), oben: r2(g.hausY), unten: r2(g.tiefe - (g.hausY + h.t)) };
+}
+function flaechen(s) {
+var grund = r2(s.g.breite * s.g.tiefe), haus = s.haus ? s.haus.flaeche : 0, bs = 0, beet = 0, baeume = 0, nBeet = 0, nBaum = 0;
+s.items.forEach(function (it) {
+if (it.art === 'gemuesebeet') { beet += it.b * it.t; nBeet++; }
+else if (it.art === 'obstbaum') { baeume += it.b * it.t; nBaum++; }
+else bs += it.b * it.t;
+});
+bs = r2(bs);
+var bebaut = r2(haus + bs);
+return { grund: grund, haus: haus, bausteine: bs, bebaut: bebaut, prozent: grund > 0 ? Math.round(bebaut / grund * 1000) / 10 : 0, frei: r2(grund - bebaut), beet: r2(beet), beete: nBeet, baeume: r2(baeume), baumAnzahl: nBaum };
+}
+function beleg(e) {
+var q = GD() && GD().quellen && GD().quellen[e.quelle];
+return { id: e.id, ref: e.ref || '', status: e.status, abruf: e.abruf, quelle: q ? q.titel : e.quelle, url: q ? q.url : '', hinweis: e.hinweis || '', grund: e.luecke_grund || '' };
+}
+function ausHeizung(e) {
+var m = /^heizung:(.+)$/.exec(e.aus || ''), h = root.DATEN && root.DATEN.heizung, a = m && h && h.arten && h.arten[m[1]];
+if (!a || !zahlOk(a.von) || !zahlOk(a.bis)) return Object.assign({}, e, { status: 'Lücke', luecke_grund: 'Der Wert dieser Zeile steht in daten/heizung.js und wurde nicht geladen.' });
+return Object.assign({}, e, { von: a.von, bis: a.bis, quelle: a.quelle, url: a.url, abruf: a.abruf, status: a.status,
+hinweis: (a.hinweis || '') + (e.hinweis ? ' ' + e.hinweis : '') });
+}
+function datenZu(artId) {
+var d = GD(), out = { kosten: [], pflichten: [], werte: [] };
+if (!d) return out;
+['kosten', 'pflichten', 'werte'].forEach(function (k) {
+(d[k] || []).forEach(function (e0) {
+if (e0.baustein !== artId) return;
+var e = e0.aus ? ausHeizung(e0) : e0, b = e0.aus && e.status !== 'Lücke' ? { id: e.id, ref: e.ref || '', status: e.status, abruf: e.abruf, quelle: e.quelle, url: e.url, hinweis: e.hinweis || '', grund: '' } : beleg(e);
+out[k].push(Object.assign({ name: e.name, einheit: e.einheit || '', von: typeof e.von === 'number' ? e.von : null, bis: typeof e.bis === 'number' ? e.bis : null, luecke: e.status === 'Lücke' }, b));
+});
+});
+return out;
+}
+function rechne(plan) {
+var s = normalisiere(plan), land = AK.planLand(plan);
+s.land = land; s.landName = AK.rechne({ land: land }).landName;
+s.abstaende = abstaende(s);
+s.flaechen = flaechen(s);
+s.zaehlung = { gruen: 0, gelb: 0, rot: 0, grau: 0 };
+s.items.forEach(function (it) {
+it.flaeche = r2(it.b * it.t);
+if (artInfo(it.art).garten) { it.garten = true; it.vf = null; it.ampel = 'keine'; it.daten = { kosten: [], pflichten: [], werte: [] }; return; }
+it.vf = AK.verfahrensfrei(it.art, land, it.flaeche, it.h, it.art === 'terrassendach' ? it.t : null, { ofen: it.ofen, gebiet: it.gebiet });
+it.ampel = it.vf && it.vf.ok ? it.vf.summe.ampel : 'grau';
+s.zaehlung[it.ampel]++;
+it.daten = datenZu(it.art);
+});
+return s;
+}
+function neueId(plan) {
+var n = 0;
+(plan.aussen || []).forEach(function (it) { var m = /^a(\d+)$/.exec(it && it.id || ''); if (m) n = Math.max(n, +m[1]); });
+return 'a' + (n + 1);
+}
+function ueberlappt(a, b) { return a.x < b.x + b.b && b.x < a.x + a.b && a.y < b.y + b.t && b.y < a.y + a.t; }
+function platzKasten(o) {
+var eb = Math.max(o.b, ANNAHMEN.platzMin), et = Math.max(o.t, ANNAHMEN.platzMin);
+return { x: o.x - (eb - o.b) / 2, y: o.y - (et - o.t) / 2, b: eb, t: et };
+}
+function freiePosition(s, art) {
+var w = Math.min(art.b, s.g.breite), t = Math.min(art.t, s.g.tiefe), ab = ANNAHMEN.abstand;
+var eb = Math.max(w, ANNAHMEN.platzMin), et = Math.max(t, ANNAHMEN.platzMin), dx = (eb - w) / 2, dy = (et - t) / 2;
+var sperr = [];
+if (s.haus) sperr.push({ x: s.g.hausX, y: s.g.hausY, b: s.haus.b, t: s.haus.t });
+s.items.forEach(function (it) { sperr.push(platzKasten(it)); });
+sperr = sperr.map(function (o) { return { x: o.x - ab, y: o.y - ab, b: o.b + 2 * ab, t: o.t + 2 * ab }; });
+var untenAb = s.haus ? s.g.hausY + s.haus.t + ab : 0;
+function suche(nurUnten) {
+var nx = Math.floor((s.g.breite - eb - 2 * ab) / RASTER + 1e-9), ny = Math.floor((s.g.tiefe - et - 2 * ab) / RASTER + 1e-9);
+for (var j = 0; j <= ny; j++) {
+var y = ab + j * RASTER;
+if (nurUnten && y < untenAb - 1e-9) continue;
+for (var i = 0; i <= nx; i++) {
+var x = ab + i * RASTER, k = { x: x, y: y, b: eb, t: et };
+if (!sperr.some(function (o) { return ueberlappt(k, o); })) return { x: r2(x + dx), y: r2(y + dy), frei: true };
+}
+}
+return null;
+}
+return (s.haus ? suche(true) : null) || suche(false) || { x: r2((s.g.breite - w) / 2), y: r2((s.g.tiefe - t) / 2), frei: false };
+}
+function schreibeGrundstueck(plan, s) {
+plan.grundstueck = { breite_m: r2(s.g.breite), tiefe_m: r2(s.g.tiefe), haus_x_m: r2(s.g.hausX), haus_y_m: r2(s.g.hausY) };
+}
+function bausteinHinzu(plan, artId) {
+var a = artInfo(artId);
+if (!a) return { ok: false, grund: 'unbekannteArt' };
+var s = normalisiere(plan);
+if (s.items.length >= MAX_BAUSTEINE) return { ok: false, grund: 'zuViele' };
+if (!plan.grundstueck) schreibeGrundstueck(plan, s);
+var p = freiePosition(s, a), id = neueId(plan);
+if (!Array.isArray(plan.aussen)) plan.aussen = [];
+plan.aussen.push({ id: id, art: a.id, x_m: r2(p.x), y_m: r2(p.y), breite_m: Math.min(a.b, s.g.breite), tiefe_m: Math.min(a.t, s.g.tiefe) });
+return { ok: true, id: id, frei: p.frei };
+}
+function bausteinEntfernen(plan, id) {
+if (!Array.isArray(plan.aussen)) return false;
+var n = plan.aussen.length;
+plan.aussen = plan.aussen.filter(function (it) { return it && it.id !== id; });
+if (!plan.aussen.length) delete plan.aussen;
+return !plan.aussen || plan.aussen.length < n;
+}
+function bausteinSetzen(plan, id, feld, wert) {
+var it = (plan.aussen || []).filter(function (x) { return x && x.id === id; })[0];
+if (!it || !zahlOk(wert)) return false;
+it[feld] = r2(wert);
+return true;
+}
+var OPTIONEN = { ofen: { art: 'sauna', werte: ['elektro', 'holz'] }, gebiet: { art: 'kleinwind', werte: ['wr', 'wa', 'gw'] } };
+function bausteinOption(plan, id, feld, wert) {
+var o = OPTIONEN[feld], it = (plan.aussen || []).filter(function (x) { return x && x.id === id; })[0];
+if (!o || !it || it.art !== o.art || o.werte.indexOf(wert) < 0) return false;
+it[feld] = wert;
+return true;
+}
+function festschreiben(plan) {
+var s = normalisiere(plan);
+schreibeGrundstueck(plan, s);
+if (s.items.length || Array.isArray(plan.aussen)) {
+plan.aussen = s.items.map(function (it) {
+var o = { id: it.id, art: it.art, x_m: it.x, y_m: it.y, breite_m: it.b, tiefe_m: it.t };
+if (it.hoeheEigen) o.hoehe_m = it.h;
+if (it.ofenEigen) o.ofen = it.ofen;
+if (it.gebietEigen) o.gebiet = it.gebiet;
+return o;
+});
+if (!plan.aussen.length) delete plan.aussen;
+}
+return s;
+}
+function grundstueckSetzen(plan, feld, wert) {
+if (!zahlOk(wert)) return false;
+var s = festschreiben(plan);
+if (feld === 'breite_m') plan.grundstueck.breite_m = r2(klemme(wert, GRUND_MIN, GRUND_MAX));
+else if (feld === 'tiefe_m') plan.grundstueck.tiefe_m = r2(klemme(wert, GRUND_MIN, GRUND_MAX));
+else if (feld === 'haus_x_m' || feld === 'haus_y_m') plan.grundstueck[feld] = r2(wert);
+else return false;
+return !!s;
+}
+var API = {
+ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, GARTEN: GARTEN, GRUND_MIN: GRUND_MIN, GRUND_MAX: GRUND_MAX, MASS_MIN: MASS_MIN, HOEHE_MAX: HOEHE_MAX, MAX_BAUSTEINE: MAX_BAUSTEINE,
+artInfo: artInfo, hausUmriss: hausUmriss, startGrund: startGrund, normalisiere: normalisiere, abstaende: abstaende, flaechen: flaechen, datenZu: datenZu, rechne: rechne,
+bausteinHinzu: bausteinHinzu, bausteinEntfernen: bausteinEntfernen, bausteinSetzen: bausteinSetzen, bausteinOption: bausteinOption, grundstueckSetzen: grundstueckSetzen, festschreiben: festschreiben, ueberlappt: ueberlappt,
+platzKasten: platzKasten
+};
+root.GRUNDSTUECK_KERN = API;
+if (typeof module !== 'undefined' && module.exports) module.exports = API;
 })(typeof window !== 'undefined' ? window : globalThis);
-
 </script>
 <script>/* sauna_kern.js */
 (function (root) {
@@ -11627,6 +11671,75 @@ return false;
 var API = { ANNAHMEN: ANNAHMEN, ARTEN: ARTEN, H_MIN: H_MIN, H_MAX: H_MAX, B_MAX: B_MAX, T_MAX: T_MAX, S_MIN: S_MIN, S_MAX: S_MAX, holzInfo: holzInfo, holzDaten: holzDaten, GEWICHT_START: GEWICHT_START, KRIT: KRIT, ZAEHLT: ZAEHLT, zaehlung: zaehlung, eigenschaften: eigenschaften, rangliste: rangliste, preisBalken: preisBalken, gewichtOk: gewichtOk, planSauna: planSauna, volumen: volumen, ofenKlasse: ofenKlasse, holzPreis: holzPreis, strompreis: strompreis,
 betrieb: betrieb, mengen: mengen, material: material, vergleich: vergleich, geometrie: geometrie, rechne: rechne, verknuepfen: verknuepfen, saunaAnlegen: saunaAnlegen, groesseSetzen: groesseSetzen, wahlSetzen: wahlSetzen };
 root.SAUNA_KERN = API;
+if (typeof module !== 'undefined' && module.exports) module.exports = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>/* heizung_kern.js */
+(function (root) {
+'use strict';
+function ok(x) { return typeof x === 'number' && isFinite(x); }
+function pos(x) { return ok(x) && x > 0; }
+function V() { var h = root.DATEN && root.DATEN.heizung; return h && h.vergleich && h.arten ? h : null; }
+function fehlt() { return { ok: false, grund: 'daten' }; }
+function standard() {
+var h = V(); if (!h) return null;
+var a = h.vergleich.annahmen, p = {}, n = {};
+Object.keys(a.preis).forEach(function (k) { p[k] = a.preis[k].w; });
+Object.keys(a.nutz).forEach(function (k) { n[k] = a.nutz[k].w; });
+return { heiz: a.heiz0.w, ww: a.ww.w, foerd: true, wptarif: false, preis: p, nutz: n };
+}
+function eingabe(e) {
+var s = standard(), r = { heiz: s.heiz, ww: s.ww, foerd: s.foerd, wptarif: s.wptarif, preis: Object.assign({}, s.preis), nutz: Object.assign({}, s.nutz), meldungen: [] }, x = e || {};
+if (x.heiz !== undefined) { if (ok(x.heiz) && x.heiz >= 0) r.heiz = x.heiz; else r.meldungen.push('heiz'); }
+if (x.ww !== undefined) { if (ok(x.ww) && x.ww >= 0) r.ww = x.ww; else r.meldungen.push('ww'); }
+if (x.foerd !== undefined) r.foerd = !!x.foerd;
+if (x.wptarif !== undefined) r.wptarif = !!x.wptarif;
+['preis', 'nutz'].forEach(function (f) {
+var q = x[f] && typeof x[f] === 'object' ? x[f] : {};
+Object.keys(q).forEach(function (k) {
+if (r[f][k] === undefined) { r.meldungen.push(f + '.' + k); return; }
+if (pos(q[k])) r[f][k] = q[k]; else r.meldungen.push(f + '.' + k);
+});
+});
+return r;
+}
+function foerderung(h, id, anschaffung, an) {
+var f = h.vergleich.foerderung, st = h.vergleich.arten[id].foerd;
+if (!an) return { aktiv: false, von: 0, bis: 0, status: st };
+if (f.arten.indexOf(id) < 0) return { aktiv: false, von: 0, bis: 0, status: st };
+return { aktiv: true, von: f.satz * Math.min(anschaffung.von, f.max), bis: f.satz * Math.min(anschaffung.bis, f.max), status: st };
+}
+function art(h, id, e, nutz) {
+var A = h.vergleich.arten[id], D = h.arten[id], J = h.vergleich.jahre, P = e.preis, N = e.nutz, wp = !!A.wp, an = { von: D.von, bis: D.bis }, g, energie = 0, endenergie = 0, co2 = [0, 0];
+var strom = (e.wptarif && (wp || A.hy)) ? P.wpstrom : P.strom, ctKey = { gas: P.gas, oel: P.oel, strom: P.strom, pellets: P.pellets, holz: P.holz, fernwaerme: P.fernwaerme };
+if (A.hy) {
+var anteil = N.hybrid_wp, wpFa = h.vergleich.arten.waermepumpe.co2[0], gasFa = h.vergleich.arten.gas.co2[0];
+var kwhWp = nutz * anteil / N.jaz_luft, kwhGas = nutz * (1 - anteil) / N.gas;
+endenergie = kwhWp + kwhGas;
+energie = kwhWp * strom / 100 + kwhGas * P.gas / 100;
+var c = (kwhWp * wpFa + kwhGas * gasFa) / 1e6; co2 = [c, c];
+} else {
+endenergie = nutz / N[A.nutz];
+energie = endenergie * (A.tr === 'strom' ? strom : ctKey[A.tr]) / 100;
+co2 = [endenergie * A.co2[0] / 1e6, endenergie * A.co2[1] / 1e6];
+}
+g = foerderung(h, id, an, e.foerd);
+var w = A.wart ? { von: A.wart[0], bis: A.wart[1], luecke: false } : { von: 0, bis: 0, luecke: true };
+var ges = { von: an.von - g.von + J * (energie + w.von), bis: an.bis - g.bis + J * (energie + w.bis) };
+ges.mitte = (ges.von + ges.bis) / 2;
+return { id: id, a: an, f: g, endenergie: endenergie, energie: energie, wart: w, gesamt: ges, co2: { von: co2[0], bis: co2[1] }, auf: A.auf, ww: A.ww !== false };
+}
+function rechne(e0) {
+var h = V(); if (!h) return fehlt();
+var e = eingabe(e0), nutz = e.heiz + e.ww, liste;
+if (!(nutz > 0)) return { ok: false, grund: 'nutzwaerme' };
+liste = h.vergleich.reihe.map(function (id) { return art(h, id, e, nutz); });
+return { ok: true, nutz: nutz, heiz: e.heiz, ww: e.ww, e: e, arten: liste, jahre: h.vergleich.jahre,
+max: { kosten: Math.max.apply(null, liste.map(function (x) { return x.gesamt.bis; })), co2: Math.max.apply(null, liste.map(function (x) { return x.co2.bis; })), auf: 3 } };
+}
+function nachKosten(res) { return res.arten.slice().sort(function (a, b) { return a.gesamt.mitte - b.gesamt.mitte; }).map(function (x) { return x.id; }); }
+var API = { standard: standard, eingabe: eingabe, rechne: rechne, nachKosten: nachKosten };
+root.HEIZUNG_KERN = API;
 if (typeof module !== 'undefined' && module.exports) module.exports = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -11865,17 +11978,19 @@ var SUMMEN_GRUPPEN = { innenausbau: 1, material: 1, daemmung: 1, lueftung: 1, an
 var HEIZ_ARTEN = ['waermepumpe', 'gas', 'offen'];
 function planHeiz(plan) {
 var h = plan && plan.heizanlage && typeof plan.heizanlage === 'object' && !Array.isArray(plan.heizanlage) ? plan.heizanlage : null;
-return h ? { vorhanden: true, art: h.art === undefined ? 'offen' : h.art, bekannt: h.art === undefined || HEIZ_ARTEN.indexOf(h.art) >= 0 } : { vorhanden: false, art: '', bekannt: true };
+return h ? { vorhanden: true, art: h.art === undefined ? 'offen' : h.art, bekannt: h.art === undefined || HEIZ_ARTEN.indexOf(h.art) >= 0 || !!heizDaten(h.art) } : { vorhanden: false, art: '', bekannt: true };
 }
 function heizDaten(art) {
 var d = root.DATEN && root.DATEN.heizung, a = d && d.arten && d.arten[art];
-return a && ok(a.von) && ok(a.bis) ? a : null;
+if (!(a && ok(a.von) && ok(a.bis))) return null;
+var q = a.q && d.vergleich && d.vergleich.quellen && d.vergleich.quellen[a.q];
+return q ? Object.assign({}, a, { quelle: q.t, url: q.u, abruf: q.a }) : a;
 }
 function heizZeile(plan, z, lu, fe) {
 var h = planHeiz(plan), a;
 if (!h.vorhanden) return;
 if (!h.bekannt) { fe.push({ teil: 'heizanlage', grund: 'art ' + h.art }); return; }
-a = h.art === 'waermepumpe' || h.art === 'gas' ? heizDaten(h.art) : null;
+a = heizDaten(h.art);
 if (a) {
 z.push({ gruppe: 'heizanlage', id: h.art, von: a.von, bis: a.bis, luecke: false, heizId: a.id, unsicher: a.unsicher !== false, preisstand: a.preisstand || '',
 belege: belege([{ quelleTitel: a.quelle, url: a.url, abruf: a.abruf, status: a.status === 'veraltet, nur Größenordnung' ? 'veraltet' : a.status },
@@ -14375,6 +14490,7 @@ if (window.GRUNDRISS_ANBAU) window.GRUNDRISS_ANBAU.aktualisieren();
 if (window.GRUNDRISS_GRUNDSTUECK) window.GRUNDRISS_GRUNDSTUECK.aktualisieren();
 if (window.GRUNDRISS_SAUNA) window.GRUNDRISS_SAUNA.aktualisieren();
 if (window.GRUNDRISS_KLEINHAUS) window.GRUNDRISS_KLEINHAUS.aktualisieren();
+if (window.GRUNDRISS_HEIZUNG) window.GRUNDRISS_HEIZUNG.aktualisieren();
 clearTimeout(speicherTimer);
 speicherTimer = setTimeout(function () {
 try {
@@ -18892,7 +19008,8 @@ h += '<article class="gs-baustein gs-k-' + a + '" data-gs-item="' + it.id + '" d
 h += '<div class="gs-k-kopf">' + symbol(ICON[it.art]) + '<b>' + esc(artName(it.art)) + '</b> <span class="klein es-zahl" data-gs-groesse="' + it.flaeche + '">' + esc(tr('gsGroesseZeile', { b: m2(it.b), t: m2(it.t), f: m2(it.flaeche) })) + '</span>' +
 ' <button type="button" class="knopf mittel zweit gs-zeigen" data-gs="zeigen" data-wert="' + it.id + '" data-fk="z-' + it.id + '">' + esc(tr('gsZeigen')) + '</button>' +
 (it.art === 'sauna' && window.GRUNDRISS_SAUNA ? ' <button type="button" class="knopf mittel gs-sauna-planen" data-gs="sauna-planen" data-wert="' + it.id + '" data-fk="sp-' + it.id + '">' + symbol('i-gs-sauna') + ' ' + esc(tr('saPlanen')) + '</button>' : '') +
-(it.art === 'gartenhaus' && window.GRUNDRISS_KLEINHAUS ? ' <button type="button" class="knopf mittel zweit gs-sauna-planen" data-gs="kleinhaus-planen" data-wert="' + it.id + '" data-fk="kp-' + it.id + '">' + symbol('i-kh-modul') + ' ' + esc(tr('khPlanen')) + '</button>' : '') + '</div>';
+(it.art === 'gartenhaus' && window.GRUNDRISS_KLEINHAUS ? ' <button type="button" class="knopf mittel zweit gs-sauna-planen" data-gs="kleinhaus-planen" data-wert="' + it.id + '" data-fk="kp-' + it.id + '">' + symbol('i-kh-modul') + ' ' + esc(tr('khPlanen')) + '</button>' : '') +
+(it.art === 'waermepumpe' && window.GRUNDRISS_HEIZUNG ? ' <button type="button" class="knopf mittel zweit gs-sauna-planen" data-gs="heizung-vergleichen" data-wert="' + it.id + '" data-fk="hv-' + it.id + '">' + symbol('i-flamme') + ' ' + esc(tr('hvKarteKnopf')) + '</button>' : '') + '</div>';
 if (it.garten) {
 h += '<p class="klein" data-gs-garten="' + it.art + '">' + esc(tr('gsGartenKarte_' + it.art, { f: m2(it.flaeche) })) + '</p><p class="klein">' + annahmeSchild() + ' ' + esc(tr('gsGartenAnnahme')) + '</p></article>';
 return;
@@ -19003,6 +19120,7 @@ var a = t.getAttribute('data-gs'), w = t.getAttribute('data-wert');
 if (a === 'hilfe') { var id = t.getAttribute('aria-controls'), p = byId(id), auf = t.getAttribute('aria-expanded') !== 'true'; t.setAttribute('aria-expanded', auf ? 'true' : 'false'); hilfeOffen[id] = auf; if (p) p.hidden = !auf; return; }
 if (a === 'sprung') { sprung(w); return; }
 if (a === 'kleinhaus-planen') { if (window.GRUNDRISS_KLEINHAUS) window.GRUNDRISS_KLEINHAUS.planen(w); return; }
+if (a === 'heizung-vergleichen') { if (window.GRUNDRISS_HEIZUNG) window.GRUNDRISS_HEIZUNG.oeffnen(); return; }
 if (a === 'sauna-planen') { if (window.GRUNDRISS_SAUNA) window.GRUNDRISS_SAUNA.planen(w); return; }
 if (a === 'pers+' || a === 'pers-') {
 var pn = HK.personenPlan(G.plan()).n, np = Math.max(1, Math.min(12, pn + (a === 'pers+' ? 1 : -1)));
@@ -19509,6 +19627,238 @@ window.GRUNDRISS_SAUNA = { aktualisieren: aktualisieren, jetzt: jetzt, planen: p
 setTimeout(function () { jetzt(false); }, 0);
 })();
 </script>
+<script>/* grundriss_heizung.js */
+(function () {
+'use strict';
+var HK = window.HEIZUNG_KERN, G = window.GRUNDRISS, D = window.DATEN || {}, WZ = window.GRUNDRISS_ANBAU && window.GRUNDRISS_ANBAU.werkzeug, HD = D.heizung, V = HD && HD.vergleich;
+function byId(i) { return document.getElementById(i); }
+function tr(k, v) { return window.TXT ? window.TXT.t(k, v) : k; }
+function melde(t) { var e = byId('hv-fehler'); if (e) { e.textContent = t || ''; e.hidden = !t; } }
+if (!HK || !G || !WZ || !V) { melde(tr('hvFehler', { grund: (!HK ? 'heizung_kern.js' : !WZ ? 'Karte Anbau' : !G ? 'Zeichnung' : 'Daten') + ' fehlt.' })); return; }
+var esc = WZ.esc, sym = WZ.symbol, nz = WZ.nz, n0 = WZ.n0, schild = WZ.annahmeSchild;
+function T(k, v) { return esc(tr(k, v)); }
+function nf(x, d) { return new Intl.NumberFormat(WZ.lang(), { minimumFractionDigits: d, maximumFractionDigits: d }).format(x); }
+function r100(x) { return n0(Math.round(x / 100) * 100); }
+function datum(iso) { var t = String(iso || '').split('-'); return t.length === 3 ? t[2] + '.' + t[1] + '.' + t[0] : String(iso || ''); }
+var ICON = { gas: 'i-flamme', oel: 'i-tropfen', waermepumpe: 'i-gs-waermepumpe', sole: 'i-boden', pellets: 'i-sa-holz', scheitholz: 'i-an-gartenhaus', fernwaerme: 'i-zentral', infrarot: 'i-blitz', hybrid: 'i-thermo' };
+var STAND = HK.standard();
+var REG = { preis: { gas: [5, 30, 0.01], oel: [5, 30, 0.01], strom: [15, 60, 0.01], wpstrom: [15, 60, 0.01], pellets: [4, 20, 0.01], holz: [3, 20, 0.01], fernwaerme: [8, 30, 0.1] },
+nutz: { gas: [0.6, 1, 0.01], oel: [0.6, 1, 0.01], jaz_luft: [2, 6, 0.1], jaz_sole: [2, 6.5, 0.1], pellets: [0.6, 1, 0.01], scheitholz: [0.5, 1, 0.01], fernwaerme: [0.8, 1, 0.01], infrarot: [0.4, 1, 0.01], hybrid_wp: [0.2, 0.95, 0.05] } };
+var ST = null, ctx = null, timer = null, offen = {}, hilfe = {}, frage = null, nachricht = '', hinweis = true, wurzel = byId('hv-inhalt'), det = byId('hv-details');
+try { hinweis = localStorage.getItem('immo-hv-hinweis') !== '1'; } catch (e0) { hinweis = true; }
+function neuST() { return { sort: false, foerd: true, wptarif: false, heiz: STAND.heiz, ww: STAND.ww, preis: Object.assign({}, STAND.preis), nutz: Object.assign({}, STAND.nutz) }; }
+ST = neuST();
+function kurz(t) { var m = /^(.*?)(?:,| \(|:|; )/.exec(t || ''), s = m ? m[1] : (t || ''); return s.length > 46 ? s.slice(0, 44) + '…' : s; }
+var CHIP = { 'geprüft': ['gepr', 'hvSt_gepr'], 'prüfen vor Nutzung': ['pruef', 'hvSt_pruef'], 'veraltet': ['pruef', 'hvSt_veralt'], 'Annahme': ['annahme', 'hvSt_annahme'], 'Lücke': ['luecke', 'hvSt_luecke'], 'ungeklärt': ['luecke', 'hvSt_ungeklaert'],
+g: ['gepr', 'hvS_g'], n: ['luecke', 'hvS_n'], p: ['pruef', 'hvS_p'], a: ['eigen', 'hvS_a'] };
+function chip(s) {
+var c = CHIP[s] || (/^veraltet/.test(s) ? CHIP['veraltet'] : /Angebotsauswertung/.test(s) ? ['gepr', 'statusAngebote'] : /^geprüft/.test(s) ? CHIP['geprüft'] : CHIP['prüfen vor Nutzung']);
+return '<span class="rg-status st-' + c[0] + '" data-status="' + esc(s) + '">' + T(c[1]) + '</span>';
+}
+function beleg(titel, url, abruf, status) {
+var n = esc(kurz(titel));
+return '<span class="ab-quelle">' + (/^https?:/.test(url || '') ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + n + '</a>' : n) + (abruf ? ' · ' + T('hvAbruf', { datum: datum(abruf) }) : '') + ' ' + chip(status) + '</span>';
+}
+function qb(q, status) { var x = V.quellen[q] || {}; return beleg(x.t, x.u, x.a, status || x.s); }
+function hk(id) { return '<button type="button" class="hilfe-knopf" data-hv="hilfe" data-wert="' + id + '" aria-expanded="' + !!hilfe[id] + '" aria-controls="' + id + '" aria-label="' + T('hilfeKnopf') + '">?</button>'; }
+function hp(id, inner) { return '<p class="klein hv-hilfe" id="' + id + '"' + (hilfe[id] ? '' : ' hidden') + '>' + inner + '</p>'; }
+function haus() {
+try { var H = window.GRUNDRISS_HUELLE; return H && H.waermeBedarf ? H.waermeBedarf() : { ok: false, grund: 'keinPlan' }; } catch (e1) { return { ok: false, grund: 'x' }; }
+}
+function eingabeAus(h) {
+return { heiz: h.ok ? h.kwh : ST.heiz, ww: ST.ww, foerd: ST.foerd, wptarif: ST.wptarif, preis: ST.preis, nutz: ST.nutz };
+}
+function grundHtml(h, c) {
+var p = { heiz: n0(c.heiz), ww: n0(c.ww), nutz: n0(c.nutz) };
+if (h.ok) return '<p class="hv-grund" data-hv-haus="ja">' + sym('i-haus') + '<span>' + T('hvHaus', p) + '</span></p>';
+var g = 'hvG_' + h.grund;
+return '<div class="ab-meldung" role="status" data-hv-haus="nein"><p>' + T('hvBeispiel', Object.assign({ grund: tr(window.TEXTE[g] ? g : 'hvG_x') }, p)) + '</p><div class="knopfreihe"><button type="button" class="knopf mittel" data-hv="zeichnen" id="hv-zeichnen">' + sym('i-grundriss') + ' ' + T('hvZeichnen') + '</button></div></div>';
+}
+function werkzeugHtml() {
+return '<div class="knopfreihe hv-werk"><button type="button" class="knopf mittel" data-hv="check" id="hv-check">' + sym('i-paragraf') + ' ' + T('hvCheck') + '</button>' +
+'<button type="button" class="knopf mittel zweit' + (hinweis ? ' gs-puls' : '') + '" data-hv="sort" data-fk="t-sort" aria-pressed="' + ST.sort + '">' + sym('i-pfeil-ab') + ' ' + T(ST.sort ? 'hvSortAus' : 'hvSort') + '</button>' +
+'<button type="button" class="knopf mittel zweit" data-hv="foerd" data-fk="t-foerd" aria-pressed="' + ST.foerd + '">' + sym(ST.foerd ? 'i-an-ok' : 'i-an-stopp') + ' ' + T('hvFoerd') + ': ' + T(ST.foerd ? 'hvAn' : 'hvAus') + '</button>' + hk('hv-h-foerd') + '</div>' +
+hp('hv-h-foerd', T('hvHilfeFoerd')) + '<p class="klein" data-hv-foerdkurz="1">' + T('hvFoerdKurz') + '</p><p class="klein" data-hv-sorthinweis="1">' + schild() + ' ' + T('hvSortHinweis') + '</p>';
+}
+var RW = [0, 12000, 100], RH = [2000, 40000, 500];
+function dez(r) { return r[2] >= 1 ? 0 : r[2] >= 0.1 ? 1 : 2; }
+function reg(pfad, lab, a, r, extra) {
+var p = pfad.split('.'), id = 'hv-' + p.join('-'), w = p.length === 2 ? ST[p[0]][p[1]] : ST[pfad];
+return '<div class="es-feld hv-reg"><label class="es-label" for="' + id + '-z">' + T(lab) + '</label><div class="hv-reg-z"><input type="range" id="' + id + '" min="' + r[0] + '" max="' + r[1] + '" step="' + r[2] + '" value="' + w + '" data-hv-r="' + pfad + '" aria-label="' + T(lab) + '">' +
+'<input type="text" inputmode="decimal" id="' + id + '-z" value="' + nf(w, dez(r)) + '" data-hv-z="' + pfad + '" aria-describedby="' + id + '-f"></div><span class="fehler" id="' + id + '-f" role="alert"></span>' +
+'<span class="klein">' + qb(a.q, a.s) + '</span><span class="klein">' + esc(a.n || '') + '</span>' + (extra || '') + '</div>';
+}
+function annahmenHtml(h) {
+var A = V.annahmen, s = '<details class="mehr-einst" id="hv-ann"' + (offen['ann'] ? ' open' : '') + ' data-hv-det="ann"><summary>' + sym('i-werkzeug') + ' ' + T('hvAnn') + '</summary><div class="hv-regeln">';
+s += reg('ww', 'hvWW', A.ww, RW);
+if (!h.ok) s += reg('heiz', 'hvHeiz', A.heiz0, RH);
+Object.keys(REG.preis).forEach(function (k) { s += reg('preis.' + k, 'hvP_' + k, A.preis[k], REG.preis[k], k === 'oel' ? '<button type="button" class="knopf mittel zweit hv-alt" data-hv="oelalt">' + T('hvOelAlt') + '</button>' : ''); });
+s += '<div class="es-feld hv-reg"><button type="button" class="es-var" data-hv="wptarif" data-fk="t-wp" aria-pressed="' + ST.wptarif + '"><span class="es-var-kopf">' + sym(ST.wptarif ? 'i-an-ok' : 'i-an-frage') + '<b>' + T('hvWpTarif') + ': ' + T(ST.wptarif ? 'hvAn' : 'hvAus') + '</b></span></button></div>';
+Object.keys(REG.nutz).forEach(function (k) { s += reg('nutz.' + k, 'hvN_' + k, A.nutz[k], REG.nutz[k]); });
+return s + '</div><div class="knopfreihe"><button type="button" class="knopf mittel zweit" data-hv="reset">' + sym('i-dreh') + ' ' + T('hvAnnReset') + '</button></div><p class="klein">' + T('hvAnnGemerkt') + '</p></details>';
+}
+function balken(klasse, von, bis, max, label) {
+var a = Math.min(100, Math.max(0, von / max * 100)), b = Math.min(100, Math.max(a, bis / max * 100));
+return '<div class="es-balken hv-bal" role="img" aria-label="' + esc(label) + '"><span class="es-b ' + klasse + '" style="width:' + a.toFixed(1) + '%"></span><span class="es-b ' + klasse + ' hv-hell" style="width:' + (b - a).toFixed(1) + '%"></span></div>';
+}
+function aufKey(a) { return a === 2.5 ? 'hvAuf_25' : 'hvAuf_' + a; }
+function bioHtml(id) {
+var bt = HD.bio_treppe;
+if (!V.arten[id].bio || !bt) return '';
+return '<div class="hv-bio" data-hv-bio="1"><b>' + T('hvBio', { d: datum(bt.stichtag) }) + '</b> ' + hk('hv-h-bio-' + id) + '<div class="hv-stufen">' + bt.stufen.map(function (s) { return '<span class="hv-stufe">' + T('hvBioStufe', { j: s[0], p: s[1] }) + '</span>'; }).join('') + '</div>' +
+hp('hv-h-bio-' + id, T('hvBioHilfe', { ueb: bt.ueberschrift, abruf: datum(bt.abruf) })) + '</div>';
+}
+function liste(arr) { return '<ul class="gs-ul hv-ul">' + arr.map(function (x) { return '<li lang="de">' + esc(x[0]) + (x[1] ? ' <span class="klein">(' + qb(x[1]) + ')</span>' : '') + '</li>'; }).join('') + '</ul>'; }
+function rechenweg(x, d) {
+var A = V.arten[x.id], s = '<ul class="gs-ul hv-ul" data-hv-rechenweg="' + x.id + '">';
+s += '<li data-hv-zeile="a">' + T('hvRwA', { von: n0(x.a.von), bis: n0(x.a.bis) }) + ' ' + (d.q ? qb(d.q, d.status) : beleg(d.quelle, d.url, d.abruf, d.status)) + (d.hinweis ? ' <span class="klein" lang="de">' + esc(d.hinweis) + '</span>' : '') + '</li>';
+s += '<li data-hv-zeile="f">' + (x.f.aktiv ? T('hvRwF', { von: n0(x.f.von), bis: n0(x.f.bis) }) + ' ' + qb(V.foerderung.q) : T(A.foerd === 'luecke' ? 'hvFoerdLuecke' : A.foerd === 'nein' ? 'hvFoerdNein' : 'hvRwF0')) + '</li>';
+s += '<li data-hv-zeile="e">' + T('hvRwE', { kwh: n0(x.endenergie), eur: n0(x.energie) }) + '</li>';
+s += '<li data-hv-zeile="w">' + (x.wart.luecke ? T('hvRwW0') : T(x.wart.von === x.wart.bis ? 'hvRwW1' : 'hvRwW', { von: n0(x.wart.von), bis: n0(x.wart.bis) }) + ' ' + qb(A.wart[3], A.wart[4])) + '</li>';
+s += '<li data-hv-zeile="c">' + (A.co2 ? T('hvRwC', { f: nf(A.co2[0], 0) + (A.co2[1] !== A.co2[0] ? '–' + nf(A.co2[1], 0) : '') }) : T('hvRwCh')) + ' ' + qb('a9') + '</li></ul>';
+return s;
+}
+function erlHtml(id) {
+return '<ul class="hv-erl">' + V.arten[id].erl.map(function (k) {
+var e = V.erlx[k];
+return '<li lang="de"><b>' + (e.u ? '<a href="' + esc(e.u) + '" target="_blank" rel="noopener">' + esc(e.p) + '</a>' : esc(e.p)) + '</b> ' + chip(e.s) + ' ' + esc(e.t) + '</li>';
+}).join('') + '</ul>';
+}
+function karteHtml(x, c, plan) {
+var A = V.arten[x.id], d = HD.arten[x.id], name = tr('hvA_' + x.id), g = x.gesamt, m = c.max, gewaehlt = plan.heizanlage && plan.heizanlage.art === x.id;
+var kt = T('hvKostenZ', { von: r100(g.von), bis: r100(g.bis) }) + (x.wart.luecke ? ' *' : ''), co = x.co2.von === x.co2.bis ? T('hvCo2Z1', { von: nf(x.co2.von, 2) }) : T('hvCo2Z', { von: nf(x.co2.von, 1), bis: nf(x.co2.bis, 1) });
+var s = '<article class="hv-k" data-hv-art="' + x.id + '" data-von="' + Math.round(g.von) + '" data-bis="' + Math.round(g.bis) + '"><div class="hv-k-kopf">' + sym(ICON[x.id]) + '<h4 class="hv-name">' + esc(name) + '</h4></div>';
+s += '<div class="hv-zeile"><span>' + T('hvB_kosten') + '</span><b class="es-zahl" data-hv-kosten="1">' + kt + '</b></div>' + balken('c1', g.von, g.bis, m.kosten, tr('hvB_kosten') + ': ' + tr('hvKostenZ', { von: r100(g.von), bis: r100(g.bis) }));
+s += '<div class="hv-zeile"><span>' + T('hvB_co2') + '</span><b class="es-zahl" data-hv-co2="1">' + co + '</b></div>' + balken('c2', x.co2.von, x.co2.bis, m.co2, tr('hvB_co2') + ': ' + co.replace(/<[^>]+>/g, ''));
+s += '<div class="hv-zeile"><span>' + T('hvB_auf') + ' <span class="klein">(' + T('hvEigen') + ')</span></span><b data-hv-auf="' + x.auf + '">' + T(aufKey(x.auf)) + '</b></div>' + balken('c3', x.auf, x.auf, m.auf, tr('hvB_auf') + ': ' + tr(aufKey(x.auf)));
+if (x.wart.luecke) s += '<p class="klein" data-hv-luecke="wartung">* ' + T('hvRwW0') + '</p>';
+if (x.ww === false) s += '<p class="klein" data-hv-ww="aus">' + T('hvInfrarotWW') + '</p><p class="klein" data-hv-ir="auslegung">' + T('hvIrAnwalt') + '</p>';
+s += bioHtml(x.id);
+if (frage && frage.neu === x.id) s += '<div class="ab-meldung" role="alert" data-hv-frage="1"><p>' + T('hvMappeFrage', { alt: tr('mpHz_' + frage.alt), neu: name }) + '</p><div class="knopfreihe"><button type="button" class="knopf mittel" data-hv="ersetzen" data-wert="' + x.id + '" data-fk="ers-' + x.id + '">' + T('hvErsetzen') + '</button><button type="button" class="knopf mittel zweit" data-hv="behalten" data-fk="beh-' + x.id + '">' + T('hvBehalten') + '</button></div></div>';
+s += '<button type="button" class="es-var hv-mappe" data-hv="mappe" data-wert="' + x.id + '" data-fk="map-' + x.id + '" aria-pressed="' + !!gewaehlt + '"><span class="es-var-kopf">' + sym(gewaehlt ? 'i-an-ok' : 'i-grundriss') + '<b>' + T(gewaehlt ? 'hvMappeIst' : 'hvMappe') + '</b></span></button>';
+s += '<details class="hv-det" data-hv-det="' + x.id + '"' + (offen[x.id] ? ' open' : '') + '><summary>' + T('hvMehr') + '</summary>' + rechenweg(x, d);
+s += '<h5 class="es-h5">' + T('hvVor') + '</h5>' + liste(A.vor) + '<h5 class="es-h5">' + T('hvNach') + '</h5>' + liste(A.nach) + '<h5 class="es-h5">' + sym('i-paragraf') + T('hvErl') + '</h5><p class="klein">' + T('hvRecht') + '</p>' + erlHtml(x.id);
+if (A.hinweis) s += '<p class="klein" lang="de">' + esc(A.hinweis) + '</p>';
+return s + '</details></article>';
+}
+function importHtml() {
+return '<details class="mehr-einst" data-hv-det="import"' + (offen['import'] ? ' open' : '') + '><summary>' + sym('i-karte') + ' ' + T('hvImport') + '</summary><p class="klein">' + T('hvImportT') + '</p><ul class="gs-ul hv-ul" data-hv-import="1">' + V['import'].map(function (i) {
+return '<li lang="de" data-hv-land="' + i.l + '"><b>' + esc(i.s) + '</b> ' + chip(i.g) + ' ' + esc(i.t) + '</li>';
+}).join('') + '</ul></details>';
+}
+function kartenHtml(c, plan) {
+var reihe = ST.sort ? HK.nachKosten(c) : V.reihe, by = {};
+c.arten.forEach(function (x) { by[x.id] = x; });
+return '<p class="klein">' + T('hvSkala') + ' ' + hk('hv-h-rw') + '</p>' + hp('hv-h-rw', T('hvHilfeRechnung')) + '<div class="hv-grid" data-hv-sort="' + ST.sort + '">' + reihe.map(function (id) { return karteHtml(by[id], c, plan); }).join('') + '</div>';
+}
+function mitFokus(w, fn) {
+var af = document.activeElement, fk = af && w.contains(af) ? af.getAttribute('data-fk') || af.id : null;
+fn();
+if (fk) { var n = w.querySelector('[data-fk="' + fk + '"]') || byId(fk); if (n && n.focus) n.focus({ preventScroll: true }); }
+}
+function rechnen() {
+var h = haus(), c = HK.rechne(eingabeAus(h));
+if (!c.ok) { melde(tr('hvFehlerRechnen', { grund: c.grund })); return null; }
+if (c.e.meldungen.length) melde(tr('hvMeld', { was: c.e.meldungen.join(', ') })); else melde('');
+ctx = { h: h, c: c };
+return ctx;
+}
+function kartenNeu() {
+var k = rechnen(), box = byId('hv-karten'), kopf = byId('hv-grund');
+if (!k || !box) return;
+var plan = G.plan();
+mitFokus(wurzel, function () { kopf.innerHTML = grundHtml(k.h, k.c); box.innerHTML = kartenHtml(k.c, plan); byId('hv-meld').textContent = nachricht; });
+}
+function jetzt() {
+if (!wurzel || !det) return;
+var k = rechnen();
+if (!k) { wurzel.innerHTML = ''; return; }
+var plan = G.plan();
+mitFokus(wurzel, function () {
+wurzel.innerHTML = '<div id="hv-grund">' + grundHtml(k.h, k.c) + '</div>' + werkzeugHtml() + '<p class="klein" id="hv-meld" role="status" aria-live="polite">' + esc(nachricht) + '</p>' + annahmenHtml(k.h) + '<div id="hv-karten">' + kartenHtml(k.c, plan) + '</div>' +
+'<div class="hv-platz" data-hv-platz="1"><h4>' + sym('i-sonne') + ' ' + T('hvPlatz') + '</h4><p class="klein">' + schild() + ' ' + T('hvPlatzT') + '</p></div>' + importHtml();
+});
+}
+function aktualisieren() {
+clearTimeout(timer);
+timer = setTimeout(function () { if (det && det.open) jetzt(); }, 150);
+}
+function parse(t) { var s = String(t).replace(/\s/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'), x = parseFloat(s); return /^-?\d*\.?\d+$/.test(s) && isFinite(x) ? x : NaN; }
+function setzeWert(pfad, x) {
+var p = pfad.split('.');
+if (p.length === 2) ST[p[0]][p[1]] = x; else ST[p[0]] = x;
+}
+function bereich(pfad) { var p = pfad.split('.'); return p.length === 2 ? REG[p[0]][p[1]] : pfad === 'ww' ? RW : RH; }
+function bei(ev) {
+var t = ev.target, r = t.getAttribute && t.getAttribute('data-hv-r'), z = t.getAttribute && t.getAttribute('data-hv-z');
+if (r) {
+var x = parseFloat(t.value), zf = t.parentNode.querySelector('[data-hv-z]');
+if (!isFinite(x)) return;
+setzeWert(r, x); if (zf) zf.value = nf(x, dez(bereich(r)));
+kartenNeu();
+} else if (z) {
+var b = bereich(z), v = parse(t.value), fe = t.parentNode.parentNode.querySelector('.fehler') || t.parentNode.querySelector('.fehler');
+if (!(v >= b[0] && v <= b[1])) { if (ev.type === 'change') { if (fe) fe.textContent = tr('hvFeld', { min: nf(b[0], dez(b)), max: nf(b[1], dez(b)) }); t.setAttribute('aria-invalid', 'true'); } return; }
+if (fe) fe.textContent = ''; t.removeAttribute('aria-invalid');
+setzeWert(z, v); var sl = t.parentNode.querySelector('[data-hv-r]'); if (sl) sl.value = v;
+kartenNeu();
+}
+}
+function zuCheck() {
+var hz = byId('hz-karte'), p = G.plan(), art = p.heizanlage && p.heizanlage.art, MAP = { gas: 'gas', oel: 'oel', waermepumpe: 'waermepumpe', sole: 'waermepumpe', fernwaerme: 'fernwaerme', pellets: 'sonstige', scheitholz: 'sonstige', infrarot: 'sonstige' };
+if (!hz) return;
+hz.open = true;
+var sel = byId('hz-art');
+if (sel && !sel.value && MAP[art]) { sel.value = MAP[art]; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+hz.scrollIntoView({ block: 'start', behavior: 'auto' });
+var s = hz.querySelector('summary'); if (s) s.focus({ preventScroll: true });
+}
+function uebernehmen(w) {
+var p = G.plan();
+p.heizanlage = { art: w };
+try { G.geaendert(); } catch (e2) { melde(tr('hvFehler', { grund: String(e2 && e2.message || e2) })); return; }
+nachricht = tr('hvMappeOk', { art: tr('hvA_' + w) });
+frage = null; kartenNeu();
+}
+function klick(ev) {
+var t = ev.target.closest('[data-hv]');
+if (!t) return;
+if (hinweis) { hinweis = false; try { localStorage.setItem('immo-hv-hinweis', '1'); } catch (e3) {  } }
+var a = t.getAttribute('data-hv'), w = t.getAttribute('data-wert'), plan = G.plan(), alt;
+if (a === 'hilfe') { var p = byId(w), auf = t.getAttribute('aria-expanded') !== 'true'; t.setAttribute('aria-expanded', auf); hilfe[w] = auf; if (p) p.hidden = !auf; return; }
+if (a === 'check') { zuCheck(); return; }
+if (a === 'zeichnen') { var tg = byId('tab-grundriss'); if (tg) tg.click(); return; }
+if (a === 'sort' || a === 'foerd' || a === 'wptarif') { ST[a] = !ST[a]; jetzt(); return; }
+if (a === 'reset') { ST = neuST(); jetzt(); return; }
+if (a === 'oelalt') { ST.preis.oel = V.annahmen.oel_alt.w; jetzt(); var ob = wurzel.querySelector('[data-hv-z="preis.oel"]'); if (ob) ob.focus({ preventScroll: true }); return; }
+if (a === 'mappe') {
+alt = plan.heizanlage && plan.heizanlage.art;
+if (alt === w) return;
+if (alt && alt !== 'offen') { frage = { alt: alt, neu: w }; kartenNeu(); var ja = wurzel.querySelector('[data-hv=ersetzen]'); if (ja) ja.focus({ preventScroll: true }); return; }
+uebernehmen(w); return;
+}
+if (a === 'ersetzen') { uebernehmen(w); var nb = wurzel.querySelector('[data-hv=mappe][data-wert="' + w + '"]'); if (nb) nb.focus({ preventScroll: true }); return; }
+if (a === 'behalten') { alt = frage && frage.alt; var nn = frage && frage.neu; frage = null; nachricht = tr('hvMappeBehalten', { alt: tr('mpHz_' + alt) }); kartenNeu(); var bb = wurzel.querySelector('[data-hv=mappe][data-wert="' + nn + '"]'); if (bb) bb.focus({ preventScroll: true }); }
+}
+function oeffnen() {
+var zu = document.querySelector('#g-mappe-ov:not([hidden]) [data-overlay-zu]'); if (zu) zu.click();
+var tab = byId('tab-umbau'); if (tab) tab.click();
+if (det) det.open = true;
+jetzt();
+var k = byId('hv-karte'); if (k) k.scrollIntoView({ block: 'start', behavior: 'auto' });
+var s = byId('hv-summary'); if (s) s.focus({ preventScroll: true });
+return true;
+}
+if (wurzel) {
+wurzel.addEventListener('click', klick); wurzel.addEventListener('input', bei); wurzel.addEventListener('change', bei);
+wurzel.addEventListener('toggle', function (ev) { var d = ev.target.getAttribute && ev.target.getAttribute('data-hv-det'); if (d) offen[d] = ev.target.open; }, true);
+}
+if (det) det.addEventListener('toggle', function () { if (det.open) jetzt(); });
+var zur = byId('hv-zurueck'); if (zur) zur.addEventListener('click', oeffnen);
+window.addEventListener('sprachegewechselt', function () { if (det && det.open) jetzt(); });
+window.GRUNDRISS_HEIZUNG = { aktualisieren: aktualisieren, jetzt: jetzt, oeffnen: oeffnen, ergebnis: function () { return ctx; } };
+})();
+</script>
 <script>/* grundriss_kleinhaus.js */
 /* Oberfläche „Kleinhaus“ (K1): Kern kleinhaus_kern.js, Daten daten/kleinhaus.js. 3D nur bei Änderung gezeichnet, keine Animation (auch nicht bei prefers-reduced-motion). */
 (function () {
@@ -19945,16 +20295,20 @@ return '<div class="mh-heiz mh-kein-druck" role="group" aria-label="' + T('mpHzW
 ['waermepumpe', 'gas', 'offen'].map(function (x) {
 return '<button type="button" class="es-var mh-heiz-k" data-hz="' + x + '" aria-pressed="' + (art === x) + '"><span class="es-var-kopf"><svg class="sym" aria-hidden="true" focusable="false"><use href="#' + HZ_ICON[x] + '"/></svg><b>' + T('mpHz_' + x) + '</b></span></button>';
 }).join('') + (a ? '<button type="button" class="es-var mh-heiz-k" data-hz="weg"><span class="es-var-kopf"><b>' + T('mpHzWeg') + '</b></span></button>' : '') + '</div>' +
-'<p class="klein" role="status" data-hz-status="1">' + (hzMeldung ? esc(hzMeldung) : '') + '</p></div>';
+(a && a.bekannt && ['waermepumpe', 'gas', 'offen'].indexOf(art) < 0 ? '<p class="klein" data-hz-andere="' + esc(art) + '"><b>' + T('mpHzAndere', { art: tr('mpHz_' + art) }) + '</b></p>' : '') +
+'<p class="klein" role="status" data-hz-status="1">' + (hzMeldung ? esc(hzMeldung) : '') + '</p>' +
+'<p class="mh-kein-druck"><button type="button" class="knopf zweit mittel" data-hz-karte="1">' + T('hvVergleichen') + '</button></p></div>';
 }
 function heizHilfe(z) {
 var hd = window.DATEN && window.DATEN.heizung, a = hd && hd.arten && hd.arten[z.id], bt = hd && hd.bio_treppe;
 if (!a) return '';
 var par = { von: n0(a.von), bis: n0(a.bis) }, wp = z.id === 'waermepumpe', rw = wp && a.richtwert, extra = '';
 if (wp) par = { von: n0(a.von), bis: n0(a.bis), mittel: n0(a.mittel), median: n0(a.median), n: a.angebote, z1: a.zeitraum_von, z2: a.zeitraum_bis, stand: a.berichtsstand };
-if (!wp && bt) par = { a: bt.stufen[0][1], j: bt.stufen[0][0], b: bt.stufen[bt.stufen.length - 1][1], k: bt.stufen[bt.stufen.length - 1][0], ueb: bt.ueberschrift, abruf: datumDe(bt.abruf) };
+var sfx = wp ? 'waermepumpe' : z.id === 'gas' ? 'gas' : 'x';
+if (sfx === 'x') par = { von: n0(a.von), bis: n0(a.bis), basis: a.basis || '', hinweis: a.hinweis || '', status: tr(STATUS_KEY[a.status === 'veraltet, nur Größenordnung' ? 'veraltet' : a.status] || 'statusPruefen') };
+if (sfx === 'gas' && bt) par = { a: bt.stufen[0][1], j: bt.stufen[0][0], b: bt.stufen[bt.stufen.length - 1][1], k: bt.stufen[bt.stufen.length - 1][0], ueb: bt.ueberschrift, abruf: datumDe(bt.abruf) };
 if (rw) extra = '<p class="klein" data-hz-richtwert="' + esc(rw.wert) + '">' + T('mpHzRichtwert', { wert: n0(rw.wert), datum: datumDe(rw.stand) }) + '</p>';
-return '<br><span class="klein mh-hz-stat" data-hz-stat="' + esc(z.id) + '">' + T(wp ? 'mpHzStat_waermepumpe' : 'mpHzStat_gas', par) + '</span> <details class="mh-hz-hilfe" data-hz-hilfe="' + esc(z.id) + '"><summary aria-label="' + T('mpHzHilfeKnopf') + '">?</summary><p class="klein">' + T(wp ? 'mpHzHilfe_waermepumpe' : 'mpHzHilfe_gas', par) + '</p>' + extra + '</details>';
+return '<br><span class="klein mh-hz-stat" data-hz-stat="' + esc(z.id) + '">' + T('mpHzStat_' + sfx, par) + '</span> <details class="mh-hz-hilfe" data-hz-hilfe="' + esc(z.id) + '"><summary aria-label="' + T('mpHzHilfeKnopf') + '">?</summary><p class="klein">' + T('mpHzHilfe_' + sfx, par) + '</p>' + extra + '</details>';
 }
 function kosten(m) {
 var k = m.kosten, h = '', gruppe = '', fertig = false, ohne = m.luecken.filter(function (l) { return /^k:/.test(l.id); }).length;
@@ -20040,6 +20394,8 @@ if (hinweis && !hinweis.hidden) { hinweis.hidden = true; knopf.classList.remove(
 oeffnen();
 });
 inhalt.addEventListener('click', function (ev) {
+var lk = ev.target.closest ? ev.target.closest('[data-hz-karte]') : null;
+if (lk) { if (window.GRUNDRISS_HEIZUNG) window.GRUNDRISS_HEIZUNG.oeffnen(); return; }
 var b = ev.target.closest ? ev.target.closest('[data-hz]') : null;
 if (!b || !letzte) return;
 var w = b.getAttribute('data-hz'), p = G.plan();

@@ -224,7 +224,7 @@
       if (typeof sa0.stunden === 'number' && isFinite(sa0.stunden)) sa.stunden = klemme(sa0.stunden, 0.25, 4);
       neu.sauna = sa;
     }
-    /* Auftrag S2: plan.heizanlage = { art } (waermepumpe, gas, offen), optional; die Mappe nennt eine unbekannte Art sichtbar. */
+    /* Auftrag S2: plan.heizanlage = { art } (waermepumpe, gas, offen), optional; die Mappe nennt eine unbekannte Art sichtbar. H1: dazu alle Heizarten aus daten/heizung.js (oel, sole, pellets, scheitholz, fernwaerme, infrarot, hybrid); die Prüfung auf eine bekannte Art macht mappe_kern.js. */
     if (p.heizanlage && typeof p.heizanlage === 'object' && !Array.isArray(p.heizanlage)) {
       var ha0 = p.heizanlage, ha = {};
       if (idOk(ha0.art)) ha.art = ha0.art;
@@ -299,6 +299,7 @@
     if (window.GRUNDRISS_GRUNDSTUECK) window.GRUNDRISS_GRUNDSTUECK.aktualisieren();   /* Welle E, Teil 1: Grundstück */
     if (window.GRUNDRISS_SAUNA) window.GRUNDRISS_SAUNA.aktualisieren();               /* Auftrag S1: Sauna */
     if (window.GRUNDRISS_KLEINHAUS) window.GRUNDRISS_KLEINHAUS.aktualisieren();       /* Auftrag K1: Kleinhaus */
+    if (window.GRUNDRISS_HEIZUNG) window.GRUNDRISS_HEIZUNG.aktualisieren();           /* Auftrag H1: Heizarten im Vergleich (Bereich Umbau) */
     clearTimeout(speicherTimer);
     speicherTimer = setTimeout(function () {
       try {
