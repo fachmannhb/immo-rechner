@@ -1066,6 +1066,17 @@
   .mh-hinweis { border: 2px solid var(--linie2); background: var(--karte2); border-radius: 10px; padding: 8px 12px; margin: 10px 0; }
   @media screen { .mh-etage svg.planzeichnung { max-width: 100%; height: auto !important; } }
   @media (max-width: 640px) { .mh-3d, .mh-dl { grid-template-columns: 1fr; } .mh-tab { min-width: 520px; } }
+  /* S5: Kosten-Tabelle der Mappe am Handy (Bildschirm, nicht Druck): je Zeile Position, darunter Betrag, darunter Quelle(n); kein Seitwärts-Wischen */
+  @media screen and (max-width: 600px) {
+    .mh-tab[data-kosten] { min-width: 0; }
+    .mh-tab[data-kosten] thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .mh-tab[data-kosten], .mh-tab[data-kosten] tbody, .mh-tab[data-kosten] tr, .mh-tab[data-kosten] th, .mh-tab[data-kosten] td { display: block; }
+    .mh-tab[data-kosten] tr { padding: 6px 0; border-bottom: 1px solid var(--linie); }
+    .mh-tab[data-kosten] th, .mh-tab[data-kosten] td { border: 0; padding: 2px 8px; overflow-wrap: anywhere; }
+    .mh-tab[data-kosten] td.z { text-align: left; white-space: normal; }
+    .mh-tab[data-kosten] td:empty { display: none; }
+    .mh-tab[data-kosten] td[data-l]::before { content: attr(data-l); display: block; font-size: 14px; font-weight: 700; color: var(--leise); }
+  }
   @media print {
     body.g-mappe-offen { background: #ffffff !important; }
     body.g-mappe-offen > *:not(#g-mappe-ov) { display: none !important; }
@@ -19955,7 +19966,7 @@ var aus = z.inSumme === false, vermerk = aus ? '<span class="mh-enth" data-entha
 if (z.gruppe === 'heizanlage' && leer) vermerk = '<br><span class="klein" data-hz-folgt="' + esc(z.id) + '">' + T('mpHzOffen') + '</span>';
 else if (z.gruppe === 'heizanlage' && z.heizId) vermerk = heizHilfe(z);
 h += '<tr data-k="' + z.gruppe + '/' + esc(z.id) + '"' + (aus ? ' class="mh-aus" data-nicht-summe="1"' : '') + (leer ? ' data-luecke="1"' : ' data-von="' + z.von + '" data-bis="' + z.bis + '"') + '><td>' + esc(name) + vermerk + '</td><td class="z">' +
-(leer ? no : (aus ? '<span class="mh-wert">' : '') + esc(spanne(z.von, z.bis, z.einheit)) + (aus ? '</span>' : '') + (z.luecke ? '<span class="klein">+ ' + no + '</span>' : '')) + '</td><td>' + (leer ? '' : belege(z.belege)) + '</td></tr>';
+(leer ? no : (aus ? '<span class="mh-wert">' : '') + esc(spanne(z.von, z.bis, z.einheit)) + (aus ? '</span>' : '') + (z.luecke ? '<span class="klein">+ ' + no + '</span>' : '')) + '</td><td data-l="' + T('regQuelle') + '">' + (leer ? '' : belege(z.belege)) + '</td></tr>';
 });
 if (!fertig) h += summe();
 return sect('kosten', true, 'mpKosten', heizWahl(m) + tab('<th>' + T('mpPosition') + '</th><th class="z">' + T('maSpanne') + '</th><th>' + T('regQuelle') + '</th>', h, ' data-kosten="1"') +

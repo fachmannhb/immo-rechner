@@ -144,7 +144,7 @@
       if (z.gruppe === 'heizanlage' && leer) vermerk = '<br><span class="klein" data-hz-folgt="' + esc(z.id) + '">' + T('mpHzOffen') + '</span>';
       else if (z.gruppe === 'heizanlage' && z.heizId) vermerk = heizHilfe(z);
       h += '<tr data-k="' + z.gruppe + '/' + esc(z.id) + '"' + (aus ? ' class="mh-aus" data-nicht-summe="1"' : '') + (leer ? ' data-luecke="1"' : ' data-von="' + z.von + '" data-bis="' + z.bis + '"') + '><td>' + esc(name) + vermerk + '</td><td class="z">' +
-        (leer ? no : (aus ? '<span class="mh-wert">' : '') + esc(spanne(z.von, z.bis, z.einheit)) + (aus ? '</span>' : '') + (z.luecke ? '<span class="klein">+ ' + no + '</span>' : '')) + '</td><td>' + (leer ? '' : belege(z.belege)) + '</td></tr>';
+        (leer ? no : (aus ? '<span class="mh-wert">' : '') + esc(spanne(z.von, z.bis, z.einheit)) + (aus ? '</span>' : '') + (z.luecke ? '<span class="klein">+ ' + no + '</span>' : '')) + '</td><td data-l="' + T('regQuelle') + '">' + (leer ? '' : belege(z.belege)) + '</td></tr>';
     });
     if (!fertig) h += summe();
     return sect('kosten', true, 'mpKosten', heizWahl(m) + tab('<th>' + T('mpPosition') + '</th><th class="z">' + T('maSpanne') + '</th><th>' + T('regQuelle') + '</th>', h, ' data-kosten="1"') +
