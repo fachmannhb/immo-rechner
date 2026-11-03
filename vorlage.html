@@ -1596,6 +1596,20 @@ __PALETTE_CSS__
   .hv-bio { margin-top: 6px; padding: 8px 10px; border-radius: 12px; background: var(--info-fl); border-left: 5px solid var(--info); font-size: 16px; }
   .hv-stufen { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
   .hv-stufe { padding: 0 10px; border-radius: 999px; border: 1.5px solid var(--info); font-weight: 700; }
+  /* H2: Kühlen, Strom, Speicher (gleiche Karten, Farben nur aus der Palette) */
+  .kl-block { margin: 14px 0; }
+  .kl-block > h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font: 700 1.2rem var(--display); }
+  .kl-block > h4 svg.sym { width: 1.4em; height: 1.4em; color: var(--akzent-text); }
+  details.kl-ab > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-height: 48px; font-size: 1.1rem; }
+  details.kl-ab > summary::before { content: "\25B6"; color: var(--akzent-text); font-size: .85em; }
+  details.kl-ab[open] > summary::before { content: "\25BC"; }
+  details.kl-ab > summary svg.sym { width: 1.8em; height: 1.8em; flex: none; color: var(--akzent-text); }
+  .es-b.hv-off { -webkit-mask-image: linear-gradient(90deg, #000 30%, transparent); mask-image: linear-gradient(90deg, #000 30%, transparent); }
+  .hv-q { margin: 2px 0 0; }
+  .hv-lk { border-style: dashed; }
+  .hv-lk-z { margin: 6px 0; padding: 6px 10px; border-left: 5px dashed var(--leise); }
+  .kl-richt { margin: 10px 0; padding: 10px 14px; border: 2px solid var(--linie); border-radius: 14px; background: var(--karte); }
+  .kl-richt-t { margin: 0 0 6px; font: 700 1.1rem var(--display); }
   .hv-platz { margin: 14px 0; padding: 12px 16px; border: 2px dashed var(--leise); border-radius: 14px; }
   .hv-platz h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font: 700 1.1rem var(--display); }
   .hv-platz svg.sym { width: 1.3em; height: 1.3em; color: var(--akzent-text); }
@@ -3909,6 +3923,7 @@ __PALETTE_CSS__
 <script src="daten/sauna.js"></script>
 <script src="daten/saunaholz.js"></script>
 <script src="daten/heizung.js"></script>
+<script src="daten/klima.js"></script>
 <script src="daten/kleinhaus.js"></script>
 <div class="g-druck" id="g-druck" aria-hidden="true"></div>
 <div class="overlay" id="g-mappe-ov" role="dialog" aria-modal="true" aria-labelledby="mh-h" hidden>
@@ -3932,6 +3947,7 @@ __PALETTE_CSS__
 <script src="daten/texte_kleinhaus.js"></script>
 <script src="daten/texte_mappe.js"></script>
 <script src="daten/texte_heizung.js"></script>
+<script src="daten/texte_klima.js"></script>
 <script src="sprache.js"></script>
 <script src="grundriss_geo.js"></script>
 <script src="grundriss_dach.js"></script>
@@ -3943,6 +3959,7 @@ __PALETTE_CSS__
 <script src="grundstueck_kern.js"></script>
 <script src="sauna_kern.js"></script>
 <script src="heizung_kern.js"></script>
+<script src="klima_kern.js"></script>
 <script src="kleinhaus_kern.js"></script>
 <script src="autarkie_kern.js"></script>
 <script src="mappe_kern.js"></script>
