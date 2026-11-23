@@ -17,10 +17,11 @@ from daten_d_common import schreibe
 OBJ_VOLL = quelle.OBJ
 BEHALTEN = {
     'altbau_heizwaerme': ['ab_efh_ist'],
-    'kfw': ['kfw261_eh40', 'kfw261_eh55', 'kfw261_eh70', 'kfw261_eh85', 'kfw261_boni', 'kfw261_stand', 'kfw297', 'kfw_mehrkosten'],
+    'gmodg': ['gm_bagatell'],   # F1 23.11.2026 (aus der Tradi-Fassung): Bagatellgrenze 10 %
+    'kfw': ['kfw261_eh40', 'kfw261_eh55', 'kfw261_eh70', 'kfw261_eh85', 'kfw261_boni', 'kfw261_stand', 'kfw297', 'kfw_mehrkosten', 'kfw261_denkmal', 'kfw262'],
     'beg_einzelmassnahmen': ['beg_huelle', 'beg_hoechst', 'beg_lueftung_satz', 'beg_lueftung_wbg', 'beg_lueftung_nachweis', 'beg_alter'],
-    'passivhaus': ['ph_heizwaerme', 'ph_luft', 'ph_mehrkosten'],
-    'lueftung': ['lu_dez_abluft', 'lu_dez_wrg', 'lu_zentral', 'lu_zentral2', 'lu_strom', 'lu_strom2', 'lu_wrg_praxis', 'lu_filter_wechsel', 'lu_filter_preis', 'lu_luecke'],
+    'passivhaus': ['ph_heizwaerme', 'ph_luft', 'ph_mehrkosten', 'ph_heizlast'],
+    'lueftung': ['lu_dez_abluft', 'lu_dez_wrg', 'lu_zentral', 'lu_zentral2', 'lu_strom', 'lu_strom2', 'lu_wrg_praxis', 'lu_filter_wechsel', 'lu_filter_preis', 'lu_luecke', 'lu_dez_nachruest', 'lu_vergleich', 'lu_kamin'],
     # Welle D Teil 3 (Karte "Anbau und Nebengebäude"): alle Zeilen der Liste, nur das Feld ref fällt weg
     'wintergarten_anbau': ['wg_kalt', 'wg_warm', 'wg_gesamt', 'wg_gmodg', 'wg_anbau_kosten', 'wg_abstand', 'wg_sachsen'],
 }

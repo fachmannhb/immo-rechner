@@ -71,7 +71,7 @@
     var strom = E && E.autarkie ? E.autarkie() : { ok: false, grund: 'keineKarte' };
     var wasser = H && H.wasserAutarkie ? H.wasserAutarkie() : null;
     var waerme = H && H.waermeBedarf ? H.waermeBedarf() : null;
-    return { pers: pers, zeilen: AU.alle({ strom: strom, wasser: wasser, waerme: waerme, flaeche: c.flaechen.beet, personen: pers.n }), baeume: c.flaechen.baumAnzahl, beete: c.flaechen.beete, beet: c.flaechen.beet };
+    return { pers: pers, solar: plan.solarthermie === 'heiz' || plan.solarthermie === 'ww' ? plan.solarthermie : 'keine', zeilen: AU.alle({ strom: strom, wasser: wasser, waerme: waerme, solar: plan.solarthermie, flaeche: c.flaechen.beet, personen: pers.n }), baeume: c.flaechen.baumAnzahl, beete: c.flaechen.beete, beet: c.flaechen.beet };
   }
   function auSprung(ziel, text) {
     return '<button type="button" class="knopf mittel zweit au-sprung" data-gs="sprung" data-wert="' + ziel + '" data-fk="au-sp-' + ziel + '">' + symbol(ziel === 'beet' ? 'i-gs-beet' : 'i-pfeil-ab') + ' ' + esc(text) + '</button>';
@@ -92,7 +92,7 @@
     h += '<div class="au-text">';
     var q = '', rechnung = '';
     if (id === 'strom') {
-      if (fehlt) h += '<p data-au-satz="strom">' + esc(tr('auFehltStrom')) + ' <span class="klein">' + esc(tr('auGrund', { grund: z.grund })) + '</span></p>' + auSprung('strom', tr('auZu_strom'));
+      if (fehlt) h += '<p data-au-satz="strom">' + esc((z.grund === 'keineFlaeche' ? tr('auStromOhnePv') + ' ' : '') + tr('auFehltStrom')) + ' <span class="klein">' + esc(tr('auGrund', { grund: z.grund })) + '</span></p>' + auSprung('strom', tr('auZu_strom'));
       else {
         h += '<p class="klein" data-au-satz="strom">' + esc(tr('auQuelleStrom')) + '</p>';
         if (z.personen !== d.pers.n) h += '<p class="klein" data-au-pers-abw="1">' + annahmeSchild() + ' ' + esc(tr('auStromPers', { n: z.personen, m: d.pers.n })) + '</p>';
@@ -106,8 +106,14 @@
       if (z.rw) { rechnung = tr('auWasserRechnung', { mitte: pc(z.prozent), von: pc(z.von), bis: pc(z.bis), n: z.personen, ges: n0(z.rw.gesamtbedarf), ntw: n0(z.rw.bedarfNtw) }); q = quelleHtml(z.rw.belegVerbrauch) + ' ' + quelleHtml(z.rw.niederschlag && z.rw.niederschlag.beleg); }
       else rechnung = tr('auQuelleWasser');
     } else if (id === 'waerme') {
-      if (z.bedarfKwh != null) h += '<p data-au-satz="waerme"><span class="es-zahl" data-bedarf="' + z.bedarfKwh.toFixed(0) + '">' + esc(tr('auWaermeBedarf', { kwh: n0(z.bedarfKwh), m2: n0(z.bedarfKwhM2) })) + '</span> ' + esc(tr('auWaermeKeine')) + '</p>';
+      if (z.bedarfKwh != null) h += '<p data-au-satz="waerme"><span class="es-zahl" data-bedarf="' + z.bedarfKwh.toFixed(0) + '">' + esc(tr('auWaermeBedarf', { kwh: n0(z.bedarfKwh), m2: n0(z.bedarfKwhM2) })) + '</span> ' + esc(tr(z.status === 'wert' ? 'auWaermeTeil' : 'auWaermeKeine')) + '</p>';
       else h += '<p data-au-satz="waerme">' + esc(tr('auWaermeOffen', { grund: z.grund })) + '</p>';
+      if (z.ersatzFuerStandard) h += '<p class="klein" data-au-ersatz="' + esc(z.ersatzFuerStandard) + '">' + annahmeSchild() + ' ' + esc(tr('auErsatzStandard', { std: tr('hdStd_' + z.ersatzFuerStandard) })) + '</p>';
+      /* F1: Solarthermie-Option (eine belegte Zahl: Warmwasser plus Heizung 20 bis 30 % des Gesamtverbrauchs) */
+      h += '<div class="au-solar es-chips" role="group" aria-label="' + esc(tr('auSolarFrage')) + '"><span class="klein">' + esc(tr('auSolarFrage')) + '</span> ' +
+        [['keine', tr('auSolarKeine')], ['ww', tr('auSolarWw')], ['heiz', tr('auSolarHeiz')]].map(function (x) { return '<button type="button" class="chip" data-gs="solar" data-wert="' + x[0] + '" data-fk="au-solar-' + x[0] + '" aria-pressed="' + (d.solar === x[0]) + '">' + esc(x[1]) + '</button>'; }).join('') + '</div>';
+      if (z.solar === 'heiz') h += '<p class="klein" data-au-solar="heiz">' + esc(tr('auSolarHeizSatz', { von: z.von, bis: z.bis })) + ' ' + annahmeSchild() + '</p>';
+      else if (z.solar === 'ww') h += '<p class="klein" data-au-solar="ww">' + luecke() + ' ' + esc(tr('auSolarWwLuecke')) + '</p>';
       h += auSprung('daemmung', tr('auZu_daemmung'));
       rechnung = tr('auWaermeRechnung');
     } else {
@@ -129,6 +135,11 @@
     h += '</div>';
     h += auHilfe(hid, '<p>' + esc(rechnung) + '</p>' + (id === 'essen' ? '<p>' + annahmeSchild() + ' ' + esc(tr('auEssenAnnahme')) + '</p><p>' + esc(tr('auEssenNicht')) + '</p>' : '') + (q ? '<p>' + q + '</p>' : ''));
     return h + '</div>';
+  }
+  /* Ampeltext eines Bausteins; Gelb nur aus Auslegung (Bauwerk nicht ausdrücklich genannt) heißt „Auslegung: bitte prüfen“, nicht „Knapp an der Grenze“ */
+  function ampelText(it) {
+    var aus = it.ampel === 'gelb' && it.vf && it.vf.ok && it.vf.summe && it.vf.summe.zeile && it.vf.summe.zeile.auslegungGelb;
+    return tr(aus ? 'anA_gelbAuslegung' : 'anA_' + it.ampel);
   }
   function klemme100(p) { return Math.max(0, Math.min(100, p || 0)).toFixed(2); }
   function autarkHtml(c) {
@@ -241,7 +252,7 @@
     }
     c.items.forEach(function (it) {
       h += objHtml({ id: it.id, ampel: it.ampel, icon: ICON[it.art], x: it.x, y: it.y, b: it.b, t: it.t,
-        aria: tr('gsObjAria', { name: artName(it.art), b: m2(it.b), t: m2(it.t), l: m(it.x), o: m(it.y), ampel: tr('anA_' + it.ampel) }) }, ppm, auswahl);
+        aria: tr('gsObjAria', { name: artName(it.art), b: m2(it.b), t: m2(it.t), l: m(it.x), o: m(it.y), ampel: ampelText(it) }) }, ppm, auswahl);
     });
     h += zahlen;   /* die Abstandszahlen zuletzt, damit kein Baustein sie verdeckt */
     var sel = auswahl && auswahl !== 'haus' ? itemById(auswahl) : null;
@@ -401,7 +412,7 @@
       if (!summe) h += '<p class="ab-meldung fehler" role="alert">' + esc(tr('anKeineDaten', { grund: v ? v.grund : '' })) + '</p>';
       else {
         var satz = summe.ursache === 'keinBaustein' ? tr('gsKeinBaustein') : W.satzFuer(summe);
-        h += '<div class="an-satz an-f ' + a + '" role="status" data-an-ampel="' + a + '">' + ampelChip(a, false) + '<span class="an-satz-text" data-an-satz="antrag">' + esc(satz) + '</span></div>';
+        h += '<div class="an-satz an-f ' + a + '" role="status" data-an-ampel="' + a + '">' + ampelChip(a, false, summe.zeile && summe.zeile.auslegungGelb) + '<span class="an-satz-text" data-an-satz="antrag">' + esc(satz) + '</span></div>';
         if (summe.zeile && summe.zeile.auslegung) h += W.auslegungHtml(summe.zeile);
         if (summe.alternativen) h += '<p class="klein" data-gs-alternativen="1">' + esc(tr('anAlternativen')) + '</p>';
         if (v.holzHinweis) h += '<p class="ab-meldung" role="note" data-gs-holz="hinweis">' + esc(tr('gsHolzHinweis')) + '</p>';
@@ -511,6 +522,11 @@
     if (a === 'kleinhaus-planen') { if (window.GRUNDRISS_KLEINHAUS) window.GRUNDRISS_KLEINHAUS.planen(w); return; }   /* Auftrag K1: öffnet die Karte Kleinhaus für diesen Gartenhaus-Baustein */
     if (a === 'heizung-vergleichen') { if (window.GRUNDRISS_HEIZUNG) window.GRUNDRISS_HEIZUNG.oeffnen(); return; }   /* Auftrag H1: öffnet die Karte Heizarten im Vergleich (Bereich Umbau) */
     if (a === 'sauna-planen') { if (window.GRUNDRISS_SAUNA) window.GRUNDRISS_SAUNA.planen(w); return; }   /* Auftrag S1: öffnet die Karte Sauna für diesen Baustein */
+    if (a === 'solar') {
+      if (w === 'heiz' || w === 'ww') G.plan().solarthermie = w; else delete G.plan().solarthermie;
+      geaendert(false); sage(tr('auSolarGesetzt_' + (w === 'heiz' || w === 'ww' ? w : 'keine')));
+      return;
+    }
     if (a === 'pers+' || a === 'pers-') {
       var pn = HK.personenPlan(G.plan()).n, np = Math.max(1, Math.min(12, pn + (a === 'pers+' ? 1 : -1)));
       if (np !== pn) { G.plan().personen = np; geaendert(false); sage(tr('auPersGesetzt', { n: np })); }
@@ -524,7 +540,7 @@
       auswahl = r.id; loeschFrage = null;
       geaendert(false);
       var c = rechne(), it = itemById(r.id);
-      sage((r.frei ? '' : tr('gsStatusVoll') + '. ') + (it && it.garten ? tr('gsStatusGesetztGarten', { name: artName(w) }) : tr('gsStatusGesetzt', { name: artName(w), ampel: it ? tr('anA_' + it.ampel) : '' })));
+      sage((r.frei ? '' : tr('gsStatusVoll') + '. ') + (it && it.garten ? tr('gsStatusGesetztGarten', { name: artName(w) }) : tr('gsStatusGesetzt', { name: artName(w), ampel: it ? ampelText(it) : '' })));
       /* liegt der Plan außerhalb des Bildes, zeigt die Seite ihn (ohne Animation); der Fokus bleibt auf dem Bildknopf */
       var sv = byId('gs-plan') ? byId('gs-plan').getBoundingClientRect() : null;
       if (sv && (sv.top > window.innerHeight - 140 || sv.bottom < 120)) byId('gs-plan').scrollIntoView({ block: 'start', behavior: 'auto' });

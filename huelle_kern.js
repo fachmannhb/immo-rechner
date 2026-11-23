@@ -22,6 +22,7 @@
     filter: 0.9,             /* Filterwirkungsgrad: nur aus dem Satzungsbeispiel rw_satzung (rw_filter ist eine Lücke) */
     beiwertVon: 0.75,        /* Ertragsbeiwert: Satzungsbeispiel Ziegeldach 75 % bis Baunetzwissen 0,8 bis 0,9 (Spanne, die beide umfasst; w_wa_03) */
     beiwertBis: 0.9,
+    gartenTage: 365,         /* Tage mit Gartenbewässerung (F1, Annahme; die Satzung nennt nur l/(m²·d); über das ganze Jahr gerechnet ist es eine Obergrenze) */
     bezugFlaecheZentral: 150 /* m²: lu_zentral nennt „Haus ca. 150 m²“; die Kosten werden proportional zur Wohnfläche umgerechnet (Annahme) */
   };
   var STANDARDS = ['bestand', 'gmodg', 'kfw', 'passivhaus'];
@@ -91,6 +92,11 @@
     }
     return { n: ANNAHMEN.personen, explizit: false };
   }
+  /* Härtebereich aus °dH: Grenzen 8,4 und 14 °dH stehen in den Daten (hr_mittel dh_von / dh_bis); sonst die Werte des Wasserhaushaltsgesetzes-Zeilen */
+  function haerteAusDh(dh) {
+    var m = wa('haerte', 'hr_mittel'), lo = m && m.dh_von != null ? m.dh_von : 8.4, hi = m && m.dh_bis != null ? m.dh_bis : 14;
+    return dh < lo ? 'weich' : (dh < hi ? 'mittel' : 'hart');
+  }
   function planWasser(plan) {
     var pw = plan && plan.wasser && typeof plan.wasser === 'object' ? plan.wasser : {}, res = { personen: ANNAHMEN.personen, regenwasser: true, gruendach: false, haerte: 'mittel', enthaertung: false, preis: null, meldung: null, explizit: {} };
     var pp = personenPlan(plan);
@@ -101,6 +107,10 @@
     if (typeof pw.haerte === 'string' && pw.haerte !== '') { if (HAERTEN.indexOf(pw.haerte) >= 0) { res.haerte = pw.haerte; res.explizit.haerte = true; } else res.meldung = { feld: 'haerte', id: pw.haerte }; }
     var pr = Number(pw.preis);
     if (isFinite(pr) && pr > 0 && pr < 50) res.preis = pr;
+    /* F1 (aus der Tradi-Fassung): Gartenfläche in m² (Bewässerung, 0 = nicht eingerechnet) und Wasserhärte als Zahl in °dH (optional; bestimmt den Härtebereich) */
+    res.garten = 0; res.haerteDh = null;
+    if (typeof pw.garten_m2 === 'number' && isFinite(pw.garten_m2) && pw.garten_m2 > 0) res.garten = klemme(pw.garten_m2, 0, 5000);
+    if (typeof pw.haerte_dh === 'number' && isFinite(pw.haerte_dh) && pw.haerte_dh >= 0) { res.haerteDh = klemme(pw.haerte_dh, 0, 60); res.haerte = haerteAusDh(res.haerteDh); res.explizit.haerte = true; }
     return res;
   }
   /* Gas- und Ölpreis: Startwerte aus daten/energiepreise.js, Eingabe überschreibt (plan.energiepreise = { traeger, gas_ct, oel_eur100l }) */
@@ -114,6 +124,9 @@
     res.oelKwhProL = hwE ? hwE.wert : 10.05;
     res.oelCt = oelCtProKwh(res.oelEur100, res.oelKwhProL);
     res.oelCtBrennwert = bwE ? oelCtProKwh(res.oelEur100, bwE.wert) : null;
+    /* F1: Gas wird je kWh Brennwert abgerechnet, Heizöl hier je kWh Heizwert: Vergleichszahl für Gas auf Heizwertbasis (nur Anzeige; die Kostenrechnung teilt mit dem Kesselwirkungsgrad gleicher Basis, Ergebnis unverändert) */
+    var hsE = eintrag({ e: d && d.eintraege }, 'e', 'gas_hs_hi');
+    res.gasHsHi = hsE ? hsE.wert : 1.107; res.gasCtHeizwert = res.gasCt * res.gasHsHi; res.belegGasHsHi = beleg(hsE);
     res.ct = res.traeger === 'oel' ? res.oelCt : res.gasCt;
     res.wirkungsgrad = ANNAHMEN.wirkungsgrad[res.traeger];
     res.belegGas = beleg(gasE); res.belegOel = beleg(oelE); res.belegOelKwh = beleg(hwE); res.belegOelBrennwert = beleg(bwE);
@@ -225,6 +238,45 @@
       });
     }
     res.ueberZiel = ueber; res.ziel = zl; res.uIst = ist; res.uWirk = uMitZiel(ist, zl);
+    /* F1 23.11.2026: KfW legt keine Bauteilwerte fest, die U-Ziele des Passivhauses sind Faustwerte (Annahme): für beide gibt es keine belegte Heizwärme.
+       Die Rechnung mit den Altbauwerten (161) oder den Faustwerten (98) wird nicht als Ergebnis gezeigt: gesamt = null, Grund steht in res.grund (alle Anzeigen prüfen hw.gesamt). */
+    if (std === 'kfw' || std === 'passivhaus') { res.gesamtRechnung = res.gesamt; res.gesamt = null; res.grund = std === 'kfw' ? 'kfwOhneHeizwaerme' : 'passivhausOhneZahl'; res.ohneBelegteZahl = true; }
+    return res;
+  }
+
+  /* F1: weitere belegte Zeilen je Karte (aus der Tradi-Fassung): gezeigt als „Weitere belegte Angaben“, jede mit Beleg; Status „Lücke“ und „abgelaufen“ bleiben sichtbar */
+  function weitereZeilen(karte, land) {
+    var plan = karte === 'daemmung' ? [['d', 'gmodg', 'gm_bagatell'], ['d', 'kfw', 'kfw261_denkmal'], ['d', 'kfw', 'kfw262'], ['d', 'passivhaus', 'ph_heizlast']]
+      : [['w', 'regenwasser', 'rw_ersparnis'], ['w', 'regenwasser', 'rw_wc_bedarf'], ['w', 'enthaertung', 'en_ausfuehrung']].concat(land === 'HB' ? [['w', 'gebuehren', 'gb_bremen_foerderung']] : []);
+    var out = [];
+    plan.forEach(function (x) {
+      var e = x[0] === 'd' ? dl(x[1], x[2]) : wa(x[1], x[2]);
+      if (e) out.push({ id: e.id, name: e.name, von: e.von, bis: e.bis, einheit: e.einheit || '', hinweis: e.hinweis || '', status: e.status || '', gilt_bis: e.gilt_bis || '', beleg: beleg(e) });
+    });
+    return out;
+  }
+  /* F1: Hinweiszeilen der Lüftungs-Karte (Platz/Einbau, Kaminofen mit Lüftungsanlage nach MFeuV, Nachrüstung Altbau dezentral); jede mit Beleg, fehlt eine Zeile, ist ihr Wert null */
+  function lueftungHinweise() {
+    function z(id) { var e = dl('lueftung', id); return e ? { text: e.name, von: e.von, bis: e.bis, einheit: e.einheit || '', beleg: beleg(e) } : null; }
+    return { vergleich: z('lu_vergleich'), kamin: z('lu_kamin'), nachruest: z('lu_dez_nachruest') };
+  }
+  /* F1 23.11.2026 (aus der Tradi-Fassung übernommen, Handrechnung tmp/f1_zusatz_hand.py): Zusätzliche Dämmschicht der Außenwand bis zum Zielwert.
+     Dicke = λ × (1/U_ziel − 1/U_alt) × 100 cm (gleicher Dämmstoff wie im Plan, sonst EPS als Annahme). Kosten: nur der Dämmstoff (Material, linear nach Dicke, Preisbasis „für U = 0,24“ aus daten/material.js);
+     Montage ist nicht anteilig gerechnet, bei kleiner Zusatzdicke also ein Mindestwert. Gilt als zweite Zahl neben dem vollen Fassadenpreis: „wenn die Fassade ohnehin erneuert wird“. */
+  function wandZusatz(plan, b, uZiel) {
+    var res = { bauteil: 'aussenwand', uAlt: null, uZiel: uZiel, noetig: false, luecke: null };
+    if (!b || !b.ok || !b.wand || !b.wand.ok || !zahlOk(uZiel)) { res.luecke = 'keineWand'; return res; }
+    var wu = b.wand, wahl = b.wahl, mg = b.mengen; res.uAlt = wu.u;
+    if (wu.u <= uZiel + 1e-9) { res.uNeu = wu.u; return res; }
+    var id = wahl.daemmung || 'eps', kw = AK.materialKennwerte(null, 'daemmung', id);
+    res.material = id; res.materialName = kw && kw.ok ? kw.name : id; res.materialAngenommen = !wahl.daemmung; res.noetig = true; res.uNeu = uZiel;
+    if (!kw || !kw.ok || !kw.lambda || kw.lambda.wert == null) { res.luecke = 'daemmungOhneLambda'; return res; }
+    var d0 = wahl.daemmung ? wahl.daemmdicke_cm : 0, extraCm = kw.lambda.wert * (1 / uZiel - 1 / wu.u) * 100;
+    res.d0Cm = d0; res.extraCm = extraCm; res.dNeuCm = d0 + extraCm; res.lambda = kw.lambda.wert;
+    var fl = AK.bauteilFlaeche('daemmung', mg, wahl), neu = AK.kostenFuer('daemmung', id, fl, res.dNeuCm), alt = d0 > 0 ? AK.kostenFuer('daemmung', id, fl, d0) : { von: 0, bis: 0 };
+    if (!neu || !neu.ok || neu.luecke || neu.von == null || !kw.preis || kw.preis.basis !== 'daemm_u024') { res.luecke = !kw.preis ? 'keinPreis' : (kw.preis.basis !== 'daemm_u024' ? 'preisbasis' : ((neu && neu.grund) || 'keinPreis')); return res; }
+    res.flaeche = fl.menge; res.preis = kw.preis;
+    res.von = neu.von - (alt.von || 0); res.bis = neu.bis - (alt.bis || 0);
     return res;
   }
 
@@ -312,9 +364,23 @@
     if (!hw.ok || !hw.transmission) { res.grund = 'keineHeizwaerme'; return res; }
     if (standardId === 'bestand') { res.grund = 'keinStandard'; return res; }
     if (standardId === 'kfw') { res.grund = 'kfwOhneHeizwaerme'; return res; }   /* KfW legt keine U-Werte fest: die Daten geben keine Heizwärme für die Stufe her */
-    if (mf.mehrkosten.art === 'luecke' || mf.mehrkosten.art === 'keine') { res.grund = 'keineMehrkosten'; return res; }
+    /* F1: Passivhaus: U-Ziele sind Faustwerte, Dach und Boden ohne Preis: eine Jahreszahl aus unvollständigen Kosten wird nicht gezeigt (Lücke mit Grund) */
+    if (standardId === 'passivhaus') { res.grund = 'passivhausOhneAmort'; return res; }
+    /* F1: zweite Zahl „wenn die Fassade ohnehin erneuert wird“: nur die zusätzliche Dämmschicht der Wand (Material), unabhängig vom vollen Fassadenpreis */
     var t = hw.transmission, ersMitte = t.istKwh - t.kwh, ersLo = Math.max(0, t.istKwhLo - t.kwhLo), ersHi = Math.max(0, t.istKwhHi - t.kwhHi);
     var lo = Math.min(ersLo, ersHi), hi = Math.max(ersLo, ersHi);
+    if (hw.ziel && hw.ziel.wand && hw.bilanz) {
+      res.zusatz = wandZusatz(plan, hw.bilanz, hw.ziel.wand.wert);
+      if (res.zusatz.noetig && !res.zusatz.luecke) {
+        var nurWand = hw.ueberZiel && hw.ueberZiel.length === 1 && hw.ueberZiel[0].bauteil === 'wand';
+        res.zusatz.nurWand = nurWand;
+        if (nurWand) {
+          res.amortZusatz = amortisationSpanne({ kostenVon: res.zusatz.von, kostenBis: res.zusatz.bis, foerderVon: 0, foerderBis: 0, kwhLo: lo, kwhHi: hi, ct: ep.ct, eta: ep.wirkungsgrad });
+          res.amortZusatzMitte = amortisation(res.zusatz.von, ersMitte, ep.ct, ep.wirkungsgrad, 0);   /* Mitte der Ersparnis: die Spanne kann im ungünstigen Fall bei 0 enden */
+        }
+      }
+    }
+    if (mf.mehrkosten.art === 'luecke' || mf.mehrkosten.art === 'keine') { res.grund = 'keineMehrkosten'; return res; }
     res.ersparnisKwh = { mitte: ersMitte, von: lo, bis: hi };
     if (mf.mehrkosten.art === 'erreicht') { res.grund = 'schonErreicht'; return res; }
     var a = amortisationSpanne({ kostenVon: mf.mehrkosten.von, kostenBis: mf.mehrkosten.bis, foerderVon: mf.foerderung.von, foerderBis: mf.foerderung.bis, kwhLo: lo, kwhHi: hi, ct: ep.ct, eta: ep.wirkungsgrad });
@@ -439,10 +505,13 @@
     res.filter = { wert: f, beleg: beleg(sat), luecke: beleg(wa('regenwasser', 'rw_filter')) };
     var basis = nd.mm * dachflaecheM2 * f;
     res.ertrag = { von: basis * bei.von, bis: basis * bei.bis, mitte: basis * (bei.von + bei.bis) / 2 };   /* l/a */
-    var ntwTag = A.ntwProPersonTag.wc + A.ntwProPersonTag.waschmaschine, bedarfNtw = ntwTag * pers * 365;
+    /* F1: Garten (Bewässerung): Fläche × 0,20 l/(m²·d) aus dem Satzungsbeispiel × Tage (Annahme 365); ohne Gartenfläche (0) wie bisher nicht eingerechnet */
+    var gartenM2 = opt.gartenM2 > 0 ? opt.gartenM2 : 0, gartenL = gartenM2 * (sat && sat.garten_l_m2d != null ? sat.garten_l_m2d : 0.2) * A.gartenTage;
+    res.gartenM2 = gartenM2; res.bedarfGarten = gartenL;
+    var ntwTag = A.ntwProPersonTag.wc + A.ntwProPersonTag.waschmaschine, bedarfNtw = ntwTag * pers * 365 + gartenL;
     res.bedarfNtw = bedarfNtw; res.bedarfWc = A.ntwProPersonTag.wc * pers * 365; res.bedarfWaesche = A.ntwProPersonTag.waschmaschine * pers * 365;
     res.satzung = beleg(sat);
-    var vb = wa('wasserpreise', 'wp_verbrauch'), gesamt = (vb ? vb.von : 122) * pers * 365;
+    var vb = wa('wasserpreise', 'wp_verbrauch'), gesamt = (vb ? vb.von : 122) * pers * 365 + gartenL;
     res.gesamtbedarf = gesamt; res.belegVerbrauch = beleg(vb);
     function deck(e) { return Math.min(1, e / bedarfNtw); }
     res.deckung = { von: deck(res.ertrag.von), bis: deck(res.ertrag.bis), mitte: deck(res.ertrag.mitte) };       /* Anteil von WC und Waschmaschine, bei 100 % gedeckelt */
@@ -494,11 +563,21 @@
     if (!schlecht.ok) return { ok: false, grund: 'ersparnisUnsicher', von: best.jahre };
     return { ok: true, von: best.jahre, bis: schlecht.jahre };
   }
-  function enthaertung(haertebereich) {
+  function enthaertung(haertebereich, dhEingabe) {
     var id = HAERTEN.indexOf(haertebereich) >= 0 ? haertebereich : 'mittel', h = wa('haerte', 'hr_' + id);
     if (!h) return { ok: false };
+    /* F1: Härte als Zahl in °dH: Salz und Betrieb pro Jahr aus der Staffel (14, 20, 25 °dH; 4 Personen, 180 m³, Ratgeber-Rechnung); darunter braucht es keinen Enthärter, darüber gilt die letzte Stufe als Untergrenze */
+    var eb = wa('enthaertung', 'en_betrieb'), betrieb = null;
+    if (zahlOk(dhEingabe) && eb && eb.staffel) {
+      var schwelle = eb.staffel[0].dh;
+      if (dhEingabe < schwelle) betrieb = { zustand: 'nichtNoetig', dh: dhEingabe, schwelle: schwelle };
+      else {
+        var st = eb.staffel.filter(function (s) { return s.dh >= dhEingabe; })[0];
+        betrieb = { zustand: st ? 'ok' : 'ueberStaffel', dh: dhEingabe, staffel: st || eb.staffel[eb.staffel.length - 1], beleg: beleg(eb) };
+      }
+    }
     var res = { ok: true, bereich: id, mmol: { von: h.von, bis: h.bis == null ? null : h.bis }, dh: { von: h.dh_von == null ? 0 : h.dh_von, bis: h.dh_bis == null ? null : h.dh_bis }, beleg: beleg(h) };
-    res.sinnvoll = id === 'hart';
+    res.sinnvoll = id === 'hart'; res.betrieb = betrieb;
     res.warentest = beleg(wa('enthaertung', 'en_warentest')); res.verbraucherzentrale = beleg(wa('enthaertung', 'en_vz_nrw'));
     res.kosten = { anschaffung: beleg(wa('enthaertung', 'en_anschaffung')), einbau: beleg(wa('enthaertung', 'en_einbau')), betrieb: beleg(wa('enthaertung', 'en_betrieb')), wartung: beleg(wa('enthaertung', 'en_wartung')), salz: beleg(wa('enthaertung', 'en_salz_vz')) };
     res.kalkwandler = beleg(wa('enthaertung', 'en_kalkwandler')); res.natrium = beleg(wa('trinkwasserrecht', 'tw_natrium'));
@@ -514,7 +593,7 @@
     if (!pw.regenwasser) return { status: 'aus', pw: pw, land: land };
     var dr = dachflaecheRegen(plan);
     if (!dr.ok) return { status: 'keinDach', pw: pw, dr: dr, land: land };
-    var rw = regenwasser(dr.projektion, land, pw.personen, { gruendach: pw.gruendach, preisEurM3: pw.preis });
+    var rw = regenwasser(dr.projektion, land, pw.personen, { gruendach: pw.gruendach, preisEurM3: pw.preis, gartenM2: pw.garten });
     if (!rw.ok) return { status: 'fehler', pw: pw, dr: dr, rw: rw, land: land };
     if (rw.gruendach) return { status: 'gruen', pw: pw, dr: dr, rw: rw, land: land };
     return { status: 'ok', pw: pw, dr: dr, rw: rw, land: land };
@@ -523,8 +602,11 @@
   function waermeBedarf(plan) {
     if (!plan || !AK) return { ok: false, grund: 'keinPlan' };
     var hw = heizwaermeMitStandard(plan, { standard: planStandard(plan).id, lueftungsart: planLueftung(plan).art });
+    /* F1: Bei KfW und Passivhaus gibt es keine belegte Heizwärmezahl für den Standard; die Heizungs-Karte und der Autarkie-Block brauchen aber das Haus „wie gezeichnet“: dann gilt dessen Wert (Standard „Wie gezeichnet“), mit Hinweis im Ergebnis */
+    var ersatz = null;
+    if (hw.ok && !hw.gesamt && hw.ohneBelegteZahl) { ersatz = hw.standard; hw = heizwaermeMitStandard(plan, { standard: 'bestand', lueftungsart: planLueftung(plan).art }); }
     if (!hw.ok || !hw.gesamt) return { ok: false, grund: hw.grund || 'keineHuelle' };
-    return { ok: true, kwh: hw.gesamt.kwh, kwhM2: hw.gesamt.kwhM2, wohnflaeche: hw.wohnflaeche, standard: hw.standard };
+    return { ok: true, kwh: hw.gesamt.kwh, kwhM2: hw.gesamt.kwhM2, wohnflaeche: hw.wohnflaeche, standard: hw.standard, ersatzFuerStandard: ersatz };
   }
 
   var api = {
@@ -532,7 +614,7 @@
     ANNAHMEN: ANNAHMEN, STANDARDS: STANDARDS, KFW_STUFEN: KFW_STUFEN, LUEFTUNG_ARTEN: LUEFTUNG_ARTEN, HAERTEN: HAERTEN, TRAEGER: TRAEGER,
     planStandard: planStandard, planLueftung: planLueftung, planWasser: planWasser, energiepreise: energiepreise, oelCtProKwh: oelCtProKwh, heizkosten: heizkosten,
     daemmstandards: daemmstandards, luftVolumen: luftVolumen, lueftungsverlust: lueftungsverlust, wrgGrad: wrgGrad, heizwaermeMitStandard: heizwaermeMitStandard,
-    begFoerderung: begFoerderung, begSpanne: begSpanne, mehrkostenUndFoerderung: mehrkostenUndFoerderung, amortisation: amortisation, amortisationSpanne: amortisationSpanne,
+    wandZusatz: wandZusatz, lueftungHinweise: lueftungHinweise, weitereZeilen: weitereZeilen, begFoerderung: begFoerderung, begSpanne: begSpanne, mehrkostenUndFoerderung: mehrkostenUndFoerderung, amortisation: amortisation, amortisationSpanne: amortisationSpanne,
     amortisationEuro: amortisationEuro, daemmAmortisation: daemmAmortisation, raeumeFuerLueftung: raeumeFuerLueftung, lueftungKosten: lueftungKosten, lueftungAmortisation: lueftungAmortisation,
     dachflaecheRegen: dachflaecheRegen, niederschlag: niederschlag, wasserpreis: wasserpreis, regenwasser: regenwasser, enthaertung: enthaertung, strompreisCt: strompreisCt, beleg: beleg
   };

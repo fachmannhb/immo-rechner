@@ -8,7 +8,7 @@
   function byId(i) { return document.getElementById(i); }
   function tr(k, v) { return window.TXT ? window.TXT.t(k, v) : k; }
   function melde(t) { var e = byId('hv-fehler'); if (e) { e.textContent = t || ''; e.hidden = !t; } }
-  if (!HK || !G || !WZ || !V) { melde(tr('hvFehler', { grund: (!HK ? 'heizung_kern.js' : !WZ ? 'Karte Anbau' : !G ? 'Zeichnung' : 'Daten') + ' fehlt.' })); return; }
+  if (!HK || !G || !WZ || !V) { melde(tr('hvFehler', { grund: (!HK ? 'heizung_kern.js' : !WZ ? 'Karte Anbau' : !G ? 'Zeichnung' : 'die Datendatei daten/heizung.js') + ' fehlt.' })); return; }
   var esc = WZ.esc, sym = WZ.symbol, nz = WZ.nz, n0 = WZ.n0, schild = WZ.annahmeSchild;
   function T(k, v) { return esc(tr(k, v)); }
   function nf(x, d) { return new Intl.NumberFormat(WZ.lang(), { minimumFractionDigits: d, maximumFractionDigits: d }).format(x); }
@@ -52,7 +52,7 @@
   /* ---------- Teile der Karte ---------- */
   function grundHtml(h, c) {
     var p = { heiz: n0(c.heiz), ww: n0(c.ww), nutz: n0(c.nutz) };
-    if (h.ok) return '<p class="hv-grund" data-hv-haus="ja">' + sym('i-haus') + '<span>' + T('hvHaus', p) + '</span></p>';
+    if (h.ok) return '<p class="hv-grund" data-hv-haus="ja">' + sym('i-haus') + '<span>' + T('hvHaus', p) + '</span></p>' + (h.ersatzFuerStandard ? '<p class="klein" data-hv-ersatz="' + h.ersatzFuerStandard + '"><span class="annahme es-an">' + T('hvAnnahmeSchild') + '</span> ' + T('hvErsatzStandard', { std: tr('hdStd_' + h.ersatzFuerStandard) }) + '</p>' : '');
     var g = 'hvG_' + h.grund;
     return '<div class="ab-meldung" role="status" data-hv-haus="nein"><p>' + T('hvBeispiel', Object.assign({ grund: tr(window.TEXTE[g] ? g : 'hvG_x') }, p)) + '</p><div class="knopfreihe"><button type="button" class="knopf mittel" data-hv="zeichnen" id="hv-zeichnen">' + sym('i-grundriss') + ' ' + T('hvZeichnen') + '</button></div></div>';
   }

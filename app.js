@@ -1401,7 +1401,7 @@
     mappe: { bereich: 'rechner', titel: 'Bank-Mappe: Zahlen zur Finanzierung', formSel: null, dl: 'mp-teilen', eingaben: [],
       zusatz: 'Nur die Zahlen der Mappe, ohne Notizen und ohne Besichtigung.', linkText: 'Zum Selbstrechnen (öffnet den leeren Rechner):' },
     grundriss: { bereich: 'grundriss', titel: 'Grundriss und Einrichtung', formSel: null, satz: 'g-satz', eingaben: [],
-      ergebnis: [['Wohnfläche', 'g-wfl'], ['Nutzfläche', 'g-nfl'], ['Einrichtung', 'g-einr'], ['Umbau', 'g-umb'], ['Innenausbau (Karte)', 'g-ausbau-kopfzeile'], ['Heizwärme (Karte Material)', 'g-material-kopfzeile'], ['Anbau (Karte)', 'g-anbau-kopfzeile'], ['Grundstück (Karte)', 'g-grund-kopfzeile']],
+      ergebnis: [['Wohnfläche', 'g-wfl'], ['Nutzfläche', 'g-nfl'], ['Einrichtung', 'g-einr'], ['Umbau', 'g-umb'], ['Innenausbau (Karte)', 'g-ausbau-kopfzeile'], ['Heizwärme (Karte Material)', 'g-material-kopfzeile'], ['Anbau (Karte)', 'g-anbau-kopfzeile'], ['Grundstück (Karte)', 'g-grund-kopfzeile'], ['Dämmstandard Gesetz (GModG): Heizwärme und Mehrkosten', 'g-teil-gmodg'], ['Regenwasser (Karte Wasser)', 'g-teil-regen']],
       zusatz: 'Der gezeichnete Grundriss selbst steckt nicht im Link. Für den Hausbauer: unten im Grundriss „Mappe für den Hausbauer“ (PDF) und „Plandatei sichern“.' },
     monteur: { bereich: 'monteur', titel: 'Monteurzimmer: Rechnet es sich?', formSel: '#monteur input[type="text"], #monteur input[type="range"]', dl: 'mz-ergebnis',
       eingaben: ['mz-betten', 'mz-preis', 'mz-beleg', 'mz-fix', 'mz-var', 'mz-abgabe'] },

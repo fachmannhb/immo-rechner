@@ -52,15 +52,20 @@
     return { id: 'wasser', status: 'fehlt', prozent: 0, grund: b.status, karte: 'wasser' };
   }
   /* Wärme: die Daten belegen keine Deckung (Holz, Wärmepumpe mit eigenem Solarstrom), also nie eine Zahl */
-  function waerme(w) {
-    return { id: 'waerme', status: 'keine', prozent: null, grund: w && w.ok ? 'keineDeckung' : (w && w.grund) || 'keinPlan', bedarfKwh: w && w.ok ? w.kwh : null, bedarfKwhM2: w && w.ok ? w.kwhM2 : null, karte: 'daemmung' };
+  /* F1 (aus der Tradi-Fassung): Solarthermie-Option. Nur eine Zahl steht in den Daten (st_deckung): Warmwasser plus Heizung 20 bis 30 % des Gesamtverbrauchs (co2online, Verbraucherzentrale).
+     solar = 'heiz' → Wert (Mitte 25 %, Spanne 20 bis 30); 'ww' → Lücke (die Daten geben nur den Anteil am Warmwasser, nicht an der gesamten Wärme); sonst „Keine Angabe“. */
+  function waerme(w, solar) {
+    var res = { id: 'waerme', status: 'keine', prozent: null, grund: w && w.ok ? 'keineDeckung' : (w && w.grund) || 'keinPlan', bedarfKwh: w && w.ok ? w.kwh : null, bedarfKwhM2: w && w.ok ? w.kwhM2 : null, ersatzFuerStandard: w && w.ok ? w.ersatzFuerStandard || null : null, karte: 'daemmung', solar: solar === 'heiz' || solar === 'ww' ? solar : 'keine' };
+    if (res.solar === 'heiz') { res.status = 'wert'; res.prozent = 25; res.von = 20; res.bis = 30; res.grund = 'solarHeiz'; }
+    else if (res.solar === 'ww') res.grund = 'solarWw';
+    return res;
   }
   function essenZeile(flaecheM2, personen) {
     var e = essen(flaecheM2, personen);
     return { id: 'essen', status: e.ok ? 'wert' : 'fehlt', prozent: e.ok ? e.prozent : 0, grund: e.ok ? '' : e.grund, essen: e, karte: 'beet' };
   }
   function alle(eing) {
-    return [strom(eing.strom), wasser(eing.wasser), waerme(eing.waerme), essenZeile(eing.flaeche, eing.personen)];
+    return [strom(eing.strom), wasser(eing.wasser), waerme(eing.waerme, eing.solar), essenZeile(eing.flaeche, eing.personen)];
   }
 
   var API = { STUFEN: STUFEN, stufenDaten: stufenDaten, essen: essen, strom: strom, wasser: wasser, waerme: waerme, essenZeile: essenZeile, alle: alle };

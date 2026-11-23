@@ -136,6 +136,8 @@
   }
   function eingaben(inst) {
     var land = landVon(inst), fl, auswahl;
+    /* F1 23.11.2026: Personen im Haus liegen an einer Stelle (plan.personen, Wasser-Karte und Autarkie-Block); ist dort eine Zahl gewählt, rechnet die Planungskarte mit ihr, sonst gilt der eigene Zähler dieser Karte */
+    if (inst.modus === 'plan') { var HKp = window.HUELLE_KERN, pp = HKp && HKp.personenPlan ? HKp.personenPlan(G.plan()) : null; if (pp && pp.explizit && pp.n !== S.personen) S.personen = pp.n; }
     if (inst.modus === 'plan') { planDach(land); fl = planFlaechen || []; auswahl = planAuswahl || []; fl = fl.map(function (f) { var c = JSON.parse(JSON.stringify(f)); c.gewaehlt = auswahl.indexOf(f.n) >= 0; return c; }); }
     else { fl = freiFlaechen(land).map(function (f, i) { f.gewaehlt = true; return f; }); }
     return { land: land, flaechenAlle: fl, rechnung: {
@@ -564,8 +566,8 @@
     ev.preventDefault && ev.preventDefault();
     var w = t.getAttribute('data-wert');
     switch (akt) {
-      case 'persplus': S.personen = Math.min(10, S.personen + 1); break;
-      case 'persminus': S.personen = Math.max(1, S.personen - 1); break;
+      case 'persplus': S.personen = Math.min(10, S.personen + 1); if (inst.modus === 'plan') G.plan().personen = S.personen; break;
+      case 'persminus': S.personen = Math.max(1, S.personen - 1); if (inst.modus === 'plan') G.plan().personen = S.personen; break;
       case 'wahl': {
         var fk = t.getAttribute('data-feld');
         if (fk === 'einspeisung') S.einspeisung = w; else if (fk === 'thermie') S.thermie = w; else S.auto[fk] = w;

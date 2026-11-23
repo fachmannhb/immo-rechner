@@ -209,15 +209,15 @@ ANNAHMEN = {
     'heiz0': w(10000, 'H-Beispiel', 'wp26', 'Annahme', 'Beispielhaus ohne Zeichnung: 10.000 kWh Heizwärme (co2online); mit Haus kommt sie aus der Karte Dämmung.'),
     'ww': w(5000, 'H-Beispiel', 'wp26', 'Annahme', 'Warmwasser 5.000 kWh im Jahr (co2online-Beispiel); die Heizwärme des Hauses enthält keines.'),
     'preis': {
-        'gas': w(11.93, 'H-40', 'bdew', 'geprüft', 'Erdgas, 20.000 kWh, 2026 bisher (August: 12,45 ct).'),
-        'oel': w(14.06, 'H-41', 'ct1', 'prüfen vor Nutzung', 'Juli 2026 mit USt.; andere Quelle: 17,9 ct (Knopf „Andere Quelle“).'),
+        'gas': w(11.58, 'H-40', 'destatis', 'geprüft', 'Erdgas, alle Haushalte, 1. Halbjahr 2026 (Destatis, derselbe Wert wie in der Karte Dämmung, daten/energiepreise.js). Andere Quelle: BDEW 11,93 ct (20.000 kWh, 2026 bisher, Abruf 27.10.2026; August 12,45 ct); Sie können den Preis oben ändern.'),
+        'oel': w(17.91, 'H-42', 'tec', 'prüfen vor Nutzung', 'Heizöl-Tagespreis 27.10.2026, 3.000 l (180 € je 100 l durch 10,05 kWh je l; derselbe Wert wie in der Karte Dämmung). Andere Quelle: 14,06 ct, Juli 2026 mit USt. (Knopf „Andere Quelle“).'),
         'strom': w(37.97, 'H-43', 'destatis', 'geprüft', '1. Halbjahr 2026, „inkl. Steuern“ nicht ausdrücklich.'),
         'wpstrom': w(27.44, 'H-44', 'bnetza', 'veraltet', 'Stand 01.04.2025, Sekundärquelle: vor Nutzung prüfen.'),
         'pellets': w(9.29, 'H-45', 'depi', 'prüfen vor Nutzung', '464,61 €/t durch 5.000 kWh/t (Annahme); Portale melden 439 bis 444 €/t.'),
         'holz': w(7.6743, 'H-46', 'holz', 'prüfen vor Nutzung', 'Buche 144,66 €/Rm durch 1.885 kWh/Rm; Zeit nicht bepreist; Waldholz 40 bis 50 €/Rm.'),
         'fernwaerme': w(15.6, 'H-48', 'fw', 'prüfen vor Nutzung', 'Mischpreis brutto, meiste Kunden 12,5 bis 17,5 ct; Mehrfamilienhaus-Preis, hier Näherung.'),
     },
-    'oel_alt': w(17.9, 'H-42', 'tec', 'prüfen vor Nutzung', 'Heizöl-Tagespreis 27.10.2026, 3.000 l.'),
+    'oel_alt': w(14.06, 'H-41', 'ct1', 'prüfen vor Nutzung', 'Juli 2026 mit USt. (cleanthinking).'),
     'nutz': {
         'gas': w(0.90, 'H-74', 'ct1', 'prüfen vor Nutzung', 'Brennwertkessel (laut cleanthinking, unsicher).'),
         'oel': w(0.90, 'H-74', 'ct1', 'prüfen vor Nutzung', 'Brennwertkessel (laut cleanthinking, unsicher).'),

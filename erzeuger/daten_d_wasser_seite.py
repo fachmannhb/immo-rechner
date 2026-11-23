@@ -17,9 +17,9 @@ OBJ_VOLL = quelle.OBJ
 BEHALTEN = {
     'haerte': ['hr_weich', 'hr_mittel', 'hr_hart'],
     'trinkwasserrecht': ['tw_anzeige', 'tw_natrium'],
-    'regenwasser': ['rw_formel', 'rw_speicher', 'rw_ertragsbeiwert', 'rw_ertragsbeiwert_gruen', 'rw_satzung', 'rw_filter', 'rw_kosten', 'rw_pumpe'],
-    'gebuehren': ['gb_bremen', 'gb_spanne', 'gb_zisterne', 'gb_bremen_zisterne', 'gb_berlin'],
-    'enthaertung': ['en_warentest', 'en_vz_nrw', 'en_salz_vz', 'en_anschaffung', 'en_einbau', 'en_betrieb', 'en_wartung', 'en_kalkwandler'],
+    'regenwasser': ['rw_formel', 'rw_speicher', 'rw_ertragsbeiwert', 'rw_ertragsbeiwert_gruen', 'rw_satzung', 'rw_filter', 'rw_kosten', 'rw_pumpe', 'rw_ersparnis', 'rw_wc_bedarf'],   # F1 23.11.2026: rw_ersparnis, rw_wc_bedarf aus der Tradi-Fassung
+    'gebuehren': ['gb_bremen', 'gb_spanne', 'gb_zisterne', 'gb_bremen_zisterne', 'gb_berlin', 'gb_bremen_foerderung'],
+    'enthaertung': ['en_warentest', 'en_vz_nrw', 'en_salz_vz', 'en_anschaffung', 'en_einbau', 'en_betrieb', 'en_wartung', 'en_kalkwandler', 'en_ausfuehrung'],
 }
 META = OBJ_VOLL['meta']
 obj = {'meta': {k: META[k] for k in ('titel', 'abruf', 'dwd_attribution', 'dwd_lizenz') if k in META}}   # die langen Hinweistexte bleiben in wasser.js

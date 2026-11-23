@@ -207,7 +207,7 @@ def schlank_eintrag(e, st=None):
             o['bedingung'] = kuerzen(e['bedingung'], 70 if str(e.get('id', '')).startswith(('SA-', 'GW-', 'KW-')) else 30)   # Bericht 42: kurze Bedingungen stehen ganz da (kein Doppel in bedingung_voll)
             if (VOLL_BEDINGUNG is None or st in VOLL_BEDINGUNG) and o['bedingung'] != e['bedingung']:
                 o['bedingung_voll'] = e['bedingung']
-        for k in ('aussenbereich', 'ausserbereich_wert', 'mehrere_bauwerke', 'tiefe_max', 'nur_vorueber', 'auslegung', 'feuer_aus', 'alt', 'privat', 'gebiet', 'gw_wert', 'rotor_max'):
+        for k in ('aussenbereich', 'ausserbereich_wert', 'mehrere_bauwerke', 'tiefe_max', 'nur_vorueber', 'nur_ueberdachung', 'auslegung', 'feuer_aus', 'alt', 'privat', 'gebiet', 'gw_wert', 'rotor_max'):
             if e.get(k) not in (None, False):
                 o[k] = e[k]
         if e.get('paragraf'):
@@ -380,6 +380,11 @@ def main():
             ent['id'] = 'BY-' + _id
             m = re.search(r'Nr\. ([\w ]+)', gilt)
             ent['bauwerk'] = STRUKTUREN[BY_KAT[_id]] + ' (' + gilt + ')'
+            if _id == 'G03':
+                # F1 23.11.2026: Art. 57 Abs. 1 Nr. 1 g BayBO nennt nur „Terrassenüberdachungen“ (Bericht 34 Z. 98, Bericht 62); amtliche FAQ 4.1.1: nur reine Überdachung.
+                # „Wintergarten“ stammte aus dem Kategorienamen, nicht aus der Quelle → die Seite zeigt für Wintergärten (kalt und warm) „Bauaufsicht fragen“
+                ent['bauwerk'] = 'Terrassenüberdachung (kein Wintergarten)'
+                ent['nur_ueberdachung'] = True
             ent.update(p)
             ent['wert_roh'] = wert
             ent['einheit_roh'] = einheit

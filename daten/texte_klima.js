@@ -3,7 +3,7 @@
   var T = {
     klBlock: ['Klimaanlage, Strom, Speicher', 'Air conditioning, power, storage', 'Кондиционер, электричество, накопитель'],
     klKeine: ['Planungshilfe ohne Empfehlung und ohne Rangliste: Spannen mit Quelle, Abruf und Status. Lücken bleiben sichtbar.', 'Planning aid without recommendation or ranking: ranges with source, date and status. Gaps stay visible.', 'Помощь в планировании без рекомендаций и рейтинга: диапазоны с источником, датой и статусом. Пробелы остаются видимыми.'],
-    klOben: ['Heizarten', 'Heating types', 'Виды отопления'], klPV: ['PV-Rechner öffnen', 'Open the solar calculator', 'Открыть расчёт солнечных панелей'],
+    klOben: ['Nach oben zu den Heizarten', 'Up to the heating types', 'Наверх к видам отопления'], klPV: ['PV-Rechner öffnen', 'Open the solar calculator', 'Открыть расчёт солнечных панелей'],
     klAbK: ['Kühlen', 'Cooling', 'Охлаждение'], klAbKs: ['Klimagerät, Ventilator, Sonnenschutz', 'air conditioner, fan, sun shading', 'кондиционер, вентилятор, защита от солнца'],
     klAbS: ['Strom', 'Power', 'Электричество'], klAbSs: ['Netz, Dach, Balkon, Notstrom', 'grid, roof, balcony, backup', 'сеть, крыша, балкон, резерв'],
     klAbSp: ['Speicher', 'Storage', 'Накопитель'], klAbSps: ['Batterie, Auto, Wärme', 'battery, car, heat', 'батарея, авто, тепло'],

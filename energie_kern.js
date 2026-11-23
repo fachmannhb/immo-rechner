@@ -137,9 +137,14 @@
     if (speicherKwh <= 0 || sRec <= 0) return a0;
     return a0 + (a1 - a0) * Math.min(1, speicherKwh / (2 * sRec));
   }
+  function evQuoteOhne() { var q = eint('eigenverbrauch', 'ev_ohne'); return q && q.von != null && q.bis != null ? (q.von + q.bis) / 200 : 0.30; }
   function eigenverbrauch(erzeugung, verbrauch, speicherKwh, art) {
     if (art === 'voll') return 0;
-    return Math.max(0, Math.min(autarkieAnteil(speicherKwh, verbrauch) * verbrauch, ANNAHMEN.evMaxErzeugung * erzeugung));
+    /* F1 23.11.2026: Ohne Speicher begrenzt auch die Anlagengröße: höchstens die Mitte der Eigenverbrauchsquote (ev_ohne, 20 bis 40 % der Erzeugung) wird selbst genutzt.
+       Eine kleine Anlage bei großem Verbrauch (viele Personen, Auto) kommt so unter die 27,5 % des Verbrauchs; eine große Anlage bleibt bei 27,5 %. Mit Speicher gilt die Kurve wie bisher. */
+    var gr = ANNAHMEN.evMaxErzeugung * erzeugung;
+    if (!(speicherKwh > 0)) gr = Math.min(gr, evQuoteOhne() * erzeugung);
+    return Math.max(0, Math.min(autarkieAnteil(speicherKwh, verbrauch) * verbrauch, gr));
   }
 
   /* ---------- Hauptrechnung ---------- */

@@ -19,6 +19,8 @@ window.DATEN.energiepreise = {
       hinweis: 'Destatis nennt den Wert für alle Haushalte; ob Steuern und Abgaben eingerechnet sind, steht im Text nicht ausdrücklich (nach der Methodik vermutlich ja). Für die Sauna-Betriebskosten (Bericht 43, S-90).' },
     { id: 'oel_heizwert_kwh', name: 'Heizöl EL, Heizwert', wert: 10.05, einheit: 'kWh/l', quelle: 'Q6', abruf: '2026-10-27', status: 'geprüft',
       hinweis: 'Eigene Rechnung aus Q6: 42,8 GJ/t mal 0,845 t/1000 l = 36,17 MJ/l, geteilt durch 3,6.' },
+    { id: 'gas_hs_hi', name: 'Erdgas, Umrechnung Brennwert in Heizwert (nur für den Vergleich Gas gegen Heizöl)', wert: 1.107, einheit: 'Faktor (Preis je kWh Heizwert = Preis je kWh Brennwert × 1,107)', quelle: 'Q6', abruf: '2026-10-27', status: 'geprüft',
+      hinweis: 'EBeV 2030 Anlage 2 nennt Hi/Hs = 0,903; 1 / 0,903 = 1,107 ist eigene Rechnung (Bericht 40, Zeile gas_hs_hi). Annahme: Die Gaspreise von Destatis und BDEW gelten je kWh Brennwert (gängige Praxis; im Wortlaut der Mitteilungen nicht ausdrücklich, prüfen vor Nutzung). Die Kostenrechnung ändert das nicht.' },
     { id: 'oel_brennwert', name: 'Heizöl EL, Brennwert (nur zum Vergleich)', wert: 10.6, einheit: 'kWh/l', quelle: 'Q7', abruf: '2026-10-27', status: 'prüfen vor Nutzung',
       hinweis: 'Beruht auf "Brennwert 6 % über Heizwert bei Heizöl" eines Anbieters, keine amtliche Quelle.' }
   ]

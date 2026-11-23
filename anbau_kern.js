@@ -156,6 +156,8 @@
     if (a.beheizt && /unbeheizt/i.test(z.bedingung) && z.ampel !== 'grau') { z.ampelOhneBeheizt = z.ampel; z.ampel = 'grau'; z.ursache = 'nurUnbeheizt'; }
     /* Eintrag nur für Vorbauten „zum vorübergehenden Aufenthalt“ (Bremen, Bericht 41): sagt nichts über den dauernd beheizten Wintergarten (grau) */
     if (a.beheizt && e.nur_vorueber && z.ampel !== 'grau') { z.ampelOhneBeheizt = z.ampel; z.ampel = 'grau'; z.ursache = 'nurVorueber'; }
+    /* Bayern, Bericht 62 (Abruf 23.11.2026): Art. 57 Abs. 1 Nr. 1 g nennt nur reine Terrassenüberdachungen; ein Wintergarten (kalt wie warm) ist dort nicht genannt → grau */
+    if (e.nur_ueberdachung && a.passt && a.passt.test('Wintergarten') && z.ampel !== 'grau') { z.ampelOhneBeheizt = z.ampel; z.ampel = 'grau'; z.ursache = 'nurUeberdachung'; }
     /* Welle E, Teil 1: Bedingungen, die die Ampel nicht tragen können (Betrieb, Baugebiet): grau statt falsch grün */
     var bed = z.bedingungVoll || z.bedingung;
     if (a.betriebGrau && !z.privat && z.ampel !== 'grau' && /betrieb|landwirtschaft|^nur\b/i.test(bed)) { z.ampelOhneBedingung = z.ampel; z.ampel = 'grau'; z.ursache = 'nurBetrieb'; z.sonder = true; }

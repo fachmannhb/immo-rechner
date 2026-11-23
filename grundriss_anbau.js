@@ -55,8 +55,9 @@
     return '<button type="button" class="hilfe-knopf" data-an="hilfe" aria-expanded="' + (!!hilfeOffen[id]) + '" aria-controls="' + id + '" aria-label="' + esc(tr('hilfeKnopf')) + '">?</button>';
   }
   var AMPEL_ICON = { gruen: 'i-an-ok', gelb: 'i-an-achtung', rot: 'i-an-stopp', grau: 'i-an-frage' };
-  function ampelChip(a, klein) {
-    return '<span class="an-ampel an-f ' + a + (klein ? ' mini' : '') + '" data-ampel-chip="' + a + '">' + symbol(AMPEL_ICON[a]) + '<span>' + esc(tr('anA_' + a)) + '</span></span>';
+  /* aus = true: das Gelb kommt nur daher, dass die Quelle das Bauwerk nicht ausdrücklich nennt (Auslegung), nicht aus der Nähe zur Grenze (F1: Beschriftung „Auslegung, prüfen“ statt „Knapp an der Grenze“) */
+  function ampelChip(a, klein, aus) {
+    return '<span class="an-ampel an-f ' + a + (klein ? ' mini' : '') + '" data-ampel-chip="' + a + '">' + symbol(AMPEL_ICON[a]) + '<span>' + esc(tr(a === 'gelb' && aus ? 'anA_gelbAuslegung' : 'anA_' + a)) + '</span></span>';
   }
 
   /* ---------- Rechenstand ---------- */
@@ -141,7 +142,7 @@
   }
   function zeileHtml(z) {
     var h = '<div class="an-zeile an-z-' + z.ampel + (z.sonder ? ' an-sonder' : '') + '" data-an-zeile="' + z.ampel + '" data-wert="' + (z.wert == null ? '' : z.wert) + '" data-einheit="' + esc(z.einheit) + '">';
-    h += '<div class="an-z-kopf">' + ampelChip(z.ampel, true) + '<b class="an-z-name">' + esc(z.bauwerk || '') + '</b></div>';
+    h += '<div class="an-z-kopf">' + ampelChip(z.ampel, true, z.auslegungGelb) + '<b class="an-z-name">' + esc(z.bauwerk || '') + '</b></div>';
     if (z.art === 'grenze' && z.wert != null && z.mass != null) {
       h += '<p class="an-z-grenze es-zahl" data-an-grenze="' + z.wert + '">' + esc(tr('anZeileGrenze', { wert: nz(z.wert), einheit: z.einheit })) + '</p>';
       if (z.ampel !== 'grau') {
@@ -155,6 +156,7 @@
     else {
       h += '<p class="an-z-grenze">' + esc(tr('anZeileGrau')) + '</p>';
       if (z.ursache === 'nurUnbeheizt') h += '<p class="klein">' + esc(tr('anS_grau_nurUnbeheizt')) + '</p>';
+      else if (z.ursache === 'nurUeberdachung') h += '<p class="klein" data-an-nur-ueberdachung="1">' + esc(tr('anS_grau_nurUeberdachung')) + '</p>';
       else if (z.ursache === 'nurVorueber') h += '<p class="klein" data-an-nur-vorueber="1">' + esc(tr('anS_grau_nurVorueber')) + '</p>';
       else if (z.ursache === 'text') h += '<p class="klein" data-an-roh="1">„' + esc(z.wertRoh) + '“</p>';
       else if (z.ursache === 'luecke') h += '<p class="klein" data-an-luecke="1">' + luecke() + ' ' + esc(z.grund) + '</p>';
@@ -178,7 +180,7 @@
     if (!v || !v.ok) { return h + '<p class="ab-meldung fehler" role="alert" data-fehler="vf">' + esc(tr('anKeineDaten', { grund: v ? v.grund : '' })) + '</p></section>'; }
     h += '<p class="klein" data-an-land="' + esc(c.land) + '">' + esc(tr('anFuer', { land: c.landName })) + '</p>';
     var a = v.summe.ampel;
-    h += '<div class="an-satz an-f ' + a + '" role="status" aria-live="polite" data-an-ampel="' + a + '">' + ampelChip(a, false) + '<span class="an-satz-text" data-an-satz="antrag">' + esc(satzFuer(v.summe)) + '</span></div>';
+    h += '<div class="an-satz an-f ' + a + '" role="status" aria-live="polite" data-an-ampel="' + a + '">' + ampelChip(a, false, v.summe.zeile && v.summe.zeile.auslegungGelb) + '<span class="an-satz-text" data-an-satz="antrag">' + esc(satzFuer(v.summe)) + '</span></div>';
     if (v.summe.mehrere) h += '<p class="klein" data-an-mehrere="1">' + esc(tr('anMehrere')) + '</p>';
     v.zeilen.forEach(function (z) { h += zeileHtml(z); });
     if (!v.zeilen.length && v.gefunden && v.gefunden.length) h += '<p class="klein" data-an-gefunden="1">' + esc(tr('anNichtGefunden', { liste: v.gefunden.join('; ') })) + '</p>';

@@ -122,7 +122,59 @@
   function teilName(t) { return tr(ART[t.art].form === 'fenster' ? 'wortFenster' : 'wortTuer'); }
 
   /* ---------- Speichern ---------- */
+  /* F1 23.11.2026: Was pruefePlan() beim Prüfen still geändert oder verworfen hat, steht danach in pruefKorr (Text je Änderung); die Ladefunktion zeigt es sichtbar an (R016). */
+  var pruefKorr = [];
+  var KORR_F = { land: 'korrFLand', grundstueck_breite_m: 'korrFGrundstueckBreiteM', grundstueck_tiefe_m: 'korrFGrundstueckTiefeM', aussen_breite_m: 'korrFAussenBreiteM', aussen_tiefe_m: 'korrFAussenTiefeM', aussen_hoehe_m: 'korrFAussenHoeheM',
+    daemmstandard: 'korrFDaemmstandard', lueftung_art: 'korrFLueftungArt', lueftung: 'korrFLueftung', kfwstufe: 'korrFKfwstufe', haerte: 'korrFHaerte', energiepreise: 'korrFEnergiepreise', personen: 'korrFPersonen',
+    wasser_personen: 'korrFWasserPersonen', anbau_flaeche_m2: 'korrFAnbauFlaeche', anbau_art: 'korrFAnbauArt', etagen_hoehe: 'korrFEtagenHoehe' };
+  function korrFeld(pfad) { var k = KORR_F[pfad.replace(/\[\d+\]/g, '').replace(/\./g, '_')]; return k ? tr(k) : pfad; }
+  function korrZahl(x) { return typeof x === 'number' ? String(Math.round(x * 1000) / 1000).replace('.', ',') : String(x); }
+  function korrVergleich(pfad, a, b, out) {
+    if (a === undefined || a === null) return;
+    if (typeof a === 'number' || typeof a === 'string') {
+      if (b === undefined || b === null) { out.push(korrFeld(pfad) + ' ' + korrZahl(a) + ' → ' + tr('korrVerworfen')); return; }
+      if (typeof a === 'number' && typeof b === 'number' && isFinite(a) && Math.abs(a - b) > 1e-9) out.push(korrFeld(pfad) + ' ' + korrZahl(a) + ' → ' + korrZahl(b));
+      else if (typeof a === 'string' && typeof b === 'string' && a !== b) out.push(korrFeld(pfad) + ' ' + a + ' → ' + b);
+      else if (typeof a !== typeof b && isFinite(Number(a)) === false) out.push(korrFeld(pfad) + ' ' + String(a) + ' → ' + (b === undefined ? tr('korrVerworfen') : korrZahl(b)));
+      return;
+    }
+    if (a && typeof a === 'object' && !Array.isArray(a) && b && typeof b === 'object') Object.keys(a).forEach(function (k) { korrVergleich(pfad + '.' + k, a[k], b[k], out); });
+    else if (a && typeof a === 'object' && !Array.isArray(a) && (b === undefined || b === null)) Object.keys(a).forEach(function (k) { korrVergleich(pfad + '.' + k, a[k], undefined, out); });
+  }
+  function korrekturen(p, neu) {
+    var out = [];
+    if (typeof p.land === 'string' && p.land !== neu.land) out.push(korrFeld('land') + ' ' + p.land + ' ' + tr('korrUnbekannt') + ' → ' + neu.land);
+    ['nord', 'wandhoehe', 'gebaeudeklasse', 'wohnungen', 'daemmstandard', 'kfwstufe', 'mehrkosten_eigen', 'personen'].forEach(function (k) { if (p[k] !== undefined) korrVergleich(k, p[k], neu[k], out); });
+    ['dach', 'material', 'lueftung', 'wasser', 'energiepreise', 'anbau', 'grundstueck', 'sauna', 'kleinhaus'].forEach(function (k) {
+      if (p[k] && typeof p[k] === 'object' && !Array.isArray(p[k])) korrVergleich(k, p[k], neu[k], out);
+    });
+    if (Array.isArray(p.aussen)) {
+      var gueltig = p.aussen.slice(0, 80).filter(function (a0) { return a0 && typeof a0 === 'object' && typeof a0.art === 'string' && /^[a-z0-9_]{1,30}$/.test(a0.art); });
+      var nl = p.aussen.length - (neu.aussen ? neu.aussen.length : 0);
+      if (nl > 0) out.push(tr('korrBausteineWeg', { n: nl }));
+      (neu.aussen || []).forEach(function (b, i) { var a0 = gueltig[i]; if (a0) ['x_m', 'y_m', 'breite_m', 'tiefe_m', 'hoehe_m'].forEach(function (k) { korrVergleich('aussen.' + k, a0[k], b[k], out); }); });
+    }
+    (p.etagen || []).slice(0, 12).forEach(function (e, i) {
+      var n = neu.etagen[i]; if (!n || !e) return;
+      ['hoehe', 'aussenwand', 'innenwand', 'decke'].forEach(function (k) { korrVergleich('etagen.' + k, e[k], n[k], out); });
+      var rl = (e.raeume || []).length - n.raeume.length, tl = (e.teile || []).length - n.teile.length;
+      if (rl > 0) out.push(tr('korrRaeumeWeg', { n: rl }));
+      if (tl > 0) out.push(tr('korrTeileWeg', { n: tl }));
+    });
+    /* unbekannte Kennungen, die pruefePlan() stehen lässt und die der Rechenkern durch den Standard ersetzt */
+    var HKm = window.HUELLE_KERN;
+    if (HKm) ['planStandard', 'planLueftung', 'planWasser', 'energiepreise'].forEach(function (fn) {
+      try { var r = HKm[fn] && HKm[fn](neu); if (r && r.meldung && r.meldung.id) out.push(korrFeld(r.meldung.feld || fn) + ' ' + r.meldung.id + ' ' + tr('korrUnbekannt') + ' → ' + tr('korrStandardGilt')); } catch (e) { /* keine Meldung möglich */ }
+    });
+    if (p.etagen && p.etagen.length > 12) out.push(tr('korrEtagenWeg', { n: p.etagen.length - 12 }));
+    return out;
+  }
   function pruefePlan(p) {
+    var neu = pruefePlanRoh(p);
+    pruefKorr = neu ? korrekturen(p, neu) : [];
+    return neu;
+  }
+  function pruefePlanRoh(p) {
     if (!p || typeof p !== 'object' || p.app !== 'immo-grundriss' || !Array.isArray(p.etagen) || !p.etagen.length) return null;
     var zahlOk = function (x, d) { x = Number(x); return isFinite(x) ? x : d; };
     var neu = leererPlan();
@@ -169,6 +221,7 @@
     }
     /* Welle E, Teil 2: Personen im Haus, gemeinsame Stelle für Wasser-Karte und Autarkie-Block (1 bis 12); ältere Pläne haben nur plan.wasser.personen, das bleibt gültig */
     if (typeof p.personen === 'number' && isFinite(p.personen)) neu.personen = Math.round(klemme(p.personen, 1, 12));
+    if (p.solarthermie === 'ww' || p.solarthermie === 'heiz') neu.solarthermie = p.solarthermie;   /* F1: Solarthermie-Option des Autarkie-Blocks */
     if (p.wasser && typeof p.wasser === 'object' && !Array.isArray(p.wasser)) {
       var wa = {}, pw0 = p.wasser;
       if (typeof pw0.personen === 'number' && isFinite(pw0.personen)) wa.personen = Math.round(klemme(pw0.personen, 1, 12));
@@ -177,6 +230,8 @@
       if (typeof pw0.enthaertung === 'boolean') wa.enthaertung = pw0.enthaertung;
       if (idOk(pw0.haerte)) wa.haerte = pw0.haerte;
       if (typeof pw0.preis === 'number' && isFinite(pw0.preis) && pw0.preis > 0) wa.preis = klemme(pw0.preis, 0.01, 49.99);
+      if (typeof pw0.garten_m2 === 'number' && isFinite(pw0.garten_m2) && pw0.garten_m2 > 0) wa.garten_m2 = klemme(pw0.garten_m2, 1, 5000);   /* F1: Gartenfläche für die Bewässerung */
+      if (typeof pw0.haerte_dh === 'number' && isFinite(pw0.haerte_dh) && pw0.haerte_dh >= 0) wa.haerte_dh = klemme(pw0.haerte_dh, 0, 60);   /* F1: Wasserhärte in °dH */
       if (Object.keys(wa).length) neu.wasser = wa;
     }
     if (p.energiepreise && typeof p.energiepreise === 'object' && !Array.isArray(p.energiepreise)) {
@@ -199,7 +254,8 @@
        Nur endliche Zahlen und gültig geformte Ids; eine unbekannte art bleibt stehen, die Karte meldet sie (GRUNDSTUECK_KERN); Werte außerhalb des Grundstücks schiebt der Kern an den Rand. */
     if (p.grundstueck && typeof p.grundstueck === 'object' && !Array.isArray(p.grundstueck)) {
       var gs0 = p.grundstueck, gs = {};
-      ['breite_m', 'tiefe_m', 'haus_x_m', 'haus_y_m'].forEach(function (k) { if (typeof gs0[k] === 'number' && isFinite(gs0[k])) gs[k] = klemme(gs0[k], k.indexOf('haus') === 0 ? -1000 : 1, 1000); });
+      /* F1: Breite und Tiefe müssen größer als 0 sein; ein Wert ≤ 0 fällt weg (die Standardgröße gilt) und steht danach in der Ladenmeldung */
+      ['breite_m', 'tiefe_m', 'haus_x_m', 'haus_y_m'].forEach(function (k) { if (typeof gs0[k] === 'number' && isFinite(gs0[k]) && (k.indexOf('haus') === 0 || gs0[k] > 0)) gs[k] = klemme(gs0[k], k.indexOf('haus') === 0 ? -1000 : 1, 1000); });
       if (Object.keys(gs).length) neu.grundstueck = gs;
     }
     if (Array.isArray(p.aussen)) {
@@ -207,7 +263,8 @@
       p.aussen.slice(0, 80).forEach(function (a0) {
         if (!a0 || typeof a0 !== 'object' || !idOk(a0.art)) return;
         var a = { id: typeof a0.id === 'string' && /^[a-z0-9_]{1,12}$/.test(a0.id) ? a0.id : 'a' + (au.length + 1), art: a0.art };
-        ['x_m', 'y_m', 'breite_m', 'tiefe_m', 'hoehe_m'].forEach(function (k) { if (typeof a0[k] === 'number' && isFinite(a0[k])) a[k] = klemme(a0[k], -1000, 1000); });
+        /* F1: Maße des Bausteins müssen größer als 0 sein; ein Wert ≤ 0 fällt weg (die Standardgröße der Art gilt) und wird gemeldet */
+        ['x_m', 'y_m', 'breite_m', 'tiefe_m', 'hoehe_m'].forEach(function (k) { if (typeof a0[k] === 'number' && isFinite(a0[k]) && (k.charAt(1) === '_' || a0[k] > 0)) a[k] = klemme(a0[k], -1000, 1000); });
         /* Ofen (Sauna) und Baugebiet (Kleinwind); anderes fällt weg */
         if (a0.art === 'sauna' && (a0.ofen === 'elektro' || a0.ofen === 'holz')) a.ofen = a0.ofen;
         if (a0.art === 'kleinwind' && (a0.gebiet === 'wr' || a0.gebiet === 'wa' || a0.gebiet === 'gw')) a.gebiet = a0.gebiet;
@@ -1433,12 +1490,16 @@
     if (!datei) return;
     var rd = new FileReader();
     rd.onload = function () {
-      var neu = null;
-      try { neu = pruefePlan(JSON.parse(rd.result)); } catch (e) { neu = null; }
-      if (!neu) { $('g-datei-meldung').textContent = 'Nicht geladen: „' + datei.name + '“ ist keine Grundriss-Datei dieser Seite.'; return; }
+      var neu = null, json = null, jsonFehler = false;
+      try { json = JSON.parse(rd.result); } catch (e) { jsonFehler = true; }
+      if (!jsonFehler) { try { neu = pruefePlan(json); } catch (e2) { neu = null; } }
+      if (!neu) { $('g-datei-meldung').textContent = jsonFehler ? tr('ladeKaputt', { name: datei.name }) : 'Nicht geladen: „' + datei.name + '“ ist keine Grundriss-Datei dieser Seite.'; return; }
+      var korr = pruefKorr.slice();
       var gesichert = !leer() && dateiSichern('_vorher');
       plan = neu; gewaehlt = null; vb = null; speichern(); allesZeigen();
-      $('g-datei-meldung').textContent = 'Geladen: ' + neu.etagen.length + ' Etagen.' + (gesichert ? ' Der bisherige Plan wurde vorher als „grundriss_' + heute() + '_vorher.json“ gesichert.' : '');
+      var kt = korr.length ? ' ' + tr('ladeKorrigiert', { n: korr.length, liste: korr.slice(0, 8).join('; ') + (korr.length > 8 ? '; …' : '') }) : '';
+      $('g-datei-meldung').textContent = 'Geladen: ' + neu.etagen.length + ' Etagen.' + kt + (gesichert ? ' Der bisherige Plan wurde vorher als „grundriss_' + heute() + '_vorher.json“ gesichert.' : '');
+      $('g-datei-meldung').setAttribute('data-korrekturen', String(korr.length));
     };
     rd.onerror = function () { $('g-datei-meldung').textContent = 'Die Datei konnte nicht gelesen werden.'; };
     rd.readAsText(datei);

@@ -5,7 +5,7 @@
   function byId(i) { return document.getElementById(i); }
   function tr(k, v) { return window.TXT ? window.TXT.t(k, v) : k; }
   function melde(t) { var e = byId('g-kleinhaus-fehler'); if (e) { e.textContent = t || ''; e.hidden = !t; } }
-  if (!KK || !G || !WZ || !KD) { melde(tr('khFehler', { grund: (!KK ? 'kleinhaus_kern.js' : !WZ ? 'Karte Anbau' : !G ? 'Zeichnung' : 'Daten') + ' fehlt.' })); return; }
+  if (!KK || !G || !WZ || !KD) { melde(tr('khFehler', { grund: (!KK ? 'kleinhaus_kern.js' : !WZ ? 'Karte Anbau' : !G ? 'Zeichnung' : 'die Datendatei daten/kleinhaus.js') + ' fehlt.' })); return; }
   var esc = WZ.esc, sym = WZ.symbol, nz = WZ.nz, n0 = WZ.n0, schild = WZ.annahmeSchild;
   function T(k, v) { return esc(tr(k, v)); }
   function nf(x, d) { return new Intl.NumberFormat(WZ.lang(), { minimumFractionDigits: d, maximumFractionDigits: d }).format(x); }

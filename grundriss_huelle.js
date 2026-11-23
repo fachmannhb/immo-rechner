@@ -148,7 +148,9 @@
       return '<button type="button" class="es-var hu-std" data-hu="std" data-wert="' + id + '" data-fk="std-' + id + '" aria-pressed="' + (ps.id === id) + '"><span class="es-var-kopf">' + symbol(STD_ICON[id]) + '<b>' + esc(tr('hdStd_' + id)) + '</b></span>' +
         '<span class="klein">' + esc(tr(STD_FACH[id])) + '</span></button>';
     }).join('') + '</div>';
+    if (ps.id === 'passivhaus') h += '<p class="klein" data-begriff="Passivhaus">' + begriffKurz('Passivhaus') + '</p>';
     if (ps.id === 'kfw') {
+      h += '<p class="klein" data-begriff="Effizienzhaus">' + begriffKurz('Effizienzhaus') + '</p>';
       h += '<div class="hu-kfw"><b>' + esc(tr('hdKfwStufe')) + '</b>' + schaltHtml(HK.KFW_STUFEN.map(function (s) { return ['kfwstufe', s, 'EH ' + s.slice(2)]; }), tr('hdKfwStufe'), ps.kfwStufe) + '</div>';
     }
     if (ps.meldung) h += '<p class="ab-meldung fehler" role="alert" data-meldung="standard">' + esc(tr('hdUnbekannt', { id: ps.meldung.id })) + '</p>';
@@ -157,6 +159,7 @@
   function eigenWertText(plan) { var m = HK.planStandard(plan).mehrkostenEigen; return m == null ? '' : n0(m); }
   function preisSteuerHtml(c) {
     if (c.leer || c.fehler) return '';
+    if (!D.energiepreise || !D.energiepreise.eintraege) return '<p class="ab-meldung fehler" role="alert" data-fehler="energiepreise">' + esc(tr('hpDatenFehlen')) + '</p>';
     var ep = c.ep, gasE = D.energiepreise.eintraege, h = '';
     function eintrag(id) { for (var i = 0; i < gasE.length; i++) if (gasE[i].id === id) return gasE[i]; return null; }
     var eg = eintrag('gas_destatis_alle'), eo = eintrag('oel_tecson');
@@ -171,6 +174,7 @@
       '<div class="es-feld"><label class="es-label" for="hu-oelpreis">' + esc(tr('hpOelLabel')) + '</label><input type="text" inputmode="decimal" id="hu-oelpreis" data-hu="oel" data-fk="oelpreis" autocomplete="off" value="' + esc(n0(ep.oelEur100)) + '">' +
       '<span class="klein hu-stand" data-stand="oel">' + esc(ep.oelEigen ? tr('hpEigen') : tr('hpStand', { datum: datumDe(eo.abruf) })) + ' ' + quelleHtml(ep.belegOel) + '</span><span class="fehler" id="hu-oelpreis-fehler" role="alert" hidden></span></div></div>';
     h += '<p class="klein">' + esc(tr('hpSchwankt')) + '</p>';
+    h += '<p class="klein hu-basis" data-gas-heizwert="' + ep.gasCtHeizwert.toFixed(4) + '">' + annahmeZeile('hpBasis', { gas: n2(ep.gasCt), gasHi: n2(ep.gasCtHeizwert), oel: n2(ep.oelCt), f: nf(3).format(ep.gasHsHi) }) + ' ' + quelleHtml(ep.belegGasHsHi) + '</p>';
     h += '<div class="es-feld hu-eigen"><label class="es-label" for="hu-mehrkosten">' + esc(tr('hdMehrkostenEigen')) + '</label><input type="text" inputmode="decimal" id="hu-mehrkosten" data-hu="mehrkosten" data-fk="mehrkosten" autocomplete="off" placeholder="' + esc(tr('hdMehrkostenPlatz')) + '" value="' + esc(eigenWertText(c.plan)) + '">' +
       '<span class="klein">' + esc(tr('hdMehrkostenHinweis')) + '</span><span class="fehler" id="hu-mehrkosten-fehler" role="alert" hidden></span></div>';
     return h;
@@ -213,6 +217,15 @@
     }
     return '<span class="ab-leer">' + esc(tr('hdNichts')) + '</span>';
   }
+  /* F1: weitere belegte Angaben (Zeilen aus den Daten, die keine eigene Rechnung haben) */
+  function weitereHtml(karte, c) {
+    var z = HK.weitereZeilen(karte, c.plan.land || 'HB');
+    if (!z.length) return '';
+    return '<details class="ab-alt" data-g="weitere-' + karte + '"><summary>' + esc(tr('hdWeitere')) + '</summary><ul class="ab-liste">' + z.map(function (x) {
+      var zahl = x.von != null ? ' <b class="es-zahl">' + (x.bis != null && x.bis !== x.von ? n0(x.von) + ' ' + tr('wortBis') + ' ' + n0(x.bis) : n0(x.von)) + ' ' + esc(x.einheit) + '</b>' : '';
+      return '<li data-weitere="' + esc(x.id) + '" data-status="' + esc(x.status) + '">' + esc(x.name) + zahl + (x.status === 'abgelaufen' ? ' <b class="fehler">' + esc(tr('hdAbgelaufen', { bis: datumDe(x.gilt_bis) })) + '</b>' : '') + (x.hinweis ? ' <span class="klein">' + esc(x.hinweis) + '</span>' : '') + ' ' + quelleHtml(x.beleg) + '</li>';
+    }).join('') + '</ul></details>';
+  }
   function amortHtml(da) {
     if (da.ok) {
       var a = da.amort;
@@ -241,6 +254,14 @@
     } else {
       var code = hw && hw.grund ? hw.grund : 'x';
       h += '<div class="ab-meldung" role="status" data-heiz="keine"><b>' + esc(tr('maKeineAngabe')) + '.</b> ' + esc(grundText(code)) + '</div>';
+      /* F1: KfW und Passivhaus haben keine belegte Heizwärme für Ihr Haus; die Referenzmarken bleiben stehen, "Ihr Haus" nennt den Grund statt einer Zahl */
+      if (code === 'kfwOhneHeizwaerme' || code === 'passivhausOhneZahl') {
+        var S2 = HK.daemmstandards(), ist2 = S2.bestand.heizRef, ph2 = S2.passivhaus.heizRef, mx = 200;
+        h += '<div class="ma-reihe hu-ihr" data-heiz="ihr-keine"><span class="ma-name">' + esc(tr('maIhrHaus')) + '</span><span class="klein" data-heiz-ihr-text="1">' + esc(tr('hdIhrNurBestand')) + '</span></div>';
+        h += '<div class="es-legende"><span><b>' + esc(tr('maRefTitel')) + '</b></span></div>';
+        if (ist2) h += heizRef(tr('hdRef_bestand'), ist2.wert, mx, ist2.beleg);
+        if (ph2) h += heizRef(tr('hdRef_passivhaus'), ph2.wert, mx, ph2.beleg);
+      }
     }
     h += '</div>';
     return h;
@@ -255,7 +276,7 @@
     /* Heizkosten */
     if (hw.gesamt) {
       var kosten = HK.heizkosten(hw.gesamt.kwh, ep), lo = HK.heizkosten(hw.gesamt.kwhLo, ep), hi = HK.heizkosten(hw.gesamt.kwhHi, ep);
-      h += '<div class="es-satz klein-satz hu-heizkosten" data-heizkosten="1" aria-live="polite"><span class="es-zahl" data-kosten="' + kosten.toFixed(2) + '">' + esc(tr('hpSatz', { traeger: tr(ep.traeger === 'oel' ? 'hpOel' : 'hpGas'), von: n0(Math.round(lo / 10) * 10), bis: n0(Math.round(hi / 10) * 10), eur: n0(Math.round(kosten / 10) * 10) })) + '</span></div>';
+      h += '<div class="es-satz klein-satz hu-heizkosten" data-heizkosten="1" aria-live="polite"><span class="es-zahl" data-kosten="' + kosten.toFixed(2) + '">' + esc(tr(Math.round(lo / 10) === Math.round(hi / 10) ? 'hpSatzEin' : 'hpSatz', { traeger: tr(ep.traeger === 'oel' ? 'hpOel' : 'hpGas'), von: n0(Math.round(lo / 10) * 10), bis: n0(Math.round(hi / 10) * 10), eur: n0(Math.round(kosten / 10) * 10) })) + '</span></div>';
       h += '<p class="klein">' + annahmeZeile('hpAnnahmen', { eta: n2(ep.wirkungsgrad), ct: n1(ep.ct) }) + '</p>';
       if (ep.traeger === 'oel') {
         h += '<p class="klein hu-oelrechnung" data-oel-ct="' + ep.oelCt.toFixed(4) + '">' + annahmeZeile('hpOelRechnung', { eur: n0(ep.oelEur100), kwh: n2(ep.oelKwhProL), ct: n2(ep.oelCt), bw: n2(ep.oelCtBrennwert) }) + ' ' + quelleHtml(ep.belegOelKwh) + '</p>';
@@ -283,6 +304,18 @@
       '<div class="hu-d" data-zeile="mehrkosten"><span class="hu-dl">' + symbol('i-rechner') + esc(tr('hdMehrkosten')) + '</span><div>' + mehrkostenHtml(mf, c) + '</div></div>' +
       '<div class="hu-d" data-zeile="foerderung"><span class="hu-dl">' + symbol('i-stern') + esc(tr('hdFoerderung')) + '</span><div>' + foerderungHtml(mf) + '</div></div>' +
       '<div class="hu-d" data-zeile="amortisation"><span class="hu-dl">' + symbol('i-uhr') + esc(tr('hdAmort')) + '</span><div>' + amortHtml(da) + '</div></div></div>';
+    if (da.zusatz && da.zusatz.noetig) {
+      var zu = da.zusatz;
+      if (zu.luecke) h += '<p class="klein" data-zusatz="luecke">' + luecke('hdKeineAngabe') + ' ' + esc(tr('hdZusatzLuecke', { grund: zu.luecke })) + '</p>';
+      else {
+        h += '<div class="hu-zusatz" data-zusatz="1" data-zusatz-cm="' + zu.extraCm.toFixed(3) + '" data-zusatz-von="' + zu.von.toFixed(2) + '" data-zusatz-bis="' + zu.bis.toFixed(2) + '"><p class="klein"><b>' + esc(tr('hdZusatzTitel')) + '</b> ' +
+          esc(tr('hdZusatzDicke', { cm: n1(zu.extraCm), stoff: zu.materialName, u0: n2(zu.uAlt), u1: n2(zu.uZiel) })) + (zu.materialAngenommen ? ' ' + annahmeSchild() : '') +
+          '<br>' + esc(r100(zu.von) === r100(zu.bis) ? tr('hdZusatzKostenEin', { eur: n0(r100(zu.von)) }) : tr('hdZusatzKosten', { von: n0(r100(zu.von)), bis: n0(r100(zu.bis)) })) + ' ' + quelleHtml(zu.preis && zu.preis.beleg ? Object.assign({}, zu.preis.beleg, { quelle: zu.preis.beleg.quelleTitel || zu.preis.beleg.quelle }) : null) + '</p>';
+        if (da.amortZusatz && da.amortZusatz.ok) h += '<p class="klein" data-zusatz-amort-von="' + da.amortZusatz.von + '" data-zusatz-amort-bis="' + da.amortZusatz.bis + '">' + esc(tr('hdZusatzAmort', { von: n0(da.amortZusatz.von), bis: n0(da.amortZusatz.bis) })) + '</p>';
+        else if (da.amortZusatzMitte && da.amortZusatzMitte.ok) h += '<p class="klein" data-zusatz-amort-mitte="' + da.amortZusatzMitte.jahre.toFixed(3) + '">' + esc(tr('hdZusatzAmortMitte', { mitte: n1(da.amortZusatzMitte.jahre) })) + '</p>';
+        h += '<p class="klein">' + annahmeZeile('hdZusatzHinweis') + '</p></div>';
+      }
+    }
     if (da.ersparnisKwh && ps.id !== 'bestand' && ps.id !== 'kfw') h += '<p class="klein">' + esc(tr('hdErsparnisSatz', { von: n0(da.ersparnisKwh.von), bis: n0(da.ersparnisKwh.bis) })) + '</p>';
     /* Belege und Annahmen */
     var bel = [];
@@ -292,12 +325,13 @@
     mf.foerderung.belege.forEach(function (b) { bel.push(b); });
     if (mf.mehrkosten.teile) mf.mehrkosten.teile.forEach(function (t) { bel.push(t.beleg); });
     h += '<details class="ab-alt" data-g="hu-belege"><summary>' + esc(tr('hdBelegTitel')) + '</summary>' + belegListe(bel) +
-      '<ul class="ab-liste"><li>' + annahmeZeile('hdAnn1') + '</li><li>' + annahmeZeile('hdAnn3', { n: n2(HK.ANNAHMEN.luftwechsel), cp: n2(HK.ANNAHMEN.luftwaerme) }) + '</li></ul></details>';
+      '<ul class="ab-liste"><li>' + annahmeZeile('hdAnn1') + '</li><li>' + annahmeZeile('hdAnn3', { n: n2(HK.ANNAHMEN.luftwechsel), cp: n2(HK.ANNAHMEN.luftwaerme) }) + '</li></ul></details>' + weitereHtml('daemmung', c);
     return h;
   }
   function kopfDaemmung(cc) {
     var el = byId('g-daemmung-kopfzeile');
     if (!el) return;
+    if (!cc.leer && cc.hw && !cc.hw.gesamt && cc.hw.ohneBelegteZahl) { el.textContent = tr('hdKopfKeine', { std: tr('hdStd_' + cc.ps.id) }); return; }   /* F1: KfW und Passivhaus nennen den Standard und „keine Angabe“ */
     if (cc.leer || !cc.hw || !cc.hw.gesamt) { el.textContent = cc.leer ? tr('abKopfLeer') : tr('maKopfKeine'); return; }
     el.textContent = tr('hdKopf', { std: tr('hdStd_' + cc.ps.id), kwh: n0(cc.hw.gesamt.kwhM2) });
   }
@@ -331,7 +365,13 @@
       h += b.html;
       h += '<p class="klein" data-lueft-verlust="1">' + esc(tr('hlVerlust', { v: n0(v.kwhM2), ohne: n0(v.kwhM2Ohne), vol: n0(v.volumen), n: n2(v.n) })) + ' ' + annahmeSchild() + '</p>';
       if (v.wrg) h += '<p class="klein">' + esc(tr('hlWrg', { von: n0(v.wrg.von * 100), bis: n0(v.wrg.bis * 100) })) + ' ' + quelleHtml(v.wrg.beleg) + '</p>';
-    } else h += '<div class="ab-meldung" role="status" data-heiz="keine">' + esc(tr('maKeineAngabe')) + '</div>';
+      if (art === 'dez_wrg' || art === 'zentral') h += '<p class="klein" data-begriff="WRG">' + begriffKurz('Wärmerückgewinnung') + '</p>';
+    } else {
+      /* F1: ohne Gesamtzahl (KfW, Passivhaus, kein Plan) nennt die Karte den Grund und zeigt den Lüftungsverlust allein, der sich ohne Bauteilwerte rechnen lässt */
+      var hwx = c.hw, gx = hwx && hwx.grund ? hwx.grund : 'x';
+      h += '<div class="ab-meldung" role="status" data-heiz="keine"><b>' + esc(tr('maKeineAngabe')) + '.</b> ' + esc(grundText(gx)) + '</div>';
+      if (hwx && hwx.lueftung) h += '<p class="klein" data-lueft-verlust="1">' + esc(tr('hlVerlust', { v: n0(hwx.lueftung.kwhM2), ohne: n0(hwx.lueftung.kwhM2Ohne), vol: n0(hwx.lueftung.volumen), n: n2(hwx.lueftung.n) })) + ' ' + annahmeSchild() + '</p>';
+    }
     if (art !== 'keine') {
       h += '<div class="hu-drei" role="group" aria-label="' + esc(tr('hlDreiTitel')) + '">';
       /* Kosten einmalig */
@@ -362,7 +402,12 @@
       h += '<div class="hu-d" data-zeile="amortisation"><span class="hu-dl">' + symbol('i-uhr') + esc(tr('hdAmort')) + '</span><div>' + am + '</div></div></div>';
       /* Filter, Lücken */
       h += '<p class="klein" data-filter="1"><b>' + esc(tr('hlFilter')) + '</b> ' + esc(tr('hlFilterText', { von: k.filter.monate.von, bis: k.filter.monate.bis, preis: n2(k.filter.beispiel.von) })) + ' ' + quelleHtml(k.filter.beleg) + '<br>' + luecke('hdKeineAngabe') + ' ' + esc(tr('hlFilterLuecke')) + '</p>';
-      h += '<details class="ab-alt" data-g="lu-belege"><summary>' + esc(tr('hdBelegTitel')) + '</summary>' + belegListe(k.belege.concat(k.strom ? k.strom.belege : [], fo.belege, [k.filter.beleg, k.filter.beispiel, k.filter.luecke])) + '</details>';
+      /* F1: Platz und Einbau, Kaminofen (MFeuV), Nachrüstung Altbau */
+      var hin = HK.lueftungHinweise(), hinBel = [];
+      if (hin.vergleich) { h += '<h4 class="es-h5">' + symbol('i-schnitt') + esc(tr('lfPlatz')) + '</h4><p class="klein">' + esc(tr('lfPlatzHinweis')) + '</p><p class="klein lf-platz" data-lf="platz">' + esc(hin.vergleich.text) + ' ' + quelleHtml(hin.vergleich.beleg) + '</p>'; hinBel.push(hin.vergleich.beleg); }
+      if (hin.nachruest && art !== 'zentral' && !pl.neubau) { h += '<p class="klein es-zahl" data-lf="nachruest" data-von="' + hin.nachruest.von + '" data-bis="' + hin.nachruest.bis + '">' + esc(tr('lfNachruest', { von: n0(hin.nachruest.von), bis: n0(hin.nachruest.bis) })) + ' ' + quelleHtml(hin.nachruest.beleg) + '</p>'; hinBel.push(hin.nachruest.beleg); }
+      if (hin.kamin) { h += '<p class="ab-meldung" role="note" data-lf="kamin"><b>' + esc(tr('lfKamin')) + '</b> ' + esc(hin.kamin.text) + ' ' + quelleHtml(hin.kamin.beleg) + '</p>'; hinBel.push(hin.kamin.beleg); }
+      h += '<details class="ab-alt" data-g="lu-belege"><summary>' + esc(tr('hdBelegTitel')) + '</summary>' + belegListe(k.belege.concat(k.strom ? k.strom.belege : [], fo.belege, [k.filter.beleg, k.filter.beispiel, k.filter.luecke], hinBel)) + '</details>';
     }
     return h;
   }
@@ -382,6 +427,8 @@
     h += '<div class="hu-wasser-reihe"><div class="es-feld"><label class="es-label" for="hw-personen">' + esc(tr('hwPersonen')) + ' <b id="hw-personen-wert">' + pw.personen + '</b></label>' +
       '<input type="range" id="hw-personen" min="1" max="12" step="1" value="' + pw.personen + '" data-hu="personen" data-fk="personen" aria-valuetext="' + esc(tr('hwPersonenText', { n: pw.personen })) + '"></div>';
     h += '<div class="es-feld"><span class="es-label">' + esc(tr('hwRegen')) + '</span>' + schaltHtml([['regen', 'ja', tr('hwRegenJa'), 'i-zisterne'], ['regen', 'nein', tr('hwRegenNein'), 'i-tropfen']], tr('hwRegen'), pw.regenwasser ? 'ja' : 'nein') + '</div></div>';
+    h += '<div class="es-feld hu-eigen"><label class="es-label" for="hw-garten">' + esc(tr('hwGartenLabel')) + '</label><input type="text" inputmode="decimal" id="hw-garten" data-hu="garten" data-fk="garten" autocomplete="off" placeholder="' + esc(tr('hwGartenPlatz')) + '" value="' + (pw.garten > 0 ? esc(n0(pw.garten)) : '') + '">' +
+      '<span class="klein">' + esc(tr('hwGartenHinweis')) + '</span><span class="fehler" id="hw-garten-fehler" role="alert" hidden></span></div>';
     h += '<label class="es-haken hu-haken"><input type="checkbox" data-hu="gruendach" data-fk="gruendach"' + (pw.gruendach ? ' checked' : '') + '> ' + esc(tr('hwGruendach')) + '</label>';
     var land = c.plan.land || 'HB', hatPreis = !!HK.wasserpreis(land);
     if (pw.regenwasser && !hatPreis) {
@@ -392,12 +439,21 @@
     return h;
   }
   function enthaertungHtml(c) {
-    var pw = c.pw, en = HK.enthaertung(pw.haerte), h = '';
+    var pw = c.pw, en = HK.enthaertung(pw.haerte, pw.haerteDh), h = '';
     if (!en.ok) return '';
     h += '<details class="ab-alt" data-g="hw-enth"><summary>' + symbol('i-kalk') + ' ' + esc(tr('hwEnthTitel')) + '</summary>';
     h += '<p class="klein">' + esc(tr('hwEnthFrage')) + '</p>';
     h += schaltHtml(HK.HAERTEN.map(function (x) { return ['haerte', x, tr('hwHaerte_' + x)]; }), tr('hwEnthFrage'), pw.haerte);
+    /* F1: Härte als Zahl in °dH (genauer als der Bereich); bei 14 °dH und mehr kommen Salz und Betriebskosten aus der Staffel */
+    h += '<div class="es-feld hu-eigen"><label class="es-label" for="hw-haertedh">' + esc(tr('hwDhLabel')) + '</label><input type="text" inputmode="decimal" id="hw-haertedh" data-hu="haertedh" data-fk="haertedh" autocomplete="off" placeholder="' + esc(tr('hwDhPlatz')) + '" value="' + (pw.haerteDh != null ? esc(n1(pw.haerteDh)) : '') + '">' +
+      '<span class="klein">' + esc(tr('hwDhHinweis')) + '</span><span class="fehler" id="hw-haertedh-fehler" role="alert" hidden></span></div>';
+    if (en.betrieb) {
+      var bt = en.betrieb;
+      if (bt.zustand === 'nichtNoetig') h += '<p class="ab-meldung" role="status" data-dh-betrieb="nichtNoetig">' + esc(tr('hwDhNichtNoetig', { dh: n1(bt.dh), s: n0(bt.schwelle) })) + '</p>';
+      else h += '<p class="ab-meldung" role="status" data-dh-betrieb="' + bt.zustand + '" data-dh-kg="' + bt.staffel.kg + '" data-dh-eur="' + bt.staffel.eur + '">' + esc(tr(bt.zustand === 'ok' ? 'hwDhBetrieb' : 'hwDhUeber', { dh: n1(bt.dh), stufe: n0(bt.staffel.dh), kg: n0(bt.staffel.kg), eur: n0(bt.staffel.eur) })) + ' ' + quelleHtml(bt.beleg) + ' ' + annahmeSchild() + '</p>';
+    }
     h += '<p class="klein" data-haerte="' + en.bereich + '">' + esc(tr('hwHaerteWerte', { mmol: en.mmol.bis == null ? '> ' + n1(en.mmol.von) : n1(en.mmol.von) + ' ' + tr('wortBis') + ' ' + n1(en.mmol.bis), dh: en.dh.bis == null ? '> ' + n1(en.dh.von) : n1(en.dh.von) + ' ' + tr('wortBis') + ' ' + n1(en.dh.bis) })) + ' ' + quelleHtml(en.beleg) + ' ' + annahmeSchild() + ' <span class="klein">' + esc(tr('hwDhAnnahme')) + '</span></p>';
+    h += '<p class="klein" data-begriff="Härtebereich">' + begriffKurz('Härtebereich') + '</p>';
     h += '<p class="ab-meldung" role="status" data-enth-sinnvoll="' + (en.sinnvoll ? 'ja' : 'nein') + '">' + esc(tr(en.sinnvoll ? 'hwEnthHart' : 'hwEnthWeich')) + ' ' + quelleHtml(en.warentest) + ' ' + quelleHtml(en.verbraucherzentrale) + '</p>';
     h += '<ul class="ab-liste">' +
       '<li>' + esc(tr('hwEnthAnschaffung', { von: n0(en.kosten.anschaffung.von), bis: n0(en.kosten.anschaffung.bis) })) + ' ' + quelleHtml(en.kosten.anschaffung) + '</li>' +
@@ -438,7 +494,7 @@
     h += '<div class="hu-d" data-zeile="speicher"><span class="hu-dl">' + symbol('i-zisterne') + esc(tr('hwSpeicher')) + '</span><div><b class="es-zahl" data-speicher-von="' + rw.speicher.jeNutzer.von + '" data-speicher-bis="' + rw.speicher.jeNutzer.bis + '">' + esc(tr('hwSpeicherL', { von: n0(rw.speicher.jeNutzer.von), bis: n0(rw.speicher.jeNutzer.bis) })) + '</b><br><span class="klein">' + esc(tr('hwSpeicherM2', { von: n0(rw.speicher.jeM2.von), bis: n0(rw.speicher.jeM2.bis) })) + '</span><br>' + quelleHtml(rw.speicher.beleg) + '</div></div>';
     h += '<div class="hu-d" data-zeile="kosten"><span class="hu-dl">' + symbol('i-rechner') + esc(tr('hwKosten')) + '</span><div><b class="es-zahl" data-kosten-von="' + rw.kosten.von + '" data-kosten-bis="' + rw.kosten.bis + '">' + spanneEur(rw.kosten.von, rw.kosten.bis) + '</b><br>' + quelleHtml(rw.kosten.beleg) + '<br><span class="klein">' + luecke('hdKeineAngabe') + ' ' + esc(tr('hwPumpeLuecke')) + '</span></div></div>';
     if (rw.ersparnis) {
-      h += '<div class="hu-d" data-zeile="ersparnis"><span class="hu-dl">' + symbol('i-spar') + esc(tr('hwErsparnis')) + '</span><div><b class="es-zahl" data-ersparnis-von="' + rw.ersparnis.von + '" data-ersparnis-bis="' + rw.ersparnis.bis + '">' + esc(tr('hwErsparnisEur', { von: n0(rw.ersparnis.von), bis: n0(rw.ersparnis.bis) })) + '</b><br><span class="klein">' + esc(tr('hwErsparnisRechnung', { m3: n0(rw.ersparnis.m3Von), pv: n2(rw.preis.von), pb: n2(rw.preis.bis) })) + '</span><br>' +
+      h += '<div class="hu-d" data-zeile="ersparnis"><span class="hu-dl">' + symbol('i-spar') + esc(tr('hwErsparnis')) + '</span><div><b class="es-zahl" data-ersparnis-von="' + rw.ersparnis.von + '" data-ersparnis-bis="' + rw.ersparnis.bis + '">' + esc(tr('hwErsparnisEur', { von: n0(rw.ersparnis.von), bis: n0(rw.ersparnis.bis) })) + '</b><br><span class="klein">' + esc(tr(Math.abs(rw.preis.von - rw.preis.bis) < 1e-9 ? 'hwErsparnisRechnungEigen' : 'hwErsparnisRechnung', { m3: n0(rw.ersparnis.m3Von), pv: n2(rw.preis.von), pb: n2(rw.preis.bis) })) + '</span><br>' +
         (rw.preis.quelle === 'daten' ? quelleHtml(rw.preis.beleg) : '<span class="klein">' + annahmeZeile('hwPreisEigen') + '</span>') + '</div></div>';
     } else {
       h += '<div class="hu-d" data-zeile="ersparnis"><span class="hu-dl">' + symbol('i-spar') + esc(tr('hwErsparnis')) + '</span><div>' + luecke('hdKeineAngabe') + '<br><span class="klein">' + esc(tr('hwPreisFehlt')) + '</span> ' + quelleHtml(rw.preisLuecke) + '</div></div>';
@@ -453,10 +509,12 @@
     else amt = '<span class="ab-luecke" data-w-amort-nicht="' + esc(am.grund) + '">' + esc(tr('hdNichtBerechenbar')) + '</span><br><span class="klein">' + esc(gtr('hwG_', am.grund)) + '</span>' + (am.von != null ? '<br><span class="klein es-zahl" data-w-amort-ab="' + am.von + '">' + esc(tr('hdAmortAb', { von: n0(am.von) })) + '</span>' : '');
     h += '<div class="hu-d" data-zeile="amortisation"><span class="hu-dl">' + symbol('i-uhr') + esc(tr('hdAmort')) + '</span><div>' + amt + '</div></div></div>';
     h += '<p class="klein" data-tw-anzeige="1">' + esc(tr('hwAnzeige')) + ' ' + quelleHtml(HK.enthaertung('mittel').anzeige) + '</p>';
-    h += '<p class="klein">' + annahmeZeile('hwGarten') + '</p>';
+    h += '<p class="klein" data-begriff="Ertragsbeiwert">' + begriffKurz('Ertragsbeiwert') + '</p>';
+    if (pw.garten > 0) h += '<p class="klein" data-garten="' + pw.garten + '" data-garten-l="' + rw.bedarfGarten.toFixed(1) + '">' + annahmeZeile('hwGartenJa', { m2: n0(pw.garten), l: n2(0.2), tage: n0(HK.ANNAHMEN.gartenTage), m3: n1(rw.bedarfGarten / 1000) }) + '</p>';
+    else h += '<p class="klein">' + annahmeZeile('hwGarten') + '</p>';
     h += '<details class="ab-alt" data-g="hw-belege"><summary>' + esc(tr('hdBelegTitel')) + '</summary>' + belegListe([nd.beleg, rw.formel, rw.beiwert.beleg, rw.beiwert.satzung, rw.filter.beleg, rw.filter.luecke, rw.belegVerbrauch, rw.satzung, rw.speicher.beleg, rw.kosten.beleg, rw.kosten.pumpe, rw.preis ? rw.preis.beleg : null, g.beleg, g.belegZisterne]) +
       '<ul class="ab-liste"><li>' + annahmeZeile('hwAnn1', { von: n2(HK.ANNAHMEN.beiwertVon), bis: n2(HK.ANNAHMEN.beiwertBis), f: n2(HK.ANNAHMEN.filter) }) + '</li><li>' + annahmeZeile('hwAnn2') + '</li><li>' + annahmeZeile('hwAnn3') + '</li></ul></details>';
-    return h + enthaertungHtml(c);
+    return h + weitereHtml('wasser', c) + enthaertungHtml(c);
   }
   function kopfWasser(cc) {
     var el = byId('g-wasser-kopfzeile');
@@ -464,6 +522,23 @@
     if (cc.leer) { el.textContent = tr('abKopfLeer'); return; }
     if (!cc.rw || !cc.rw.ok || !cc.rw.deckung) { el.textContent = tr('hwKopfOhne'); return; }
     el.textContent = tr('hwKopf', { p: n0(Math.round(cc.rw.deckung.bis * 100)) });
+  }
+
+  /* F1 (aus der Tradi-Fassung): „Ergebnis weiterleiten“ bekommt zwei Zahlenzeilen: Dämmstandard Gesetz (Heizwärme, Mehrkosten) und Regenwasser; nur Zahlen, nie Raumnamen */
+  function setzeText(id, t) { var e = byId(id); if (e) e.textContent = t || ''; }
+  function teilenFuellen(c) {
+    try {
+      if (c.leer || c.fehler) { setzeText('g-teil-gmodg', ''); setzeText('g-teil-regen', ''); return; }
+      var hw = HK.heizwaermeMitStandard(c.plan, { bilanz: c.bilanz, standard: 'gmodg', lueftungsart: c.pl.art });
+      var mf = hw.ok && hw.gesamt ? HK.mehrkostenUndFoerderung(c.plan, 'gmodg', { heizwaerme: hw }) : null, t = '';
+      if (hw.ok && hw.gesamt) {
+        t = n0(hw.gesamt.kwhM2) + ' kWh/(m²·a)';
+        if (mf && mf.mehrkosten.art === 'schaetzung') t += ', ' + tr('teilenMehrkosten', { von: n0(r100(mf.mehrkosten.von)), bis: n0(r100(mf.mehrkosten.bis)) });
+        else if (mf && mf.mehrkosten.art === 'erreicht') t += ', ' + tr('teilenKeineMehrkosten');
+      }
+      setzeText('g-teil-gmodg', t);
+      setzeText('g-teil-regen', c.rw && c.rw.ertrag ? tr('teilenRegen', { von: n0(Math.round(c.rw.ertrag.von / 1000)), bis: n0(Math.round(c.rw.ertrag.bis / 1000)) }) : '');
+    } catch (e) { setzeText('g-teil-gmodg', ''); setzeText('g-teil-regen', ''); }
   }
 
   /* ====================================================================== Zusammenspiel */
@@ -478,13 +553,13 @@
     FEHLER_IDS.forEach(function (id) { meldeFehler(id, ''); });
     try {
       var d1 = byId('g-daemmung-details'), d2 = byId('g-lueftung-details'), d3 = byId('g-wasser-details');
-      var ersatz = function (id, fn) { var w = byId(id); if (!w) return; if (nurErgebnis && id === 'hu-w-steuer') return; var neu = fn(c); mitFokus(w, function () { w.innerHTML = neu; }); };
+      var ersatz = function (id, fn) { var w = byId(id); if (!w) return; if (nurErgebnis && id === 'hu-w-steuer') return; var neu; try { neu = fn(c); } catch (e4) { neu = '<p class="ab-meldung fehler" role="alert" data-fehler="teil">' + esc(tr('abTeilFehler', { grund: e4 && e4.message ? e4.message : String(e4) })) + '</p>'; } mitFokus(w, function () { w.innerHTML = neu; }); };
       /* Beim Ziehen des Personen-Reglers bleibt sein Steuerteil stehen (sonst bricht das Ziehen ab), nur die Ergebnisse werden neu gebaut */
       if (d1 && d1.open) { ersatz('hu-d-steuer', daemmSteuerHtml); ersatz('hu-d-balken', daemmErgebnisHtml); ersatz('hu-d-preise', preisSteuerHtml); ersatz('hu-d-rest', daemmRestHtml); }
       if (d2 && d2.open) { ersatz('hu-l-steuer', lueftungSteuerHtml); ersatz('hu-l-ergebnis', lueftungErgebnisHtml); }
       if (d3 && d3.open) { ersatz('hu-w-steuer', wasserSteuerHtml); ersatz('hu-w-ergebnis', wasserErgebnisHtml); }
-      else if (c && !c.leer && !c.fehler) { try { var dr = HK.dachflaecheRegen(c.plan); c.rw = dr.ok && c.pw.regenwasser && !c.pw.gruendach ? HK.regenwasser(dr.projektion, c.plan.land || 'HB', c.pw.personen, { preisEurM3: c.pw.preis }) : null; } catch (e3) { c.rw = null; } }
-      kopfDaemmung(c); kopfLueftung(c); kopfWasser(c);
+      else if (c && !c.leer && !c.fehler) { try { var dr = HK.dachflaecheRegen(c.plan); c.rw = dr.ok && c.pw.regenwasser && !c.pw.gruendach ? HK.regenwasser(dr.projektion, c.plan.land || 'HB', c.pw.personen, { preisEurM3: c.pw.preis, gartenM2: c.pw.garten }) : null; } catch (e3) { c.rw = null; } }
+      kopfDaemmung(c); kopfLueftung(c); kopfWasser(c); teilenFuellen(c);
     } catch (e2) {
       var t = 'Die Anzeige von Dämmung, Lüftung und Wasser ist ausgefallen: ' + (e2 && e2.message ? e2.message : e2);
       FEHLER_IDS.forEach(function (id) { meldeFehler(id, t); });
@@ -543,6 +618,18 @@
       if (r3.leer || r3.wert === 0) planFeld('mehrkosten_eigen', null, null, true); else planFeld('mehrkosten_eigen', null, r3.wert);
       t.value = eigenWertText(G.plan()); return;
     }
+    if (a === 'garten') {
+      var r5 = zahlFeld(t, 1, 5000, 'hw-garten-fehler', 'hwGartenLabel');
+      if (r5.fehler) return;
+      if (r5.leer) planFeld('wasser', 'garten_m2', null, true); else planFeld('wasser', 'garten_m2', r5.wert);
+      var gm = HK.planWasser(G.plan()).garten; t.value = gm > 0 ? n0(gm) : ''; return;
+    }
+    if (a === 'haertedh') {
+      var r6 = zahlFeld(t, 0, 60, 'hw-haertedh-fehler', 'hwDhLabel');
+      if (r6.fehler) return;
+      if (r6.leer) planFeld('wasser', 'haerte_dh', null, true); else planFeld('wasser', 'haerte_dh', r6.wert);
+      return;
+    }
     if (a === 'wasserpreis') {
       var r4 = zahlFeld(t, 0.01, 49, 'hw-preis-fehler', 'hwPreisLabel');
       if (r4.fehler) return;
@@ -562,7 +649,7 @@
       case 'art': planFeld('lueftung', 'art', w); break;
       case 'traeger': planFeld('energiepreise', 'traeger', w); break;
       case 'regen': planFeld('wasser', 'regenwasser', w === 'ja'); break;
-      case 'haerte': planFeld('wasser', 'haerte', w); break;
+      case 'haerte': planFeld('wasser', 'haerte_dh', null, true); planFeld('wasser', 'haerte', w); break;
     }
   }
 

@@ -7,7 +7,7 @@
   function byId(i) { return document.getElementById(i); }
   function tr(k, v) { return window.TXT ? window.TXT.t(k, v) : k; }
   function melde(t) { var e = byId('g-sauna-fehler'); if (e) { e.textContent = t || ''; e.hidden = !t; } }
-  if (!SK || !GK || !G || !WZ || !SD || !D.verfahrensfrei || !D.saunaholz) { melde(tr('saFehler', { grund: (!SK ? 'sauna_kern.js' : !WZ ? 'Karte Anbau' : !G ? 'Zeichnung' : 'Daten') + ' fehlt.' })); return; }
+  if (!SK || !GK || !G || !WZ || !SD || !D.verfahrensfrei || !D.saunaholz) { melde(tr('saFehler', { grund: (!SK ? 'sauna_kern.js' : !WZ ? 'Karte Anbau' : !G ? 'Zeichnung' : 'eine Datendatei (daten/sauna.js, daten/saunaholz.js oder daten/verfahrensfrei.js)') + ' fehlt.' })); return; }
   var esc = WZ.esc, sym = WZ.symbol, nz = WZ.nz, n0 = WZ.n0, schild = WZ.annahmeSchild;
   function T(k, v) { return esc(tr(k, v)); }
   function nf(x, d) { return new Intl.NumberFormat(WZ.lang(), { minimumFractionDigits: d, maximumFractionDigits: d }).format(x); }
@@ -222,7 +222,7 @@
     var v = c.vf, a = c.ampel, s = v && v.ok ? v.summe : null, h = h5('i-paragraf', 'gsAntragTitel');
     if (c.art === 'innen') return h + '<p class="klein" data-sa-ampel="innen">' + T('saAmpelInnen') + '</p>';
     if (!s) return h + '<p class="ab-meldung fehler" role="alert">' + T('anKeineDaten', { grund: v ? v.grund : '' }) + '</p>';
-    return h + '<p class="klein" data-sa-land="' + esc(c.ctx.land) + '">' + T('saAmpelFuer', { land: c.ctx.landName, ofen: tr('saOfen_' + c.ofen) }) + '</p><div class="an-satz an-f ' + a + '" role="status" data-an-ampel="' + a + '">' + WZ.ampelChip(a, false) + '<span class="an-satz-text" data-an-satz="antrag">' + esc(WZ.satzFuer(s)) + '</span></div>' +
+    return h + '<p class="klein" data-sa-land="' + esc(c.ctx.land) + '">' + T('saAmpelFuer', { land: c.ctx.landName, ofen: tr('saOfen_' + c.ofen) }) + '</p><div class="an-satz an-f ' + a + '" role="status" data-an-ampel="' + a + '">' + WZ.ampelChip(a, false, s.zeile && s.zeile.auslegungGelb) + '<span class="an-satz-text" data-an-satz="antrag">' + esc(WZ.satzFuer(s)) + '</span></div>' +
       (s.zeile && s.zeile.auslegung ? WZ.auslegungHtml(s.zeile) : '') + (v.holzHinweis ? '<p class="ab-meldung" role="note">' + T('gsHolzHinweis') + '</p>' : '') + (v.zeilen.length ? '<details class="an-bed gs-einzel"><summary>' + T('gsEinzel') + '</summary>' + v.zeilen.map(WZ.zeileHtml).join('') + '</details>' : '');
   }
   function abstandHtml(c) {
